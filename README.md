@@ -194,12 +194,14 @@ POST /api/travel/recommend
 }
 ```
 Response
+```
 [
   {
     "place": "오사카",
     "totalCost": 950000
   }
 ]
+```
 🚀 실행 방법
 프로젝트 설치
 npm install
