@@ -1,13 +1,18 @@
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+   margin: 0;
+  background: #f5f6f8;
+  display: flex;
+  justify-content: center;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* 앱 전체 감싸는 박스 */
+.app {
+  width: 100%;
+  max-width: 400px;   /* 아이폰 크기 */
+  min-height: 100vh;
+  background: #fff;
+  padding-bottom: 80px;
+}
+.app-content {
+  flex: 1;
 }

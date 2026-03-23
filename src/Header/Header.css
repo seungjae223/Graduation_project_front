@@ -1,0 +1,125 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  max-width: 390px;
+  min-height: 82px;
+  margin: 0 auto;
+  padding: 18px 16px;
+
+  box-sizing: border-box;
+  background-color: #ffffff;
+  position: relative;
+}
+
+.header-side {
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.header-icon,
+.back-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: block;
+}
+
+.my-icon,
+.menu-icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  display: block;
+}
+
+/* 온보딩 로고 */
+.logo {
+  height: 20px;
+  object-fit: contain;
+  display: block;
+}
+
+/* 가운데 로고 */
+.logo-center {
+  height: 25px;
+  object-fit: contain;
+  display: block;
+}
+
+.header-title {
+  margin: 0;
+  color: #151a28;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.4px;
+}
+
+.result-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.skip-btn {
+  background: none;
+  border: none;
+  padding: 0;
+
+  font-size: 16px;
+  font-weight: 500;
+  color: #8e8e93;
+
+  cursor: pointer;
+}
+
+/* 예전 클래스 남아 있어도 깨지지 않게 */
+.header3 {
+  justify-content: space-between;
+}
+
+@media (max-width: 360px) {
+  .header {
+    padding: 16px 12px;
+    min-height: 74px;
+  }
+
+  .header-title {
+    font-size: 17px;
+  }
+
+  .result-title {
+    font-size: 13px;
+  }
+
+  .logo-center {
+    height: 26px;
+  }
+}

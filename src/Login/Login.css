@@ -1,0 +1,167 @@
+.login {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  min-height: 100vh;          /* 🔥 전체 화면 */
+  display: flex;              /* 🔥 핵심 */
+  align-items: center;        /* 🔥 세로 가운데 */
+  justify-content: center;    /* 🔥 가로 가운데 */
+
+  padding: 16px;
+}
+
+/* 카드 */
+.login-card {
+    position: relative;
+    bottom: 60px;
+    right: 14px;  
+    width: 85%;
+  background: #f8f9fb;
+  padding: 16px;             /* 🔥 줄임 */
+  border-radius: 20px;
+}
+
+/* 헤더 */
+.login-header {
+  text-align: center;
+  margin-bottom: 16px;       /* 🔥 줄임 */
+}
+
+.login-header h2 {
+  font-size: 20px;           /* 🔥 줄임 */
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.login-header p {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* 아이콘 */
+.icon-circle {
+  width: 50px;               /* 🔥 줄임 */
+  height: 50px;
+  background: #e9f6fd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+}
+
+.icon-circle img {
+  width: 24px;
+}
+
+/* 입력 */
+.input-group {
+  margin-bottom: 10px;       /* 🔥 줄임 */
+}
+
+.input-group label {
+  font-size: 13px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.input-group input {
+  width: 95%;
+  height: 42px;              /* 🔥 줄임 */
+  border-radius: 15px;
+  border: 1px solid #ddd;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+/* 비밀번호 */
+.password-box {
+  display: flex;
+  align-items: center;
+}
+
+.eye-icon {
+  width: 18px;
+  margin-left: -28px;
+  cursor: pointer;
+}
+
+/* 옵션 */
+.login-options {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.link {
+  color: #0DA6F2;
+  cursor: pointer;
+}
+
+/* 버튼 */
+.login-btn {
+width: 294px;
+height: 56px;              /* 🔥 줄임 */
+  background: #0DA6F2;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+/* 회원가입 */
+.signup {
+  text-align: center;
+  font-size: 13px;
+}
+
+.signup span {
+  color: #0DA6F2;
+  font-weight: bold;
+}
+
+/* 구분선 */
+.divider {
+  text-align: center;
+  margin: 16px 0;
+  color: #aaa;
+  font-size: 12px;
+}
+
+/* 소셜 */
+.social {
+  display: flex;
+  gap: 10px;
+}
+
+.kakao {
+  flex: 1;
+  background: #fee500;
+  border: none;
+  border-radius: 10px;
+  height: 42px;
+}
+
+.naver {
+  flex: 1;
+  background: #03c75a;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  height: 42px;
+}
+
+/* 소셜 버튼 아이콘 */
+.kakao, .naver {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.kakao img,
+.naver img {
+  width: 16px;
+}

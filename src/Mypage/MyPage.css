@@ -1,0 +1,218 @@
+.mypage-page,
+.mypage-page * {
+  box-sizing: border-box;
+}
+
+.mypage-page {
+  width: 100%;
+  margin: 0;
+  padding: 18px 16px 120px;
+  background: #f7f9fc;
+  min-height: calc(100vh - 82px);
+}
+
+.mypage-inner {
+  width: 100%;
+}
+
+.mypage-profile {
+  width: 100%;
+}
+
+.mypage-user-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 2px 0;
+}
+
+.mypage-avatar-wrap {
+  width: 78px;
+  height: 78px;
+  flex-shrink: 0;
+}
+
+.mypage-avatar-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.mypage-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mypage-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mypage-name-row h1 {
+  margin: 0;
+  color: #182031;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+}
+
+.mypage-level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #e9f7ff;
+  color: #17a1f4;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.mypage-user-info p {
+  margin: 6px 0 0;
+  color: #6d7b90;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.mypage-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.mypage-stat-card {
+  min-height: 68px;
+  border-radius: 14px;
+  border: 1px solid #e6edf4;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.mypage-stat-card strong {
+  color: #14a3f5;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.mypage-stat-card span {
+  margin-top: 8px;
+  color: #65748a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mypage-invite-banner {
+  width: 100%;
+  margin-top: 18px;
+  padding: 16px 14px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(90deg, #199ef4 0%, #48acf8 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  box-shadow: 0 8px 20px rgba(24, 159, 244, 0.18);
+  cursor: pointer;
+}
+
+.mypage-invite-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mypage-invite-text strong {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+}
+
+.mypage-invite-text span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.mypage-section {
+  margin-top: 28px;
+}
+
+.mypage-section-title {
+  margin: 0 0 14px 6px;
+  color: #9aa7ba;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mypage-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mypage-menu-item {
+  width: 100%;
+  min-height: 54px;
+  padding: 8px 6px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.mypage-menu-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.mypage-menu-left span {
+  color: #1d2536;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.mypage-menu-icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #eaf7ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mypage-menu-icon-circle.support {
+  background: transparent;
+}
+
+@media (max-width: 360px) {
+  .mypage-page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .mypage-name-row h1 {
+    font-size: 18px;
+  }
+
+  .mypage-menu-left span {
+    font-size: 15px;
+  }
+}

@@ -1,0 +1,348 @@
+.total-page,
+.total-page * {
+  box-sizing: border-box;
+}
+
+.total-page {
+  width: 100%;
+  max-width: 390px;
+  min-height: calc(100vh - 82px);
+  margin: 0 auto;
+  padding: 22px 14px 120px;
+  background: #f7f9fc;
+}
+
+.total-inner {
+  width: 100%;
+}
+
+.total-description {
+  margin: 0;
+  color: #1a2233;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.45;
+  letter-spacing: -0.4px;
+}
+
+.total-filter-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.total-filter-btn {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid #d9e2ec;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #6b7788;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.total-filter-btn.active {
+  background: #18a8f5;
+  border-color: #18a8f5;
+  color: #ffffff;
+  box-shadow: 0 8px 16px rgba(24, 168, 245, 0.22);
+}
+
+.total-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.total-card {
+  overflow: hidden;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #edf1f6;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.total-card-image {
+  position: relative;
+  width: 100%;
+  height: 172px;
+  overflow: hidden;
+}
+
+.total-bookmark-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(12, 28, 48, 0.28);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.total-bookmark-btn.active {
+  background: rgba(18, 166, 245, 0.95);
+}
+
+.bookmark-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.bookmark-icon path {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.total-bookmark-btn.active .bookmark-icon path {
+  fill: #ffffff;
+}
+
+.total-card-body {
+  padding: 16px 16px 18px;
+}
+
+.total-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.total-card-top h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #1a2233;
+  letter-spacing: -0.4px;
+}
+
+.total-rating {
+  flex-shrink: 0;
+  min-width: 62px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: #fff4df;
+  color: #f29c1f;
+  font-size: 14px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.total-location {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #8090a4;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.total-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.total-tag {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: #eef8ff;
+  color: #16a5f4;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.total-detail-btn {
+  width: 100%;
+  height: 44px;
+  margin-top: 18px;
+  border: none;
+  border-radius: 10px;
+  background: #16a5f4;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* 목업 이미지 */
+.image-bamboo {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.08)),
+    repeating-linear-gradient(
+      90deg,
+      #284f13 0 8px,
+      #4d7e1f 8px 18px,
+      #86ba33 18px 26px
+    ),
+    linear-gradient(180deg, #d4f082 0 18%, #79a838 18% 52%, #284f13 52% 100%);
+}
+
+.image-bamboo::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 32%;
+  height: 28%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(252, 236, 198, 0) 0%, #e6d8bd 100%);
+  clip-path: polygon(38% 0%, 62% 0%, 80% 100%, 20% 100%);
+}
+
+.image-forest {
+  background:
+    radial-gradient(circle at 65% 12%, rgba(255, 255, 255, 0.9) 0 6%, transparent 7%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0)),
+    repeating-linear-gradient(
+      90deg,
+      #1d2a17 0 10px,
+      #2e4a22 10px 28px,
+      #52763b 28px 34px
+    ),
+    linear-gradient(180deg, #b7e1a3 0 20%, #5c8f47 20% 62%, #24321b 62% 100%);
+}
+
+.image-beach {
+  background: linear-gradient(
+    180deg,
+    #7fd5ff 0 28%,
+    #1aa2d6 28% 62%,
+    #11a0b3 62% 84%,
+    #f4eee5 84% 100%
+  );
+}
+
+.image-beach::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 26%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.65) 80%,
+    rgba(255, 255, 255, 0.85) 100%
+  );
+}
+
+.image-lake {
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255, 244, 214, 0.9) 0 8%, transparent 9%),
+    linear-gradient(180deg, #b9def0 0 30%, #7db4c9 30% 60%, #436f66 60% 100%);
+}
+
+.image-mountain {
+  background: linear-gradient(180deg, #93d5ff 0 30%, #d9f1ff 30% 45%, #6ba56a 45% 100%);
+}
+
+.image-mountain::before {
+  content: "";
+  position: absolute;
+  inset: 30% 0 0 0;
+  background:
+    linear-gradient(150deg, transparent 0 35%, #4c7057 35% 60%, transparent 60%),
+    linear-gradient(30deg, transparent 0 40%, #35543f 40% 65%, transparent 65%);
+}
+
+.image-market {
+  background: linear-gradient(180deg, #f2d2a0 0 24%, #d76f4a 24% 50%, #6b3a25 50% 100%);
+}
+
+.image-market::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 14px, transparent 14px 42px),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.25));
+}
+
+.image-cafe {
+  background: linear-gradient(180deg, #f6e2d1 0 35%, #c98e63 35% 100%);
+}
+
+.image-cafe::before {
+  content: "";
+  position: absolute;
+  left: 18%;
+  top: 24%;
+  width: 64%;
+  height: 48%;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+}
+
+.image-rooftop {
+  background: linear-gradient(180deg, #ffb87e 0 18%, #f27059 18% 45%, #56497c 45% 100%);
+}
+
+.image-rooftop::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 38%;
+  background:
+    linear-gradient(
+      90deg,
+      #24324f 0 10%,
+      transparent 10% 16%,
+      #1e2a40 16% 28%,
+      transparent 28% 36%,
+      #27304a 36% 48%,
+      transparent 48% 58%,
+      #1f2740 58% 70%,
+      transparent 70% 82%,
+      #23314a 82% 100%
+    );
+}
+
+.image-city {
+  background: linear-gradient(180deg, #7ec0ff 0 28%, #46648d 28% 56%, #13233f 56% 100%);
+}
+
+.image-city::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 40%;
+  background:
+    linear-gradient(
+      90deg,
+      #162745 0 12%,
+      transparent 12% 18%,
+      #10203b 18% 30%,
+      transparent 30% 36%,
+      #1b2c49 36% 54%,
+      transparent 54% 60%,
+      #152744 60% 74%,
+      transparent 74% 80%,
+      #0f213c 80% 100%
+    );
+}
