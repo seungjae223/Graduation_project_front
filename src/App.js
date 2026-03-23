@@ -10,9 +10,11 @@ import Landing from "./Landingpage/Landing";
 import Login from "./Login/Login";
 import Footer from "./Footer/Footer";
 import Home from "./Homepage/Home";
+import Search from "./Search/Search"; // 추가
 import Recommend from "./Recommend/Recommend";
 import Total from "./Recommend/Total";
 import MyPage from "./Mypage/MyPage";
+import Calendar from "./Calendar/Calendar";
 
 function Layout() {
   const location = useLocation();
@@ -43,9 +45,11 @@ function Layout() {
           <Route path="/Landing" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/search" element={<Search />} /> {/* 추가 */}
           <Route path="/recommend" element={<Recommend />} />
           <Route path="/total" element={<Total />} />
           <Route path="/mypage" element={<MyPage />} />
+          <Route path="/calendar" element={<Calendar />} />
         </Routes>
       </main>
 

@@ -69,7 +69,7 @@
 
 /* 가운데 로고 */
 .logo-center {
-  height: 25px;
+  height: 20px;
   object-fit: contain;
   display: block;
 }

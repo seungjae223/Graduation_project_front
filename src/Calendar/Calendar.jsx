@@ -1,14 +1,51 @@
 import React, { useState } from "react";
 import "./Calendar.css";
 
-const upcomingSchedules = [
+import seoulImg from "../img/도쿄.png";
+import jejuImg from "../img/교토.png";
+import busanImg from "../img/서비스 소개 .png";
+
+const PlusIcon = () => (
+  <svg viewBox="0 0 24 24" className="calendar-svg" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" />
+    <path d="M12 8V16M8 12H16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+const PinIcon = () => (
+  <svg viewBox="0 0 24 24" className="small-svg" aria-hidden="true">
+    <path
+      d="M12 20C12 20 6 14.5 6 10.5C6 7.46 8.46 5 11.5 5C14.54 5 17 7.46 17 10.5C17 14.5 12 20 12 20Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinejoin="round"
+    />
+    <circle cx="11.5" cy="10.5" r="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+  </svg>
+);
+
+const ChevronIcon = () => (
+  <svg viewBox="0 0 24 24" className="small-svg chevron" aria-hidden="true">
+    <path
+      d="M9 6L15 12L9 18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const upcomingMock = [
   {
     id: 1,
     dday: "D-5",
     title: "서울 근교 힐링 여행",
     date: "2024.03.15 - 03.16",
     location: "경기 가평군",
-    thumbClass: "thumb-city",
+    image: seoulImg,
   },
   {
     id: 2,
@@ -16,7 +53,7 @@ const upcomingSchedules = [
     title: "제주도 푸른 밤 투어",
     date: "2024.04.05 - 04.08",
     location: "제주 서귀포시",
-    thumbClass: "thumb-sea",
+    image: jejuImg,
   },
   {
     id: 3,
@@ -24,164 +61,93 @@ const upcomingSchedules = [
     title: "부산 먹방 식도락 여행",
     date: "2024.05.01 - 05.03",
     location: "부산 수영구",
-    thumbClass: "thumb-night",
+    image: busanImg,
   },
 ];
 
-const pastSchedules = [
+const pastMock = [
   {
     id: 4,
-    title: "교토 감성 산책 여행",
-    date: "2024.01.10 - 01.13",
-    location: "일본 교토",
-    thumbClass: "thumb-kyoto",
+    dday: "완료",
+    title: "강릉 바다 드라이브",
+    date: "2023.12.10 - 12.11",
+    location: "강원 강릉시",
+    image: jejuImg,
   },
   {
     id: 5,
-    title: "강릉 바다 드라이브",
-    date: "2023.12.20 - 12.21",
-    location: "강원 강릉시",
-    thumbClass: "thumb-sea",
+    dday: "완료",
+    title: "전주 한옥마을 산책",
+    date: "2023.11.03 - 11.04",
+    location: "전북 전주시",
+    image: seoulImg,
   },
 ];
 
-const Calendar = () => {
-  const [activeTab, setActiveTab] = useState("upcoming");
+function Calendar() {
+  const [tab, setTab] = useState("upcoming");
 
-  const currentSchedules =
-    activeTab === "upcoming" ? upcomingSchedules : pastSchedules;
+  const scheduleList = tab === "upcoming" ? upcomingMock : pastMock;
 
   return (
     <div className="calendar-page">
-      <div className="calendar-tabs">
+      <div className="calendar-tab-bar">
         <button
           type="button"
-          className={`calendar-tab-btn ${
-            activeTab === "upcoming" ? "active" : ""
-          }`}
-          onClick={() => setActiveTab("upcoming")}
+          className={`calendar-tab ${tab === "upcoming" ? "active" : ""}`}
+          onClick={() => setTab("upcoming")}
         >
           다가오는 일정
         </button>
-
         <button
           type="button"
-          className={`calendar-tab-btn ${
-            activeTab === "past" ? "active" : ""
-          }`}
-          onClick={() => setActiveTab("past")}
+          className={`calendar-tab ${tab === "past" ? "active" : ""}`}
+          onClick={() => setTab("past")}
         >
           지난 일정
         </button>
       </div>
 
-      <div className="calendar-content">
-        <button
-          type="button"
-          className="calendar-create-box"
-          onClick={() => console.log("새 일정 만들기")}
-        >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="12" r="10" stroke="#13A5F4" strokeWidth="2" />
-            <path
-              d="M12 7V17"
-              stroke="#13A5F4"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            />
-            <path
-              d="M7 12H17"
-              stroke="#13A5F4"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            />
-          </svg>
-          <span>새 일정 만들기</span>
-        </button>
+      <button type="button" className="create-schedule-btn">
+        <PlusIcon />
+        <span>새 일정 만들기</span>
+      </button>
 
-        <div className="calendar-section-title">
-          <h2>{activeTab === "upcoming" ? "다가오는 일정" : "지난 일정"}</h2>
-          <span>{currentSchedules.length}</span>
-        </div>
-
-        <div className="calendar-schedule-list">
-          {currentSchedules.map((item) => (
-            <article key={item.id} className="calendar-card">
-              <div className={`calendar-thumb ${item.thumbClass}`} />
-
-              <div className="calendar-card-content">
-                {item.dday && <span className="calendar-dday">{item.dday}</span>}
-
-                <h3>{item.title}</h3>
-                <p className="calendar-date">{item.date}</p>
-
-                <div className="calendar-location">
-                  <svg
-                    width="13"
-                    height="16"
-                    viewBox="0 0 13 16"
-                    fill="none"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M6.5 15C6.5 15 11.5 10.364 11.5 6.5C11.5 3.462 9.038 1 6 1C2.962 1 0.5 3.462 0.5 6.5C0.5 10.364 5.5 15 5.5 15H6.5Z"
-                      stroke="#A1AAB8"
-                      strokeWidth="1.6"
-                    />
-                    <circle cx="6" cy="6.5" r="1.8" stroke="#A1AAB8" strokeWidth="1.4" />
-                  </svg>
-                  <span>{item.location}</span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className="calendar-arrow-btn"
-                onClick={() => console.log(`${item.title} 상세 보기`)}
-                aria-label="상세 보기"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M9 6L15 12L9 18"
-                    stroke="#C5CFDB"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            </article>
-          ))}
-        </div>
-
-        {activeTab === "upcoming" && (
-          <div className="calendar-banner">
-            <h3>어디로 떠나볼까요?</h3>
-            <p>너만 오면 go가 추천하는 맞춤형 여행 코스</p>
-            <button
-              type="button"
-              className="calendar-banner-btn"
-              onClick={() => console.log("추천 받기")}
-            >
-              추천 받기
-            </button>
-          </div>
-        )}
+      <div className="calendar-section-title">
+        <h2>{tab === "upcoming" ? "다가오는 일정" : "지난 일정"}</h2>
+        <span>{scheduleList.length}</span>
       </div>
+
+      <div className="schedule-list">
+        {scheduleList.map((item) => (
+          <article key={item.id} className="schedule-card">
+            <img src={item.image} alt={item.title} className="schedule-thumb" />
+
+            <div className="schedule-info">
+              <span className="dday-badge">{item.dday}</span>
+              <h3>{item.title}</h3>
+              <p className="schedule-date">{item.date}</p>
+
+              <div className="schedule-location">
+                <PinIcon />
+                <span>{item.location}</span>
+              </div>
+            </div>
+
+            <button type="button" className="schedule-arrow-btn" aria-label="상세 보기">
+              <ChevronIcon />
+            </button>
+          </article>
+        ))}
+      </div>
+
+      <section className="calendar-recommend-box">
+        <h3>어디로 떠날까요?</h3>
+        <p>너만 오면 go가 추천하는 맞춤형 여행 코스</p>
+        <button type="button">추천 받기</button>
+      </section>
     </div>
   );
-};
+}
 
 export default Calendar;
