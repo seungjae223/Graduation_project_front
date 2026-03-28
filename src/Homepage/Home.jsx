@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
 // 아이콘
@@ -20,6 +21,7 @@ const travelMockData = [
 ];
 
 const Home = () => {
+  const navigate = useNavigate();
   const [selectedMenu, setSelectedMenu] = useState("route");
   const [keyword, setKeyword] = useState("");
 
@@ -27,6 +29,20 @@ const Home = () => {
     if (e.key === "Enter") {
       console.log("검색어:", keyword);
     }
+  };
+
+  const handleRecommendClick = () => {
+    setSelectedMenu("recommend");
+    navigate("/recommend");
+  };
+
+  const handleRouteClick = () => {
+    setSelectedMenu("route");
+    navigate("/route-create");
+  };
+
+  const handlePopularAllClick = () => {
+    navigate("/popular-all");
   };
 
   return (
@@ -57,7 +73,7 @@ const Home = () => {
           className={`menu-card ${
             selectedMenu === "recommend" ? "active" : ""
           }`}
-          onClick={() => setSelectedMenu("recommend")}
+          onClick={handleRecommendClick}
         >
           <div
             className={`icon-circle ${
@@ -72,7 +88,7 @@ const Home = () => {
 
         <div
           className={`menu-card ${selectedMenu === "route" ? "active" : ""}`}
-          onClick={() => setSelectedMenu("route")}
+          onClick={handleRouteClick}
         >
           <div
             className={`icon-circle ${
@@ -89,7 +105,19 @@ const Home = () => {
       {/* 인기 여행지 */}
       <div className="section-header">
         <h2>인기 급상승 여행지</h2>
-        <span>전체보기</span>
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={handlePopularAllClick}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              handlePopularAllClick();
+            }
+          }}
+          style={{ cursor: "pointer" }}
+        >
+          전체보기
+        </span>
       </div>
 
       <div className="travel-list">

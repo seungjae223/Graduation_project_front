@@ -10,11 +10,18 @@ import Landing from "./Landingpage/Landing";
 import Login from "./Login/Login";
 import Footer from "./Footer/Footer";
 import Home from "./Homepage/Home";
-import Search from "./Search/Search"; // 추가
 import Recommend from "./Recommend/Recommend";
 import Total from "./Recommend/Total";
 import MyPage from "./Mypage/MyPage";
-import Calendar from "./Calendar/Calendar";
+import SavedPlaces from "./Mypage/SavedPlaces";
+import Search from "./Search/Search";
+import RouteCreate from "./RouteCreate/RouteCreate";
+import Detail from "./Recommend/Detail";
+import RouteResult from "./RouteResult/RouteResult";
+import Schedule from "./Schedule/Schedule";
+import PopularAll from "./Homepage/PopularAll";
+import MySchedule from "./MySchedule/MySchedule";
+import { SavedPlacesProvider } from "./Context/SavedPlacesContext";
 
 function Layout() {
   const location = useLocation();
@@ -26,6 +33,7 @@ function Layout() {
     "/onboarding3",
     "/login",
     "/Landing",
+    "/detail",
   ];
 
   const shouldHideFooter = hideFooterPaths.includes(location.pathname);
@@ -45,11 +53,19 @@ function Layout() {
           <Route path="/Landing" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/search" element={<Search />} /> {/* 추가 */}
+          <Route path="/search" element={<Search />} />
           <Route path="/recommend" element={<Recommend />} />
           <Route path="/total" element={<Total />} />
           <Route path="/mypage" element={<MyPage />} />
-          <Route path="/calendar" element={<Calendar />} />
+          <Route path="/saved-places" element={<SavedPlaces />} />
+          <Route path="/route-create" element={<RouteCreate />} />
+          <Route path="/detail" element={<Detail />} />
+          <Route path="/route-result" element={<RouteResult />} />
+          <Route path="/schedule" element={<Schedule />} />
+          <Route path="/popular-all" element={<PopularAll />} />
+          <Route path="/my-schedule" element={<MySchedule />} />
+          
+          
         </Routes>
       </main>
 
@@ -60,9 +76,11 @@ function Layout() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Layout />
-    </BrowserRouter>
+    <SavedPlacesProvider>
+      <BrowserRouter>
+        <Layout />
+      </BrowserRouter>
+    </SavedPlacesProvider>
   );
 }
 

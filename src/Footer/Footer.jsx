@@ -32,7 +32,7 @@ const Footer = () => {
     { key: "home", label: "홈", path: "/home", off: homeOff, on: homeOn },
     { key: "search", label: "검색", path: "/search", off: searchOff, on: searchOff },
     { key: "recommend", label: "추천", path: "/recommend", off: recommendOff, on: recommendOn },
-    { key: "calendar", label: "일정", path: "/calendar", off: calendarOff, on: calendarOn },
+    { key: "calendar", label: "일정", path: "/schedule", off: calendarOff, on: calendarOn },
   ];
 
   return (

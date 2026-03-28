@@ -33,20 +33,45 @@
 .search-box {
   display: flex;
   align-items: center;
-  gap: 10px;
-
+  gap: 12px;
+  width: 100%;
   background: #ffffff;
-  padding: 14px;
-  border-radius: 16px;
-
-  color: #9ca3af;
-  font-size: 14px;
-
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  border-radius: 28px;
+  padding: 18px 22px;
+  box-sizing: border-box;
 }
 
 .search-box img {
-  width: 18px;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.search-box input {
+  flex: 1;
+  width: 100%;
+  border: none;
+  outline: none ;
+  box-shadow: none ;
+  background: transparent ;
+  -webkit-appearance: none;
+  appearance: none;
+  font-size: 16px;
+  color: #64748b;
+  padding: 0;
+  margin: 0;
+}
+
+.search-box input:focus,
+.search-box input:active {
+  border: none;
+  outline: none ;
+  box-shadow: none ;
+  background: transparent ;
+}
+
+.search-box input::placeholder {
+  color: #8b95a1;
 }
 
 /* 🔥 아래 콘텐츠 영역 여백 따로 */
@@ -63,6 +88,15 @@
   border-radius: 20px;
   padding: 20px;
   text-align: center;
+}
+.section-more-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #7c8aa0;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .menu-card.active {

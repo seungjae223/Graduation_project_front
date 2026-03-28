@@ -1,0 +1,692 @@
+.route-create-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  background: #f4f6f8;
+}
+
+.route-create-screen {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+}
+
+.route-create-header {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.back-button {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 28px;
+  line-height: 1;
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.route-create-header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #17212f;
+}
+
+/* 달력 섹션 */
+.calendar-section,
+.route-calendar-section {
+  padding: 18px 0 18px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.calendar-header,
+.route-calendar-header {
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
+  align-items: center;
+  padding: 0 16px;
+  margin-bottom: 18px;
+}
+
+.calendar-header strong,
+.route-calendar-header strong {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: #17212f;
+}
+
+.calendar-arrow,
+.route-calendar-arrow {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+  font-size: 28px;
+  line-height: 1;
+  color: #7c8899;
+  cursor: pointer;
+}
+
+/* 요일 */
+.calendar-weekdays,
+.route-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: center;
+  padding: 0 16px;
+  margin-bottom: 8px;
+}
+
+.calendar-weekdays span,
+.route-calendar-weekdays span {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #a3afbf;
+}
+
+/* 달력 본문 */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  column-gap: 0;
+  row-gap: 10px;
+  padding: 0 16px;
+}
+
+.route-calendar-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 16px;
+}
+
+.route-calendar-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  column-gap: 0;
+}
+
+/* 날짜 셀 */
+.calendar-day,
+.route-calendar-day {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none !important;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  width: 100%;
+  height: 56px;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 500;
+  color: #17212f;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.calendar-day.is-muted,
+.route-calendar-day.is-muted {
+  color: #c8d2df;
+}
+
+.calendar-day.is-selected,
+.route-calendar-day.is-selected {
+  background: #deedf6;
+  color: #1d9bf0;
+  font-weight: 800;
+}
+
+.calendar-day.is-range-start,
+.route-calendar-day.is-range-start {
+  border-radius: 18px 0 0 18px;
+}
+
+.calendar-day.is-range-middle,
+.route-calendar-day.is-range-middle {
+  border-radius: 0;
+}
+
+.calendar-day.is-range-end,
+.route-calendar-day.is-range-end {
+  border-radius: 0 18px 18px 0;
+}
+
+.calendar-day.is-range-single,
+.route-calendar-day.is-range-single {
+  border-radius: 18px;
+}
+
+/* day tab */
+.day-tabs {
+  display: flex;
+  gap: 22px;
+  padding: 0 14px;
+  border-bottom: 1px solid #edf2f7;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.day-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.day-tab {
+  position: relative;
+  border: none;
+  background: transparent;
+  padding: 18px 0 14px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #94a3b8;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.day-tab.is-active {
+  color: #1da1f2;
+}
+
+.day-tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 999px;
+  background: #1da1f2;
+}
+
+/* 검색창 */
+.route-search-area {
+  padding: 20px 14px 12px;
+}
+
+.route-search-box {
+  position: relative;
+}
+
+.route-search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  opacity: 0.45;
+}
+
+.route-search-box input {
+  width: 100%;
+  height: 46px;
+  padding: 0 16px 0 44px;
+  border: none;
+  border-radius: 14px;
+  background: #f1f5f9;
+  box-sizing: border-box;
+  font-size: 16px;
+  color: #334155;
+  outline: none;
+}
+
+.route-search-box input::placeholder {
+  color: #b5c0cf;
+}
+
+/* 선택 장소 - 일정 리스트 형태 */
+.selected-place-section {
+  padding: 8px 16px 30px;
+}
+
+.selected-place-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.selected-place-header h2 {
+  margin: 0;
+}
+
+.schedule-list-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #7c8aa0;
+  letter-spacing: -0.02em;
+}
+
+.selected-place-count {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1da1f2;
+  white-space: nowrap;
+}
+
+.place-list,
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.place-card.schedule-card {
+  position: relative;
+  display: block;
+  padding: 18px 16px 18px;
+  border: 1px solid #edf2f7;
+  border-radius: 28px;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+.place-main.schedule-card-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-width: 0;
+}
+
+.schedule-place-thumb {
+  width: 92px;
+  height: 92px;
+  border-radius: 999px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.place-text.schedule-card-content {
+  flex: 1;
+  min-width: 0;
+  padding-top: 4px;
+}
+
+.place-name.schedule-place-name {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #17212f;
+  padding-right: 34px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.place-desc.schedule-place-desc {
+  margin-top: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #7c8aa0;
+  padding-right: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.remove-place-button.schedule-remove-button {
+  position: absolute;
+  top: 20px;
+  right: 18px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 24px;
+  line-height: 1;
+  color: #c5ced9;
+  cursor: pointer;
+}
+
+.schedule-time-bar {
+  margin-top: 16px;
+  width: 100%;
+  min-height: 64px;
+  border-radius: 999px;
+  background: #eef3f8;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 8px 18px;
+  box-sizing: border-box;
+}
+
+.schedule-time-bar.is-fixed {
+  background: #f5fbff;
+  border: 2px solid #bfe4fb;
+  padding: 6px 8px 6px 16px;
+}
+
+.schedule-time-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  color: #1da1f2;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.schedule-time-text span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.schedule-time-icon {
+  width: 24px;
+  height: 24px;
+  color: #1da1f2;
+  flex-shrink: 0;
+}
+
+.schedule-time-action {
+  margin-left: auto;
+  width: 100px;
+  min-width: 100px;
+  height: 50px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.schedule-time-action.is-fix {
+  border: none;
+  background: #1da1f2;
+  color: #ffffff;
+}
+
+.schedule-time-action.is-edit {
+  border: 1px solid #d8e7f3;
+  background: #ffffff;
+  color: #1da1f2;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
+}
+
+.schedule-add-place-button {
+  width: 100%;
+  height: 82px;
+  border: 2px dashed #d7e2ee;
+  border-radius: 24px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #a7b3c4;
+  cursor: pointer;
+}
+
+.schedule-add-place-button .add-place-plus {
+  width: 26px;
+  height: 26px;
+  border: 2px solid #a7b3c4;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.schedule-time-action {
+  min-width: 96px;
+  height: 48px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.schedule-time-action.is-fix {
+  border: none;
+  background: #1da1f2;
+  color: #ffffff;
+}
+
+.schedule-time-action.is-edit {
+  border: 1px solid #d8e7f3;
+  background: #ffffff;
+  color: #1da1f2;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
+}
+
+.empty-state {
+  padding: 20px 16px;
+  border-radius: 18px;
+  background: #f8fafc;
+  text-align: center;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.add-place-button {
+  width: 100%;
+  height: 62px;
+  border: 2px dashed #dde6ef;
+  border-radius: 18px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #a7b3c4;
+  cursor: pointer;
+}
+
+.schedule-add-place-button {
+  width: 100%;
+  height: 84px;
+  border: 2px dashed #d7e2ee;
+  border-radius: 24px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #a7b3c4;
+  cursor: pointer;
+}
+
+.add-place-plus {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #a7b3c4;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.schedule-add-place-button .add-place-plus {
+  width: 26px;
+  height: 26px;
+  font-size: 16px;
+}
+
+/* 검색 결과 */
+.route-search-result-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.route-search-result-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid #edf2f7;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+.route-search-result-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.route-search-result-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #17212f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.route-search-result-desc {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #7c8aa0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.route-search-add-button {
+  border: none;
+  border-radius: 12px;
+  background: #1da1f2;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 10px 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.route-search-add-button.is-disabled {
+  background: #dbe7f0;
+  color: #8da0b3;
+  cursor: not-allowed;
+}
+
+.route-search-empty {
+  padding: 18px 14px;
+  border-radius: 14px;
+  background: #f8fafc;
+  text-align: center;
+  font-size: 14px;
+  color: #94a3b8;
+}
+.route-generate-bar {
+  padding: 18px 14px 28px;
+}
+
+.route-generate-btn {
+  width: 100%;
+  height: 58px;
+  border: none;
+  border-radius: 14px;
+  background: #18a8f5;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(24, 168, 245, 0.22);
+}
+
+.route-complete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(16, 24, 40, 0.24);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.route-complete-modal {
+  width: 100%;
+  max-width: 290px;
+  border-radius: 22px;
+  background: #ffffff;
+  padding: 38px 28px 26px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  text-align: center;
+}
+
+.route-complete-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.route-complete-title {
+  margin: 0;
+  color: #17212f;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
+.route-complete-desc {
+  margin: 18px 0 0;
+  color: #6b7788;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.7;
+  word-break: keep-all;
+}
+
+.route-complete-confirm-btn {
+  width: 100%;
+  height: 60px;
+  margin-top: 26px;
+  border: none;
+  border-radius: 16px;
+  background: #18a8f5;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(24, 168, 245, 0.2);
+}
+
+.route-complete-later-btn {
+  margin-top: 18px;
+  border: none;
+  background: transparent;
+  color: #9aa7b7;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}

@@ -83,6 +83,29 @@ const Header = () => {
       );
     }
 
+    // 경로 만들기 페이지
+    if (path === "/route-create") {
+      return (
+        <>
+          <div className="header-side">
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={() => navigate(-1)}
+            >
+              <img src={backIcon} alt="back" className="header-icon" />
+            </button>
+          </div>
+
+          <div className="header-center">
+            <h2 className="header-title">경로 만들기</h2>
+          </div>
+
+          <div className="header-side" />
+        </>
+      );
+    }
+
     // 최적 경로 결과 페이지
     if (path === "/route-result") {
       return (

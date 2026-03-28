@@ -1,214 +1,254 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import "./Recommend.css";
 
-import leafIcon from "../img/흰색 나뭇잎.png";
-import activityIcon from "../img/검은색 액티비티.png";
-import foodIcon from "../img/검은색 맛집.png";
-import cameraIcon from "../img/검은색 카메라.png";
-import locationIcon from "../img/위치.png";
+import forestImg from "../img/도쿄.png";
+import museumImg from "../img/교토.png";
+import beachImg from "../img/서비스 소개 .png";
 
-const themeList = [
-  { id: "healing", title: "힐링", icon: leafIcon, type: "leaf" },
-  { id: "activity", title: "액티비티", icon: activityIcon, type: "dark" },
-  { id: "food", title: "맛집 탐방", icon: foodIcon, type: "dark" },
-  { id: "insta", title: "인스타 감성", icon: cameraIcon, type: "dark" },
+const HeartIcon = ({ active }) => (
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+    <path
+      d="M12 21s-6.8-4.35-9.4-8.1C.3 9.55 1.1 5.2 5.4 4.3c2.3-.5 4.3.5 5.6 2.1 1.3-1.6 3.3-2.6 5.6-2.1 4.3.9 5.1 5.25 2.8 8.6C18.8 16.65 12 21 12 21z"
+      fill={active ? "#FF5A5F" : "#FFFFFF"}
+      stroke={active ? "#FF5A5F" : "#D9E1EB"}
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const PinIcon = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+    <path
+      d="M12 20C12 20 6 14.5 6 10.5C6 7.46 8.46 5 11.5 5C14.54 5 17 7.46 17 10.5C17 14.5 12 20 12 20Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinejoin="round"
+    />
+    <circle cx="11.5" cy="10.5" r="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+  </svg>
+);
+
+const LeafIcon = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+    <path
+      d="M18 6C12 6 7 10 7 15C7 18 9.4 20 12.3 20C17 20 19 15.6 19 11C19 9.2 18.7 7.5 18 6Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M9 17C10.5 14.5 13 12.3 16.5 10.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const ActivityIcon = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+    <circle cx="15.5" cy="5.5" r="2" fill="currentColor" />
+    <path
+      d="M7 12L11 9L13.5 12L17 10"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path d="M10 12L8 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M13 12L16 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M5 10L8 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+const FoodIcon = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+    <path d="M7 3V10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M5 3V6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M9 3V6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M7 10V21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M16 3C17.7 5 18 7.2 18 9V21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M14 12H18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+const CameraIcon = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+    <rect x="4" y="7" width="16" height="12" rx="3" fill="none" stroke="currentColor" strokeWidth="2" />
+    <path d="M9 7L10.5 5H13.5L15 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+    <circle cx="12" cy="13" r="3" fill="none" stroke="currentColor" strokeWidth="2" />
+  </svg>
+);
+
+const themeCards = [
+  { key: "힐링", label: "힐링", icon: <LeafIcon /> },
+  { key: "액티비티", label: "액티비티", icon: <ActivityIcon /> },
+  { key: "맛집 탐방", label: "맛집 탐방", icon: <FoodIcon /> },
+  { key: "인스타 감성", label: "인스타 감성", icon: <CameraIcon /> },
 ];
 
-const placeData = {
-  healing: [
-    {
-      id: "healing-1",
-      name: "포레스트 하우스",
-      location: "강원도 평창군",
-      rating: 4.9,
-      tags: ["#자연힐링", "#조용한"],
-      imageClass: "forest-image",
-    },
-    {
-      id: "healing-2",
-      name: "레이크 스테이",
-      location: "경기도 가평군",
-      rating: 4.8,
-      tags: ["#호수뷰", "#감성숙소"],
-      imageClass: "museum-image",
-    },
-  ],
-  activity: [
-    {
-      id: "activity-1",
-      name: "서핑 포인트",
-      location: "강원도 양양군",
-      rating: 4.8,
-      tags: ["#서핑", "#액티비티"],
-      imageClass: "museum-image",
-    },
-    {
-      id: "activity-2",
-      name: "레일 바이크 파크",
-      location: "강원도 정선군",
-      rating: 4.6,
-      tags: ["#야외체험", "#가족추천"],
-      imageClass: "forest-image",
-    },
-  ],
-  food: [
-    {
-      id: "food-1",
-      name: "시장 골목 투어",
-      location: "전북 전주시",
-      rating: 4.9,
-      tags: ["#로컬맛집", "#먹방코스"],
-      imageClass: "forest-image",
-    },
-    {
-      id: "food-2",
-      name: "브런치 로스터리",
-      location: "서울 성동구",
-      rating: 4.7,
-      tags: ["#브런치", "#카페투어"],
-      imageClass: "museum-image",
-    },
-  ],
-  insta: [
-    {
-      id: "insta-1",
-      name: "루프탑 갤러리",
-      location: "서울 용산구",
-      rating: 4.8,
-      tags: ["#인생샷", "#도심뷰"],
-      imageClass: "museum-image",
-    },
-    {
-      id: "insta-2",
-      name: "선셋 포토 스팟",
-      location: "제주 서귀포시",
-      rating: 4.9,
-      tags: ["#노을맛집", "#감성사진"],
-      imageClass: "forest-image",
-    },
-  ],
-};
+const recommendedPlaces = [
+  {
+    id: 101,
+    theme: "힐링",
+    title: "포레스트 하우스",
+    address: "강원도 평창군",
+    rating: 4.9,
+    reviewCount: 1240,
+    badge: "STAY",
+    tabType: "숙소",
+    image: forestImg,
+    tags: ["#자연힐링", "#조용함"],
+  },
+  {
+    id: 102,
+    theme: "힐링",
+    title: "뮤지엄 산",
+    address: "경기도 원주시",
+    rating: 4.7,
+    reviewCount: 980,
+    badge: "LANDMARK",
+    tabType: "명소",
+    image: museumImg,
+    tags: ["#건축미", "#산책코스"],
+  },
+  {
+    id: 103,
+    theme: "맛집 탐방",
+    title: "우도 해녀의 집",
+    address: "제주 제주시",
+    rating: 4.8,
+    reviewCount: 1560,
+    badge: "RESTAURANT",
+    tabType: "맛집",
+    image: beachImg,
+    tags: ["#제주맛집", "#해산물"],
+  },
+  {
+    id: 104,
+    theme: "액티비티",
+    title: "평창 패러글라이딩",
+    address: "강원도 평창군",
+    rating: 4.6,
+    reviewCount: 720,
+    badge: "ACTIVITY",
+    tabType: "명소",
+    image: forestImg,
+    tags: ["#스릴", "#액티비티"],
+  },
+  {
+    id: 105,
+    theme: "인스타 감성",
+    title: "무드 스테이",
+    address: "서울 성동구",
+    rating: 4.8,
+    reviewCount: 430,
+    badge: "STAY",
+    tabType: "숙소",
+    image: museumImg,
+    tags: ["#감성숙소", "#포토스팟"],
+  },
+];
 
-const Recommend = () => {
+function Recommend() {
   const navigate = useNavigate();
-  const [selectedTheme, setSelectedTheme] = useState("healing");
-  const [likedPlaces, setLikedPlaces] = useState(["healing-1"]);
+  const { isSaved, toggleSavedPlace } = useSavedPlaces();
+  const [selectedTheme, setSelectedTheme] = useState("힐링");
 
-  const toggleLike = (id) => {
-    setLikedPlaces((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
+  const filteredPlaces = recommendedPlaces.filter(
+    (place) => place.theme === selectedTheme
+  );
 
-  const selectedThemeTitle =
-    themeList.find((theme) => theme.id === selectedTheme)?.title || "추천";
-
-  const currentPlaces = placeData[selectedTheme] || [];
-
-  const handleMoreClick = () => {
-    navigate(`/total?theme=${selectedTheme}`);
+  const handleViewAll = () => {
+    const params = new URLSearchParams({
+      theme: selectedTheme,
+    });
+    navigate(`/total?${params.toString()}`);
   };
 
   return (
     <div className="recommend-page">
-      <div className="recommend-inner">
+      <section className="recommend-hero">
         <h1 className="recommend-title">
           어떤 여행을 꿈꾸시나요?
           <br />
-          <span>취향에 딱 맞는 장소를</span> 찾아드릴게요.
+          <span className="accent">취향에 딱 맞는 장소</span>를 찾아드릴게요.
         </h1>
+      </section>
 
-        <div className="theme-grid">
-          {themeList.map((theme) => {
-            const isActive = selectedTheme === theme.id;
+      <section className="theme-grid">
+        {themeCards.map((theme) => (
+          <button
+            key={theme.key}
+            type="button"
+            className={`theme-card ${selectedTheme === theme.key ? "active" : ""}`}
+            onClick={() => setSelectedTheme(theme.key)}
+          >
+            <div className="theme-icon-wrap">{theme.icon}</div>
+            <span className="theme-label">{theme.label}</span>
+          </button>
+        ))}
+      </section>
 
-            return (
-              <button
-                key={theme.id}
-                type="button"
-                className={`theme-card ${isActive ? "active" : ""}`}
-                onClick={() => setSelectedTheme(theme.id)}
-              >
-                <div className="theme-icon-circle">
-                  <img
-                    src={theme.icon}
-                    alt={theme.title}
-                    className={`theme-icon ${
-                      theme.type === "leaf" ? "leaf-icon" : "dark-icon"
-                    } ${isActive ? "active" : "inactive"}`}
-                  />
-                </div>
-                <span className="theme-label">{theme.title}</span>
-              </button>
-            );
-          })}
-        </div>
-
+      <section className="recommend-section">
         <div className="recommend-section-header">
-          <h2>{selectedThemeTitle} 추천 장소</h2>
+          <h2>당신만을 위한 추천 장소</h2>
           <button
             type="button"
-            className="more-btn"
-            onClick={handleMoreClick}
+            className="view-all-btn"
+            onClick={handleViewAll}
           >
             전체보기
           </button>
         </div>
 
-        <div className="place-list">
-          {currentPlaces.map((place) => {
-            const isLiked = likedPlaces.includes(place.id);
+        <div className="recommend-card-list">
+          {filteredPlaces.map((place) => {
+            const saved = isSaved(place.id);
 
             return (
-              <article key={place.id} className="place-card">
-                <div className={`place-image ${place.imageClass}`}>
+              <article key={place.id} className="recommend-card">
+                <div className="recommend-card-image-wrap">
+                  <img
+                    src={place.image}
+                    alt={place.title}
+                    className="recommend-card-image"
+                  />
+
                   <button
                     type="button"
-                    className={`like-btn ${isLiked ? "liked" : ""}`}
-                    onClick={() => toggleLike(place.id)}
-                    aria-label={isLiked ? "찜 해제" : "찜하기"}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: 0,
-                    }}
+                    className="recommend-heart-btn"
+                    onClick={() => toggleSavedPlace(place)}
+                    aria-label={saved ? "저장 취소" : "저장"}
                   >
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      aria-hidden="true"
-                      style={{ display: "block" }}
-                    >
-                      <path
-                        d="M12.001 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54l-1.449 1.31z"
-                        fill={isLiked ? "#ff4d6d" : "none"}
-                        stroke={isLiked ? "#ff4d6d" : "#94A3B8"}
-                        strokeWidth="2"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <HeartIcon active={saved} />
                   </button>
                 </div>
 
-                <div className="place-content">
-                  <div className="place-top">
-                    <h3>{place.name}</h3>
-                    <span className="place-rating">★ {place.rating}</span>
+                <div className="recommend-card-body">
+                  <div className="recommend-title-row">
+                    <h3>{place.title}</h3>
+                    <div className="recommend-rating">
+                      <span className="star">★</span>
+                      <span>{place.rating}</span>
+                    </div>
                   </div>
 
-                  <div className="place-location">
-                    <img src={locationIcon} alt="위치" />
-                    <span>{place.location}</span>
+                  <div className="recommend-address-row">
+                    <PinIcon />
+                    <span>{place.address}</span>
                   </div>
 
-                  <div className="place-tags">
+                  <div className="recommend-tag-row">
                     {place.tags.map((tag) => (
-                      <span key={tag} className="place-tag">
+                      <span key={tag} className="recommend-tag">
                         {tag}
                       </span>
                     ))}
@@ -218,9 +258,9 @@ const Recommend = () => {
             );
           })}
         </div>
-      </div>
+      </section>
     </div>
   );
-};
+}
 
 export default Recommend;

@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import "./MyPage.css";
 
 const ArrowIcon = () => (
@@ -137,27 +138,28 @@ const AvatarIllustration = () => (
   </svg>
 );
 
-const stats = [
-  { label: "다녀온 곳", value: 12 },
-  { label: "저장한 곳", value: 48 },
-  { label: "작성한 리뷰", value: 25 },
-];
-
 const MyPage = () => {
   const navigate = useNavigate();
+  const { savedPlaces } = useSavedPlaces();
+
+  const stats = [
+    { label: "다녀온 곳", value: 12 },
+    { label: "저장한 곳", value: savedPlaces.length },
+    { label: "작성한 리뷰", value: 25 },
+  ];
 
   const myActivityMenus = [
     {
       id: "calendar",
       label: "내 일정 관리",
       icon: <CalendarIcon />,
-      onClick: () => navigate("/calendar"),
+      onClick: () => navigate("/my-schedule"),
     },
     {
       id: "saved",
       label: "저장한 장소",
       icon: <BookmarkIcon />,
-      onClick: () => console.log("저장한 장소"),
+      onClick: () => navigate("/saved-places"),
     },
     {
       id: "recent",
