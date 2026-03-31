@@ -1,0 +1,128 @@
+.alert-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.28);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.alert-modal {
+  width: 100%;
+  max-width: 360px;
+  border-radius: 34px;
+  background: #ffffff;
+  padding: 32px 22px 22px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
+.alert-icon-wrap {
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  margin: 0 auto 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alert-icon-wrap.blue {
+  background: #eaf7ff;
+}
+
+.alert-icon-wrap.red {
+  background: #fdeeef;
+}
+
+.alert-icon-image {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.alert-title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 900;
+  line-height: 1.35;
+  color: #17212f;
+  word-break: keep-all;
+}
+
+.alert-description {
+  margin: 18px 0 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.65;
+  color: #7c8aa0;
+  word-break: keep-all;
+}
+
+.alert-actions {
+  margin-top: 28px;
+}
+
+.alert-actions.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.alert-actions.single {
+  display: flex;
+}
+
+.alert-actions.row {
+  display: flex;
+  gap: 12px;
+}
+
+.alert-btn {
+  height: 50px;
+  border: none;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.alert-actions.stack .alert-btn,
+.alert-actions.single .alert-btn {
+  width: 100%;
+}
+
+.alert-actions.row .alert-btn {
+  flex: 1;
+}
+
+.alert-btn.primary.blue {
+  background: #1da1f2;
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(29, 161, 242, 0.2);
+}
+
+.alert-btn.primary.red {
+  background: #d71919;
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(215, 25, 25, 0.18);
+}
+
+.alert-btn.secondary.gray {
+  background: #eef2f7;
+  color: #94a3b8;
+}
+
+.alert-btn-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}

@@ -1,18 +1,14 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { getSavedRouteById } from "../utils/routeStorage";
 import "./RouteResult.css";
 
+let mapsConfigured = false;
+
 const ClockIcon = () => (
   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-    <circle
-      cx="12"
-      cy="12"
-      r="9"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
+    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" />
     <path
       d="M12 7.5V12.3L15.4 14.4"
       fill="none"
@@ -33,43 +29,15 @@ const PinIcon = () => (
       strokeWidth="1.8"
       strokeLinejoin="round"
     />
-    <circle
-      cx="12.2"
-      cy="10.8"
-      r="2"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    />
+    <circle cx="12.2" cy="10.8" r="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
   </svg>
 );
 
 const BusIcon = () => (
   <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-    <rect
-      x="5"
-      y="4.5"
-      width="14"
-      height="11"
-      rx="2"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    />
-    <path
-      d="M8 8.2H16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    <path
-      d="M8.5 18.5V16M15.5 18.5V16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
+    <rect x="5" y="4.5" width="14" height="11" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+    <path d="M8 8.2H16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <path d="M8.5 18.5V16M15.5 18.5V16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     <circle cx="8.5" cy="14.5" r="1" fill="currentColor" />
     <circle cx="15.5" cy="14.5" r="1" fill="currentColor" />
   </svg>
@@ -86,31 +54,14 @@ const WalkIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <path
-      d="M11 12.5L9.3 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M13.5 12.5L16.3 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
+    <path d="M11 12.5L9.3 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M13.5 12.5L16.3 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
 const GearIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    <path
-      d="M12 8.7A3.3 3.3 0 1 0 12 15.3A3.3 3.3 0 1 0 12 8.7Z"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
+    <path d="M12 8.7A3.3 3.3 0 1 0 12 15.3A3.3 3.3 0 1 0 12 8.7Z" fill="none" stroke="currentColor" strokeWidth="2" />
     <path
       d="M19 12C19 11.5 18.95 11 18.82 10.53L21 8.8L19.2 5.7L16.56 6.5C15.84 5.9 14.99 5.45 14.06 5.21L13.5 2.5H10.5L9.94 5.21C9.01 5.45 8.16 5.9 7.44 6.5L4.8 5.7L3 8.8L5.18 10.53C5.05 11 5 11.5 5 12C5 12.5 5.05 13 5.18 13.47L3 15.2L4.8 18.3L7.44 17.5C8.16 18.1 9.01 18.55 9.94 18.79L10.5 21.5H13.5L14.06 18.79C14.99 18.55 15.84 18.1 16.56 17.5L19.2 18.3L21 15.2L18.82 13.47C18.95 13 19 12.5 19 12Z"
       fill="none"
@@ -123,128 +74,66 @@ const GearIcon = () => (
 
 const LayersIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    <path
-      d="M12 5L19 9L12 13L5 9L12 5Z"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M5 13L12 17L19 13"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-      strokeLinecap="round"
-    />
+    <path d="M12 5L19 9L12 13L5 9L12 5Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+    <path d="M5 13L12 17L19 13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
   </svg>
 );
 
-const MapMock = () => {
-  return (
-    <div className="route-map-mock">
-      <svg
-        viewBox="0 0 800 520"
-        className="route-map-svg"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <rect width="800" height="520" fill="#eef3f6" />
-        <rect x="0" y="320" width="180" height="120" fill="#d7ece3" />
-        <rect x="550" y="40" width="160" height="100" fill="#d7ece3" />
-        <rect x="620" y="210" width="120" height="80" fill="#d7ece3" />
+const FALLBACK_CENTER = { lat: 37.5665, lng: 126.978 };
 
-        <path
-          d="M0 160 C120 130, 220 170, 340 150 S580 100, 800 130"
-          stroke="#d2d9e2"
-          strokeWidth="18"
-          fill="none"
-          strokeLinecap="round"
-        />
-        <path
-          d="M120 0 C180 100, 240 200, 300 520"
-          stroke="#d2d9e2"
-          strokeWidth="18"
-          fill="none"
-          strokeLinecap="round"
-        />
-        <path
-          d="M460 0 C500 120, 520 210, 580 520"
-          stroke="#d2d9e2"
-          strokeWidth="18"
-          fill="none"
-          strokeLinecap="round"
-        />
-        <path
-          d="M0 250 C130 260, 260 240, 420 255 S660 290, 800 250"
-          stroke="#d2d9e2"
-          strokeWidth="14"
-          fill="none"
-          strokeLinecap="round"
-        />
+const PLACE_COORDS = {
+  서울역: { lat: 37.5547, lng: 126.9706 },
+  남산서울타워: { lat: 37.5512, lng: 126.9882 },
+  "명동 거리": { lat: 37.5636, lng: 126.9827 },
+  경복궁: { lat: 37.5796, lng: 126.977 },
+  북촌한옥마을: { lat: 37.5826, lng: 126.9831 },
+  "삼청동 카페 거리": { lat: 37.582, lng: 126.9816 },
+  익선동카페거리: { lat: 37.5743, lng: 126.9895 },
+  "익선동 카페거리": { lat: 37.5743, lng: 126.9895 },
+  창덕궁: { lat: 37.5794, lng: 126.991 },
+  광장시장: { lat: 37.5704, lng: 126.9992 },
+  한강공원: { lat: 37.5289, lng: 126.9326 },
+  성수동카페거리: { lat: 37.5446, lng: 127.0557 },
+  "성수동 카페거리": { lat: 37.5446, lng: 127.0557 },
+  서울숲: { lat: 37.5444, lng: 127.0374 },
 
-        <path
-          d="M80 290 C180 250, 260 210, 350 220 C430 230, 520 260, 640 210"
-          stroke="#21a0f6"
-          strokeWidth="6"
-          fill="none"
-          strokeLinecap="round"
-        />
-        <path
-          d="M350 220 C420 180, 500 150, 620 170"
-          stroke="#a45cff"
-          strokeWidth="5"
-          fill="none"
-          strokeLinecap="round"
-        />
-        <path
-          d="M350 220 C310 270, 290 340, 300 450"
-          stroke="#22c55e"
-          strokeWidth="5"
-          fill="none"
-          strokeLinecap="round"
-        />
-        <path
-          d="M620 170 C690 155, 730 120, 770 70"
-          stroke="#7c3aed"
-          strokeWidth="5"
-          fill="none"
-          strokeLinecap="round"
-        />
+  가평역: { lat: 37.8184, lng: 127.5091 },
+  아침고요수목원: { lat: 37.743, lng: 127.3526 },
+  남이섬: { lat: 37.7915, lng: 127.5259 },
+  잣향기푸른숲: { lat: 37.8158, lng: 127.3923 },
+  청평카페거리: { lat: 37.7362, lng: 127.4175 },
+  "청평 카페거리": { lat: 37.7362, lng: 127.4175 },
+  "서울 복귀": { lat: 37.5547, lng: 126.9706 },
 
-        <circle cx="350" cy="220" r="13" fill="#22c55e" />
-        <circle cx="350" cy="220" r="5" fill="#fff" />
-        <circle cx="620" cy="170" r="12" fill="#a45cff" />
-        <circle cx="620" cy="170" r="5" fill="#fff" />
-        <circle cx="760" cy="75" r="12" fill="#3b82f6" />
-        <circle cx="760" cy="75" r="5" fill="#fff" />
+  제주공항: { lat: 33.5104, lng: 126.4913 },
+  협재해변: { lat: 33.3945, lng: 126.2395 },
+  애월카페거리: { lat: 33.4621, lng: 126.3097 },
+  "애월 카페거리": { lat: 33.4621, lng: 126.3097 },
+  성산일출봉: { lat: 33.4589, lng: 126.9425 },
+  우도: { lat: 33.5066, lng: 126.9559 },
+  섭지코지: { lat: 33.424, lng: 126.9272 },
+  사려니숲길: { lat: 33.4225, lng: 126.6265 },
+  "서귀포 올레시장": { lat: 33.2501, lng: 126.5654 },
+  "중문 야경 포인트": { lat: 33.2488, lng: 126.4122 },
+  용머리해안: { lat: 33.2317, lng: 126.3142 },
+  카멜리아힐: { lat: 33.2896, lng: 126.3707 },
+  "제주공항 복귀": { lat: 33.5104, lng: 126.4913 },
 
-        <text x="335" y="250" className="map-city-label-main">
-          Seoul
-        </text>
-        <text x="290" y="280" className="map-city-label-sub">
-          서울특별시
-        </text>
-      </svg>
+  부산역: { lat: 35.1151, lng: 129.0414 },
+  자갈치시장: { lat: 35.0979, lng: 129.0307 },
+  "광안리 해변": { lat: 35.1532, lng: 129.1187 },
+  "해운대 블루라인파크": { lat: 35.1587, lng: 129.1756 },
+  "해운대 암소갈비": { lat: 35.1629, lng: 129.1635 },
+  "전포 카페거리": { lat: 35.1578, lng: 129.0675 },
+  국제시장: { lat: 35.1028, lng: 129.0285 },
+  흰여울문화마을: { lat: 35.0789, lng: 129.0457 },
+  "부산역 복귀": { lat: 35.1151, lng: 129.0414 },
 
-      <div className="route-map-controls">
-        <button type="button" className="route-map-control-btn">
-          <GearIcon />
-        </button>
-        <button type="button" className="route-map-control-btn">
-          <LayersIcon />
-        </button>
-      </div>
-    </div>
-  );
-};
-
-const formatDateKey = (date) => {
-  const d = new Date(date);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  교토역: { lat: 34.9855, lng: 135.7586 },
+  "후시미 이나리 신사": { lat: 34.9671, lng: 135.7727 },
+  기요미즈데라: { lat: 34.9949, lng: 135.785 },
+  아라시야마: { lat: 35.0094, lng: 135.6668 },
+  "교토 복귀": { lat: 34.9855, lng: 135.7586 },
 };
 
 const DEFAULT_RESULT_DAYS = [
@@ -378,6 +267,77 @@ const DEFAULT_RESULT_DAYS = [
   },
 ];
 
+const normalizeTitle = (title = "") =>
+  title.replace(/\s*\([^)]*\)/g, "").trim();
+
+const getCoordByTitle = (title = "") => {
+  const normalized = normalizeTitle(title);
+
+  if (PLACE_COORDS[title]) return PLACE_COORDS[title];
+  if (PLACE_COORDS[normalized]) return PLACE_COORDS[normalized];
+
+  const matchedKey = Object.keys(PLACE_COORDS).find(
+    (key) => normalized.includes(key) || key.includes(normalized)
+  );
+
+  return matchedKey ? PLACE_COORDS[matchedKey] : null;
+};
+
+const buildMapDataFromDay = (day, dayIndex) => {
+  const fallbackDay =
+    DEFAULT_RESULT_DAYS[dayIndex % DEFAULT_RESULT_DAYS.length] ||
+    DEFAULT_RESULT_DAYS[0];
+
+  const sourceItems =
+    day?.items?.length > 0 ? day.items : fallbackDay.items;
+
+  const points = sourceItems
+    .map((item) => {
+      const coord = getCoordByTitle(item.title);
+      if (!coord) return null;
+
+      return {
+        ...coord,
+        title: item.title,
+      };
+    })
+    .filter(Boolean);
+
+  if (!points.length) {
+    return {
+      center: FALLBACK_CENTER,
+      markers: [],
+      lines: [],
+    };
+  }
+
+  const colors = ["#22C55E", "#21A0F6", "#A45CFF", "#F59E0B", "#EF4444"];
+
+  const markers = points.map((point, index) => ({
+    lat: point.lat,
+    lng: point.lng,
+    title: point.title,
+    color: colors[index % colors.length],
+  }));
+
+  const lines = [];
+  for (let i = 0; i < points.length - 1; i += 1) {
+    lines.push({
+      color: colors[i % colors.length],
+      path: [
+        { lat: points[i].lat, lng: points[i].lng },
+        { lat: points[i + 1].lat, lng: points[i + 1].lng },
+      ],
+    });
+  }
+
+  return {
+    center: { lat: points[0].lat, lng: points[0].lng },
+    markers,
+    lines,
+  };
+};
+
 const makeMockMove = (index) => {
   const busTexts = [
     "버스 15분 이동 (2.1km)",
@@ -395,52 +355,59 @@ const makeMockMove = (index) => {
     : { move: walkTexts[index % walkTexts.length], moveType: "walk" };
 };
 
+const formatDateKey = (date) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 const buildDaysFromState = (selectedDates = [], placesByDate = {}) => {
   if (!selectedDates.length) return DEFAULT_RESULT_DAYS;
 
   return selectedDates.map((date, dayIndex) => {
     const dateKey = formatDateKey(date);
     const places = placesByDate?.[dateKey] || [];
+    const fallbackDay =
+      DEFAULT_RESULT_DAYS[dayIndex % DEFAULT_RESULT_DAYS.length] ||
+      DEFAULT_RESULT_DAYS[0];
 
-    const items =
-      places.length > 0
-        ? places.map((place, index) => {
-            const mockMove = makeMockMove(index);
+    if (!places.length) {
+      return {
+        ...fallbackDay,
+        label: `${dayIndex + 1}일차`,
+      };
+    }
 
-            return {
-              time: place.timeLabel || ["10:00 AM", "11:30 AM", "01:00 PM", "03:00 PM"][index] || "10:00 AM",
-              title:
-                index === 0 && !place.name.includes("(출발)")
-                  ? `${place.name}${place.name.includes("역") ? " (출발)" : ""}`
-                  : place.name,
-              desc:
-                index === 0
-                  ? place.desc || "여행 시작 지점입니다."
-                  : place.desc || "추천 일정으로 배치된 장소입니다.",
-              badge:
-                index === 0
-                  ? place.name.includes("역")
-                    ? "지하철/KTX"
-                    : "출발"
-                  : place.isFixedTime
-                  ? "고정 일정"
-                  : "",
-              move:
-                index < places.length - 1 ? mockMove.move : "",
-              moveType:
-                index < places.length - 1 ? mockMove.moveType : "walk",
-            };
-          })
-        : [
-            {
-              time: "10:00 AM",
-              title: `${dayIndex + 1}일차 추천 일정`,
-              desc: "아직 생성된 장소가 없어 기본 목업 일정이 표시됩니다.",
-              badge: "",
-              move: "",
-              moveType: "walk",
-            },
-          ];
+    const items = places.map((place, index) => {
+      const mockMove = makeMockMove(index);
+
+      return {
+        time:
+          place.timeLabel ||
+          ["10:00 AM", "11:30 AM", "01:00 PM", "03:00 PM"][index] ||
+          "10:00 AM",
+        title:
+          index === 0 && !place.name.includes("(출발)")
+            ? `${place.name}${place.name.includes("역") ? " (출발)" : ""}`
+            : place.name,
+        desc:
+          index === 0
+            ? place.desc || "여행 시작 지점입니다."
+            : place.desc || "추천 일정으로 배치된 장소입니다.",
+        badge:
+          index === 0
+            ? place.name.includes("역")
+              ? "지하철/KTX"
+              : "출발"
+            : place.isFixedTime
+            ? "고정 일정"
+            : "",
+        move: index < places.length - 1 ? mockMove.move : "",
+        moveType: index < places.length - 1 ? mockMove.moveType : "walk",
+      };
+    });
 
     const totalMinutes = items.length * 90 + 60;
     const hour = Math.floor(totalMinutes / 60);
@@ -458,19 +425,173 @@ const buildDaysFromState = (selectedDates = [], placesByDate = {}) => {
   });
 };
 
-function RouteResult() {
+const GoogleMapBox = ({ dayData, dayIndex }) => {
+  const mapRef = useRef(null);
+  const [mapError, setMapError] = useState("");
+
+  const mapData = useMemo(
+    () => buildMapDataFromDay(dayData, dayIndex),
+    [dayData, dayIndex]
+  );
+
+  useEffect(() => {
+    const apiKey = process.env.REACT_APP_GOOGLE_MAPS_BROWSER_KEY;
+
+    if (!apiKey) {
+      setMapError("구글맵 API 키가 없습니다. .env 파일을 확인하세요.");
+      return;
+    }
+
+    if (!mapsConfigured) {
+      setOptions({
+        key: apiKey,
+        v: "weekly",
+      });
+      mapsConfigured = true;
+    }
+
+    let mounted = true;
+    let map = null;
+    let markers = [];
+    let polylines = [];
+
+    (async () => {
+      try {
+        const { Map } = await importLibrary("maps");
+        if (!mounted || !mapRef.current) return;
+
+        const gm = window.google.maps;
+
+        map = new Map(mapRef.current, {
+          center: mapData.center,
+          zoom: 11,
+          disableDefaultUI: true,
+          gestureHandling: "greedy",
+          clickableIcons: false,
+        });
+
+        const bounds = new gm.LatLngBounds();
+
+        mapData.lines.forEach((line) => {
+          line.path.forEach((point) => bounds.extend(point));
+
+          const polyline = new gm.Polyline({
+            map,
+            path: line.path,
+            strokeColor: line.color,
+            strokeOpacity: 1,
+            strokeWeight: 5,
+            geodesic: true,
+          });
+
+          polylines.push(polyline);
+        });
+
+        mapData.markers.forEach((marker) => {
+          const position = { lat: marker.lat, lng: marker.lng };
+          bounds.extend(position);
+
+          const markerInstance = new gm.Marker({
+            map,
+            position,
+            title: marker.title,
+            icon: {
+              path: gm.SymbolPath.CIRCLE,
+              fillColor: marker.color,
+              fillOpacity: 1,
+              strokeColor: "#ffffff",
+              strokeWeight: 3,
+              scale: 8,
+            },
+          });
+
+          markers.push(markerInstance);
+        });
+
+        if (mapData.markers.length > 1) {
+          map.fitBounds(bounds, 60);
+
+          gm.event.addListenerOnce(map, "idle", () => {
+            if (map && map.getZoom() > 13) {
+              map.setZoom(13);
+            }
+          });
+        } else if (mapData.markers.length === 1) {
+          map.setCenter(mapData.center);
+          map.setZoom(13);
+        }
+
+        setMapError("");
+      } catch (error) {
+        console.error("Google Maps 로드 실패:", error);
+        setMapError(
+          "지도를 불러오지 못했어요. API 키 또는 Google Cloud 설정을 확인해 주세요."
+        );
+      }
+    })();
+
+    return () => {
+      mounted = false;
+      markers.forEach((marker) => marker.setMap(null));
+      polylines.forEach((polyline) => polyline.setMap(null));
+    };
+  }, [mapData]);
+
+  return (
+    <div className="route-map-mock">
+      <div ref={mapRef} className="route-map-real" />
+
+      {mapError && <div className="route-map-error-overlay">{mapError}</div>}
+
+      <div className="route-map-controls">
+        <button type="button" className="route-map-control-btn">
+          <GearIcon />
+        </button>
+        <button type="button" className="route-map-control-btn">
+          <LayersIcon />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   const location = useLocation();
-  const state = location.state || {};
+  const [searchParams] = useSearchParams();
+
+  const routeId = searchParams.get("id");
+  const savedRouteFromState = location.state?.savedRoute;
+  const savedRoute =
+    initialSavedRoute ||
+    savedRouteFromState ||
+    (routeId ? getSavedRouteById(routeId) : null);
 
   const resultDays = useMemo(() => {
-    return buildDaysFromState(state.selectedDates, state.placesByDate);
-  }, [state.selectedDates, state.placesByDate]);
+    const rawSelectedDates =
+      savedRoute?.selectedDates || location.state?.selectedDates;
+    const rawPlacesByDate =
+      savedRoute?.placesByDate || location.state?.placesByDate;
+
+    if (rawSelectedDates && rawSelectedDates.length) {
+      const parsedDates = rawSelectedDates.map((date) => new Date(date));
+      return buildDaysFromState(parsedDates, rawPlacesByDate);
+    }
+
+    return DEFAULT_RESULT_DAYS;
+  }, [savedRoute, location.state?.selectedDates, location.state?.placesByDate]);
 
   const [activeDayIndex, setActiveDayIndex] = useState(0);
+
+  useEffect(() => {
+    if (activeDayIndex > resultDays.length - 1) {
+      setActiveDayIndex(0);
+    }
+  }, [activeDayIndex, resultDays.length]);
+
   const activeDay = resultDays[activeDayIndex] || resultDays[0];
 
   return (
-    <div className="route-result-page">
+    <div className={`route-result-page ${isEmbedded ? "embedded" : ""}`}>
       <div className="route-result-tabs">
         {resultDays.map((day, index) => (
           <button
@@ -512,7 +633,7 @@ function RouteResult() {
         </section>
 
         <section className="route-result-map-section">
-          <MapMock />
+          <GoogleMapBox dayData={activeDay} dayIndex={activeDayIndex} />
         </section>
 
         <section className="route-result-detail-section">
@@ -529,7 +650,10 @@ function RouteResult() {
 
           <div className="route-result-timeline">
             {activeDay.items.map((item, index) => (
-              <div key={`${item.title}-${index}`} className="route-result-timeline-item">
+              <div
+                key={`${item.title}-${index}`}
+                className="route-result-timeline-item"
+              >
                 <div className="route-result-marker-column">
                   <div className="route-result-step-circle">{index + 1}</div>
                   {index !== activeDay.items.length - 1 && (

@@ -22,6 +22,7 @@ import Schedule from "./Schedule/Schedule";
 import PopularAll from "./Homepage/PopularAll";
 import MySchedule from "./MySchedule/MySchedule";
 import { SavedPlacesProvider } from "./Context/SavedPlacesContext";
+import SignUp from "./Login/SignUp";
 
 function Layout() {
   const location = useLocation();
@@ -64,7 +65,7 @@ function Layout() {
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/popular-all" element={<PopularAll />} />
           <Route path="/my-schedule" element={<MySchedule />} />
-          
+          <Route path="/signup" element={<SignUp />} />
           
         </Routes>
       </main>

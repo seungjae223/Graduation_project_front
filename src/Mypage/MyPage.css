@@ -47,7 +47,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px;
 }
 
 .mypage-name-row h1 {
@@ -58,17 +58,32 @@
   letter-spacing: -0.4px;
 }
 
-.mypage-level-badge {
+.mypage-logout-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 999px;
-  background: #e9f7ff;
-  color: #17a1f4;
-  font-size: 11px;
+  gap: 8px;
+  height: 44px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 14px;
+  background: #f4f7fb;
+  box-shadow: inset 0 0 0 1px #edf2f7;
+  cursor: pointer;
+}
+
+.mypage-logout-btn span {
+  color: #6d7b90;
+  font-size: 14px;
   font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.mypage-logout-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 
 .mypage-user-info p {
@@ -214,5 +229,14 @@
 
   .mypage-menu-left span {
     font-size: 15px;
+  }
+
+  .mypage-logout-btn {
+    height: 40px;
+    padding: 0 12px;
+  }
+
+  .mypage-logout-btn span {
+    font-size: 13px;
   }
 }

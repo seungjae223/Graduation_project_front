@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
 // 🔥 아이콘 이미지 추가
@@ -8,17 +9,20 @@ import kakaoIcon from "../img/카카오.png";
 import naverIcon from "../img/네이버.png";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [showPw, setShowPw] = useState(false);
+
+  const handleSignupClick = () => {
+    navigate("/signup");
+  };
 
   return (
     <div className="login">
-
       <div className="login-card">
-
         {/* 상단 */}
         <div className="login-header">
           <div className="icon-circle">
-            <img src={logoIcon} alt="icon" /> {/* 🔥 수정 */}
+            <img src={logoIcon} alt="icon" />
           </div>
           <h2>너만 오면 go !</h2>
           <p>준비 됐어? 너만 오면 돼!</p>
@@ -38,7 +42,6 @@ const Login = () => {
               type={showPw ? "text" : "password"}
               placeholder="비밀번호를 입력해주세요"
             />
-            {/* 🔥 눈 아이콘 변경 */}
             <img
               src={eyeIcon}
               alt="eye"
@@ -61,7 +64,19 @@ const Login = () => {
 
         {/* 회원가입 */}
         <p className="signup">
-          아직 회원이 아니신가요? <span>회원가입</span>
+          아직 회원이 아니신가요?{" "}
+          <span
+            onClick={handleSignupClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                handleSignupClick();
+              }
+            }}
+          >
+            회원가입
+          </span>
         </p>
 
         {/* 간편 로그인 */}
@@ -78,7 +93,6 @@ const Login = () => {
             네이버 로그인
           </button>
         </div>
-
       </div>
     </div>
   );

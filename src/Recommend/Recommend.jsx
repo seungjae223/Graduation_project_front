@@ -28,7 +28,14 @@ const PinIcon = () => (
       strokeWidth="1.8"
       strokeLinejoin="round"
     />
-    <circle cx="11.5" cy="10.5" r="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+    <circle
+      cx="11.5"
+      cy="10.5"
+      r="2"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
   </svg>
 );
 
@@ -62,28 +69,104 @@ const ActivityIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <path d="M10 12L8 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    <path d="M13 12L16 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    <path d="M5 10L8 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path
+      d="M10 12L8 18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M13 12L16 18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5 10L8 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
 const FoodIcon = () => (
   <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-    <path d="M7 3V10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    <path d="M5 3V6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    <path d="M9 3V6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    <path d="M7 10V21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    <path d="M16 3C17.7 5 18 7.2 18 9V21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    <path d="M14 12H18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path
+      d="M7 3V10"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5 3V6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M9 3V6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M7 10V21"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M16 3C17.7 5 18 7.2 18 9V21"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M14 12H18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
 const CameraIcon = () => (
   <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-    <rect x="4" y="7" width="16" height="12" rx="3" fill="none" stroke="currentColor" strokeWidth="2" />
-    <path d="M9 7L10.5 5H13.5L15 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-    <circle cx="12" cy="13" r="3" fill="none" stroke="currentColor" strokeWidth="2" />
+    <rect
+      x="4"
+      y="7"
+      width="16"
+      height="12"
+      rx="3"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+    <path
+      d="M9 7L10.5 5H13.5L15 7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+    <circle
+      cx="12"
+      cy="13"
+      r="3"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
   </svg>
 );
 
@@ -173,6 +256,12 @@ function Recommend() {
     navigate(`/total?${params.toString()}`);
   };
 
+  const handleDetailClick = (place) => {
+    navigate(`/detail?id=${place.id}`, {
+      state: { place },
+    });
+  };
+
   return (
     <div className="recommend-page">
       <section className="recommend-hero">
@@ -188,7 +277,9 @@ function Recommend() {
           <button
             key={theme.key}
             type="button"
-            className={`theme-card ${selectedTheme === theme.key ? "active" : ""}`}
+            className={`theme-card ${
+              selectedTheme === theme.key ? "active" : ""
+            }`}
             onClick={() => setSelectedTheme(theme.key)}
           >
             <div className="theme-icon-wrap">{theme.icon}</div>
@@ -214,7 +305,18 @@ function Recommend() {
             const saved = isSaved(place.id);
 
             return (
-              <article key={place.id} className="recommend-card">
+              <article
+                key={place.id}
+                className="recommend-card"
+                onClick={() => handleDetailClick(place)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    handleDetailClick(place);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+              >
                 <div className="recommend-card-image-wrap">
                   <img
                     src={place.image}
@@ -225,7 +327,10 @@ function Recommend() {
                   <button
                     type="button"
                     className="recommend-heart-btn"
-                    onClick={() => toggleSavedPlace(place)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleSavedPlace(place);
+                    }}
                     aria-label={saved ? "저장 취소" : "저장"}
                   >
                     <HeartIcon active={saved} />

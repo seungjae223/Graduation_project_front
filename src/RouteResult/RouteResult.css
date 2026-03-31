@@ -308,3 +308,23 @@
   align-items: center;
   justify-content: center;
 }
+.route-map-real {
+  width: 100%;
+  height: 100%;
+}
+
+.route-map-error-overlay {
+  position: absolute;
+  inset: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 16px;
+  color: #445468;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 16px;
+  z-index: 2;
+}

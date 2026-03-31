@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import "./MyPage.css";
 
+import logoutGrayIcon from "../img/회색 로그아웃.png";
+
 const ArrowIcon = () => (
   <svg
     width="18"
@@ -117,7 +119,14 @@ const AvatarIllustration = () => (
     xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
   >
-    <circle cx="42" cy="42" r="41" fill="#EAF7FF" stroke="#BFE2F8" strokeWidth="2" />
+    <circle
+      cx="42"
+      cy="42"
+      r="41"
+      fill="#EAF7FF"
+      stroke="#BFE2F8"
+      strokeWidth="2"
+    />
     <circle cx="42" cy="31" r="13" fill="#F5C39C" />
     <path
       d="M26 65C28 54.5 35.5 49 42 49C48.5 49 56 54.5 58 65"
@@ -138,9 +147,24 @@ const AvatarIllustration = () => (
   </svg>
 );
 
+const getStoredUser = () => {
+  try {
+    const localUser = localStorage.getItem("mock_current_user");
+    if (localUser) return JSON.parse(localUser);
+
+    const sessionUser = sessionStorage.getItem("mock_current_user");
+    if (sessionUser) return JSON.parse(sessionUser);
+
+    return null;
+  } catch (error) {
+    return null;
+  }
+};
+
 const MyPage = () => {
   const navigate = useNavigate();
   const { savedPlaces } = useSavedPlaces();
+  const currentUser = getStoredUser();
 
   const stats = [
     { label: "다녀온 곳", value: 12 },
@@ -178,6 +202,17 @@ const MyPage = () => {
     },
   ];
 
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem("mock_current_user");
+      sessionStorage.removeItem("mock_current_user");
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+    }
+
+    navigate("/login", { replace: true });
+  };
+
   return (
     <div className="mypage-page">
       <div className="mypage-inner">
@@ -189,10 +224,24 @@ const MyPage = () => {
 
             <div className="mypage-user-info">
               <div className="mypage-name-row">
-                <h1>김여행</h1>
-                <span className="mypage-level-badge">LV.4 TRAVELER</span>
+                <h1>{currentUser?.name || "김여행"}</h1>
+
+                <button
+                  type="button"
+                  className="mypage-logout-btn"
+                  onClick={handleLogout}
+                  aria-label="로그아웃"
+                >
+                  <img
+                    src={logoutGrayIcon}
+                    alt="로그아웃"
+                    className="mypage-logout-icon"
+                  />
+                  <span>로그아웃</span>
+                </button>
               </div>
-              <p>traveler_kim@email.com</p>
+
+              <p>{currentUser?.email || "traveler_kim@email.com"}</p>
             </div>
           </div>
 
