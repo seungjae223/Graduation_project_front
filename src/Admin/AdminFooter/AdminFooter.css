@@ -1,0 +1,131 @@
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.page-wrap {
+  width: min(100%, 390px);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.page-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.admin-footer,
+.admin-footer * {
+  box-sizing: border-box;
+}
+
+.admin-footer {
+  width: 100%;
+  background: #ffffff;
+  border-top: 1px solid #edf2f7;
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.admin-footer-inner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: end;
+  justify-items: center;
+  gap: 4px;
+}
+
+.admin-footer-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-footer-item:focus-visible {
+  outline: 2px solid #17a1f4;
+  outline-offset: -2px;
+  border-radius: 12px;
+}
+
+.admin-footer-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.admin-footer-item.active .admin-footer-icon-wrap {
+  background: #eaf7ff;
+}
+
+.admin-footer-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+}
+
+.admin-footer-log-icon {
+  width: 28px;
+  height: 28px;
+  color: #6c7a90;
+  display: block;
+}
+
+.admin-footer-label {
+  color: #6c7a90;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.admin-footer-item.active .admin-footer-label {
+  color: #17a1f4;
+}
+
+.admin-footer-item.active .admin-footer-log-icon {
+  color: #17a1f4;
+}
+
+@media (max-width: 360px) {
+  .admin-footer {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  .admin-footer-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+  }
+
+  .admin-footer-icon,
+  .admin-footer-log-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .admin-footer-label {
+    font-size: 11px;
+  }
+}

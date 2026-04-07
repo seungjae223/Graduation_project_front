@@ -20,7 +20,11 @@ const Footer = () => {
     if (pathname === "/home") return "home";
     if (pathname.startsWith("/search")) return "search";
     if (pathname.startsWith("/recommend")) return "recommend";
-    if (pathname.startsWith("/calendar") || pathname.startsWith("/route-result")) {
+    if (
+      pathname.startsWith("/schedule") ||
+      pathname.startsWith("/calendar") ||
+      pathname.startsWith("/route-result")
+    ) {
       return "calendar";
     }
     return "";
@@ -36,28 +40,33 @@ const Footer = () => {
   ];
 
   return (
-    <div className="footer-nav">
-      {tabs.map((tab) => {
-        const isActive = activeTab === tab.key;
+    <footer className="footer">
+      <nav className="footer-nav" aria-label="하단 메뉴">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.key;
 
-        return (
-          <div
-            key={tab.key}
-            className={`tab ${isActive ? "active" : ""} ${tab.key}-tab`}
-            onClick={() => navigate(tab.path)}
-          >
-            <div className="tab-icon-wrap">
-              <img
-                src={isActive ? tab.on : tab.off}
-                alt={tab.label}
-                className="tab-icon"
-              />
-            </div>
-            <span>{tab.label}</span>
-          </div>
-        );
-      })}
-    </div>
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              className={`tab ${isActive ? "active" : ""} ${tab.key}-tab`}
+              onClick={() => navigate(tab.path)}
+              aria-pressed={isActive}
+            >
+              <div className="tab-icon-wrap">
+                <img
+                  src={isActive ? tab.on : tab.off}
+                  alt=""
+                  className="tab-icon"
+                  aria-hidden="true"
+                />
+              </div>
+              <span className="tab-label">{tab.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+    </footer>
   );
 };
 

@@ -82,10 +82,7 @@ function LoginAlert({
 
   return (
     <div className="login-alert-overlay" onClick={handleBackdropClick}>
-      <div
-        className="login-alert-sheet"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="login-alert-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="login-alert-handle" />
 
         {iconSrc ? (

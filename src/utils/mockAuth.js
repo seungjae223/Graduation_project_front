@@ -1,6 +1,18 @@
 const USERS_KEY = "mock_users";
 const AUTH_KEY = "mock_current_user";
 
+const ADMIN_ACCOUNT = {
+  id: "admin001",
+  name: "관리자",
+  email: "admin@naver.com",
+  password: "admin1234",
+  role: "admin",
+  phone: "",
+};
+
+const normalizeEmail = (email = "") => email.trim().toLowerCase();
+const normalizeInput = (value = "") => String(value).trim().toLowerCase();
+
 const readUsers = () => {
   try {
     return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
@@ -13,13 +25,31 @@ const saveUsers = (users) => {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 };
 
+const saveAuthUser = (user, remember) => {
+  localStorage.removeItem(AUTH_KEY);
+  sessionStorage.removeItem(AUTH_KEY);
+
+  if (remember) {
+    localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+  } else {
+    sessionStorage.setItem(AUTH_KEY, JSON.stringify(user));
+  }
+};
+
 export const registerMockUser = (form) => {
   const users = readUsers();
 
-  const email = form.email.trim().toLowerCase();
-  const phone = form.phone.trim();
+  const email = normalizeEmail(form.email);
+  const phone = (form.phone || "").trim();
 
-  const exists = users.some((user) => user.email === email);
+  if (email === normalizeEmail(ADMIN_ACCOUNT.email)) {
+    return {
+      ok: false,
+      message: "이 이메일은 사용할 수 없습니다.",
+    };
+  }
+
+  const exists = users.some((user) => normalizeEmail(user.email) === email);
 
   if (exists) {
     return {
@@ -34,6 +64,7 @@ export const registerMockUser = (form) => {
     email,
     phone,
     password: form.password,
+    role: "user",
     createdAt: new Date().toISOString(),
   };
 
@@ -41,16 +72,52 @@ export const registerMockUser = (form) => {
 
   return {
     ok: true,
-    user: newUser,
+    user: {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      phone: newUser.phone,
+      role: newUser.role,
+    },
   };
 };
 
-export const loginMockUser = ({ email, password, rememberMe }) => {
+export const loginMockUser = ({
+  email,
+  password,
+  rememberMe,
+  keepLogin,
+}) => {
   const users = readUsers();
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedInput = normalizeInput(email);
+  const remember = typeof rememberMe === "boolean" ? rememberMe : !!keepLogin;
+
+  if (
+    (normalizedInput === normalizeInput(ADMIN_ACCOUNT.email) ||
+      normalizedInput === normalizeInput(ADMIN_ACCOUNT.id)) &&
+    password === ADMIN_ACCOUNT.password
+  ) {
+    const safeAdmin = {
+      id: ADMIN_ACCOUNT.id,
+      name: ADMIN_ACCOUNT.name,
+      email: ADMIN_ACCOUNT.email,
+      phone: ADMIN_ACCOUNT.phone,
+      role: ADMIN_ACCOUNT.role,
+    };
+
+    saveAuthUser(safeAdmin, remember);
+
+    return {
+      ok: true,
+      user: safeAdmin,
+    };
+  }
 
   const matchedUser = users.find(
-    (user) => user.email === normalizedEmail && user.password === password
+    (user) =>
+      (normalizeInput(user.email) === normalizedInput ||
+        normalizeInput(user.id) === normalizedInput) &&
+      user.password === password
   );
 
   if (!matchedUser) {
@@ -64,17 +131,11 @@ export const loginMockUser = ({ email, password, rememberMe }) => {
     id: matchedUser.id,
     name: matchedUser.name,
     email: matchedUser.email,
-    phone: matchedUser.phone,
+    phone: matchedUser.phone || "",
+    role: matchedUser.role || "user",
   };
 
-  localStorage.removeItem(AUTH_KEY);
-  sessionStorage.removeItem(AUTH_KEY);
-
-  if (rememberMe) {
-    localStorage.setItem(AUTH_KEY, JSON.stringify(safeUser));
-  } else {
-    sessionStorage.setItem(AUTH_KEY, JSON.stringify(safeUser));
-  }
+  saveAuthUser(safeUser, remember);
 
   return {
     ok: true,
@@ -103,4 +164,17 @@ export const logoutMockUser = () => {
 
 export const getMockUsers = () => {
   return readUsers();
+};
+
+export const isAdminUser = () => {
+  const currentUser = getMockCurrentUser();
+  return currentUser?.role === "admin";
+};
+
+export const getAdminMockAccount = () => {
+  return {
+    id: ADMIN_ACCOUNT.id,
+    email: ADMIN_ACCOUNT.email,
+    password: ADMIN_ACCOUNT.password,
+  };
 };

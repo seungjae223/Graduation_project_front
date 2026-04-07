@@ -4,6 +4,7 @@ import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import "./MyPage.css";
 
 import logoutGrayIcon from "../img/회색 로그아웃.png";
+import adminMenuIcon from "../img/관리자.png";
 
 const ArrowIcon = () => (
   <svg
@@ -155,16 +156,29 @@ const getStoredUser = () => {
     const sessionUser = sessionStorage.getItem("mock_current_user");
     if (sessionUser) return JSON.parse(sessionUser);
 
+    const users = JSON.parse(localStorage.getItem("mock_users") || "[]");
+    if (Array.isArray(users) && users.length > 0) {
+      return users[users.length - 1];
+    }
+
     return null;
   } catch (error) {
     return null;
   }
 };
 
+const adminIconStyle = {
+  width: "22px",
+  height: "22px",
+  objectFit: "contain",
+  display: "block",
+};
+
 const MyPage = () => {
   const navigate = useNavigate();
   const { savedPlaces } = useSavedPlaces();
   const currentUser = getStoredUser();
+  const isAdmin = currentUser?.role === "admin";
 
   const stats = [
     { label: "다녀온 곳", value: 12 },
@@ -198,8 +212,24 @@ const MyPage = () => {
       id: "inquiry",
       label: "1:1 문의",
       icon: <InquiryIcon />,
-      onClick: () => console.log("1:1 문의"),
+      onClick: () => navigate("/inquiry"),
     },
+    ...(isAdmin
+      ? [
+          {
+            id: "admin",
+            label: "관리자 페이지",
+            icon: (
+              <img
+                src={adminMenuIcon}
+                alt="관리자"
+                style={adminIconStyle}
+              />
+            ),
+            onClick: () => navigate("/admin"),
+          },
+        ]
+      : []),
   ];
 
   const handleLogout = () => {

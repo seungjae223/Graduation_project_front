@@ -23,9 +23,16 @@ import PopularAll from "./Homepage/PopularAll";
 import MySchedule from "./MySchedule/MySchedule";
 import { SavedPlacesProvider } from "./Context/SavedPlacesContext";
 import SignUp from "./Login/SignUp";
+import Inquiry from "./Mypage/Inquiry";
+
+// 관리자 페이지 / 관리자 전용 푸터
+import AdminMain from "./Admin/AdminMain/AdminMain";
+import AdminFooter from "./Admin/AdminFooter/AdminFooter";
 
 function Layout() {
   const location = useLocation();
+
+  const isAdminPage = location.pathname.startsWith("/admin");
 
   const hideFooterPaths = [
     "/",
@@ -35,9 +42,12 @@ function Layout() {
     "/login",
     "/Landing",
     "/detail",
+    "/signup",
   ];
 
   const shouldHideFooter = hideFooterPaths.includes(location.pathname);
+  const shouldShowDefaultFooter = !shouldHideFooter && !isAdminPage;
+  const shouldShowAdminFooter = isAdminPage;
 
   const hideHeaderPaths = ["/login"];
   const shouldHideHeader = hideHeaderPaths.includes(location.pathname);
@@ -46,13 +56,18 @@ function Layout() {
     <div className="app">
       {!shouldHideHeader && <Header />}
 
-      <main className={`app-content ${!shouldHideFooter ? "with-footer" : ""}`}>
+      <main
+        className={`app-content ${
+          shouldShowDefaultFooter || shouldShowAdminFooter ? "with-footer" : ""
+        }`}
+      >
         <Routes>
           <Route path="/" element={<OnBoarding />} />
           <Route path="/onboarding2" element={<OnBoarding2 />} />
           <Route path="/onboarding3" element={<OnBoarding3 />} />
           <Route path="/Landing" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="/home" element={<Home />} />
           <Route path="/search" element={<Search />} />
           <Route path="/recommend" element={<Recommend />} />
@@ -65,12 +80,15 @@ function Layout() {
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/popular-all" element={<PopularAll />} />
           <Route path="/my-schedule" element={<MySchedule />} />
-          <Route path="/signup" element={<SignUp />} />
-          
+          <Route path="/inquiry" element={<Inquiry />} />
+
+          {/* 관리자 페이지 */}
+          <Route path="/admin" element={<AdminMain />} />
         </Routes>
       </main>
 
-      {!shouldHideFooter && <Footer />}
+      {shouldShowDefaultFooter && <Footer />}
+      {shouldShowAdminFooter && <AdminFooter />}
     </div>
   );
 }

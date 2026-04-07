@@ -1,0 +1,191 @@
+.inquiry-page,
+.inquiry-page * {
+  box-sizing: border-box;
+}
+
+.inquiry-page {
+  width: 100%;
+  max-width: 390px;
+  min-height: 100%;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 28px 24px 40px;
+  overflow-x: hidden;
+}
+
+.inquiry-section {
+  width: 100%;
+  min-width: 0;
+}
+
+.inquiry-title {
+  margin: 8px 0 10px;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #13233d;
+}
+
+.inquiry-subtitle {
+  margin: 0 0 34px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #7b8ba3;
+}
+
+.inquiry-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.inquiry-label {
+  margin-top: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #5f6f87;
+}
+
+.inquiry-input,
+.inquiry-textarea {
+  width: 100%;
+  max-width: 100%;
+  display: block;
+  border: 1px solid #eef2f7;
+  background: #ffffff;
+  color: #13233d;
+  outline: none;
+  box-shadow: 0 2px 10px rgba(18, 35, 61, 0.03);
+}
+
+.inquiry-input {
+  height: 68px;
+  padding: 0 24px;
+  border-radius: 999px;
+  font-size: 16px;
+}
+
+.inquiry-textarea {
+  min-height: 220px;
+  padding: 22px 24px;
+  border-radius: 32px;
+  font-size: 16px;
+  line-height: 1.6;
+  resize: none;
+}
+
+.inquiry-input::placeholder,
+.inquiry-textarea::placeholder {
+  color: #c1c8d3;
+}
+
+.inquiry-input:focus,
+.inquiry-textarea:focus {
+  border-color: #18a4f4;
+  box-shadow: 0 0 0 4px rgba(24, 164, 244, 0.12);
+}
+
+.inquiry-submit {
+  width: 100%;
+  max-width: 100%;
+  display: block;
+  margin-top: 12px;
+  border: none;
+  border-radius: 999px;
+  background: #18a4f4;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  padding: 21px 24px;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(24, 164, 244, 0.18);
+}
+
+.inquiry-email-card {
+  width: 100%;
+  max-width: 100%;
+  margin-top: 40px;
+  padding: 28px 24px;
+  border-radius: 32px;
+  border: 1px solid #d7e8f8;
+  background: #eef7ff;
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.inquiry-email-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #d3e9fb;
+  color: #18a4f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.inquiry-email-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.inquiry-email-title {
+  margin: 0 0 10px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #13233d;
+}
+
+.inquiry-email-text {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #6f8098;
+}
+
+.inquiry-email-link {
+  font-size: 18px;
+  font-weight: 800;
+  color: #18a4f4;
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+@media (max-width: 360px) {
+  .inquiry-page {
+    padding: 24px 18px 32px;
+  }
+
+  .inquiry-title {
+    font-size: 24px;
+  }
+
+  .inquiry-input {
+    height: 62px;
+  }
+
+  .inquiry-textarea {
+    min-height: 200px;
+  }
+
+  .inquiry-submit {
+    font-size: 17px;
+    padding: 19px 20px;
+  }
+
+  .inquiry-email-card {
+    padding: 22px 18px;
+    border-radius: 24px;
+  }
+
+  .inquiry-email-title {
+    font-size: 18px;
+  }
+
+  .inquiry-email-link {
+    font-size: 16px;
+  }
+}

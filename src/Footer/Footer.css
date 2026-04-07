@@ -1,40 +1,67 @@
-.footer-nav {
-  position: fixed;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-
-  width: 100%;
-  max-width: 390px;
-  height: calc(70px + env(safe-area-inset-bottom));
-  padding-bottom: env(safe-area-inset-bottom);
-
-  background: #ffffff;
-  border-top: 1px solid #eee;
-  box-sizing: border-box;
-  z-index: 1000;
-
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
+
+:root {
+  --footer-height: 70px;
+}
+
+.page-wrap {
+  width: min(100%, 390px);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.page-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.footer,
+.footer *,
+.footer-nav,
+.footer-nav * {
+  box-sizing: border-box;
+}
+
 .footer {
   width: 100%;
   background: #ffffff;
   border-top: 1px solid #e5e7eb;
-  position: static;
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
-.footer-inner {
-  height: var(--footer-height);
+.footer-nav {
+  width: 100%;
+  height: calc(70px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: #ffffff;
+
   display: flex;
-  align-items: center;
   justify-content: space-around;
+  align-items: center;
+
+  position: static;
+  left: auto;
+  bottom: auto;
+  transform: none;
 }
-/* 탭 */
+
 .tab {
   flex: 1;
   height: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
 
   display: flex;
   flex-direction: column;
@@ -45,15 +72,32 @@
   font-size: 12px;
   color: #8e8e93;
   cursor: pointer;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.tab img {
+.tab:focus-visible {
+  outline: 2px solid #0da6f2;
+  outline-offset: -2px;
+}
+
+.tab-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-icon {
   width: 24px;
   height: 24px;
   object-fit: contain;
   display: block;
 }
 
+.tab-label {
+  line-height: 1;
+}
+
 .tab.active {
-  color: #0DA6F2;
+  color: #0da6f2;
 }
