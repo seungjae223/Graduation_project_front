@@ -6,6 +6,16 @@ import "./RouteResult.css";
 
 let mapsConfigured = false;
 
+const MAP_OPEN_BUTTON_STYLE = {
+  position: "absolute",
+  inset: 0,
+  zIndex: 1,
+  border: "none",
+  padding: 0,
+  background: "transparent",
+  cursor: "pointer",
+};
+
 const ClockIcon = () => (
   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
     <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" />
@@ -283,13 +293,41 @@ const getCoordByTitle = (title = "") => {
   return matchedKey ? PLACE_COORDS[matchedKey] : null;
 };
 
+const buildGoogleMapsRouteUrl = (day) => {
+  const placeNames = (day?.items || [])
+    .map((item) => normalizeTitle(item.title))
+    .filter(Boolean);
+
+  if (placeNames.length === 0) return "";
+
+  if (placeNames.length === 1) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      placeNames[0]
+    )}`;
+  }
+
+  const origin = placeNames[0];
+  const destination = placeNames[placeNames.length - 1];
+  const waypoints = placeNames.slice(1, -1);
+
+  let url =
+    `https://www.google.com/maps/dir/?api=1` +
+    `&origin=${encodeURIComponent(origin)}` +
+    `&destination=${encodeURIComponent(destination)}`;
+
+  if (waypoints.length > 0) {
+    url += `&waypoints=${encodeURIComponent(waypoints.join("|"))}`;
+  }
+
+  return url;
+};
+
 const buildMapDataFromDay = (day, dayIndex) => {
   const fallbackDay =
     DEFAULT_RESULT_DAYS[dayIndex % DEFAULT_RESULT_DAYS.length] ||
     DEFAULT_RESULT_DAYS[0];
 
-  const sourceItems =
-    day?.items?.length > 0 ? day.items : fallbackDay.items;
+  const sourceItems = day?.items?.length > 0 ? day.items : fallbackDay.items;
 
   const points = sourceItems
     .map((item) => {
@@ -336,6 +374,91 @@ const buildMapDataFromDay = (day, dayIndex) => {
     markers,
     lines,
   };
+};
+
+const STATIC_MAP_WIDTH = 640;
+const STATIC_MAP_HEIGHT = 320;
+
+const toStaticMarkerColor = (hex = "#21A0F6") => {
+  const normalized = hex.replace("#", "").trim();
+
+  if (normalized.length === 3) {
+    const full = normalized
+      .split("")
+      .map((char) => char + char)
+      .join("")
+      .toUpperCase();
+
+    return `0x${full}`;
+  }
+
+  if (normalized.length === 6 || normalized.length === 8) {
+    return `0x${normalized.slice(0, 6).toUpperCase()}`;
+  }
+
+  return "0x21A0F6";
+};
+
+const toStaticPathColor = (hex = "#21A0F6") => {
+  const normalized = hex.replace("#", "").trim();
+
+  if (normalized.length === 3) {
+    const full = normalized
+      .split("")
+      .map((char) => char + char)
+      .join("")
+      .toUpperCase();
+
+    return `0x${full}FF`;
+  }
+
+  if (normalized.length === 6) {
+    return `0x${normalized.toUpperCase()}FF`;
+  }
+
+  if (normalized.length === 8) {
+    return `0x${normalized.toUpperCase()}`;
+  }
+
+  return "0x21A0F6FF";
+};
+
+const buildStaticMapUrl = (mapData) => {
+  const apiKey = process.env.REACT_APP_GOOGLE_MAPS_BROWSER_KEY;
+
+  if (!apiKey) return "";
+
+  const params = new URLSearchParams();
+
+  params.set("size", `${STATIC_MAP_WIDTH}x${STATIC_MAP_HEIGHT}`);
+  params.set("scale", "2");
+  params.set("format", "png");
+  params.set("maptype", "roadmap");
+  params.set("key", apiKey);
+
+  if (!mapData.markers.length && !mapData.lines.length) {
+    params.set("center", `${FALLBACK_CENTER.lat},${FALLBACK_CENTER.lng}`);
+    params.set("zoom", "11");
+  }
+
+  mapData.markers.forEach((marker) => {
+    params.append(
+      "markers",
+      `size:mid|color:${toStaticMarkerColor(marker.color)}|${marker.lat},${marker.lng}`
+    );
+  });
+
+  mapData.lines.forEach((line) => {
+    const pathValue = [
+      `color:${toStaticPathColor(line.color)}`,
+      "weight:5",
+      ...line.path.map((point) => `${point.lat},${point.lng}`),
+    ].join("|");
+
+    params.append("path", pathValue);
+  });
+
+  return `https://maps.googleapis.com/maps/api/staticmap?${params.toString()}`;
 };
 
 const makeMockMove = (index) => {
@@ -425,7 +548,116 @@ const buildDaysFromState = (selectedDates = [], placesByDate = {}) => {
   });
 };
 
-const GoogleMapBox = ({ dayData, dayIndex }) => {
+const RouteTabs = ({ resultDays, activeIndex, onChange, isStatic = false }) => {
+  return (
+    <div className={`route-result-tabs ${isStatic ? "route-result-tabs-static" : ""}`}>
+      {resultDays.map((day, index) =>
+        isStatic ? (
+          <div
+            key={`${day.label}-${index}`}
+            className={`route-result-tab ${
+              activeIndex === index ? "active" : ""
+            }`}
+          >
+            {day.label}
+          </div>
+        ) : (
+          <button
+            key={`${day.label}-${index}`}
+            type="button"
+            className={`route-result-tab ${
+              activeIndex === index ? "active" : ""
+            }`}
+            onClick={() => onChange(index)}
+          >
+            {day.label}
+          </button>
+        )
+      )}
+    </div>
+  );
+};
+
+const SummaryCard = ({ day }) => (
+  <section className="route-result-summary-card">
+    <div className="route-result-summary-item">
+      <div className="route-result-summary-icon">
+        <ClockIcon />
+      </div>
+      <div className="route-result-summary-text">
+        <span>총 소요 시간:</span>
+        <strong>{day.totalDuration}</strong>
+      </div>
+    </div>
+
+    <div className="route-result-summary-divider" />
+
+    <div className="route-result-summary-item">
+      <div className="route-result-summary-icon">
+        <PinIcon />
+      </div>
+      <div className="route-result-summary-text">
+        <span>총 이동 거리:</span>
+        <strong>{day.totalDistance}</strong>
+      </div>
+    </div>
+  </section>
+);
+
+const DetailSection = ({ day }) => (
+  <section className="route-result-detail-section">
+    <div className="route-result-detail-header">
+      <h2>상세 일정</h2>
+      <span className="route-result-distance-pill">{day.sectionDistance}</span>
+    </div>
+
+    <p className="route-result-detail-sub">
+      가장 효율적인 동선으로 재구성되었습니다.
+    </p>
+
+    <div className="route-result-timeline">
+      {day.items.map((item, index) => (
+        <div
+          key={`${day.label}-${item.title}-${index}`}
+          className="route-result-timeline-item"
+        >
+          <div className="route-result-marker-column">
+            <div className="route-result-step-circle">{index + 1}</div>
+            {index !== day.items.length - 1 && (
+              <div className="route-result-step-line" />
+            )}
+          </div>
+
+          <div className="route-result-item-body">
+            <div className="route-result-item-time">{item.time}</div>
+
+            <div className="route-result-item-title-row">
+              <h3>{item.title}</h3>
+              {item.badge ? (
+                <span className="route-result-item-badge">{item.badge}</span>
+              ) : null}
+            </div>
+
+            {item.desc ? (
+              <p className="route-result-item-desc">{item.desc}</p>
+            ) : null}
+
+            {item.move ? (
+              <div className="route-result-item-move">
+                <span className="route-result-item-move-icon">
+                  {item.moveType === "bus" ? <BusIcon /> : <WalkIcon />}
+                </span>
+                <span>{item.move}</span>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+);
+
+const GoogleMapBox = ({ dayData, dayIndex, onOpenGoogleMaps }) => {
   const mapRef = useRef(null);
   const [mapError, setMapError] = useState("");
 
@@ -541,16 +773,95 @@ const GoogleMapBox = ({ dayData, dayIndex }) => {
     <div className="route-map-mock">
       <div ref={mapRef} className="route-map-real" />
 
+      <button
+        type="button"
+        aria-label="Google Maps에서 경로 열기"
+        onClick={onOpenGoogleMaps}
+        style={MAP_OPEN_BUTTON_STYLE}
+      />
+
       {mapError && <div className="route-map-error-overlay">{mapError}</div>}
 
       <div className="route-map-controls">
-        <button type="button" className="route-map-control-btn">
+        <button
+          type="button"
+          className="route-map-control-btn"
+          onClick={onOpenGoogleMaps}
+        >
           <GearIcon />
         </button>
-        <button type="button" className="route-map-control-btn">
+        <button
+          type="button"
+          className="route-map-control-btn"
+          onClick={onOpenGoogleMaps}
+        >
           <LayersIcon />
         </button>
       </div>
+    </div>
+  );
+};
+
+const PdfMapPreview = ({ dayData, dayIndex }) => {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  const mapData = useMemo(
+    () => buildMapDataFromDay(dayData, dayIndex),
+    [dayData, dayIndex]
+  );
+
+  const staticMapUrl = useMemo(() => buildStaticMapUrl(mapData), [mapData]);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [staticMapUrl]);
+
+  if (!staticMapUrl || imageFailed) {
+    return (
+      <div className="route-map-static-fallback">
+        PDF용 지도 이미지를 불러오지 못했어요.
+      </div>
+    );
+  }
+
+  return (
+    <div className="route-map-static-preview">
+      <img
+        src={staticMapUrl}
+        alt={`${dayData.label} 경로 지도`}
+        className="route-map-static-image"
+        crossOrigin="anonymous"
+        loading="eager"
+        data-pdf-asset="true"
+        onError={() => setImageFailed(true)}
+      />
+    </div>
+  );
+};
+
+const RouteDayContent = ({
+  day,
+  dayIndex,
+  useStaticMap = false,
+  onOpenGoogleMaps,
+}) => {
+  return (
+    <div className="route-result-content">
+      <SummaryCard day={day} />
+
+      <section className="route-result-map-section">
+        {useStaticMap ? (
+          <PdfMapPreview dayData={day} dayIndex={dayIndex} />
+        ) : (
+          <GoogleMapBox
+            dayData={day}
+            dayIndex={dayIndex}
+            onOpenGoogleMaps={onOpenGoogleMaps}
+          />
+        )}
+      </section>
+
+      <DetailSection day={day} />
     </div>
   );
 };
@@ -590,107 +901,59 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
 
   const activeDay = resultDays[activeDayIndex] || resultDays[0];
 
+  const handleOpenGoogleMaps = () => {
+    const googleMapsUrl = buildGoogleMapsRouteUrl(activeDay);
+
+    if (!googleMapsUrl) {
+      alert("구글맵으로 넘길 장소 정보가 없어요.");
+      return;
+    }
+
+    window.open(googleMapsUrl, "_blank", "noopener,noreferrer");
+  };
+
   return (
-    <div className={`route-result-page ${isEmbedded ? "embedded" : ""}`}>
-      <div className="route-result-tabs">
-        {resultDays.map((day, index) => (
-          <button
-            key={day.label}
-            type="button"
-            className={`route-result-tab ${
-              activeDayIndex === index ? "active" : ""
-            }`}
-            onClick={() => setActiveDayIndex(index)}
-          >
-            {day.label}
-          </button>
-        ))}
+    <div
+      id={!isEmbedded ? "route-result-pdf" : undefined}
+      className={`route-result-page ${isEmbedded ? "embedded" : ""}`}
+    >
+      <div className="route-result-screen">
+        <RouteTabs
+          resultDays={resultDays}
+          activeIndex={activeDayIndex}
+          onChange={setActiveDayIndex}
+        />
+
+        <RouteDayContent
+          day={activeDay}
+          dayIndex={activeDayIndex}
+          useStaticMap={false}
+          onOpenGoogleMaps={handleOpenGoogleMaps}
+        />
       </div>
 
-      <div className="route-result-content">
-        <section className="route-result-summary-card">
-          <div className="route-result-summary-item">
-            <div className="route-result-summary-icon">
-              <ClockIcon />
-            </div>
-            <div className="route-result-summary-text">
-              <span>총 소요 시간:</span>
-              <strong>{activeDay.totalDuration}</strong>
-            </div>
-          </div>
+      {!isEmbedded && (
+        <div className="route-result-pdf-root" aria-hidden="true">
+          {resultDays.map((day, index) => (
+            <section
+              key={`${day.label}-${index}`}
+              className="route-result-pdf-day"
+            >
+              <RouteTabs
+                resultDays={resultDays}
+                activeIndex={index}
+                isStatic={true}
+              />
 
-          <div className="route-result-summary-divider" />
-
-          <div className="route-result-summary-item">
-            <div className="route-result-summary-icon">
-              <PinIcon />
-            </div>
-            <div className="route-result-summary-text">
-              <span>총 이동 거리:</span>
-              <strong>{activeDay.totalDistance}</strong>
-            </div>
-          </div>
-        </section>
-
-        <section className="route-result-map-section">
-          <GoogleMapBox dayData={activeDay} dayIndex={activeDayIndex} />
-        </section>
-
-        <section className="route-result-detail-section">
-          <div className="route-result-detail-header">
-            <h2>상세 일정</h2>
-            <span className="route-result-distance-pill">
-              {activeDay.sectionDistance}
-            </span>
-          </div>
-
-          <p className="route-result-detail-sub">
-            가장 효율적인 동선으로 재구성되었습니다.
-          </p>
-
-          <div className="route-result-timeline">
-            {activeDay.items.map((item, index) => (
-              <div
-                key={`${item.title}-${index}`}
-                className="route-result-timeline-item"
-              >
-                <div className="route-result-marker-column">
-                  <div className="route-result-step-circle">{index + 1}</div>
-                  {index !== activeDay.items.length - 1 && (
-                    <div className="route-result-step-line" />
-                  )}
-                </div>
-
-                <div className="route-result-item-body">
-                  <div className="route-result-item-time">{item.time}</div>
-
-                  <div className="route-result-item-title-row">
-                    <h3>{item.title}</h3>
-                    {item.badge ? (
-                      <span className="route-result-item-badge">
-                        {item.badge}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  {item.desc ? (
-                    <p className="route-result-item-desc">{item.desc}</p>
-                  ) : null}
-
-                  {item.move ? (
-                    <div className="route-result-item-move">
-                      <span className="route-result-item-move-icon">
-                        {item.moveType === "bus" ? <BusIcon /> : <WalkIcon />}
-                      </span>
-                      <span>{item.move}</span>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
+              <RouteDayContent
+                day={day}
+                dayIndex={index}
+                useStaticMap={true}
+              />
+            </section>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

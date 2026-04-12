@@ -5,6 +5,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
+import html2pdf from "html2pdf.js";
 import "./Detail.css";
 
 import forestImg from "../img/도쿄.png";
@@ -26,9 +27,30 @@ const BackIcon = () => (
 
 const ShareIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    <circle cx="18" cy="5" r="2.2" fill="none" stroke="currentColor" strokeWidth="2" />
-    <circle cx="6" cy="12" r="2.2" fill="none" stroke="currentColor" strokeWidth="2" />
-    <circle cx="18" cy="19" r="2.2" fill="none" stroke="currentColor" strokeWidth="2" />
+    <circle
+      cx="18"
+      cy="5"
+      r="2.2"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+    <circle
+      cx="6"
+      cy="12"
+      r="2.2"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+    <circle
+      cx="18"
+      cy="19"
+      r="2.2"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
     <path
       d="M8 11L15.8 6.2M8 13L15.8 17.8"
       fill="none"
@@ -60,13 +82,27 @@ const PinIcon = () => (
       strokeWidth="1.8"
       strokeLinejoin="round"
     />
-    <circle cx="12.25" cy="10.8" r="2.1" fill="none" stroke="currentColor" strokeWidth="1.8" />
+    <circle
+      cx="12.25"
+      cy="10.8"
+      r="2.1"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
   </svg>
 );
 
 const UserIcon = () => (
   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-    <circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" strokeWidth="2" />
+    <circle
+      cx="12"
+      cy="8"
+      r="3.2"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
     <path
       d="M5.5 18.2C6.8 15.7 9 14.5 12 14.5C15 14.5 17.2 15.7 18.5 18.2"
       fill="none"
@@ -336,6 +372,82 @@ const buildFallbackIntro = (place) => {
 
 const renderStars = (count = 5) => "★".repeat(count);
 
+const sanitizeFileName = (value = "파일") =>
+  value.replace(/[\\/:*?"<>|]/g, "_");
+
+const waitForNextPaint = () =>
+  new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(resolve);
+    });
+  });
+
+const waitForImages = async (root) => {
+  const images = Array.from(root.querySelectorAll("img"));
+
+  if (!images.length) return;
+
+  await Promise.all(
+    images.map((img) => {
+      if (img.complete && img.naturalWidth > 0) {
+        return Promise.resolve();
+      }
+
+      return new Promise((resolve) => {
+        const done = () => {
+          img.removeEventListener("load", done);
+          img.removeEventListener("error", done);
+          resolve();
+        };
+
+        img.addEventListener("load", done, { once: true });
+        img.addEventListener("error", done, { once: true });
+      });
+    })
+  );
+};
+
+const createPdfClone = (target) => {
+  const rect = target.getBoundingClientRect();
+  const pageWidthPx = Math.ceil(rect.width);
+
+  const wrapper = document.createElement("div");
+  wrapper.style.position = "fixed";
+  wrapper.style.left = "-99999px";
+  wrapper.style.top = "0";
+  wrapper.style.width = `${pageWidthPx}px`;
+  wrapper.style.background = "#ffffff";
+  wrapper.style.pointerEvents = "none";
+  wrapper.style.zIndex = "-1";
+  wrapper.style.opacity = "1";
+  wrapper.style.overflow = "visible";
+
+  const clone = target.cloneNode(true);
+  clone.style.width = `${pageWidthPx}px`;
+  clone.style.maxWidth = `${pageWidthPx}px`;
+  clone.style.minHeight = "auto";
+  clone.style.height = "auto";
+  clone.style.margin = "0";
+  clone.style.background = "#ffffff";
+  clone.style.overflow = "visible";
+
+  clone
+    .querySelectorAll(".detail-top-actions, .detail-bottom-bar")
+    .forEach((element) => {
+      element.remove();
+    });
+
+  clone.querySelectorAll(".detail-review-card").forEach((element) => {
+    element.style.breakInside = "avoid";
+    element.style.pageBreakInside = "avoid";
+  });
+
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  return { wrapper, clone, pageWidthPx };
+};
+
 function Detail() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -382,25 +494,62 @@ function Detail() {
   };
 
   const handleShare = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: detailPlace.title,
-          text: `${detailPlace.title} 상세 정보`,
-          url: window.location.href,
-        });
-        return;
-      }
+    const target = document.getElementById("detail-pdf");
 
-      await navigator.clipboard.writeText(window.location.href);
-      alert("링크가 복사됐어요.");
+    if (!target) {
+      alert("PDF로 저장할 내용을 찾지 못했어요.");
+      return;
+    }
+
+    const pageHeightPx = Math.ceil(window.innerHeight);
+    const { wrapper, clone, pageWidthPx } = createPdfClone(target);
+
+    try {
+      await waitForNextPaint();
+      await waitForImages(clone);
+      await waitForNextPaint();
+
+      const today = new Date();
+      const fileDate = `${today.getFullYear()}-${String(
+        today.getMonth() + 1
+      ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+      const options = {
+        margin: 0,
+        filename: `${sanitizeFileName(detailPlace.title)}_${fileDate}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        pagebreak: {
+          mode: ["css", "legacy"],
+          avoid: [".detail-review-card"],
+        },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          windowWidth: pageWidthPx,
+          windowHeight: Math.ceil(clone.scrollHeight),
+          scrollX: 0,
+          scrollY: 0,
+        },
+        jsPDF: {
+          unit: "px",
+          format: [pageWidthPx, pageHeightPx],
+          orientation: "portrait",
+          hotfixes: ["px_scaling"],
+        },
+      };
+
+      await html2pdf().from(clone).set(options).save();
     } catch (error) {
-      console.log("공유 실패:", error);
+      console.log("PDF 저장 실패:", error);
+      alert("PDF 저장에 실패했어요.");
+    } finally {
+      wrapper.remove();
     }
   };
 
   return (
-    <div className="detail-page">
+    <div id="detail-pdf" className="detail-page">
       <section className="detail-hero">
         <img
           src={detailPlace.image}
@@ -510,9 +659,7 @@ function Detail() {
           onClick={handleToggleSaved}
         >
           <SavePlaceIcon active={saved} />
-          <span>
-            {saved ? "관심 장소에 저장됨" : "관심 장소에 추가하기"}
-          </span>
+          <span>{saved ? "관심 장소에 저장됨" : "관심 장소에 추가하기"}</span>
         </button>
       </div>
     </div>

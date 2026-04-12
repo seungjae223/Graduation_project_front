@@ -1,4 +1,5 @@
 import "./App.css";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Header from "./Header/Header";
@@ -15,6 +16,7 @@ import Total from "./Recommend/Total";
 import MyPage from "./Mypage/MyPage";
 import SavedPlaces from "./Mypage/SavedPlaces";
 import Search from "./Search/Search";
+import SearchPop from "./SearchPopup/SearchPop";
 import RouteCreate from "./RouteCreate/RouteCreate";
 import Detail from "./Recommend/Detail";
 import RouteResult from "./RouteResult/RouteResult";
@@ -24,6 +26,7 @@ import MySchedule from "./MySchedule/MySchedule";
 import { SavedPlacesProvider } from "./Context/SavedPlacesContext";
 import SignUp from "./Login/SignUp";
 import Inquiry from "./Mypage/Inquiry";
+import InquiryList from "./Mypage/InquiryList";
 
 // 관리자 페이지 / 관리자 전용 푸터
 import AdminMain from "./Admin/AdminMain/AdminMain";
@@ -31,6 +34,11 @@ import AdminFooter from "./Admin/AdminFooter/AdminFooter";
 
 function Layout() {
   const location = useLocation();
+  const [isSearchPopOpen, setIsSearchPopOpen] = useState(false);
+
+  useEffect(() => {
+    setIsSearchPopOpen(false);
+  }, [location.pathname]);
 
   const isAdminPage = location.pathname.startsWith("/admin");
 
@@ -54,7 +62,9 @@ function Layout() {
 
   return (
     <div className="app">
-      {!shouldHideHeader && <Header />}
+      {!shouldHideHeader && (
+        <Header onSearchClick={() => setIsSearchPopOpen(true)} />
+      )}
 
       <main
         className={`app-content ${
@@ -80,6 +90,9 @@ function Layout() {
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/popular-all" element={<PopularAll />} />
           <Route path="/my-schedule" element={<MySchedule />} />
+
+          {/* 문의 페이지 */}
+          <Route path="/inquiry/write" element={<InquiryList />} />
           <Route path="/inquiry" element={<Inquiry />} />
 
           {/* 관리자 페이지 */}
@@ -89,6 +102,11 @@ function Layout() {
 
       {shouldShowDefaultFooter && <Footer />}
       {shouldShowAdminFooter && <AdminFooter />}
+
+      <SearchPop
+        isOpen={isSearchPopOpen}
+        onClose={() => setIsSearchPopOpen(false)}
+      />
     </div>
   );
 }

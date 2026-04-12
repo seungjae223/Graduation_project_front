@@ -212,7 +212,7 @@ const MyPage = () => {
       id: "inquiry",
       label: "1:1 문의",
       icon: <InquiryIcon />,
-      onClick: () => navigate("/inquiry"),
+      onClick: () => navigate("/inquiry/write"),
     },
     ...(isAdmin
       ? [
