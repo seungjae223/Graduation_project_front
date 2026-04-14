@@ -5,20 +5,23 @@ import { getSavedRouteById } from "../utils/routeStorage";
 import "./RouteResult.css";
 
 let mapsConfigured = false;
+let kakaoMapsLoadingPromise = null;
+const runtimeCoordinateCache = new Map();
 
-const MAP_OPEN_BUTTON_STYLE = {
-  position: "absolute",
-  inset: 0,
-  zIndex: 1,
-  border: "none",
-  padding: 0,
-  background: "transparent",
+const TIMELINE_ITEM_BUTTON_STYLE = {
   cursor: "pointer",
 };
 
 const ClockIcon = () => (
   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" />
+    <circle
+      cx="12"
+      cy="12"
+      r="9"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
     <path
       d="M12 7.5V12.3L15.4 14.4"
       fill="none"
@@ -39,15 +42,43 @@ const PinIcon = () => (
       strokeWidth="1.8"
       strokeLinejoin="round"
     />
-    <circle cx="12.2" cy="10.8" r="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+    <circle
+      cx="12.2"
+      cy="10.8"
+      r="2"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
   </svg>
 );
 
 const BusIcon = () => (
   <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-    <rect x="5" y="4.5" width="14" height="11" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-    <path d="M8 8.2H16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    <path d="M8.5 18.5V16M15.5 18.5V16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <rect
+      x="5"
+      y="4.5"
+      width="14"
+      height="11"
+      rx="2"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
+    <path
+      d="M8 8.2H16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+    <path
+      d="M8.5 18.5V16M15.5 18.5V16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
     <circle cx="8.5" cy="14.5" r="1" fill="currentColor" />
     <circle cx="15.5" cy="14.5" r="1" fill="currentColor" />
   </svg>
@@ -64,14 +95,31 @@ const WalkIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <path d="M11 12.5L9.3 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    <path d="M13.5 12.5L16.3 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path
+      d="M11 12.5L9.3 18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M13.5 12.5L16.3 18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
 const GearIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    <path d="M12 8.7A3.3 3.3 0 1 0 12 15.3A3.3 3.3 0 1 0 12 8.7Z" fill="none" stroke="currentColor" strokeWidth="2" />
+    <path
+      d="M12 8.7A3.3 3.3 0 1 0 12 15.3A3.3 3.3 0 1 0 12 8.7Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
     <path
       d="M19 12C19 11.5 18.95 11 18.82 10.53L21 8.8L19.2 5.7L16.56 6.5C15.84 5.9 14.99 5.45 14.06 5.21L13.5 2.5H10.5L9.94 5.21C9.01 5.45 8.16 5.9 7.44 6.5L4.8 5.7L3 8.8L5.18 10.53C5.05 11 5 11.5 5 12C5 12.5 5.05 13 5.18 13.47L3 15.2L4.8 18.3L7.44 17.5C8.16 18.1 9.01 18.55 9.94 18.79L10.5 21.5H13.5L14.06 18.79C14.99 18.55 15.84 18.1 16.56 17.5L19.2 18.3L21 15.2L18.82 13.47C18.95 13 19 12.5 19 12Z"
       fill="none"
@@ -84,66 +132,84 @@ const GearIcon = () => (
 
 const LayersIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    <path d="M12 5L19 9L12 13L5 9L12 5Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-    <path d="M5 13L12 17L19 13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
+    <path
+      d="M12 5L19 9L12 13L5 9L12 5Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M5 13L12 17L19 13"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinejoin="round"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
 const FALLBACK_CENTER = { lat: 37.5665, lng: 126.978 };
 
+const KR = "KR";
+const JP = "JP";
+
+const withCountry = (countryCode, lat, lng) => ({ lat, lng, countryCode });
+
 const PLACE_COORDS = {
-  서울역: { lat: 37.5547, lng: 126.9706 },
-  남산서울타워: { lat: 37.5512, lng: 126.9882 },
-  "명동 거리": { lat: 37.5636, lng: 126.9827 },
-  경복궁: { lat: 37.5796, lng: 126.977 },
-  북촌한옥마을: { lat: 37.5826, lng: 126.9831 },
-  "삼청동 카페 거리": { lat: 37.582, lng: 126.9816 },
-  익선동카페거리: { lat: 37.5743, lng: 126.9895 },
-  "익선동 카페거리": { lat: 37.5743, lng: 126.9895 },
-  창덕궁: { lat: 37.5794, lng: 126.991 },
-  광장시장: { lat: 37.5704, lng: 126.9992 },
-  한강공원: { lat: 37.5289, lng: 126.9326 },
-  성수동카페거리: { lat: 37.5446, lng: 127.0557 },
-  "성수동 카페거리": { lat: 37.5446, lng: 127.0557 },
-  서울숲: { lat: 37.5444, lng: 127.0374 },
+  서울역: withCountry(KR, 37.5547, 126.9706),
+  남산서울타워: withCountry(KR, 37.5512, 126.9882),
+  "명동 거리": withCountry(KR, 37.5636, 126.9827),
+  경복궁: withCountry(KR, 37.5796, 126.977),
+  북촌한옥마을: withCountry(KR, 37.5826, 126.9831),
+  "삼청동 카페 거리": withCountry(KR, 37.582, 126.9816),
+  익선동카페거리: withCountry(KR, 37.5743, 126.9895),
+  "익선동 카페거리": withCountry(KR, 37.5743, 126.9895),
+  창덕궁: withCountry(KR, 37.5794, 126.991),
+  광장시장: withCountry(KR, 37.5704, 126.9992),
+  한강공원: withCountry(KR, 37.5289, 126.9326),
+  성수동카페거리: withCountry(KR, 37.5446, 127.0557),
+  "성수동 카페거리": withCountry(KR, 37.5446, 127.0557),
+  서울숲: withCountry(KR, 37.5444, 127.0374),
 
-  가평역: { lat: 37.8184, lng: 127.5091 },
-  아침고요수목원: { lat: 37.743, lng: 127.3526 },
-  남이섬: { lat: 37.7915, lng: 127.5259 },
-  잣향기푸른숲: { lat: 37.8158, lng: 127.3923 },
-  청평카페거리: { lat: 37.7362, lng: 127.4175 },
-  "청평 카페거리": { lat: 37.7362, lng: 127.4175 },
-  "서울 복귀": { lat: 37.5547, lng: 126.9706 },
+  가평역: withCountry(KR, 37.8184, 127.5091),
+  아침고요수목원: withCountry(KR, 37.743, 127.3526),
+  남이섬: withCountry(KR, 37.7915, 127.5259),
+  잣향기푸른숲: withCountry(KR, 37.8158, 127.3923),
+  청평카페거리: withCountry(KR, 37.7362, 127.4175),
+  "청평 카페거리": withCountry(KR, 37.7362, 127.4175),
+  "서울 복귀": withCountry(KR, 37.5547, 126.9706),
 
-  제주공항: { lat: 33.5104, lng: 126.4913 },
-  협재해변: { lat: 33.3945, lng: 126.2395 },
-  애월카페거리: { lat: 33.4621, lng: 126.3097 },
-  "애월 카페거리": { lat: 33.4621, lng: 126.3097 },
-  성산일출봉: { lat: 33.4589, lng: 126.9425 },
-  우도: { lat: 33.5066, lng: 126.9559 },
-  섭지코지: { lat: 33.424, lng: 126.9272 },
-  사려니숲길: { lat: 33.4225, lng: 126.6265 },
-  "서귀포 올레시장": { lat: 33.2501, lng: 126.5654 },
-  "중문 야경 포인트": { lat: 33.2488, lng: 126.4122 },
-  용머리해안: { lat: 33.2317, lng: 126.3142 },
-  카멜리아힐: { lat: 33.2896, lng: 126.3707 },
-  "제주공항 복귀": { lat: 33.5104, lng: 126.4913 },
+  제주공항: withCountry(KR, 33.5104, 126.4913),
+  협재해변: withCountry(KR, 33.3945, 126.2395),
+  애월카페거리: withCountry(KR, 33.4621, 126.3097),
+  "애월 카페거리": withCountry(KR, 33.4621, 126.3097),
+  성산일출봉: withCountry(KR, 33.4589, 126.9425),
+  우도: withCountry(KR, 33.5066, 126.9559),
+  섭지코지: withCountry(KR, 33.424, 126.9272),
+  사려니숲길: withCountry(KR, 33.4225, 126.6265),
+  "서귀포 올레시장": withCountry(KR, 33.2501, 126.5654),
+  "중문 야경 포인트": withCountry(KR, 33.2488, 126.4122),
+  용머리해안: withCountry(KR, 33.2317, 126.3142),
+  카멜리아힐: withCountry(KR, 33.2896, 126.3707),
+  "제주공항 복귀": withCountry(KR, 33.5104, 126.4913),
 
-  부산역: { lat: 35.1151, lng: 129.0414 },
-  자갈치시장: { lat: 35.0979, lng: 129.0307 },
-  "광안리 해변": { lat: 35.1532, lng: 129.1187 },
-  "해운대 블루라인파크": { lat: 35.1587, lng: 129.1756 },
-  "해운대 암소갈비": { lat: 35.1629, lng: 129.1635 },
-  "전포 카페거리": { lat: 35.1578, lng: 129.0675 },
-  국제시장: { lat: 35.1028, lng: 129.0285 },
-  흰여울문화마을: { lat: 35.0789, lng: 129.0457 },
-  "부산역 복귀": { lat: 35.1151, lng: 129.0414 },
+  부산역: withCountry(KR, 35.1151, 129.0414),
+  자갈치시장: withCountry(KR, 35.0979, 129.0307),
+  "광안리 해변": withCountry(KR, 35.1532, 129.1187),
+  "해운대 블루라인파크": withCountry(KR, 35.1587, 129.1756),
+  "해운대 암소갈비": withCountry(KR, 35.1629, 129.1635),
+  "전포 카페거리": withCountry(KR, 35.1578, 129.0675),
+  국제시장: withCountry(KR, 35.1028, 129.0285),
+  흰여울문화마을: withCountry(KR, 35.0789, 129.0457),
+  "부산역 복귀": withCountry(KR, 35.1151, 129.0414),
 
-  교토역: { lat: 34.9855, lng: 135.7586 },
-  "후시미 이나리 신사": { lat: 34.9671, lng: 135.7727 },
-  기요미즈데라: { lat: 34.9949, lng: 135.785 },
-  아라시야마: { lat: 35.0094, lng: 135.6668 },
-  "교토 복귀": { lat: 34.9855, lng: 135.7586 },
+  교토역: withCountry(JP, 34.9855, 135.7586),
+  "후시미 이나리 신사": withCountry(JP, 34.9671, 135.7727),
+  기요미즈데라: withCountry(JP, 34.9949, 135.785),
+  아라시야마: withCountry(JP, 35.0094, 135.6668),
+  "교토 복귀": withCountry(JP, 34.9855, 135.7586),
 };
 
 const DEFAULT_RESULT_DAYS = [
@@ -280,7 +346,92 @@ const DEFAULT_RESULT_DAYS = [
 const normalizeTitle = (title = "") =>
   title.replace(/\s*\([^)]*\)/g, "").trim();
 
-const getCoordByTitle = (title = "") => {
+const normalizeCountryCode = (value = "") =>
+  String(value || "").trim().toUpperCase();
+
+const normalizeMapProvider = (value = "") => {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (!normalized) return "";
+  if (normalized.includes("kakao")) return "kakao";
+  if (normalized.includes("google")) return "google";
+
+  return "";
+};
+
+const getSourceItemsForDay = (day, dayIndex) => {
+  const fallbackDay =
+    DEFAULT_RESULT_DAYS[dayIndex % DEFAULT_RESULT_DAYS.length] ||
+    DEFAULT_RESULT_DAYS[0];
+
+  return day?.items?.length > 0 ? day.items : fallbackDay.items;
+};
+
+const getRuntimeCoordinateCacheKey = (provider, title) =>
+  `${provider}:${normalizeTitle(title)}`;
+
+const MAP_OUTLIER_DISTANCE_KM = 80;
+
+const toRadians = (degree) => (degree * Math.PI) / 180;
+
+const getDistanceKm = (a, b) => {
+  const earthRadiusKm = 6371;
+
+  const dLat = toRadians(b.lat - a.lat);
+  const dLng = toRadians(b.lng - a.lng);
+  const lat1 = toRadians(a.lat);
+  const lat2 = toRadians(b.lat);
+
+  const haversine =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+
+  return 2 * earthRadiusKm * Math.asin(Math.sqrt(haversine));
+};
+
+const filterResolvedPointsForMap = (points = []) => {
+  if (points.length <= 1) {
+    return points;
+  }
+
+  const staticPoints = points.filter((point) => point.resolvedBy === "static");
+
+  if (points.length === 2) {
+    if (
+      staticPoints.length === 1 &&
+      getDistanceKm(points[0], points[1]) > MAP_OUTLIER_DISTANCE_KM
+    ) {
+      return staticPoints;
+    }
+
+    return points;
+  }
+
+  const anchorCandidates = staticPoints.length > 0 ? staticPoints : points;
+
+  const getNeighborCount = (basePoint) =>
+    points.filter(
+      (point) => getDistanceKm(basePoint, point) <= MAP_OUTLIER_DISTANCE_KM
+    ).length;
+
+  const anchor = anchorCandidates.reduce(
+    (bestPoint, currentPoint) =>
+      getNeighborCount(currentPoint) > getNeighborCount(bestPoint)
+        ? currentPoint
+        : bestPoint,
+    anchorCandidates[0]
+  );
+
+  const clusteredPoints = points.filter(
+    (point) => getDistanceKm(anchor, point) <= MAP_OUTLIER_DISTANCE_KM
+  );
+
+  return clusteredPoints.length >= 2 && clusteredPoints.length > points.length / 2
+    ? clusteredPoints
+    : points;
+};
+
+const getPlaceMetaByTitle = (title = "") => {
   const normalized = normalizeTitle(title);
 
   if (PLACE_COORDS[title]) return PLACE_COORDS[title];
@@ -293,6 +444,114 @@ const getCoordByTitle = (title = "") => {
   return matchedKey ? PLACE_COORDS[matchedKey] : null;
 };
 
+const getCoordByTitle = (title = "") => {
+  const meta = getPlaceMetaByTitle(title);
+  return meta ? { lat: meta.lat, lng: meta.lng } : null;
+};
+
+const getCountryCodeByTitle = (title = "") =>
+  getPlaceMetaByTitle(title)?.countryCode || "";
+
+const getItemCountryCode = (item = {}) => {
+  const directCountryCandidates = [
+    item.countryCode,
+    item.destinationCountryCode,
+    item.country,
+    item.nationCode,
+  ];
+
+  for (const candidate of directCountryCandidates) {
+    const code = normalizeCountryCode(candidate);
+    if (code) return code;
+  }
+
+  return getCountryCodeByTitle(item.title);
+};
+
+const getExplicitMapProviderFromContext = (savedRoute, routeState) => {
+  const providerCandidates = [
+    savedRoute?.mapProvider,
+    savedRoute?.provider,
+    savedRoute?.mapType,
+    routeState?.mapProvider,
+    routeState?.provider,
+    routeState?.mapType,
+    savedRoute?.destination?.mapProvider,
+    routeState?.destination?.mapProvider,
+  ];
+
+  for (const candidate of providerCandidates) {
+    const provider = normalizeMapProvider(candidate);
+    if (provider) return provider;
+  }
+
+  const booleanDomesticCandidates = [
+    savedRoute?.isDomestic,
+    savedRoute?.domestic,
+    routeState?.isDomestic,
+    routeState?.domestic,
+    savedRoute?.destination?.isDomestic,
+    routeState?.destination?.isDomestic,
+  ];
+
+  for (const candidate of booleanDomesticCandidates) {
+    if (candidate === true) return "kakao";
+    if (candidate === false) return "google";
+  }
+
+  const countryCandidates = [
+    savedRoute?.countryCode,
+    savedRoute?.destinationCountryCode,
+    savedRoute?.travelCountryCode,
+    savedRoute?.destination?.countryCode,
+    routeState?.countryCode,
+    routeState?.destinationCountryCode,
+    routeState?.travelCountryCode,
+    routeState?.destination?.countryCode,
+  ];
+
+  for (const candidate of countryCandidates) {
+    const code = normalizeCountryCode(candidate);
+    if (code) {
+      return code === KR ? "kakao" : "google";
+    }
+  }
+
+  return "";
+};
+
+const getMapProviderForDay = (day, dayIndex, tripLevelMapProvider = "") => {
+  if (tripLevelMapProvider) {
+    return tripLevelMapProvider;
+  }
+
+  const sourceItems = getSourceItemsForDay(day, dayIndex);
+
+  const itemLevelProviders = sourceItems
+    .map((item) => normalizeMapProvider(item?.mapProvider || item?.provider))
+    .filter(Boolean);
+
+  if (itemLevelProviders.includes("google")) return "google";
+  if (itemLevelProviders.includes("kakao")) return "kakao";
+
+  const countryCodes = sourceItems.map(getItemCountryCode).filter(Boolean);
+
+  if (countryCodes.some((code) => code !== KR)) return "google";
+  if (countryCodes.some((code) => code === KR)) return "kakao";
+
+  return "kakao";
+};
+
+const buildGoogleMapsPlaceUrl = (title = "") => {
+  const query = normalizeTitle(title);
+
+  if (!query) return "";
+
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    query
+  )}`;
+};
+
 const buildGoogleMapsRouteUrl = (day) => {
   const placeNames = (day?.items || [])
     .map((item) => normalizeTitle(item.title))
@@ -301,9 +560,7 @@ const buildGoogleMapsRouteUrl = (day) => {
   if (placeNames.length === 0) return "";
 
   if (placeNames.length === 1) {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-      placeNames[0]
-    )}`;
+    return buildGoogleMapsPlaceUrl(placeNames[0]);
   }
 
   const origin = placeNames[0];
@@ -322,26 +579,67 @@ const buildGoogleMapsRouteUrl = (day) => {
   return url;
 };
 
-const buildMapDataFromDay = (day, dayIndex) => {
-  const fallbackDay =
-    DEFAULT_RESULT_DAYS[dayIndex % DEFAULT_RESULT_DAYS.length] ||
-    DEFAULT_RESULT_DAYS[0];
+const buildKakaoMapsPlaceUrl = (title = "") => {
+  const name = normalizeTitle(title);
 
-  const sourceItems = day?.items?.length > 0 ? day.items : fallbackDay.items;
+  if (!name) return "";
 
-  const points = sourceItems
+  const place = getPlaceMetaByTitle(title);
+
+  if (place) {
+    return `https://map.kakao.com/link/map/${encodeURIComponent(name)},${
+      place.lat
+    },${place.lng}`;
+  }
+
+  return `https://map.kakao.com/link/search/${encodeURIComponent(name)}`;
+};
+
+const buildKakaoMapsRouteUrl = (day) => {
+  const placeInfos = (day?.items || [])
     .map((item) => {
-      const coord = getCoordByTitle(item.title);
-      if (!coord) return null;
+      const name = normalizeTitle(item.title);
+      const place = getPlaceMetaByTitle(item.title);
+
+      if (!name || !place) return null;
 
       return {
-        ...coord,
-        title: item.title,
+        name,
+        lat: place.lat,
+        lng: place.lng,
       };
     })
-    .filter(Boolean);
+    .filter(Boolean)
+    .slice(0, 7);
 
-  if (!points.length) {
+  if (placeInfos.length === 0) {
+    const firstTitle = normalizeTitle(day?.items?.[0]?.title || "");
+    return firstTitle ? buildKakaoMapsPlaceUrl(firstTitle) : "";
+  }
+
+  if (placeInfos.length === 1) {
+    return buildKakaoMapsPlaceUrl(placeInfos[0].name);
+  }
+
+  const movementType =
+    (day?.items || []).every(
+      (item, index, array) =>
+        index === array.length - 1 || (item.moveType || "walk") === "walk"
+    )
+      ? "walk"
+      : "car";
+
+  const segments = placeInfos.map(
+    (place) => `${encodeURIComponent(place.name)},${place.lat},${place.lng}`
+  );
+
+  return `https://map.kakao.com/link/by/${movementType}/${segments.join("/")}`;
+};
+
+const buildMapDataFromResolvedPoints = (sourceItems, resolvedPoints) => {
+  const filteredPoints = filterResolvedPointsForMap(resolvedPoints);
+
+  if (!filteredPoints.length) {
     return {
       center: FALLBACK_CENTER,
       markers: [],
@@ -351,7 +649,7 @@ const buildMapDataFromDay = (day, dayIndex) => {
 
   const colors = ["#22C55E", "#21A0F6", "#A45CFF", "#F59E0B", "#EF4444"];
 
-  const markers = points.map((point, index) => ({
+  const markers = filteredPoints.map((point, index) => ({
     lat: point.lat,
     lng: point.lng,
     title: point.title,
@@ -359,22 +657,249 @@ const buildMapDataFromDay = (day, dayIndex) => {
   }));
 
   const lines = [];
-  for (let i = 0; i < points.length - 1; i += 1) {
+
+  for (let i = 0; i < filteredPoints.length - 1; i += 1) {
+    const sourceIndex = filteredPoints[i].sourceIndex ?? i;
+
     lines.push({
       color: colors[i % colors.length],
       path: [
-        { lat: points[i].lat, lng: points[i].lng },
-        { lat: points[i + 1].lat, lng: points[i + 1].lng },
+        { lat: filteredPoints[i].lat, lng: filteredPoints[i].lng },
+        { lat: filteredPoints[i + 1].lat, lng: filteredPoints[i + 1].lng },
       ],
+      moveType:
+        sourceItems[sourceIndex]?.moveTypeToNext ||
+        sourceItems[sourceIndex]?.moveType ||
+        "walk",
     });
   }
 
   return {
-    center: { lat: points[0].lat, lng: points[0].lng },
+    center: { lat: filteredPoints[0].lat, lng: filteredPoints[0].lng },
     markers,
     lines,
   };
 };
+
+const buildMapDataFromDay = (day, dayIndex) => {
+  const sourceItems = getSourceItemsForDay(day, dayIndex);
+
+  const points = sourceItems
+    .map((item, index) => {
+      const coord = getCoordByTitle(item.title);
+      if (!coord) return null;
+
+      return {
+        ...coord,
+        title: item.title,
+        sourceIndex: index,
+        resolvedBy: "static",
+      };
+    })
+    .filter(Boolean);
+
+  return buildMapDataFromResolvedPoints(sourceItems, points);
+};
+
+const resolveMapDataForDay = async (day, dayIndex, resolveDynamicCoord) => {
+  const sourceItems = getSourceItemsForDay(day, dayIndex);
+
+  const resolvedPoints = (
+    await Promise.all(
+      sourceItems.map(async (item, index) => {
+        const staticCoord = getCoordByTitle(item.title);
+        const coord =
+          staticCoord ||
+          (typeof resolveDynamicCoord === "function"
+            ? await resolveDynamicCoord(item.title)
+            : null);
+
+        if (!coord) return null;
+
+        return {
+          ...coord,
+          title: item.title,
+          sourceIndex: index,
+          resolvedBy: staticCoord ? "static" : "dynamic",
+        };
+      })
+    )
+  ).filter(Boolean);
+
+  return buildMapDataFromResolvedPoints(sourceItems, resolvedPoints);
+};
+
+const loadKakaoMapsScript = () => {
+  if (window.kakao?.maps?.services) {
+    return Promise.resolve(window.kakao);
+  }
+
+  if (kakaoMapsLoadingPromise) {
+    return kakaoMapsLoadingPromise;
+  }
+
+  kakaoMapsLoadingPromise = new Promise((resolve, reject) => {
+    const appKey = process.env.REACT_APP_KAKAO_MAP_JS_KEY;
+
+    if (!appKey) {
+      reject(new Error("카카오맵 JS 키가 없습니다."));
+      return;
+    }
+
+    const initialize = () => {
+      if (!window.kakao?.maps?.load) {
+        reject(new Error("카카오맵 SDK 초기화에 실패했습니다."));
+        return;
+      }
+
+      window.kakao.maps.load(() => {
+        if (window.kakao?.maps?.services) {
+          resolve(window.kakao);
+        } else {
+          reject(new Error("카카오맵 services 라이브러리를 찾지 못했습니다."));
+        }
+      });
+    };
+
+    const existingScript = document.querySelector(
+      'script[data-kakao-maps="true"]'
+    );
+
+    if (existingScript) {
+      if (window.kakao?.maps?.services) {
+        resolve(window.kakao);
+        return;
+      }
+
+      if (window.kakao?.maps?.load) {
+        initialize();
+        return;
+      }
+
+      existingScript.addEventListener("load", initialize, { once: true });
+      existingScript.addEventListener(
+        "error",
+        () => reject(new Error("카카오맵 SDK 로드 실패")),
+        { once: true }
+      );
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src =
+      `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}` +
+      `&autoload=false&libraries=services`;
+    script.async = true;
+    script.defer = true;
+    script.dataset.kakaoMaps = "true";
+    script.onload = initialize;
+    script.onerror = () => reject(new Error("카카오맵 SDK 로드 실패"));
+
+    document.head.appendChild(script);
+  }).catch((error) => {
+    kakaoMapsLoadingPromise = null;
+    throw error;
+  });
+
+  return kakaoMapsLoadingPromise;
+};
+
+const resolveKakaoCoordinate = (kakao, title, placesService, geocoder) =>
+  new Promise((resolve) => {
+    const keyword = normalizeTitle(title);
+
+    if (!keyword) {
+      resolve(null);
+      return;
+    }
+
+    const cacheKey = getRuntimeCoordinateCacheKey("kakao", keyword);
+
+    if (runtimeCoordinateCache.has(cacheKey)) {
+      resolve(runtimeCoordinateCache.get(cacheKey));
+      return;
+    }
+
+    const finish = (coord) => {
+      runtimeCoordinateCache.set(cacheKey, coord);
+      resolve(coord);
+    };
+
+    placesService.keywordSearch(keyword, (data, status) => {
+      if (status === kakao.maps.services.Status.OK && data?.[0]) {
+        finish({
+          lat: Number(data[0].y),
+          lng: Number(data[0].x),
+        });
+        return;
+      }
+
+      geocoder.addressSearch(keyword, (addressData, addressStatus) => {
+        if (
+          addressStatus === kakao.maps.services.Status.OK &&
+          addressData?.[0]
+        ) {
+          finish({
+            lat: Number(addressData[0].y),
+            lng: Number(addressData[0].x),
+          });
+          return;
+        }
+
+        finish(null);
+      });
+    });
+  });
+
+const resolveGoogleCoordinate = (gm, title, geocoder) =>
+  new Promise((resolve) => {
+    const keyword = normalizeTitle(title);
+
+    if (!keyword) {
+      resolve(null);
+      return;
+    }
+
+    const cacheKey = getRuntimeCoordinateCacheKey("google", keyword);
+
+    if (runtimeCoordinateCache.has(cacheKey)) {
+      resolve(runtimeCoordinateCache.get(cacheKey));
+      return;
+    }
+
+    geocoder.geocode({ address: keyword }, (results, status) => {
+      const isOk =
+        status === "OK" ||
+        status === gm.GeocoderStatus?.OK ||
+        status === gm.GeocoderStatus?.ZERO_RESULTS;
+
+      if (
+        isOk &&
+        results?.[0]?.geometry?.location &&
+        status !== gm.GeocoderStatus?.ZERO_RESULTS
+      ) {
+        const location = results[0].geometry.location;
+
+        const coord = {
+          lat:
+            typeof location.lat === "function"
+              ? location.lat()
+              : Number(location.lat),
+          lng:
+            typeof location.lng === "function"
+              ? location.lng()
+              : Number(location.lng),
+        };
+
+        runtimeCoordinateCache.set(cacheKey, coord);
+        resolve(coord);
+        return;
+      }
+
+      runtimeCoordinateCache.set(cacheKey, null);
+      resolve(null);
+    });
+  });
 
 const STATIC_MAP_WIDTH = 640;
 const STATIC_MAP_HEIGHT = 320;
@@ -505,6 +1030,7 @@ const buildDaysFromState = (selectedDates = [], placesByDate = {}) => {
 
     const items = places.map((place, index) => {
       const mockMove = makeMockMove(index);
+      const isLast = index === places.length - 1;
 
       return {
         time:
@@ -527,8 +1053,21 @@ const buildDaysFromState = (selectedDates = [], placesByDate = {}) => {
             : place.isFixedTime
             ? "고정 일정"
             : "",
-        move: index < places.length - 1 ? mockMove.move : "",
-        moveType: index < places.length - 1 ? mockMove.moveType : "walk",
+        move: isLast
+          ? ""
+          : place.moveTextToNext || place.moveText || mockMove.move,
+        moveType: isLast
+          ? "walk"
+          : place.moveTypeToNext || place.moveType || mockMove.moveType,
+        countryCode: normalizeCountryCode(
+          place.countryCode ||
+            place.destinationCountryCode ||
+            place.country ||
+            place.nationCode
+        ),
+        mapProvider: normalizeMapProvider(
+          place.mapProvider || place.provider || place.mapType
+        ),
       };
     });
 
@@ -550,7 +1089,11 @@ const buildDaysFromState = (selectedDates = [], placesByDate = {}) => {
 
 const RouteTabs = ({ resultDays, activeIndex, onChange, isStatic = false }) => {
   return (
-    <div className={`route-result-tabs ${isStatic ? "route-result-tabs-static" : ""}`}>
+    <div
+      className={`route-result-tabs ${
+        isStatic ? "route-result-tabs-static" : ""
+      }`}
+    >
       {resultDays.map((day, index) =>
         isStatic ? (
           <div
@@ -604,64 +1147,100 @@ const SummaryCard = ({ day }) => (
   </section>
 );
 
-const DetailSection = ({ day }) => (
-  <section className="route-result-detail-section">
-    <div className="route-result-detail-header">
-      <h2>상세 일정</h2>
-      <span className="route-result-distance-pill">{day.sectionDistance}</span>
-    </div>
+const DetailSection = ({ day, onOpenPlaceMap, mapProvider = "google" }) => {
+  const providerLabel = mapProvider === "kakao" ? "카카오맵" : "구글맵";
+  const isClickable = typeof onOpenPlaceMap === "function";
 
-    <p className="route-result-detail-sub">
-      가장 효율적인 동선으로 재구성되었습니다.
-    </p>
+  const handleOpen = (title) => {
+    if (typeof onOpenPlaceMap === "function") {
+      onOpenPlaceMap(title);
+    }
+  };
 
-    <div className="route-result-timeline">
-      {day.items.map((item, index) => (
-        <div
-          key={`${day.label}-${item.title}-${index}`}
-          className="route-result-timeline-item"
-        >
-          <div className="route-result-marker-column">
-            <div className="route-result-step-circle">{index + 1}</div>
-            {index !== day.items.length - 1 && (
-              <div className="route-result-step-line" />
-            )}
-          </div>
+  const handleKeyDown = (event, title) => {
+    if (!isClickable) return;
 
-          <div className="route-result-item-body">
-            <div className="route-result-item-time">{item.time}</div>
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleOpen(title);
+    }
+  };
 
-            <div className="route-result-item-title-row">
-              <h3>{item.title}</h3>
-              {item.badge ? (
-                <span className="route-result-item-badge">{item.badge}</span>
-              ) : null}
+  return (
+    <section className="route-result-detail-section">
+      <div className="route-result-detail-header">
+        <h2>상세 일정</h2>
+        <span className="route-result-distance-pill">
+          {day.sectionDistance}
+        </span>
+      </div>
+
+      <p className="route-result-detail-sub">
+        가장 효율적인 동선으로 재구성되었습니다.
+      </p>
+
+      <div className="route-result-timeline">
+        {day.items.map((item, index) => (
+          <div
+            key={`${day.label}-${item.title}-${index}`}
+            className="route-result-timeline-item"
+            role={isClickable ? "button" : undefined}
+            tabIndex={isClickable ? 0 : undefined}
+            onClick={isClickable ? () => handleOpen(item.title) : undefined}
+            onKeyDown={
+              isClickable
+                ? (event) => handleKeyDown(event, item.title)
+                : undefined
+            }
+            style={isClickable ? TIMELINE_ITEM_BUTTON_STYLE : undefined}
+            aria-label={
+              isClickable
+                ? `${normalizeTitle(item.title)} ${providerLabel}에서 열기`
+                : undefined
+            }
+          >
+            <div className="route-result-marker-column">
+              <div className="route-result-step-circle">{index + 1}</div>
+              {index !== day.items.length - 1 && (
+                <div className="route-result-step-line" />
+              )}
             </div>
 
-            {item.desc ? (
-              <p className="route-result-item-desc">{item.desc}</p>
-            ) : null}
+            <div className="route-result-item-body">
+              <div className="route-result-item-time">{item.time}</div>
 
-            {item.move ? (
-              <div className="route-result-item-move">
-                <span className="route-result-item-move-icon">
-                  {item.moveType === "bus" ? <BusIcon /> : <WalkIcon />}
-                </span>
-                <span>{item.move}</span>
+              <div className="route-result-item-title-row">
+                <h3>{item.title}</h3>
+                {item.badge ? (
+                  <span className="route-result-item-badge">{item.badge}</span>
+                ) : null}
               </div>
-            ) : null}
-          </div>
-        </div>
-      ))}
-    </div>
-  </section>
-);
 
-const GoogleMapBox = ({ dayData, dayIndex, onOpenGoogleMaps }) => {
+              {item.desc ? (
+                <p className="route-result-item-desc">{item.desc}</p>
+              ) : null}
+
+              {item.move ? (
+                <div className="route-result-item-move">
+                  <span className="route-result-item-move-icon">
+                    {item.moveType === "bus" ? <BusIcon /> : <WalkIcon />}
+                  </span>
+                  <span>{item.move}</span>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
   const mapRef = useRef(null);
   const [mapError, setMapError] = useState("");
 
-  const mapData = useMemo(
+  const fallbackMapData = useMemo(
     () => buildMapDataFromDay(dayData, dayIndex),
     [dayData, dayIndex]
   );
@@ -686,38 +1265,105 @@ const GoogleMapBox = ({ dayData, dayIndex, onOpenGoogleMaps }) => {
     let map = null;
     let markers = [];
     let polylines = [];
+    let mapClickListener = null;
+
+    const drawStraightLine = (gm, line, bounds) => {
+      line.path.forEach((point) => bounds.extend(point));
+
+      const polyline = new gm.Polyline({
+        map,
+        path: line.path,
+        strokeColor: line.color,
+        strokeOpacity: 1,
+        strokeWeight: 5,
+        geodesic: true,
+      });
+
+      polylines.push(polyline);
+    };
 
     (async () => {
       try {
         const { Map } = await importLibrary("maps");
+        await importLibrary("routes");
+
         if (!mounted || !mapRef.current) return;
 
         const gm = window.google.maps;
+        const directionsService = new gm.DirectionsService();
+        const geocoder = new gm.Geocoder();
+
+        const resolvedMapData = await resolveMapDataForDay(
+          dayData,
+          dayIndex,
+          (title) => resolveGoogleCoordinate(gm, title, geocoder)
+        );
+
+        if (!mounted || !mapRef.current) return;
+
+        const mapData =
+          resolvedMapData.markers.length > 0 ? resolvedMapData : fallbackMapData;
 
         map = new Map(mapRef.current, {
           center: mapData.center,
           zoom: 11,
-          disableDefaultUI: true,
           gestureHandling: "greedy",
           clickableIcons: false,
+          disableDefaultUI: true,
+          zoomControl: true,
+          scrollwheel: true,
+          keyboardShortcuts: true,
+          streetViewControl: false,
+          fullscreenControl: false,
+          mapTypeControl: false,
+        });
+
+        mapClickListener = map.addListener("click", () => {
+          if (typeof onOpenMap === "function") {
+            onOpenMap();
+          }
         });
 
         const bounds = new gm.LatLngBounds();
 
-        mapData.lines.forEach((line) => {
-          line.path.forEach((point) => bounds.extend(point));
+        await Promise.all(
+          mapData.lines.map(async (line) => {
+            if (line.moveType !== "walk") {
+              drawStraightLine(gm, line, bounds);
+              return;
+            }
 
-          const polyline = new gm.Polyline({
-            map,
-            path: line.path,
-            strokeColor: line.color,
-            strokeOpacity: 1,
-            strokeWeight: 5,
-            geodesic: true,
-          });
+            try {
+              const result = await directionsService.route({
+                origin: line.path[0],
+                destination: line.path[1],
+                travelMode: gm.TravelMode.WALKING,
+              });
 
-          polylines.push(polyline);
-        });
+              const route = result.routes?.[0];
+              const drawPath =
+                route?.overview_path && route.overview_path.length > 0
+                  ? route.overview_path
+                  : line.path;
+
+              drawPath.forEach((point) => bounds.extend(point));
+
+              const polyline = new gm.Polyline({
+                map,
+                path: drawPath,
+                strokeColor: line.color,
+                strokeOpacity: 1,
+                strokeWeight: 5,
+                geodesic: true,
+              });
+
+              polylines.push(polyline);
+            } catch (error) {
+              console.error("도보 경로 계산 실패:", error);
+              drawStraightLine(gm, line, bounds);
+            }
+          })
+        );
 
         mapData.markers.forEach((marker) => {
           const position = { lat: marker.lat, lng: marker.lng };
@@ -764,36 +1410,167 @@ const GoogleMapBox = ({ dayData, dayIndex, onOpenGoogleMaps }) => {
 
     return () => {
       mounted = false;
+      if (mapClickListener) {
+        mapClickListener.remove();
+      }
       markers.forEach((marker) => marker.setMap(null));
       polylines.forEach((polyline) => polyline.setMap(null));
     };
-  }, [mapData]);
+  }, [dayData, dayIndex, fallbackMapData, onOpenMap]);
 
   return (
     <div className="route-map-mock">
       <div ref={mapRef} className="route-map-real" />
 
-      <button
-        type="button"
-        aria-label="Google Maps에서 경로 열기"
-        onClick={onOpenGoogleMaps}
-        style={MAP_OPEN_BUTTON_STYLE}
-      />
-
       {mapError && <div className="route-map-error-overlay">{mapError}</div>}
 
-      <div className="route-map-controls">
+      <div className="route-map-controls" style={{ zIndex: 2 }}>
         <button
           type="button"
           className="route-map-control-btn"
-          onClick={onOpenGoogleMaps}
+          onClick={onOpenMap}
         >
           <GearIcon />
         </button>
         <button
           type="button"
           className="route-map-control-btn"
-          onClick={onOpenGoogleMaps}
+          onClick={onOpenMap}
+        >
+          <LayersIcon />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
+  const mapRef = useRef(null);
+  const [mapError, setMapError] = useState("");
+
+  const fallbackMapData = useMemo(
+    () => buildMapDataFromDay(dayData, dayIndex),
+    [dayData, dayIndex]
+  );
+
+  useEffect(() => {
+    let map = null;
+    let clickHandler = null;
+    const markers = [];
+    const polylines = [];
+
+    loadKakaoMapsScript()
+      .then(async (kakao) => {
+        if (!mapRef.current) return;
+
+        const placesService = new kakao.maps.services.Places();
+        const geocoder = new kakao.maps.services.Geocoder();
+
+        const resolvedMapData = await resolveMapDataForDay(
+          dayData,
+          dayIndex,
+          (title) =>
+            resolveKakaoCoordinate(kakao, title, placesService, geocoder)
+        );
+
+        if (!mapRef.current) return;
+
+        const mapData =
+          resolvedMapData.markers.length > 0 ? resolvedMapData : fallbackMapData;
+
+        map = new kakao.maps.Map(mapRef.current, {
+          center: new kakao.maps.LatLng(mapData.center.lat, mapData.center.lng),
+          level: 7,
+        });
+
+        clickHandler = () => {
+          if (typeof onOpenMap === "function") {
+            onOpenMap();
+          }
+        };
+
+        kakao.maps.event.addListener(map, "click", clickHandler);
+
+        const bounds = new kakao.maps.LatLngBounds();
+
+        mapData.lines.forEach((line) => {
+          const path = line.path.map(
+            (point) => new kakao.maps.LatLng(point.lat, point.lng)
+          );
+
+          path.forEach((point) => bounds.extend(point));
+
+          const polyline = new kakao.maps.Polyline({
+            map,
+            path,
+            strokeWeight: 5,
+            strokeColor: line.color,
+            strokeOpacity: 1,
+            strokeStyle: "solid",
+          });
+
+          polylines.push(polyline);
+        });
+
+        mapData.markers.forEach((marker) => {
+          const position = new kakao.maps.LatLng(marker.lat, marker.lng);
+          bounds.extend(position);
+
+          const markerInstance = new kakao.maps.Marker({
+            map,
+            position,
+            title: marker.title,
+          });
+
+          markers.push(markerInstance);
+        });
+
+        if (mapData.markers.length > 1) {
+          map.setBounds(bounds);
+        } else if (mapData.markers.length === 1) {
+          map.setCenter(
+            new kakao.maps.LatLng(mapData.center.lat, mapData.center.lng)
+          );
+          map.setLevel(4);
+        }
+
+        setMapError("");
+      })
+      .catch((error) => {
+        console.error("Kakao Maps 로드 실패:", error);
+        setMapError(
+          "카카오 지도를 불러오지 못했어요. JS 키 또는 JavaScript SDK 도메인을 확인해 주세요."
+        );
+      });
+
+    return () => {
+      if (window.kakao?.maps && map && clickHandler) {
+        window.kakao.maps.event.removeListener(map, "click", clickHandler);
+      }
+
+      markers.forEach((marker) => marker.setMap(null));
+      polylines.forEach((polyline) => polyline.setMap(null));
+    };
+  }, [dayData, dayIndex, fallbackMapData, onOpenMap]);
+
+  return (
+    <div className="route-map-mock">
+      <div ref={mapRef} className="route-map-real" />
+
+      {mapError && <div className="route-map-error-overlay">{mapError}</div>}
+
+      <div className="route-map-controls" style={{ zIndex: 2 }}>
+        <button
+          type="button"
+          className="route-map-control-btn"
+          onClick={onOpenMap}
+        >
+          <GearIcon />
+        </button>
+        <button
+          type="button"
+          className="route-map-control-btn"
+          onClick={onOpenMap}
         >
           <LayersIcon />
         </button>
@@ -843,7 +1620,9 @@ const RouteDayContent = ({
   day,
   dayIndex,
   useStaticMap = false,
-  onOpenGoogleMaps,
+  mapProvider = "google",
+  onOpenRouteMap,
+  onOpenPlaceMap,
 }) => {
   return (
     <div className="route-result-content">
@@ -852,16 +1631,26 @@ const RouteDayContent = ({
       <section className="route-result-map-section">
         {useStaticMap ? (
           <PdfMapPreview dayData={day} dayIndex={dayIndex} />
+        ) : mapProvider === "kakao" ? (
+          <KakaoMapBox
+            dayData={day}
+            dayIndex={dayIndex}
+            onOpenMap={onOpenRouteMap}
+          />
         ) : (
           <GoogleMapBox
             dayData={day}
             dayIndex={dayIndex}
-            onOpenGoogleMaps={onOpenGoogleMaps}
+            onOpenMap={onOpenRouteMap}
           />
         )}
       </section>
 
-      <DetailSection day={day} />
+      <DetailSection
+        day={day}
+        onOpenPlaceMap={onOpenPlaceMap}
+        mapProvider={mapProvider}
+      />
     </div>
   );
 };
@@ -901,15 +1690,69 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
 
   const activeDay = resultDays[activeDayIndex] || resultDays[0];
 
-  const handleOpenGoogleMaps = () => {
-    const googleMapsUrl = buildGoogleMapsRouteUrl(activeDay);
+  const tripLevelMapProvider = useMemo(
+    () => getExplicitMapProviderFromContext(savedRoute, location.state),
+    [savedRoute, location.state]
+  );
 
-    if (!googleMapsUrl) {
-      alert("구글맵으로 넘길 장소 정보가 없어요.");
+  const activeMapProvider = useMemo(
+    () => getMapProviderForDay(activeDay, activeDayIndex, tripLevelMapProvider),
+    [activeDay, activeDayIndex, tripLevelMapProvider]
+  );
+
+  const openInNewTab = (url) => {
+    if (!url) return;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleOpenRouteMap = () => {
+    const url =
+      activeMapProvider === "kakao"
+        ? buildKakaoMapsRouteUrl(activeDay)
+        : buildGoogleMapsRouteUrl(activeDay);
+
+    if (!url) {
+      alert(
+        `${
+          activeMapProvider === "kakao" ? "카카오맵" : "구글맵"
+        }으로 넘길 장소 정보가 없어요.`
+      );
       return;
     }
 
-    window.open(googleMapsUrl, "_blank", "noopener,noreferrer");
+    openInNewTab(url);
+  };
+
+  const handleOpenPlaceMap = (title) => {
+    const currentDayItem = activeDay?.items?.find((item) => item.title === title);
+
+    const itemLevelProvider = normalizeMapProvider(
+      currentDayItem?.mapProvider || currentDayItem?.provider
+    );
+
+    const itemCountryCode = getItemCountryCode(currentDayItem || { title });
+
+    const provider =
+      itemLevelProvider ||
+      (itemCountryCode
+        ? itemCountryCode === KR
+          ? "kakao"
+          : "google"
+        : activeMapProvider);
+
+    const url =
+      provider === "kakao"
+        ? buildKakaoMapsPlaceUrl(title)
+        : buildGoogleMapsPlaceUrl(title);
+
+    if (!url) {
+      alert(
+        `${provider === "kakao" ? "카카오맵" : "구글맵"}으로 넘길 장소 정보가 없어요.`
+      );
+      return;
+    }
+
+    openInNewTab(url);
   };
 
   return (
@@ -928,7 +1771,9 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
           day={activeDay}
           dayIndex={activeDayIndex}
           useStaticMap={false}
-          onOpenGoogleMaps={handleOpenGoogleMaps}
+          mapProvider={activeMapProvider}
+          onOpenRouteMap={handleOpenRouteMap}
+          onOpenPlaceMap={handleOpenPlaceMap}
         />
       </div>
 
@@ -949,6 +1794,11 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
                 day={day}
                 dayIndex={index}
                 useStaticMap={true}
+                mapProvider={getMapProviderForDay(
+                  day,
+                  index,
+                  tripLevelMapProvider
+                )}
               />
             </section>
           ))}
