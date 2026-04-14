@@ -343,6 +343,73 @@ const DEFAULT_RESULT_DAYS = [
   },
 ];
 
+const DEFAULT_OVERSEAS_RESULT_DAYS = [
+  {
+    label: "1일차",
+    totalDuration: "5시간 20분",
+    totalDistance: "9.1km",
+    sectionDistance: "총 3.4km 이동",
+    items: [
+      {
+        time: "09:00 AM",
+        title: "교토역",
+        desc: "숙소 출발",
+        badge: "출발",
+        move: "지하철 12분 이동 (3.1km)",
+        moveType: "bus",
+      },
+      {
+        time: "10:00 AM",
+        title: "후시미 이나리 신사",
+        desc: "도리이 길 산책",
+        badge: "명소",
+        move: "버스 20분 이동 (4.0km)",
+        moveType: "bus",
+      },
+      {
+        time: "12:10 PM",
+        title: "기요미즈데라",
+        desc: "청수사 관람 및 주변 산책",
+        badge: "",
+        move: "",
+        moveType: "walk",
+      },
+    ],
+  },
+  {
+    label: "2일차",
+    totalDuration: "4시간 50분",
+    totalDistance: "7.8km",
+    sectionDistance: "총 2.9km 이동",
+    items: [
+      {
+        time: "09:30 AM",
+        title: "교토역",
+        desc: "둘째 날 출발",
+        badge: "출발",
+        move: "전철 18분 이동 (6.5km)",
+        moveType: "bus",
+      },
+      {
+        time: "10:20 AM",
+        title: "아라시야마",
+        desc: "대나무숲 및 강변 산책",
+        badge: "명소",
+        move: "전철 25분 이동 (6.8km)",
+        moveType: "bus",
+      },
+      {
+        time: "01:00 PM",
+        title: "교토역",
+        desc: "복귀",
+        badge: "복귀",
+        move: "",
+        moveType: "walk",
+      },
+    ],
+  },
+];
+
 const normalizeTitle = (title = "") =>
   title.replace(/\s*\([^)]*\)/g, "").trim();
 
@@ -1660,6 +1727,10 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   const [searchParams] = useSearchParams();
 
   const routeId = searchParams.get("id");
+  const mockMode = searchParams.get("mock");
+  const isDomesticMock = mockMode === "domestic";
+  const isOverseasMock = mockMode === "overseas";
+
   const savedRouteFromState = location.state?.savedRoute;
   const savedRoute =
     initialSavedRoute ||
@@ -1667,6 +1738,14 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     (routeId ? getSavedRouteById(routeId) : null);
 
   const resultDays = useMemo(() => {
+    if (isOverseasMock) {
+      return DEFAULT_OVERSEAS_RESULT_DAYS;
+    }
+
+    if (isDomesticMock) {
+      return DEFAULT_RESULT_DAYS;
+    }
+
     const rawSelectedDates =
       savedRoute?.selectedDates || location.state?.selectedDates;
     const rawPlacesByDate =
@@ -1678,7 +1757,13 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     }
 
     return DEFAULT_RESULT_DAYS;
-  }, [savedRoute, location.state?.selectedDates, location.state?.placesByDate]);
+  }, [
+    savedRoute,
+    location.state?.selectedDates,
+    location.state?.placesByDate,
+    isDomesticMock,
+    isOverseasMock,
+  ]);
 
   const [activeDayIndex, setActiveDayIndex] = useState(0);
 
@@ -1690,10 +1775,12 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
 
   const activeDay = resultDays[activeDayIndex] || resultDays[0];
 
-  const tripLevelMapProvider = useMemo(
-    () => getExplicitMapProviderFromContext(savedRoute, location.state),
-    [savedRoute, location.state]
-  );
+  const tripLevelMapProvider = useMemo(() => {
+    if (isOverseasMock) return "google";
+    if (isDomesticMock) return "kakao";
+
+    return getExplicitMapProviderFromContext(savedRoute, location.state);
+  }, [savedRoute, location.state, isDomesticMock, isOverseasMock]);
 
   const activeMapProvider = useMemo(
     () => getMapProviderForDay(activeDay, activeDayIndex, tripLevelMapProvider),
