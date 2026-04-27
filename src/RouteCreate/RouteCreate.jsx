@@ -43,53 +43,294 @@ const persistRouteSafely = (route) => {
 };
 
 const MOCK_PLACE_RESULTS = [
+  // 한국 - 서울
   {
-    sourceId: "deluna-brunch-cafe",
-    name: "브런치 카페 델루나",
-    desc: "서울특별시 종로구 삼청로 12",
-    thumb: getThumb("deluna-brunch-cafe"),
-  },
-  {
-    sourceId: "park-hyatt-dining",
-    name: "파크 하얏트 다이닝",
-    desc: "식당 예약됨",
-    thumb: getThumb("park-hyatt-dining"),
-  },
-  {
-    sourceId: "mmca-seoul",
-    name: "국립현대미술관",
-    desc: "서울특별시 종로구 삼청로 30",
-    thumb: getThumb("mmca-seoul"),
-  },
-  {
-    sourceId: "bukchon",
-    name: "북촌한옥마을",
-    desc: "서울특별시 종로구 계동길 37",
-    thumb: getThumb("bukchon"),
-  },
-  {
-    sourceId: "samcheong-soup",
-    name: "삼청동 수제비",
-    desc: "서울특별시 종로구 삼청로 101-1",
-    thumb: getThumb("samcheong-soup"),
-  },
-  {
-    sourceId: "gyeongbokgung",
+    sourceId: "seoul-gyeongbokgung",
     name: "경복궁",
     desc: "서울특별시 종로구 사직로 161",
-    thumb: getThumb("gyeongbokgung"),
+    city: "서울",
+    country: "대한민국",
+    mapProvider: "kakao",
+    thumb: getThumb("seoul-gyeongbokgung"),
   },
   {
-    sourceId: "ikseondong",
+    sourceId: "seoul-bukchon",
+    name: "북촌한옥마을",
+    desc: "서울특별시 종로구 계동길 37",
+    city: "서울",
+    country: "대한민국",
+    mapProvider: "kakao",
+    thumb: getThumb("seoul-bukchon"),
+  },
+  {
+    sourceId: "seoul-ikseondong",
     name: "익선동 카페거리",
     desc: "서울특별시 종로구 익선동",
-    thumb: getThumb("ikseondong"),
+    city: "서울",
+    country: "대한민국",
+    mapProvider: "kakao",
+    thumb: getThumb("seoul-ikseondong"),
   },
   {
-    sourceId: "changdeokgung",
-    name: "창덕궁",
-    desc: "서울특별시 종로구 율곡로 99",
-    thumb: getThumb("changdeokgung"),
+    sourceId: "seoul-starfield-library",
+    name: "별마당도서관",
+    desc: "서울특별시 강남구 영동대로 513 코엑스몰",
+    city: "서울",
+    country: "대한민국",
+    mapProvider: "kakao",
+    thumb: getThumb("seoul-starfield-library"),
+  },
+  {
+    sourceId: "seoul-namsan-tower",
+    name: "N서울타워",
+    desc: "서울특별시 용산구 남산공원길 105",
+    city: "서울",
+    country: "대한민국",
+    mapProvider: "kakao",
+    thumb: getThumb("seoul-namsan-tower"),
+  },
+
+  // 해외 - 일본 도쿄
+  {
+    sourceId: "tokyo-skytree",
+    name: "도쿄 스카이트리",
+    desc: "일본 도쿄도 스미다구 오시아게 1-1-2",
+    city: "도쿄",
+    country: "일본",
+    mapProvider: "google",
+    thumb: getThumb("tokyo-skytree"),
+  },
+  {
+    sourceId: "tokyo-sensoji",
+    name: "센소지",
+    desc: "일본 도쿄도 다이토구 아사쿠사 2-3-1",
+    city: "도쿄",
+    country: "일본",
+    mapProvider: "google",
+    thumb: getThumb("tokyo-sensoji"),
+  },
+  {
+    sourceId: "tokyo-shibuya-scramble",
+    name: "시부야 스크램블 스퀘어",
+    desc: "일본 도쿄도 시부야구 시부야 2-24-12",
+    city: "도쿄",
+    country: "일본",
+    mapProvider: "google",
+    thumb: getThumb("tokyo-shibuya-scramble"),
+  },
+
+  // 한국 - 부산
+  {
+    sourceId: "busan-haeundae",
+    name: "해운대 해수욕장",
+    desc: "부산광역시 해운대구 우동",
+    city: "부산",
+    country: "대한민국",
+    mapProvider: "kakao",
+    thumb: getThumb("busan-haeundae"),
+  },
+  {
+    sourceId: "busan-gwangalli",
+    name: "광안리 해수욕장",
+    desc: "부산광역시 수영구 광안해변로 219",
+    city: "부산",
+    country: "대한민국",
+    mapProvider: "kakao",
+    thumb: getThumb("busan-gwangalli"),
+  },
+  {
+    sourceId: "busan-gamcheon",
+    name: "감천문화마을",
+    desc: "부산광역시 사하구 감내2로 203",
+    city: "부산",
+    country: "대한민국",
+    mapProvider: "kakao",
+    thumb: getThumb("busan-gamcheon"),
+  },
+
+  // 해외 - 프랑스 파리
+  {
+    sourceId: "paris-eiffel-tower",
+    name: "에펠탑",
+    desc: "프랑스 파리 Champ de Mars, 5 Avenue Anatole France",
+    city: "파리",
+    country: "프랑스",
+    mapProvider: "google",
+    thumb: getThumb("paris-eiffel-tower"),
+  },
+  {
+    sourceId: "paris-louvre",
+    name: "루브르 박물관",
+    desc: "프랑스 파리 Rue de Rivoli, 75001",
+    city: "파리",
+    country: "프랑스",
+    mapProvider: "google",
+    thumb: getThumb("paris-louvre"),
+  },
+  {
+    sourceId: "paris-montmartre",
+    name: "몽마르트르",
+    desc: "프랑스 파리 75018",
+    city: "파리",
+    country: "프랑스",
+    mapProvider: "google",
+    thumb: getThumb("paris-montmartre"),
+  },
+
+  // 한국 - 제주
+  {
+    sourceId: "jeju-seongsan",
+    name: "성산일출봉",
+    desc: "제주특별자치도 서귀포시 성산읍 성산리 1",
+    city: "제주",
+    country: "대한민국",
+    mapProvider: "kakao",
+    thumb: getThumb("jeju-seongsan"),
+  },
+  {
+    sourceId: "jeju-hyeopjae",
+    name: "협재해수욕장",
+    desc: "제주특별자치도 제주시 한림읍 협재리 2497-1",
+    city: "제주",
+    country: "대한민국",
+    mapProvider: "kakao",
+    thumb: getThumb("jeju-hyeopjae"),
+  },
+  {
+    sourceId: "jeju-aewol-cafe-street",
+    name: "애월 카페거리",
+    desc: "제주특별자치도 제주시 애월읍 애월리",
+    city: "제주",
+    country: "대한민국",
+    mapProvider: "kakao",
+    thumb: getThumb("jeju-aewol-cafe-street"),
+  },
+
+  // 해외 - 미국 뉴욕
+  {
+    sourceId: "newyork-times-square",
+    name: "타임스 스퀘어",
+    desc: "미국 뉴욕 Manhattan, New York, NY 10036",
+    city: "뉴욕",
+    country: "미국",
+    mapProvider: "google",
+    thumb: getThumb("newyork-times-square"),
+  },
+  {
+    sourceId: "newyork-central-park",
+    name: "센트럴 파크",
+    desc: "미국 뉴욕 New York, NY",
+    city: "뉴욕",
+    country: "미국",
+    mapProvider: "google",
+    thumb: getThumb("newyork-central-park"),
+  },
+  {
+    sourceId: "newyork-met-museum",
+    name: "메트로폴리탄 미술관",
+    desc: "미국 뉴욕 1000 5th Ave, New York, NY 10028",
+    city: "뉴욕",
+    country: "미국",
+    mapProvider: "google",
+    thumb: getThumb("newyork-met-museum"),
+  },
+
+  // 한국 - 경주
+  {
+    sourceId: "gyeongju-donggung",
+    name: "동궁과 월지",
+    desc: "경상북도 경주시 원화로 102",
+    city: "경주",
+    country: "대한민국",
+    mapProvider: "kakao",
+    thumb: getThumb("gyeongju-donggung"),
+  },
+  {
+    sourceId: "gyeongju-hwangridan",
+    name: "황리단길",
+    desc: "경상북도 경주시 포석로 1080 일대",
+    city: "경주",
+    country: "대한민국",
+    mapProvider: "kakao",
+    thumb: getThumb("gyeongju-hwangridan"),
+  },
+
+  // 해외 - 태국 방콕
+  {
+    sourceId: "bangkok-wat-arun",
+    name: "왓 아룬",
+    desc: "태국 방콕 Bangkok Yai, 158 Wang Doem Road",
+    city: "방콕",
+    country: "태국",
+    mapProvider: "google",
+    thumb: getThumb("bangkok-wat-arun"),
+  },
+  {
+    sourceId: "bangkok-iconsiam",
+    name: "아이콘시암",
+    desc: "태국 방콕 Khlong San, 299 Charoen Nakhon Road",
+    city: "방콕",
+    country: "태국",
+    mapProvider: "google",
+    thumb: getThumb("bangkok-iconsiam"),
+  },
+  {
+    sourceId: "bangkok-chatuchak",
+    name: "짜뚜짝 시장",
+    desc: "태국 방콕 Kamphaeng Phet 2 Rd, Chatuchak",
+    city: "방콕",
+    country: "태국",
+    mapProvider: "google",
+    thumb: getThumb("bangkok-chatuchak"),
+  },
+
+  // 해외 - 일본 오사카
+  {
+    sourceId: "osaka-dotonbori",
+    name: "도톤보리",
+    desc: "일본 오사카시 주오구 도톤보리",
+    city: "오사카",
+    country: "일본",
+    mapProvider: "google",
+    thumb: getThumb("osaka-dotonbori"),
+  },
+  {
+    sourceId: "osaka-usj",
+    name: "유니버설 스튜디오 재팬",
+    desc: "일본 오사카시 고노하나구 사쿠라지마 2-1-33",
+    city: "오사카",
+    country: "일본",
+    mapProvider: "google",
+    thumb: getThumb("osaka-usj"),
+  },
+
+  // 해외 - 싱가포르
+  {
+    sourceId: "singapore-marina-bay-sands",
+    name: "마리나 베이 샌즈",
+    desc: "싱가포르 10 Bayfront Avenue",
+    city: "싱가포르",
+    country: "싱가포르",
+    mapProvider: "google",
+    thumb: getThumb("singapore-marina-bay-sands"),
+  },
+  {
+    sourceId: "singapore-gardens-by-the-bay",
+    name: "가든스 바이 더 베이",
+    desc: "싱가포르 18 Marina Gardens Drive",
+    city: "싱가포르",
+    country: "싱가포르",
+    mapProvider: "google",
+    thumb: getThumb("singapore-gardens-by-the-bay"),
+  },
+  {
+    sourceId: "singapore-merlion-park",
+    name: "멀라이언 파크",
+    desc: "싱가포르 1 Fullerton Road",
+    city: "싱가포르",
+    country: "싱가포르",
+    mapProvider: "google",
+    thumb: getThumb("singapore-merlion-park"),
   },
 ];
 
@@ -274,6 +515,9 @@ const createPlaceItem = (place, orderIndex = 0) => {
     sourceId: place.sourceId,
     name: place.name,
     desc: place.desc,
+    city: place.city,
+    country: place.country,
+    mapProvider: place.mapProvider,
     thumb: place.thumb || getThumb(place.sourceId || place.name),
     timeLabel:
       place.timeLabel ||
@@ -292,28 +536,37 @@ const INITIAL_PLACES_BY_DATE = {
   [formatDateKey(createDate(2024, 5, 12))]: [
     {
       id: "initial-1",
-      sourceId: "deluna-brunch-cafe",
-      name: "브런치 카페 델루나",
-      desc: "서울특별시 종로구 삼청로 12",
-      thumb: getThumb("deluna-brunch-cafe"),
+      sourceId: "seoul-gyeongbokgung",
+      name: "경복궁",
+      desc: "서울특별시 종로구 사직로 161",
+      city: "서울",
+      country: "대한민국",
+      mapProvider: "kakao",
+      thumb: getThumb("seoul-gyeongbokgung"),
       timeLabel: "09:30 AM",
       isFixedTime: false,
     },
     {
       id: "initial-2",
-      sourceId: "park-hyatt-dining",
-      name: "파크 하얏트 다이닝",
-      desc: "식당 예약됨",
-      thumb: getThumb("park-hyatt-dining"),
+      sourceId: "seoul-bukchon",
+      name: "북촌한옥마을",
+      desc: "서울특별시 종로구 계동길 37",
+      city: "서울",
+      country: "대한민국",
+      mapProvider: "kakao",
+      thumb: getThumb("seoul-bukchon"),
       timeLabel: "12:30 PM",
       isFixedTime: true,
     },
     {
       id: "initial-3",
-      sourceId: "mmca-seoul",
-      name: "국립현대미술관",
-      desc: "서울특별시 종로구 삼청로 30",
-      thumb: getThumb("mmca-seoul"),
+      sourceId: "seoul-ikseondong",
+      name: "익선동 카페거리",
+      desc: "서울특별시 종로구 익선동",
+      city: "서울",
+      country: "대한민국",
+      mapProvider: "kakao",
+      thumb: getThumb("seoul-ikseondong"),
       timeLabel: "03:00 PM",
       isFixedTime: false,
     },
@@ -367,14 +620,14 @@ const RouteCreate = () => {
     const keyword = searchKeyword.trim().toLowerCase();
 
     const baseList = keyword
-      ? MOCK_PLACE_RESULTS.filter(
-          (place) =>
-            place.name.toLowerCase().includes(keyword) ||
-            place.desc.toLowerCase().includes(keyword)
+      ? MOCK_PLACE_RESULTS.filter((place) =>
+          [place.name, place.desc, place.city, place.country, place.mapProvider]
+            .filter(Boolean)
+            .some((value) => value.toLowerCase().includes(keyword))
         )
       : MOCK_PLACE_RESULTS;
 
-    return baseList.slice(0, 8);
+    return baseList.slice(0, 12);
   }, [isSearchOpen, searchKeyword]);
 
   const monthTitle = `${currentMonth.getFullYear()}년 ${

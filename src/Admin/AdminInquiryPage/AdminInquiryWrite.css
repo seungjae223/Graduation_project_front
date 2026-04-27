@@ -1,0 +1,246 @@
+.admin-inquiry-write-page {
+  min-height: 100vh;
+  background: #f2f4f7;
+  padding: 18px 16px 30px;
+  box-sizing: border-box;
+}
+
+.admin-inquiry-back-button {
+  border: none;
+  background: transparent;
+  color: #516175;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+
+.admin-inquiry-write-card,
+.admin-answer-write-card {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 2px 12px rgba(14, 30, 62, 0.05);
+}
+
+.admin-answer-write-card {
+  margin-top: 18px;
+}
+
+.admin-inquiry-section-label {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #d9f1ff;
+  color: #19a8f4;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin: 0 0 14px;
+}
+
+.admin-inquiry-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-inquiry-detail-header h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+  color: #1b2430;
+  line-height: 1.45;
+}
+
+.admin-inquiry-detail-header span {
+  font-size: 13px;
+  color: #7a8698;
+  white-space: nowrap;
+}
+
+.admin-inquiry-customer-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f1f4f8;
+  border-radius: 999px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
+.admin-inquiry-customer-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #d7e8ff;
+  color: #2b6fe8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.admin-inquiry-customer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.admin-inquiry-customer-info strong {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1b2430;
+}
+
+.admin-inquiry-customer-info span {
+  font-size: 13px;
+  color: #6f7b8b;
+}
+
+.admin-inquiry-content-box {
+  color: #1f2a37;
+  font-size: 16px;
+  line-height: 1.85;
+  white-space: pre-line;
+}
+
+.admin-inquiry-content-box p {
+  margin: 0 0 14px;
+}
+
+.admin-inquiry-extra-line {
+  font-weight: 500;
+}
+
+.admin-answer-textarea {
+  width: 100%;
+  min-height: 260px;
+  border: none;
+  resize: none;
+  outline: none;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #1f2a37;
+  box-sizing: border-box;
+}
+
+.admin-answer-textarea::placeholder {
+  color: #a0a9b7;
+}
+
+.admin-answer-done-message {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: #6f7b8b;
+}
+
+.admin-answer-submit-button {
+  width: 100%;
+  height: 54px;
+  margin-top: 22px;
+  border: none;
+  border-radius: 999px;
+  background: #19a8f4;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(25, 168, 244, 0.18);
+}
+
+.admin-answer-submit-button:disabled {
+  background: #dbe2ea;
+  color: #6f7b8b;
+  box-shadow: none;
+  cursor: default;
+}
+
+.admin-inquiry-error-title {
+  margin: 0 0 18px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #1b2430;
+}
+.admin-success-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(31, 41, 55, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  box-sizing: border-box;
+}
+
+.admin-success-modal {
+  width: 100%;
+  max-width: 274px;
+  background: #ffffff;
+  border-radius: 26px;
+  padding: 34px 25px 25px;
+  box-sizing: border-box;
+  text-align: center;
+  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.24);
+}
+
+.admin-success-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #dff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+}
+
+.admin-success-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #1da9f2;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.admin-success-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 900;
+  color: #172033;
+  letter-spacing: -0.03em;
+}
+
+.admin-success-message {
+  margin: 10px 0 24px;
+  font-size: 12px;
+  line-height: 1.65;
+  font-weight: 600;
+  color: #8a97a8;
+}
+
+.admin-success-confirm-button {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: #19a8f4;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 9px 18px rgba(25, 168, 244, 0.26);
+}

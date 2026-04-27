@@ -49,6 +49,9 @@ const AdminFooter = () => {
     return params.get("tab") || "stats";
   }, [location.search]);
 
+  const isAdminMainPage = location.pathname === "/admin";
+  const isAdminInquiryPage = location.pathname.startsWith("/admin/inquiry");
+
   const footerItems = [
     {
       key: "stats",
@@ -69,18 +72,31 @@ const AdminFooter = () => {
       label: "문의사항",
       type: "image",
       icon: inquiryIcon,
-      onClick: () => navigate("/admin?tab=inquiry"),
+      onClick: () => navigate("/admin/inquiry"),
     },
   ];
+
+  const checkIsActive = (key) => {
+    if (key === "inquiry") {
+      return isAdminInquiryPage;
+    }
+
+    if (key === "stats") {
+      return isAdminMainPage && activeTab === "stats";
+    }
+
+    if (key === "logs") {
+      return isAdminMainPage && activeTab === "logs";
+    }
+
+    return false;
+  };
 
   return (
     <footer className="admin-footer">
       <nav className="admin-footer-inner" aria-label="관리자 하단 메뉴">
         {footerItems.map((item) => {
-          const isActive =
-            item.key === "stats"
-              ? activeTab === "stats"
-              : item.key === activeTab;
+          const isActive = checkIsActive(item.key);
 
           return (
             <button

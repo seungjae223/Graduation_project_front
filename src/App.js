@@ -25,12 +25,14 @@ import PopularAll from "./Homepage/PopularAll";
 import MySchedule from "./MySchedule/MySchedule";
 import { SavedPlacesProvider } from "./Context/SavedPlacesContext";
 import SignUp from "./Login/SignUp";
-import Inquiry from "./Mypage/Inquiry";
-import InquiryList from "./Mypage/InquiryList";
 
 // 관리자 페이지 / 관리자 전용 푸터
 import AdminMain from "./Admin/AdminMain/AdminMain";
 import AdminFooter from "./Admin/AdminFooter/AdminFooter";
+
+// 관리자 문의 페이지
+import AdminInquiry from "./Admin/AdminInquiryPage/AdminInquiryPage";
+import AdminInquiryWrite from "./Admin/AdminInquiryPage/AdminInquiryWrite";
 
 function Layout() {
   const location = useLocation();
@@ -58,7 +60,8 @@ function Layout() {
   const shouldShowAdminFooter = isAdminPage;
 
   const hideHeaderPaths = ["/login"];
-  const shouldHideHeader = hideHeaderPaths.includes(location.pathname);
+  const shouldHideHeader =
+    hideHeaderPaths.includes(location.pathname) || isAdminPage;
 
   return (
     <div className="app">
@@ -91,12 +94,15 @@ function Layout() {
           <Route path="/popular-all" element={<PopularAll />} />
           <Route path="/my-schedule" element={<MySchedule />} />
 
-          {/* 문의 페이지 */}
-          <Route path="/inquiry/write" element={<InquiryList />} />
-          <Route path="/inquiry" element={<Inquiry />} />
-
-          {/* 관리자 페이지 */}
+          {/* 관리자 메인 페이지 */}
           <Route path="/admin" element={<AdminMain />} />
+
+          {/* 관리자 문의 페이지 */}
+          <Route path="/admin/inquiry" element={<AdminInquiry />} />
+          <Route
+            path="/admin/inquiry/write"
+            element={<AdminInquiryWrite />}
+          />
         </Routes>
       </main>
 

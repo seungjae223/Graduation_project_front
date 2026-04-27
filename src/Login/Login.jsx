@@ -53,11 +53,8 @@ const Login = () => {
       return;
     }
 
-    if (result.user.role === "admin") {
-      navigate("/admin", { replace: true });
-    } else {
-      navigate("/home", { replace: true });
-    }
+    // 관리자/일반회원 구분 없이 로그인 후 메인 홈으로 이동
+    navigate("/home", { replace: true });
   };
 
   return (

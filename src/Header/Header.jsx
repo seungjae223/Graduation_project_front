@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./Header.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import html2pdf from "html2pdf.js";
+import ShareModal from "../ShareModal/ShareModal";
 
 import logoBlue from "../img/너만 오면 go.png";
 import logoBlack from "../img/너만 오면 go 블랙.png";
@@ -15,6 +16,12 @@ const Header = ({ onSearchClick }) => {
   const navigate = useNavigate();
 
   const path = location.pathname;
+  const [isShareOpen, setIsShareOpen] = useState(false);
+
+  const routeShareUrl = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    return `${window.location.origin}${location.pathname}${location.search || ""}`;
+  }, [location.pathname, location.search]);
 
   const waitForNextPaint = () =>
     new Promise((resolve) => {
@@ -50,6 +57,20 @@ const Header = ({ onSearchClick }) => {
     );
   };
 
+  const buildPdfFileDate = () => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(today.getDate()).padStart(2, "0")}`;
+  };
+
+  useEffect(() => {
+    if (path !== "/route-result") {
+      setIsShareOpen(false);
+    }
+  }, [path]);
+
   const handleSearchClick = () => {
     if (typeof onSearchClick === "function") {
       onSearchClick();
@@ -59,7 +80,7 @@ const Header = ({ onSearchClick }) => {
     navigate("/search");
   };
 
-  const handleShare = async () => {
+  const handleSavePdfFromShare = async () => {
     const target = document.getElementById("route-result-pdf");
 
     if (!target) {
@@ -67,16 +88,14 @@ const Header = ({ onSearchClick }) => {
       return;
     }
 
-    const today = new Date();
-    const fileDate = `${today.getFullYear()}-${String(
-      today.getMonth() + 1
-    ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-
     target.classList.add("is-exporting");
 
     try {
       await waitForNextPaint();
       await waitForPdfImages(target);
+      await waitForNextPaint();
+
+      const fileDate = buildPdfFileDate();
 
       const options = {
         margin: 0,
@@ -98,12 +117,18 @@ const Header = ({ onSearchClick }) => {
       };
 
       await html2pdf().from(target).set(options).save();
+      setIsShareOpen(false);
     } catch (error) {
       console.log("PDF 저장 실패:", error);
       alert("PDF 저장에 실패했어요.");
     } finally {
       target.classList.remove("is-exporting");
     }
+  };
+
+  const handleShare = () => {
+    if (path !== "/route-result") return;
+    setIsShareOpen(true);
   };
 
   const renderHeader = () => {
@@ -203,6 +228,7 @@ const Header = ({ onSearchClick }) => {
               type="button"
               className="icon-btn"
               onClick={handleShare}
+              aria-label="일정 공유"
             >
               <img src={shareIcon} alt="share" className="header-icon" />
             </button>
@@ -277,7 +303,21 @@ const Header = ({ onSearchClick }) => {
     );
   };
 
-  return <header className="header">{renderHeader()}</header>;
+  return (
+    <>
+      <header className="header">{renderHeader()}</header>
+
+      {path === "/route-result" && (
+        <ShareModal
+          open={isShareOpen}
+          onClose={() => setIsShareOpen(false)}
+          variant="schedule"
+          shareUrl={routeShareUrl}
+          onSavePdf={handleSavePdfFromShare}
+        />
+      )}
+    </>
+  );
 };
 
 export default Header;
