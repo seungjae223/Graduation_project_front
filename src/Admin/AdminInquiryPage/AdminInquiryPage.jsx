@@ -72,7 +72,7 @@ const AdminInquiryPage = () => {
       <h1 className="admin-inquiry-title">1:1 문의 목록</h1>
 
       <p className="admin-inquiry-subtitle">
-        태객 문의사항을 효율적으로 관리해 응답하세요
+        고객 문의사항을 효율적으로 관리해 응답하세요
       </p>
 
       <div className="admin-inquiry-tabs">

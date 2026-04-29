@@ -150,6 +150,85 @@ const LayersIcon = () => (
   </svg>
 );
 
+const MemoInputIcon = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+    <path
+      d="M5 7H13.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5 12H11"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M15.7 11.2L18.8 14.3L12.7 20.4H9.6V17.3L15.7 11.2Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M17.2 9.7L20.3 12.8"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const MemoSavedIcon = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+    <rect
+      x="4"
+      y="4"
+      width="16"
+      height="16"
+      rx="2.4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+    <path
+      d="M8 9H16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M8 13H14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M7 19L10.2 15.8H17"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const MoreVerticalIcon = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+    <circle cx="12" cy="5" r="1.8" fill="currentColor" />
+    <circle cx="12" cy="12" r="1.8" fill="currentColor" />
+    <circle cx="12" cy="19" r="1.8" fill="currentColor" />
+  </svg>
+);
+
 const FALLBACK_CENTER = { lat: 37.5665, lng: 126.978 };
 
 const KR = "KR";
@@ -232,6 +311,7 @@ const DEFAULT_RESULT_DAYS = [
         title: "남산서울타워",
         desc: "전망대 관람 및 주변 산책 코스 (예상 소요 시간 1시간 30분)",
         badge: "",
+        memo: "사랑의 자물쇠 미리 준비해가기!",
         move: "도보 12분 이동 (800m)",
         moveType: "walk",
       },
@@ -412,6 +492,28 @@ const DEFAULT_OVERSEAS_RESULT_DAYS = [
 
 const normalizeTitle = (title = "") =>
   title.replace(/\s*\([^)]*\)/g, "").trim();
+
+const getMemoKey = (dayIndex, itemIndex, itemTitle = "") =>
+  `${dayIndex}:${itemIndex}:${normalizeTitle(itemTitle)}`;
+
+const getInitialMemoValue = (item = {}) =>
+  String(item.memo || item.memoText || item.note || item.notes || "").trim();
+
+const getItemMemoValue = (memoValues = {}, dayIndex, itemIndex, item = {}) => {
+  const key = getMemoKey(dayIndex, itemIndex, item.title);
+
+  if (Object.prototype.hasOwnProperty.call(memoValues, key)) {
+    return memoValues[key];
+  }
+
+  return getInitialMemoValue(item);
+};
+
+const getMemoDisplayTitle = (memo = "") =>
+  String(memo || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find(Boolean) || "";
 
 const normalizeCountryCode = (value = "") =>
   String(value || "").trim().toUpperCase();
@@ -1135,6 +1237,7 @@ const buildDaysFromState = (selectedDates = [], placesByDate = {}) => {
         mapProvider: normalizeMapProvider(
           place.mapProvider || place.provider || place.mapType
         ),
+        memo: place.memo || place.memoText || place.note || place.notes || "",
       };
     });
 
@@ -1214,9 +1317,131 @@ const SummaryCard = ({ day }) => (
   </section>
 );
 
-const DetailSection = ({ day, onOpenPlaceMap, mapProvider = "google" }) => {
+const TimelineMemo = ({ memo, onClick }) => {
+  const displayTitle = getMemoDisplayTitle(memo);
+  const isSaved = Boolean(displayTitle);
+  const className = isSaved
+    ? "route-result-memo-card"
+    : "route-result-memo-input";
+  const icon = isSaved ? <MemoSavedIcon /> : <MemoInputIcon />;
+  const text = isSaved ? displayTitle : "메모를 입력하세요...";
+
+  const handleClick = (event) => {
+    event.stopPropagation();
+
+    if (typeof onClick === "function") {
+      onClick();
+    }
+  };
+
+  if (typeof onClick !== "function") {
+    return (
+      <div className={className} title={isSaved ? displayTitle : undefined}>
+        <span className="route-result-memo-icon">{icon}</span>
+        <span className="route-result-memo-text">{text}</span>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className={className}
+      title={isSaved ? displayTitle : undefined}
+      onClick={handleClick}
+      onKeyDown={(event) => event.stopPropagation()}
+    >
+      <span className="route-result-memo-icon">{icon}</span>
+      <span className="route-result-memo-text">{text}</span>
+    </button>
+  );
+};
+
+const MemoModal = ({ isOpen, value, onChange, onCancel, onSave }) => {
+  const textareaRef = useRef(null);
+  const onCancelRef = useRef(onCancel);
+
+  useEffect(() => {
+    onCancelRef.current = onCancel;
+  }, [onCancel]);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    window.setTimeout(() => {
+      textareaRef.current?.focus();
+    }, 0);
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onCancelRef.current?.();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="route-result-memo-backdrop" onClick={onCancel}>
+      <div
+        className="route-result-memo-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="route-result-memo-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <h3 id="route-result-memo-title">메모 작성</h3>
+
+        <textarea
+          ref={textareaRef}
+          className="route-result-memo-textarea"
+          value={value}
+          placeholder="이 장소에 대한 메모를 남겨보세요."
+          onChange={(event) => onChange(event.target.value)}
+        />
+
+        <div className="route-result-memo-actions">
+          <button
+            type="button"
+            className="route-result-memo-cancel"
+            onClick={onCancel}
+          >
+            취소
+          </button>
+          <button
+            type="button"
+            className="route-result-memo-save"
+            onClick={onSave}
+          >
+            저장
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DetailSection = ({
+  day,
+  dayIndex,
+  memoValues = {},
+  onOpenMemo,
+  onOpenPlaceMap,
+  mapProvider = "google",
+}) => {
   const providerLabel = mapProvider === "kakao" ? "카카오맵" : "구글맵";
   const isClickable = typeof onOpenPlaceMap === "function";
+  const isMemoEditable = typeof onOpenMemo === "function";
 
   const handleOpen = (title) => {
     if (typeof onOpenPlaceMap === "function") {
@@ -1230,6 +1455,14 @@ const DetailSection = ({ day, onOpenPlaceMap, mapProvider = "google" }) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       handleOpen(title);
+    }
+  };
+
+  const handleMenuClick = (event, itemIndex) => {
+    event.stopPropagation();
+
+    if (isMemoEditable) {
+      onOpenMemo(dayIndex, itemIndex);
     }
   };
 
@@ -1247,57 +1480,83 @@ const DetailSection = ({ day, onOpenPlaceMap, mapProvider = "google" }) => {
       </p>
 
       <div className="route-result-timeline">
-        {day.items.map((item, index) => (
-          <div
-            key={`${day.label}-${item.title}-${index}`}
-            className="route-result-timeline-item"
-            role={isClickable ? "button" : undefined}
-            tabIndex={isClickable ? 0 : undefined}
-            onClick={isClickable ? () => handleOpen(item.title) : undefined}
-            onKeyDown={
-              isClickable
-                ? (event) => handleKeyDown(event, item.title)
-                : undefined
-            }
-            style={isClickable ? TIMELINE_ITEM_BUTTON_STYLE : undefined}
-            aria-label={
-              isClickable
-                ? `${normalizeTitle(item.title)} ${providerLabel}에서 열기`
-                : undefined
-            }
-          >
-            <div className="route-result-marker-column">
-              <div className="route-result-step-circle">{index + 1}</div>
-              {index !== day.items.length - 1 && (
-                <div className="route-result-step-line" />
-              )}
-            </div>
+        {day.items.map((item, index) => {
+          const memo = getItemMemoValue(memoValues, dayIndex, index, item);
 
-            <div className="route-result-item-body">
-              <div className="route-result-item-time">{item.time}</div>
-
-              <div className="route-result-item-title-row">
-                <h3>{item.title}</h3>
-                {item.badge ? (
-                  <span className="route-result-item-badge">{item.badge}</span>
-                ) : null}
+          return (
+            <div
+              key={`${day.label}-${item.title}-${index}`}
+              className="route-result-timeline-item"
+              role={isClickable ? "button" : undefined}
+              tabIndex={isClickable ? 0 : undefined}
+              onClick={isClickable ? () => handleOpen(item.title) : undefined}
+              onKeyDown={
+                isClickable
+                  ? (event) => handleKeyDown(event, item.title)
+                  : undefined
+              }
+              style={isClickable ? TIMELINE_ITEM_BUTTON_STYLE : undefined}
+              aria-label={
+                isClickable
+                  ? `${normalizeTitle(item.title)} ${providerLabel}에서 열기`
+                  : undefined
+              }
+            >
+              <div className="route-result-marker-column">
+                <div className="route-result-step-circle">{index + 1}</div>
+                {index !== day.items.length - 1 && (
+                  <div className="route-result-step-line" />
+                )}
               </div>
 
-              {item.desc ? (
-                <p className="route-result-item-desc">{item.desc}</p>
-              ) : null}
+              <div className="route-result-item-body">
+                <div className="route-result-item-time">{item.time}</div>
 
-              {item.move ? (
-                <div className="route-result-item-move">
-                  <span className="route-result-item-move-icon">
-                    {item.moveType === "bus" ? <BusIcon /> : <WalkIcon />}
-                  </span>
-                  <span>{item.move}</span>
+                <div className="route-result-item-title-row">
+                  <h3>{item.title}</h3>
+
+                  {item.badge ? (
+                    <span className="route-result-item-badge">
+                      {item.badge}
+                    </span>
+                  ) : isMemoEditable && index === 1 ? (
+                    <button
+                      type="button"
+                      className="route-result-item-menu"
+                      aria-label="메모 메뉴 열기"
+                      onClick={(event) => handleMenuClick(event, index)}
+                      onKeyDown={(event) => event.stopPropagation()}
+                    >
+                      <MoreVerticalIcon />
+                    </button>
+                  ) : null}
                 </div>
-              ) : null}
+
+                {item.desc ? (
+                  <p className="route-result-item-desc">{item.desc}</p>
+                ) : null}
+
+                <TimelineMemo
+                  memo={memo}
+                  onClick={
+                    isMemoEditable
+                      ? () => onOpenMemo(dayIndex, index)
+                      : undefined
+                  }
+                />
+
+                {item.move ? (
+                  <div className="route-result-item-move">
+                    <span className="route-result-item-move-icon">
+                      {item.moveType === "bus" ? <BusIcon /> : <WalkIcon />}
+                    </span>
+                    <span>{item.move}</span>
+                  </div>
+                ) : null}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
@@ -1688,8 +1947,10 @@ const RouteDayContent = ({
   dayIndex,
   useStaticMap = false,
   mapProvider = "google",
+  memoValues = {},
   onOpenRouteMap,
   onOpenPlaceMap,
+  onOpenMemo,
 }) => {
   return (
     <div className="route-result-content">
@@ -1715,6 +1976,9 @@ const RouteDayContent = ({
 
       <DetailSection
         day={day}
+        dayIndex={dayIndex}
+        memoValues={memoValues}
+        onOpenMemo={onOpenMemo}
         onOpenPlaceMap={onOpenPlaceMap}
         mapProvider={mapProvider}
       />
@@ -1775,6 +2039,69 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
 
   const activeDay = resultDays[activeDayIndex] || resultDays[0];
 
+  const [memoValues, setMemoValues] = useState({});
+  const [memoModal, setMemoModal] = useState({
+    isOpen: false,
+    dayIndex: null,
+    itemIndex: null,
+    value: "",
+  });
+
+  const closeMemoModal = () => {
+    setMemoModal({
+      isOpen: false,
+      dayIndex: null,
+      itemIndex: null,
+      value: "",
+    });
+  };
+
+  const handleOpenMemo = (dayIndex, itemIndex) => {
+    const targetDay = resultDays[dayIndex];
+    const targetItem = targetDay?.items?.[itemIndex];
+
+    if (!targetItem) return;
+
+    setMemoModal({
+      isOpen: true,
+      dayIndex,
+      itemIndex,
+      value: getItemMemoValue(memoValues, dayIndex, itemIndex, targetItem),
+    });
+  };
+
+  const handleChangeMemo = (value) => {
+    setMemoModal((prev) => ({
+      ...prev,
+      value,
+    }));
+  };
+
+  const handleSaveMemo = () => {
+    const targetDay = resultDays[memoModal.dayIndex];
+    const targetItem = targetDay?.items?.[memoModal.itemIndex];
+
+    if (!targetItem) {
+      closeMemoModal();
+      return;
+    }
+
+    const key = getMemoKey(
+      memoModal.dayIndex,
+      memoModal.itemIndex,
+      targetItem.title
+    );
+
+    const nextValue = memoModal.value.trim();
+
+    setMemoValues((prev) => ({
+      ...prev,
+      [key]: nextValue,
+    }));
+
+    closeMemoModal();
+  };
+
   const tripLevelMapProvider = useMemo(() => {
     if (isOverseasMock) return "google";
     if (isDomesticMock) return "kakao";
@@ -1834,7 +2161,9 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
 
     if (!url) {
       alert(
-        `${provider === "kakao" ? "카카오맵" : "구글맵"}으로 넘길 장소 정보가 없어요.`
+        `${
+          provider === "kakao" ? "카카오맵" : "구글맵"
+        }으로 넘길 장소 정보가 없어요.`
       );
       return;
     }
@@ -1859,10 +2188,20 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
           dayIndex={activeDayIndex}
           useStaticMap={false}
           mapProvider={activeMapProvider}
+          memoValues={memoValues}
           onOpenRouteMap={handleOpenRouteMap}
           onOpenPlaceMap={handleOpenPlaceMap}
+          onOpenMemo={handleOpenMemo}
         />
       </div>
+
+      <MemoModal
+        isOpen={memoModal.isOpen}
+        value={memoModal.value}
+        onChange={handleChangeMemo}
+        onCancel={closeMemoModal}
+        onSave={handleSaveMemo}
+      />
 
       {!isEmbedded && (
         <div className="route-result-pdf-root" aria-hidden="true">
@@ -1886,6 +2225,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
                   index,
                   tripLevelMapProvider
                 )}
+                memoValues={memoValues}
               />
             </section>
           ))}
