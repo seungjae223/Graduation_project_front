@@ -1,11 +1,13 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   useLocation,
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
+import { saveRecentPlace } from "../utils/recentPlaces";
 import html2pdf from "html2pdf.js";
+import ShareModal from "../ShareModal/ShareModal";
 import "./Detail.css";
 
 import forestImg from "../img/도쿄.png";
@@ -454,6 +456,8 @@ function Detail() {
   const [searchParams] = useSearchParams();
   const { isSaved, toggleSavedPlace } = useSavedPlaces();
 
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+
   const detailPlace = useMemo(() => {
     const idParam = Number(searchParams.get("id"));
     const placeFromState = location.state?.place;
@@ -480,7 +484,38 @@ function Detail() {
     };
   }, [location.state, searchParams]);
 
+  // 최근 본 장소 저장
+  useEffect(() => {
+    if (!detailPlace?.id) {
+      return;
+    }
+
+    saveRecentPlace({
+      id: detailPlace.id,
+      title: detailPlace.title,
+      address: detailPlace.address,
+      rating: detailPlace.rating,
+      image: detailPlace.image,
+      tags: detailPlace.tags,
+      reviewCount: detailPlace.reviewCount,
+    });
+  }, [
+    detailPlace.id,
+    detailPlace.title,
+    detailPlace.address,
+    detailPlace.rating,
+    detailPlace.image,
+    detailPlace.tags,
+    detailPlace.reviewCount,
+  ]);
+
   const saved = isSaved(detailPlace.id);
+
+  const shareUrl = useMemo(() => {
+    if (typeof window === "undefined") return "";
+
+    return `${window.location.origin}${location.pathname}?id=${detailPlace.id}`;
+  }, [location.pathname, detailPlace.id]);
 
   const handleToggleSaved = () => {
     toggleSavedPlace({
@@ -493,7 +528,11 @@ function Detail() {
     });
   };
 
-  const handleShare = async () => {
+  const handleOpenShareModal = () => {
+    setShareModalOpen(true);
+  };
+
+  const handleSavePdf = async () => {
     const target = document.getElementById("detail-pdf");
 
     if (!target) {
@@ -549,120 +588,135 @@ function Detail() {
   };
 
   return (
-    <div id="detail-pdf" className="detail-page">
-      <section className="detail-hero">
-        <img
-          src={detailPlace.image}
-          alt={detailPlace.title}
-          className="detail-hero-image"
-        />
+    <>
+      <div id="detail-pdf" className="detail-page">
+        <section className="detail-hero">
+          <img
+            src={detailPlace.image}
+            alt={detailPlace.title}
+            className="detail-hero-image"
+          />
 
-        <div className="detail-top-actions">
-          <button
-            type="button"
-            className="detail-action-btn"
-            onClick={() => navigate(-1)}
-            aria-label="뒤로가기"
-          >
-            <BackIcon />
-          </button>
-
-          <div className="detail-action-group">
+          <div className="detail-top-actions">
             <button
               type="button"
               className="detail-action-btn"
-              onClick={handleShare}
-              aria-label="공유"
+              onClick={() => navigate(-1)}
+              aria-label="뒤로가기"
             >
-              <ShareIcon />
+              <BackIcon />
             </button>
 
-            <button
-              type="button"
-              className="detail-action-btn"
-              onClick={handleToggleSaved}
-              aria-label={saved ? "관심 장소 해제" : "관심 장소 추가"}
-            >
-              <HeartIcon active={saved} />
-            </button>
-          </div>
-        </div>
-      </section>
+            <div className="detail-action-group">
+              <button
+                type="button"
+                className="detail-action-btn"
+                onClick={handleOpenShareModal}
+                aria-label="공유"
+              >
+                <ShareIcon />
+              </button>
 
-      <section className="detail-sheet">
-        <h1 className="detail-title">{detailPlace.title}</h1>
-
-        <div className="detail-location-row">
-          <PinIcon />
-          <span>{detailPlace.address}</span>
-        </div>
-
-        <div className="detail-tag-row">
-          {detailPlace.tags.map((tag) => (
-            <span key={tag} className="detail-tag">
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        <section className="detail-section">
-          <h2 className="detail-section-title">장소 소개</h2>
-          <p className="detail-section-text">{detailPlace.intro}</p>
-        </section>
-
-        <section className="detail-section">
-          <div className="detail-review-header">
-            <h2 className="detail-section-title">방문자 리뷰</h2>
-
-            <div className="detail-review-summary">
-              <span className="detail-review-star">★</span>
-              <span>{Number(detailPlace.rating).toFixed(1)}</span>
-              <small>({detailPlace.reviewCount.toLocaleString("ko-KR")})</small>
+              <button
+                type="button"
+                className="detail-action-btn"
+                onClick={handleToggleSaved}
+                aria-label={saved ? "관심 장소 해제" : "관심 장소 추가"}
+              >
+                <HeartIcon active={saved} />
+              </button>
             </div>
           </div>
+        </section>
 
-          <div className="detail-review-list">
-            {detailPlace.reviews.map((review) => (
-              <article key={review.id} className="detail-review-card">
-                <div className="detail-review-top">
-                  <div className="detail-review-author">
-                    <div className="detail-review-avatar">
-                      <UserIcon />
-                    </div>
+        <section className="detail-sheet">
+          <h1 className="detail-title">{detailPlace.title}</h1>
 
-                    <div>
-                      <p className="detail-review-name">{review.name}</p>
-                      <p className="detail-review-badge">{review.badge}</p>
-                    </div>
-                  </div>
+          <div className="detail-location-row">
+            <PinIcon />
+            <span>{detailPlace.address}</span>
+          </div>
 
-                  <div className="detail-review-stars">
-                    {renderStars(review.rating)}
-                  </div>
-                </div>
-
-                <p className="detail-review-text">{review.content}</p>
-              </article>
+          <div className="detail-tag-row">
+            {detailPlace.tags.map((tag) => (
+              <span key={tag} className="detail-tag">
+                {tag}
+              </span>
             ))}
           </div>
 
-          <button type="button" className="detail-review-more-btn">
-            리뷰 더보기
-          </button>
-        </section>
-      </section>
+          <section className="detail-section">
+            <h2 className="detail-section-title">장소 소개</h2>
+            <p className="detail-section-text">{detailPlace.intro}</p>
+          </section>
 
-      <div className="detail-bottom-bar">
-        <button
-          type="button"
-          className={`detail-save-btn ${saved ? "saved" : ""}`}
-          onClick={handleToggleSaved}
-        >
-          <SavePlaceIcon active={saved} />
-          <span>{saved ? "관심 장소에 저장됨" : "관심 장소에 추가하기"}</span>
-        </button>
+          <section className="detail-section">
+            <div className="detail-review-header">
+              <h2 className="detail-section-title">방문자 리뷰</h2>
+
+              <div className="detail-review-summary">
+                <span className="detail-review-star">★</span>
+                <span>{Number(detailPlace.rating).toFixed(1)}</span>
+                <small>
+                  ({detailPlace.reviewCount.toLocaleString("ko-KR")})
+                </small>
+              </div>
+            </div>
+
+            <div className="detail-review-list">
+              {detailPlace.reviews.map((review) => (
+                <article key={review.id} className="detail-review-card">
+                  <div className="detail-review-top">
+                    <div className="detail-review-author">
+                      <div className="detail-review-avatar">
+                        <UserIcon />
+                      </div>
+
+                      <div>
+                        <p className="detail-review-name">{review.name}</p>
+                        <p className="detail-review-badge">{review.badge}</p>
+                      </div>
+                    </div>
+
+                    <div className="detail-review-stars">
+                      {renderStars(review.rating)}
+                    </div>
+                  </div>
+
+                  <p className="detail-review-text">{review.content}</p>
+                </article>
+              ))}
+            </div>
+
+            <button type="button" className="detail-review-more-btn">
+              리뷰 더보기
+            </button>
+          </section>
+        </section>
+
+        <div className="detail-bottom-bar">
+          <button
+            type="button"
+            className={`detail-save-btn ${saved ? "saved" : ""}`}
+            onClick={handleToggleSaved}
+          >
+            <SavePlaceIcon active={saved} />
+            <span>{saved ? "관심 장소에 저장됨" : "관심 장소에 추가하기"}</span>
+          </button>
+        </div>
       </div>
-    </div>
+
+      <ShareModal
+        open={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        variant="place"
+        shareUrl={shareUrl}
+        previewTitle={detailPlace.title}
+        previewSubtitle={detailPlace.address}
+        previewImage={detailPlace.image}
+        onSavePdf={handleSavePdf}
+      />
+    </>
   );
 }
 

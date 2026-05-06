@@ -5,18 +5,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  background: rgba(31, 41, 55, 0.34);
-  backdrop-filter: blur(6px);
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(8px);
 }
 
 .share-modal-sheet {
-  width: min(100%, 390px);
-  background: #ffffff;
-  border-radius: 40px;
-  padding: 34px 38px 40px;
+  width: min(432px, calc(100vw - 32px));
   box-sizing: border-box;
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.16);
+  padding: 28px 30px 34px;
+  border-radius: 34px;
+  background: #ffffff;
+  color: #172033;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
 }
 
 .share-modal-header {
@@ -28,184 +29,221 @@
 
 .share-modal-title {
   margin: 0;
-  color: #17233a;
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: #172033;
 }
 
 .share-modal-close {
-  width: 44px;
-  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
   padding: 0;
   border: 0;
   background: transparent;
-  color: #17233a;
-  font-size: 40px;
+  color: #172033;
+  font-size: 36px;
+  font-weight: 400;
   line-height: 1;
   cursor: pointer;
 }
 
-.share-modal-top-row {
-  display: flex;
-  gap: 14px;
-  margin-bottom: 18px;
+.share-modal-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
 }
 
-.share-modal-url {
-  flex: 1;
-  min-width: 0;
-  height: 78px;
-  display: flex;
-  align-items: center;
-  padding: 0 28px;
-  border-radius: 999px;
-  background: #eef2f6;
-  color: #6f7f99;
-  font-size: 20px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-sizing: border-box;
-}
-
-.share-modal-copy-button {
-  width: 180px;
-  min-width: 180px;
-  height: 78px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+.share-modal-action-card {
+  height: 136px;
+  padding: 20px 12px;
   border: 0;
-  border-radius: 999px;
-  background: #169cf2;
-  color: #ffffff;
-  font-size: 20px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.share-modal-copy-button img {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.share-modal-pdf-button {
-  width: 100%;
-  height: 92px;
+  border-radius: 17px;
+  background: #f2f6fb;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 18px;
-  margin-bottom: 28px;
-  border: 2px solid #cfe7fb;
-  border-radius: 24px;
-  background: #f4f7fb;
-  color: #17233a;
-  font-size: 22px;
-  font-weight: 800;
   cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
-.share-modal-pdf-button:disabled {
+.share-modal-action-card:hover {
+  background: #edf4fb;
+}
+
+.share-modal-action-card:active {
+  transform: translateY(1px);
+}
+
+.share-modal-action-card:disabled {
   cursor: default;
-  opacity: 0.8;
+  opacity: 0.65;
 }
 
-.share-modal-pdf-icon-box {
-  width: 56px;
-  height: 56px;
-  display: inline-flex;
+.share-modal-action-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
 }
 
-.share-modal-pdf-icon-box img {
-  width: 26px;
-  height: 26px;
+.share-modal-action-icon img {
+  display: block;
   object-fit: contain;
 }
 
+.share-modal-copy-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.share-modal-pdf-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.share-modal-action-label {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  color: #172033;
+  white-space: nowrap;
+}
+
+/* 장소 미리보기 카드 */
 .share-modal-preview-card {
-  min-height: 156px;
-  padding: 26px 28px;
-  border: 1px solid #e4edf4;
-  border-radius: 26px;
-  background: #ffffff;
+  width: 100%;
   box-sizing: border-box;
+  padding: 22px 18px;
+  border: 1px solid #edf2f8;
+  border-radius: 18px;
+  background: #ffffff;
+  text-align: center;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.02);
+}
+
+/* 대표 사진이 있을 때: 사진 왼쪽, 텍스트 오른쪽 */
+.share-modal-preview-card.has-image {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 14px;
+  text-align: left;
+}
+
+/* 대표 사진 */
+.share-modal-preview-image {
+  flex: 0 0 72px !important;
+  width: 72px !important;
+  height: 72px !important;
+  min-width: 72px;
+  max-width: 72px;
+  min-height: 72px;
+  max-height: 72px;
+  border-radius: 14px;
+  object-fit: cover;
+  display: block;
+  background: #edf2f8;
+}
+
+/* 오른쪽 텍스트 영역 */
+.share-modal-preview-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .share-modal-preview-title {
-  color: #17233a;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 800;
   line-height: 1.35;
-  margin-bottom: 8px;
+  letter-spacing: -0.04em;
+  color: #172033;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .share-modal-preview-subtitle {
-  color: #7788a2;
-  font-size: 17px;
+  margin-top: 3px;
+  font-size: 13px;
   font-weight: 500;
-  line-height: 1.45;
-  margin-bottom: 12px;
+  line-height: 1.35;
+  letter-spacing: -0.04em;
+  color: #6d7890;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .share-modal-preview-url {
-  color: #149cf1;
-  font-size: 15px;
-  font-weight: 900;
-  letter-spacing: 1.4px;
-  line-height: 1.4;
-  word-break: break-all;
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: 0.06em;
+  color: #1d9beb;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 380px) {
   .share-modal-sheet {
-    border-radius: 34px;
-    padding: 28px 20px 28px;
+    padding: 26px 28px 32px;
+    border-radius: 30px;
   }
 
-  .share-modal-title {
-    font-size: 26px;
+  .share-modal-actions {
+    gap: 14px;
+    margin-bottom: 28px;
   }
 
-  .share-modal-top-row {
-    flex-direction: column;
+  .share-modal-action-card {
+    height: 128px;
   }
 
-  .share-modal-url,
-  .share-modal-copy-button {
-    width: 100%;
-    min-width: 0;
-    height: 68px;
-    font-size: 18px;
+  .share-modal-action-label {
+    font-size: 16px;
   }
 
-  .share-modal-url {
-    padding: 0 22px;
+  .share-modal-preview-card.has-image {
+    gap: 12px;
+    padding: 12px;
   }
 
-  .share-modal-pdf-button {
-    height: 84px;
-    font-size: 20px;
+  .share-modal-preview-image {
+    flex-basis: 64px !important;
+    width: 64px !important;
+    height: 64px !important;
+    min-width: 64px;
+    max-width: 64px;
+    min-height: 64px;
+    max-height: 64px;
+    border-radius: 12px;
   }
 
   .share-modal-preview-title {
-    font-size: 18px;
+    font-size: 15px;
   }
 
   .share-modal-preview-subtitle {
-    font-size: 15px;
+    font-size: 12px;
+  }
+
+  .share-modal-preview-url {
+    font-size: 10px;
   }
 }

@@ -1,0 +1,132 @@
+.recent-places-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 45px 16px 80px;
+  background-color: #f8fafc;
+  color: #101828;
+  box-sizing: border-box;
+}
+
+.recent-places-section + .recent-places-section {
+  margin-top: 74px;
+}
+
+.recent-places-title {
+  margin: 0 0 32px;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  color: #101828;
+}
+
+.recent-places-list {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.recent-place-item {
+  display: grid;
+  grid-template-columns: 103px minmax(0, 1fr);
+  column-gap: 20px;
+  cursor: pointer;
+}
+
+.recent-place-thumb {
+  width: 103px;
+  height: 103px;
+  border-radius: 14px;
+  object-fit: cover;
+  display: block;
+  background-color: #f7f1df;
+}
+
+.recent-place-thumb-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fbf5e7;
+}
+
+.recent-place-info {
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.recent-place-name {
+  margin: 0 0 7px;
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.7px;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-place-category {
+  margin: 0 0 14px;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  color: #64748b;
+}
+
+.recent-place-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.recent-route-button {
+  height: 40px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 9px;
+  background-color: #16a9f5;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  cursor: pointer;
+}
+
+.recent-bookmark-button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #dce7f3;
+  border-radius: 10px;
+  background-color: #f8fbff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.recent-bookmark-button.active {
+  border-color: #d7edf9;
+}
+
+.recent-places-empty {
+  min-height: calc(100vh - 160px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+@media (min-width: 480px) {
+  .recent-places-page {
+    max-width: 390px;
+    margin: 0 auto;
+  }
+}

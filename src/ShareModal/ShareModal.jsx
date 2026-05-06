@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import copyIcon from "../img/복사.png";
+import copyIcon from "../img/파랑색 공유.png";
 import pdfIcon from "../img/pdf.png";
 import "./ShareModal.css";
 
@@ -40,6 +40,7 @@ function ShareModal({
   shareUrl = "",
   previewTitle = "",
   previewSubtitle = "",
+  previewImage = "",
   onSavePdf,
 }) {
   const [copied, setCopied] = useState(false);
@@ -126,40 +127,76 @@ function ShareModal({
           </button>
         </div>
 
-        <div className="share-modal-top-row">
-          <div className="share-modal-url" title={shareUrl}>
-            {displayUrl || "링크를 준비 중이에요."}
-          </div>
+        <div className="share-modal-actions">
+          <button
+            type="button"
+            className="share-modal-action-card"
+            onClick={handleCopy}
+            aria-label="링크 복사"
+          >
+            <span className="share-modal-action-icon">
+              <img
+                className="share-modal-copy-icon"
+                src={copyIcon}
+                alt=""
+                aria-hidden="true"
+              />
+            </span>
+
+            <span className="share-modal-action-label">
+              {copied ? "복사됨" : "링크 복사"}
+            </span>
+          </button>
 
           <button
             type="button"
-            className="share-modal-copy-button"
-            onClick={handleCopy}
+            className="share-modal-action-card"
+            onClick={handlePdf}
+            disabled={isSavingPdf}
+            aria-label="PDF로 저장하기"
           >
-            <img src={copyIcon} alt="" aria-hidden="true" />
-            <span>{copied ? "복사됨" : "링크 복사"}</span>
+            <span className="share-modal-action-icon">
+              <img
+                className="share-modal-pdf-icon"
+                src={pdfIcon}
+                alt=""
+                aria-hidden="true"
+              />
+            </span>
+
+            <span className="share-modal-action-label">
+              {isSavingPdf ? "PDF 저장 중..." : "PDF로 저장하기"}
+            </span>
           </button>
         </div>
 
-        <button
-          type="button"
-          className="share-modal-pdf-button"
-          onClick={handlePdf}
-          disabled={isSavingPdf}
-        >
-          <span className="share-modal-pdf-icon-box">
-            <img src={pdfIcon} alt="" aria-hidden="true" />
-          </span>
-          <span>{isSavingPdf ? "PDF 저장 중..." : "PDF로 저장하기"}</span>
-        </button>
-
         {showPreviewCard && (
-          <div className="share-modal-preview-card">
-            <div className="share-modal-preview-title">{previewTitle}</div>
-            <div className="share-modal-preview-subtitle">
-              {previewSubtitle}
+          <div
+            className={`share-modal-preview-card ${
+              previewImage ? "has-image" : ""
+            }`}
+          >
+            {previewImage && (
+              <img
+                className="share-modal-preview-image"
+                src={previewImage}
+                alt={previewTitle ? `${previewTitle} 대표 사진` : "대표 사진"}
+              />
+            )}
+
+            <div className="share-modal-preview-info">
+              <div className="share-modal-preview-title">
+                {previewTitle || "장소 이름"}
+              </div>
+
+              <div className="share-modal-preview-subtitle">
+                {previewSubtitle || "주소 정보"}
+              </div>
+
+              <div className="share-modal-preview-url">
+                {previewUrl || "AZUREHORIZON.COM"}
+              </div>
             </div>
-            <div className="share-modal-preview-url">{previewUrl}</div>
           </div>
         )}
       </div>

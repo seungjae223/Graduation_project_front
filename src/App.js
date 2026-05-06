@@ -15,6 +15,7 @@ import Recommend from "./Recommend/Recommend";
 import Total from "./Recommend/Total";
 import MyPage from "./Mypage/MyPage";
 import SavedPlaces from "./Mypage/SavedPlaces";
+import RecentPlacesPage from "./RecentPlacesPage/RecentPlacesPage";
 import Search from "./Search/Search";
 import SearchPop from "./SearchPopup/SearchPop";
 import RouteCreate from "./RouteCreate/RouteCreate";
@@ -87,6 +88,7 @@ function Layout() {
           <Route path="/total" element={<Total />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/saved-places" element={<SavedPlaces />} />
+          <Route path="/mypage/recent-places" element={<RecentPlacesPage />} />
           <Route path="/route-create" element={<RouteCreate />} />
           <Route path="/detail" element={<Detail />} />
           <Route path="/route-result" element={<RouteResult />} />

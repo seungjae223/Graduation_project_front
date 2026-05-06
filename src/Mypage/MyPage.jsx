@@ -203,7 +203,7 @@ const MyPage = () => {
       id: "recent",
       label: "최근 본 장소",
       icon: <HistoryIcon />,
-      onClick: () => console.log("최근 본 장소"),
+      onClick: () => navigate("/mypage/recent-places"),
     },
   ];
 

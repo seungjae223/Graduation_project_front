@@ -1,11 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./RouteCreate.css";
 import searchIcon from "../img/검색.png";
 import { saveRoute as saveRouteUtil } from "../utils/routeStorage";
 
 const STORAGE_KEY = "mock_saved_route_results";
 const ROUTE_STORAGE_EVENT = "mock-routes-updated";
+
+const ROUTE_SELECTED_PLACE_KEY = "routeSelectedPlace";
+const ROUTE_DRAFT_PLACES_KEY = "routeDraftPlaces";
+const RECENT_PLACES_KEY = "recentPlaces";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -43,7 +47,6 @@ const persistRouteSafely = (route) => {
 };
 
 const MOCK_PLACE_RESULTS = [
-  // 한국 - 서울
   {
     sourceId: "seoul-gyeongbokgung",
     name: "경복궁",
@@ -89,8 +92,6 @@ const MOCK_PLACE_RESULTS = [
     mapProvider: "kakao",
     thumb: getThumb("seoul-namsan-tower"),
   },
-
-  // 해외 - 일본 도쿄
   {
     sourceId: "tokyo-skytree",
     name: "도쿄 스카이트리",
@@ -118,8 +119,6 @@ const MOCK_PLACE_RESULTS = [
     mapProvider: "google",
     thumb: getThumb("tokyo-shibuya-scramble"),
   },
-
-  // 한국 - 부산
   {
     sourceId: "busan-haeundae",
     name: "해운대 해수욕장",
@@ -147,8 +146,6 @@ const MOCK_PLACE_RESULTS = [
     mapProvider: "kakao",
     thumb: getThumb("busan-gamcheon"),
   },
-
-  // 해외 - 프랑스 파리
   {
     sourceId: "paris-eiffel-tower",
     name: "에펠탑",
@@ -176,8 +173,6 @@ const MOCK_PLACE_RESULTS = [
     mapProvider: "google",
     thumb: getThumb("paris-montmartre"),
   },
-
-  // 한국 - 제주
   {
     sourceId: "jeju-seongsan",
     name: "성산일출봉",
@@ -205,8 +200,6 @@ const MOCK_PLACE_RESULTS = [
     mapProvider: "kakao",
     thumb: getThumb("jeju-aewol-cafe-street"),
   },
-
-  // 해외 - 미국 뉴욕
   {
     sourceId: "newyork-times-square",
     name: "타임스 스퀘어",
@@ -234,8 +227,6 @@ const MOCK_PLACE_RESULTS = [
     mapProvider: "google",
     thumb: getThumb("newyork-met-museum"),
   },
-
-  // 한국 - 경주
   {
     sourceId: "gyeongju-donggung",
     name: "동궁과 월지",
@@ -254,8 +245,6 @@ const MOCK_PLACE_RESULTS = [
     mapProvider: "kakao",
     thumb: getThumb("gyeongju-hwangridan"),
   },
-
-  // 해외 - 태국 방콕
   {
     sourceId: "bangkok-wat-arun",
     name: "왓 아룬",
@@ -283,8 +272,6 @@ const MOCK_PLACE_RESULTS = [
     mapProvider: "google",
     thumb: getThumb("bangkok-chatuchak"),
   },
-
-  // 해외 - 일본 오사카
   {
     sourceId: "osaka-dotonbori",
     name: "도톤보리",
@@ -303,8 +290,6 @@ const MOCK_PLACE_RESULTS = [
     mapProvider: "google",
     thumb: getThumb("osaka-usj"),
   },
-
-  // 해외 - 싱가포르
   {
     sourceId: "singapore-marina-bay-sands",
     name: "마리나 베이 샌즈",
@@ -405,6 +390,214 @@ const RouteCompleteIcon = () => (
     />
   </svg>
 );
+
+const FixPointPinIcon = () => (
+  <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+    <path
+      d="M12 21s-6-5.2-6-11a6 6 0 1 1 12 0c0 5.8-6 11-6 11Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+    <circle
+      cx="12"
+      cy="10"
+      r="2.2"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+  </svg>
+);
+
+const padTime = (value) => String(value).padStart(2, "0");
+
+const parseTimeLabel = (timeLabel = "12:30 PM") => {
+  const match = String(timeLabel).match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+
+  if (!match) {
+    return {
+      period: "PM",
+      hour: 12,
+      minute: 30,
+    };
+  }
+
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  const period = match[3].toUpperCase();
+
+  return {
+    period: period === "AM" ? "AM" : "PM",
+    hour: hour >= 1 && hour <= 12 ? hour : 12,
+    minute: minute >= 0 && minute <= 59 ? minute : 30,
+  };
+};
+
+const formatTimeLabel = ({ period, hour, minute }) => {
+  return `${padTime(hour)}:${padTime(minute)} ${period}`;
+};
+
+const getPrevHour = (hour) => {
+  return hour <= 1 ? 12 : hour - 1;
+};
+
+const getNextHour = (hour) => {
+  return hour >= 12 ? 1 : hour + 1;
+};
+
+const getPrevMinute = (minute) => {
+  return minute - 5 < 0 ? 55 : minute - 5;
+};
+
+const getNextMinute = (minute) => {
+  return minute + 5 > 59 ? 0 : minute + 5;
+};
+
+const FixPointModal = ({
+  open,
+  place,
+  period,
+  hour,
+  minute,
+  isFixed,
+  onChangePeriod,
+  onChangeHour,
+  onChangeMinute,
+  onChangeFixed,
+  onClose,
+  onConfirm,
+}) => {
+  if (!open || !place) return null;
+
+  const prevHour = getPrevHour(hour);
+  const nextHour = getNextHour(hour);
+  const prevMinute = getPrevMinute(minute);
+  const nextMinute = getNextMinute(minute);
+
+  return (
+    <div className="fix-point-overlay" onClick={onClose}>
+      <div
+        className="fix-point-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Fix Point 설정"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="fix-point-icon">
+          <ClockIcon />
+        </div>
+
+        <h2 className="fix-point-title">Fix Point 설정</h2>
+
+        <div className="fix-point-place">
+          <FixPointPinIcon />
+          <span>{place.name}</span>
+        </div>
+
+        <div className="fix-point-period-tabs">
+          <button
+            type="button"
+            className={period === "AM" ? "is-active" : ""}
+            onClick={() => onChangePeriod("AM")}
+          >
+            오전
+          </button>
+
+          <button
+            type="button"
+            className={period === "PM" ? "is-active" : ""}
+            onClick={() => onChangePeriod("PM")}
+          >
+            오후
+          </button>
+        </div>
+
+        <div className="fix-point-time-picker">
+          <div className="fix-point-time-column">
+            <button
+              type="button"
+              className="fix-point-time-muted"
+              onClick={() => onChangeHour(prevHour)}
+            >
+              {padTime(prevHour)}
+            </button>
+
+            <button type="button" className="fix-point-time-selected">
+              {padTime(hour)}
+            </button>
+
+            <button
+              type="button"
+              className="fix-point-time-muted"
+              onClick={() => onChangeHour(nextHour)}
+            >
+              {padTime(nextHour)}
+            </button>
+          </div>
+
+          <span className="fix-point-time-colon">:</span>
+
+          <div className="fix-point-time-column">
+            <button
+              type="button"
+              className="fix-point-time-muted"
+              onClick={() => onChangeMinute(prevMinute)}
+            >
+              {padTime(prevMinute)}
+            </button>
+
+            <button type="button" className="fix-point-time-selected">
+              {padTime(minute)}
+            </button>
+
+            <button
+              type="button"
+              className="fix-point-time-muted"
+              onClick={() => onChangeMinute(nextMinute)}
+            >
+              {padTime(nextMinute)}
+            </button>
+          </div>
+        </div>
+
+        <label className="fix-point-fixed-row">
+          <span className="fix-point-fixed-text">
+            <strong>이 시간에 고정하기</strong>
+            <small>경로 변경 시에도 시간이 유지됩니다</small>
+          </span>
+
+          <input
+            type="checkbox"
+            checked={isFixed}
+            onChange={(event) => onChangeFixed(event.target.checked)}
+          />
+
+          <span className="fix-point-switch" />
+        </label>
+
+        <div className="fix-point-actions">
+          <button
+            type="button"
+            className="fix-point-cancel-button"
+            onClick={onClose}
+          >
+            취소
+          </button>
+
+          <button
+            type="button"
+            className="fix-point-confirm-button"
+            onClick={onConfirm}
+          >
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const normalizeDate = (date) => {
   const newDate = new Date(date);
@@ -513,12 +706,17 @@ const createPlaceItem = (place, orderIndex = 0) => {
       .toString(36)
       .slice(2, 7)}`,
     sourceId: place.sourceId,
+    originalId: place.originalId || place.id || place.placeId || null,
     name: place.name,
     desc: place.desc,
     city: place.city,
     country: place.country,
     mapProvider: place.mapProvider,
     thumb: place.thumb || getThumb(place.sourceId || place.name),
+    rating: place.rating || null,
+    tags: place.tags || [],
+    latitude: place.latitude || null,
+    longitude: place.longitude || null,
     timeLabel:
       place.timeLabel ||
       DEFAULT_TIME_SLOTS[orderIndex % DEFAULT_TIME_SLOTS.length],
@@ -575,15 +773,177 @@ const INITIAL_PLACES_BY_DATE = {
   [formatDateKey(createDate(2024, 5, 14))]: [],
 };
 
+const readLocalStorageJSON = (key, fallbackValue) => {
+  try {
+    if (typeof window === "undefined") {
+      return fallbackValue;
+    }
+
+    const raw = window.localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallbackValue;
+  } catch (error) {
+    console.error(`${key} 불러오기 실패:`, error);
+    return fallbackValue;
+  }
+};
+
+const getPlaceCompareId = (place) => {
+  const value = place?.id ?? place?.placeId ?? place?.sourceId;
+  return value === undefined || value === null ? "" : String(value);
+};
+
+const isSamePlaceId = (place, placeId) => {
+  return getPlaceCompareId(place) === String(placeId);
+};
+
+const normalizeSourceId = (value) => {
+  return String(value || "place")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w가-힣-]/g, "")
+    .toLowerCase();
+};
+
+const normalizeIncomingRoutePlace = (place) => {
+  if (!place) {
+    return null;
+  }
+
+  const name =
+    place.name ||
+    place.title ||
+    place.placeName ||
+    place.place_name ||
+    "이름 없는 장소";
+
+  if (!name) {
+    return null;
+  }
+
+  const originalId =
+    place.id ?? place.placeId ?? place.sourceId ?? place.title ?? place.name;
+
+  const sourceId = normalizeSourceId(
+    place.sourceId || place.id || place.placeId || name
+  );
+
+  const desc =
+    place.desc ||
+    place.address ||
+    place.roadAddress ||
+    place.roadAddressName ||
+    place.addressName ||
+    place.address_name ||
+    "주소 정보 없음";
+
+  return {
+    sourceId,
+    originalId,
+    name,
+    desc,
+    city: place.city || place.region || "",
+    country: place.country || "대한민국",
+    mapProvider: place.mapProvider || place.provider || "kakao",
+    thumb:
+      place.thumb ||
+      place.image ||
+      place.thumbnail ||
+      place.thumbnailUrl ||
+      getThumb(sourceId || name),
+    rating: place.rating || null,
+    tags: place.tags || [],
+    latitude: place.latitude || place.lat || null,
+    longitude: place.longitude || place.lng || null,
+  };
+};
+
+const getIncomingRoutePlaces = (navigationState, search = "") => {
+  const statePlaces = Array.isArray(navigationState?.routePlaces)
+    ? navigationState.routePlaces
+    : navigationState?.selectedPlace
+    ? [navigationState.selectedPlace]
+    : [];
+
+  const normalizedStatePlaces = statePlaces
+    .map(normalizeIncomingRoutePlace)
+    .filter(Boolean);
+
+  if (normalizedStatePlaces.length > 0) {
+    return normalizedStatePlaces;
+  }
+
+  const searchParams = new URLSearchParams(search);
+  const placeId = searchParams.get("placeId");
+
+  if (!placeId) {
+    return [];
+  }
+
+  const draftPlaces = readLocalStorageJSON(ROUTE_DRAFT_PLACES_KEY, []);
+  const matchedDraftPlaces = Array.isArray(draftPlaces)
+    ? draftPlaces.filter((place) => isSamePlaceId(place, placeId))
+    : [];
+
+  const normalizedDraftPlaces = matchedDraftPlaces
+    .map(normalizeIncomingRoutePlace)
+    .filter(Boolean);
+
+  if (normalizedDraftPlaces.length > 0) {
+    return normalizedDraftPlaces;
+  }
+
+  const selectedPlace = readLocalStorageJSON(ROUTE_SELECTED_PLACE_KEY, null);
+
+  if (selectedPlace && isSamePlaceId(selectedPlace, placeId)) {
+    const normalizedSelectedPlace = normalizeIncomingRoutePlace(selectedPlace);
+
+    if (normalizedSelectedPlace) {
+      return [normalizedSelectedPlace];
+    }
+  }
+
+  const recentPlaces = readLocalStorageJSON(RECENT_PLACES_KEY, []);
+  const recentPlace = Array.isArray(recentPlaces)
+    ? recentPlaces.find((place) => isSamePlaceId(place, placeId))
+    : null;
+
+  const normalizedRecentPlace = normalizeIncomingRoutePlace(recentPlace);
+
+  return normalizedRecentPlace ? [normalizedRecentPlace] : [];
+};
+
+const createInitialPlacesByDate = (incomingPlaces = []) => {
+  const clonedPlacesByDate = JSON.parse(JSON.stringify(INITIAL_PLACES_BY_DATE));
+
+  if (incomingPlaces.length === 0) {
+    return clonedPlacesByDate;
+  }
+
+  const firstDateKey = formatDateKey(INITIAL_START_DATE);
+
+  clonedPlacesByDate[firstDateKey] = incomingPlaces.map((place, index) =>
+    createPlaceItem(place, index)
+  );
+
+  return clonedPlacesByDate;
+};
+
 const RouteCreate = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const searchInputRef = useRef(null);
+
+  const incomingRoutePlaces = useMemo(() => {
+    return getIncomingRoutePlaces(location.state, location.search);
+  }, [location.state, location.search]);
 
   const [rangeStart, setRangeStart] = useState(INITIAL_START_DATE);
   const [rangeEnd, setRangeEnd] = useState(INITIAL_END_DATE);
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [placesByDate, setPlacesByDate] = useState(INITIAL_PLACES_BY_DATE);
+  const [placesByDate, setPlacesByDate] = useState(() =>
+    createInitialPlacesByDate(incomingRoutePlaces)
+  );
   const [currentMonth, setCurrentMonth] = useState(
     new Date(
       INITIAL_START_DATE.getFullYear(),
@@ -593,6 +953,13 @@ const RouteCreate = () => {
   );
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+
+  const [fixModalPlace, setFixModalPlace] = useState(null);
+  const [fixModalDateKey, setFixModalDateKey] = useState("");
+  const [fixPeriod, setFixPeriod] = useState("PM");
+  const [fixHour, setFixHour] = useState(12);
+  const [fixMinute, setFixMinute] = useState(30);
+  const [fixIsFixed, setFixIsFixed] = useState(true);
 
   const selectedDates = useMemo(() => {
     return getDatesInRange(rangeStart, rangeEnd);
@@ -654,7 +1021,7 @@ const RouteCreate = () => {
   }, [activeDayIndex, selectedDates.length]);
 
   useEffect(() => {
-    if (!isCompleteModalOpen) return;
+    if (!isCompleteModalOpen && !fixModalPlace) return undefined;
 
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -662,7 +1029,7 @@ const RouteCreate = () => {
     return () => {
       document.body.style.overflow = originalOverflow;
     };
-  }, [isCompleteModalOpen]);
+  }, [isCompleteModalOpen, fixModalPlace]);
 
   const handlePrevMonth = () => {
     setCurrentMonth(
@@ -768,20 +1135,47 @@ const RouteCreate = () => {
     }));
   };
 
-  const handleTogglePlaceFixed = (id) => {
+  const handleOpenFixModal = (place) => {
     if (!activeDateKey) return;
+
+    const parsedTime = parseTimeLabel(place.timeLabel);
+
+    setFixModalPlace(place);
+    setFixModalDateKey(activeDateKey);
+    setFixPeriod(parsedTime.period);
+    setFixHour(parsedTime.hour);
+    setFixMinute(parsedTime.minute);
+    setFixIsFixed(true);
+  };
+
+  const handleCloseFixModal = () => {
+    setFixModalPlace(null);
+    setFixModalDateKey("");
+  };
+
+  const handleConfirmFixModal = () => {
+    if (!fixModalPlace || !fixModalDateKey) return;
+
+    const nextTimeLabel = formatTimeLabel({
+      period: fixPeriod,
+      hour: fixHour,
+      minute: fixMinute,
+    });
 
     setPlacesByDate((prev) => ({
       ...prev,
-      [activeDateKey]: (prev[activeDateKey] || []).map((place) =>
-        place.id === id
+      [fixModalDateKey]: (prev[fixModalDateKey] || []).map((place) =>
+        place.id === fixModalPlace.id
           ? {
               ...place,
-              isFixedTime: !place.isFixedTime,
+              timeLabel: nextTimeLabel,
+              isFixedTime: fixIsFixed,
             }
           : place
       ),
     }));
+
+    handleCloseFixModal();
   };
 
   const handleGenerateRoute = () => {
@@ -1061,7 +1455,7 @@ const RouteCreate = () => {
                           className={`schedule-time-action ${
                             isFixedTime ? "is-edit" : "is-fix"
                           }`}
-                          onClick={() => handleTogglePlaceFixed(place.id)}
+                          onClick={() => handleOpenFixModal(place)}
                         >
                           {isFixedTime ? "EDIT" : "FIX"}
                         </button>
@@ -1093,6 +1487,21 @@ const RouteCreate = () => {
           </button>
         </div>
       </div>
+
+      <FixPointModal
+        open={Boolean(fixModalPlace)}
+        place={fixModalPlace}
+        period={fixPeriod}
+        hour={fixHour}
+        minute={fixMinute}
+        isFixed={fixIsFixed}
+        onChangePeriod={setFixPeriod}
+        onChangeHour={setFixHour}
+        onChangeMinute={setFixMinute}
+        onChangeFixed={setFixIsFixed}
+        onClose={handleCloseFixModal}
+        onConfirm={handleConfirmFixModal}
+      />
 
       {isCompleteModalOpen && (
         <div
