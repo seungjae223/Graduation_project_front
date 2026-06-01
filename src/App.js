@@ -95,7 +95,7 @@ function Layout() {
   const shouldHideHeader = hideHeaderPaths.includes(pathname) || isAdminPage;
 
   return (
-    <div className="app app-container">
+    <div className="app">
       {!shouldHideHeader && (
         <Header onSearchClick={() => setIsSearchPopOpen(true)} />
       )}

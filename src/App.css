@@ -18,7 +18,7 @@ html {
 
 body {
   min-height: 100vh;
-  background: #f2f4f7;
+  background: #ffffff;
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -45,13 +45,14 @@ svg {
 
 .app {
   width: 100%;
+  max-width: none;
   min-height: 100vh;
   min-height: 100dvh;
-  margin: 0 auto;
+  margin: 0;
+  padding: 0;
   background: #ffffff;
   position: relative;
   overflow-x: hidden;
-  padding: 0;
   display: flex;
   flex-direction: column;
 }
@@ -59,7 +60,6 @@ svg {
 .app-content {
   width: 100%;
   min-width: 0;
-  display: block;
   flex: 1;
   overflow-x: hidden;
 }
@@ -68,13 +68,12 @@ svg {
   padding-bottom: var(--footer-height);
 }
 
-/* 페이지 전환 애니메이션 */
 .route-transition {
   width: 100%;
   min-width: 0;
   min-height: auto;
-  animation: pageFadeUp 0.32s ease both;
   overflow-x: hidden;
+  animation: pageFadeUp 0.32s ease both;
 }
 
 @keyframes pageFadeUp {
@@ -89,40 +88,15 @@ svg {
   }
 }
 
-/* 모바일에서는 화면 전체를 꽉 채움 */
-@media (max-width: 480px) {
-  body {
-    display: block;
-    background: #ffffff;
-  }
-
-  #root {
-    width: 100%;
-    min-height: 100vh;
-  }
-
-  .app {
-    width: 100%;
-    max-width: none;
-    margin: 0;
-    box-shadow: none;
-  }
-}
-
 /* PC에서만 모바일 앱처럼 가운데 고정 */
-@media (min-width: 481px) {
+@media (min-width: 768px) {
   body {
-    display: flex;
-    justify-content: center;
     background: #f2f4f7;
-  }
-
-  #root {
-    width: 100%;
   }
 
   .app {
     max-width: var(--app-width);
+    margin: 0 auto;
     box-shadow: 0 0 24px rgba(0, 0, 0, 0.08);
   }
 }
