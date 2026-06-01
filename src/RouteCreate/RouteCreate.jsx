@@ -741,12 +741,6 @@ const getTodayDate = () => {
   );
 };
 
-const addDays = (date, days) => {
-  const nextDate = new Date(date);
-  nextDate.setDate(nextDate.getDate() + days);
-  return normalizeDate(nextDate);
-};
-
 const INITIAL_START_DATE = getTodayDate();
 const INITIAL_END_DATE = INITIAL_START_DATE;
 

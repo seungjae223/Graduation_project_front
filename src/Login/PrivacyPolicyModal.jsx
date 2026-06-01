@@ -98,7 +98,7 @@ const PrivacyPolicyModal = ({ isOpen, onClose, onAgree }) => {
       month: "long",
       day: "numeric",
     }).format(new Date());
-  }, [isOpen]);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
