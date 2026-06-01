@@ -61,7 +61,8 @@ function Layout() {
     setIsSearchPopOpen(false);
   }, [location.pathname]);
 
-  const isAdminPage = location.pathname.startsWith("/admin");
+  const pathname = location.pathname.toLowerCase();
+  const isAdminPage = pathname.startsWith("/admin");
 
   const hideFooterPaths = [
     "/",
@@ -71,21 +72,27 @@ function Layout() {
     "/login",
     "/find-password",
     "/verify-code",
-    "/Landing",
+    "/landing",
     "/detail",
     "/signup",
   ];
 
-  const shouldHideFooter = hideFooterPaths.includes(location.pathname);
+  const hideHeaderPaths = [
+    "/",
+    "/onboarding",
+    "/onboarding2",
+    "/onboarding3",
+    "/landing",
+    "/login",
+  ];
+
+  const shouldHideFooter = hideFooterPaths.includes(pathname);
   const shouldShowDefaultFooter = !shouldHideFooter && !isAdminPage;
   const shouldShowAdminFooter = isAdminPage;
 
-  // Header는 로그인 화면과 관리자 화면에서만 숨김
+  // 온보딩, 랜딩, 로그인, 관리자 화면에서는 Header 숨김
   // find-password, verify-code, signup 같은 이메일 인증 관련 화면에서는 Header 보임
-  const hideHeaderPaths = ["/login"];
-
-  const shouldHideHeader =
-    hideHeaderPaths.includes(location.pathname) || isAdminPage;
+  const shouldHideHeader = hideHeaderPaths.includes(pathname) || isAdminPage;
 
   return (
     <div className="app app-container">
@@ -102,9 +109,11 @@ function Layout() {
           <Suspense fallback={<EarthLoader text="Connecting..." />}>
             <Routes>
               <Route path="/" element={<OnBoarding />} />
+              <Route path="/onboarding" element={<OnBoarding />} />
               <Route path="/onboarding2" element={<OnBoarding2 />} />
               <Route path="/onboarding3" element={<OnBoarding3 />} />
 
+              <Route path="/landing" element={<Landing />} />
               <Route path="/Landing" element={<Landing />} />
 
               <Route path="/login" element={<Login />} />
@@ -143,6 +152,9 @@ function Layout() {
                 path="/admin/inquiry/write"
                 element={<AdminInquiryWrite />}
               />
+
+              {/* 잘못된 경로로 들어오면 온보딩으로 표시 */}
+              <Route path="*" element={<OnBoarding />} />
             </Routes>
           </Suspense>
         </div>
