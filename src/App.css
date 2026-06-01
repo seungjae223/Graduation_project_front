@@ -63,11 +63,17 @@ svg {
   display: block;
   flex: 1;
   overflow-x: hidden;
+  overflow-y: visible;
 }
 
+/* 푸터가 있는 페이지의 실제 스크롤 여백 */
 .app-content.with-footer {
-  padding-bottom: var(--footer-height);
-  box-sizing: border-box;
+  padding-bottom: calc(var(--footer-height) + 32px);
+}
+
+/* 라우트 전환 wrapper에도 푸터 여백 추가 */
+.app-content.with-footer .route-transition {
+  padding-bottom: calc(var(--footer-height) + 32px);
 }
 
 /* 페이지 전환 애니메이션 */
@@ -77,6 +83,7 @@ svg {
   min-height: 100%;
   animation: pageFadeUp 0.32s ease both;
   overflow-x: hidden;
+  overflow-y: visible;
 }
 
 @keyframes pageFadeUp {
@@ -94,8 +101,8 @@ svg {
 /* 실제 모바일에서는 화면 꽉 차게 */
 @media (max-width: 390px) {
   .app {
-    max-width: none;
     width: 100%;
+    max-width: none;
   }
 }
 
