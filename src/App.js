@@ -1,39 +1,57 @@
 import "./App.css";
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Header from "./Header/Header";
-
-import OnBoarding from "./OnBoarding/OnBoarding";
-import OnBoarding2 from "./OnBoarding/OnBoarding2";
-import OnBoarding3 from "./OnBoarding/OnBoarding3";
-import Landing from "./Landingpage/Landing";
-import Login from "./Login/Login";
 import Footer from "./Footer/Footer";
-import Home from "./Homepage/Home";
-import Recommend from "./Recommend/Recommend";
-import Total from "./Recommend/Total";
-import MyPage from "./Mypage/MyPage";
-import SavedPlaces from "./Mypage/SavedPlaces";
-import RecentPlacesPage from "./RecentPlacesPage/RecentPlacesPage";
-import Search from "./Search/Search";
 import SearchPop from "./SearchPopup/SearchPop";
-import RouteCreate from "./RouteCreate/RouteCreate";
-import Detail from "./Recommend/Detail";
-import RouteResult from "./RouteResult/RouteResult";
-import Schedule from "./Schedule/Schedule";
-import PopularAll from "./Homepage/PopularAll";
-import MySchedule from "./MySchedule/MySchedule";
+import EarthLoader from "./Loading/EarthLoader";
 import { SavedPlacesProvider } from "./Context/SavedPlacesContext";
-import SignUp from "./Login/SignUp";
 
-// 관리자 페이지 / 관리자 전용 푸터
-import AdminMain from "./Admin/AdminMain/AdminMain";
+// 관리자 전용 푸터
 import AdminFooter from "./Admin/AdminFooter/AdminFooter";
 
-// 관리자 문의 페이지
-import AdminInquiry from "./Admin/AdminInquiryPage/AdminInquiryPage";
-import AdminInquiryWrite from "./Admin/AdminInquiryPage/AdminInquiryWrite";
+// 페이지 레이지 로딩
+const OnBoarding = lazy(() => import("./OnBoarding/OnBoarding"));
+const OnBoarding2 = lazy(() => import("./OnBoarding/OnBoarding2"));
+const OnBoarding3 = lazy(() => import("./OnBoarding/OnBoarding3"));
+const Landing = lazy(() => import("./Landingpage/Landing"));
+
+const Login = lazy(() => import("./Login/Login"));
+const FindPassword = lazy(() => import("./Login/FindPassword"));
+const VerifyCode = lazy(() => import("./Login/VerifyCode"));
+const SignUp = lazy(() => import("./Login/SignUp"));
+
+const Home = lazy(() => import("./Homepage/Home"));
+const Search = lazy(() => import("./Search/Search"));
+const Recommend = lazy(() => import("./Recommend/Recommend"));
+const Total = lazy(() => import("./Recommend/Total"));
+const Detail = lazy(() => import("./Recommend/Detail"));
+const PopularAll = lazy(() => import("./Homepage/PopularAll"));
+
+const MyPage = lazy(() => import("./Mypage/MyPage"));
+const SavedPlaces = lazy(() => import("./Mypage/SavedPlaces"));
+const RecentPlacesPage = lazy(() =>
+  import("./RecentPlacesPage/RecentPlacesPage")
+);
+const MySchedule = lazy(() => import("./MySchedule/MySchedule"));
+
+const RouteCreate = lazy(() => import("./RouteCreate/RouteCreate"));
+const RouteResult = lazy(() => import("./RouteResult/RouteResult"));
+const Schedule = lazy(() => import("./Schedule/Schedule"));
+
+const Inquiry = lazy(() => import("./Mypage/Inquiry"));
+const InquiryWrite = lazy(() => import("./Mypage/InquiryWrite"));
+const InquiryDetail = lazy(() => import("./Mypage/InquiryDetail"));
+
+// 관리자 페이지
+const AdminMain = lazy(() => import("./Admin/AdminMain/AdminMain"));
+const AdminInquiry = lazy(() =>
+  import("./Admin/AdminInquiryPage/AdminInquiryPage")
+);
+const AdminInquiryWrite = lazy(() =>
+  import("./Admin/AdminInquiryPage/AdminInquiryWrite")
+);
 
 function Layout() {
   const location = useLocation();
@@ -51,6 +69,8 @@ function Layout() {
     "/onboarding2",
     "/onboarding3",
     "/login",
+    "/find-password",
+    "/verify-code",
     "/Landing",
     "/detail",
     "/signup",
@@ -60,12 +80,15 @@ function Layout() {
   const shouldShowDefaultFooter = !shouldHideFooter && !isAdminPage;
   const shouldShowAdminFooter = isAdminPage;
 
+  // Header는 로그인 화면과 관리자 화면에서만 숨김
+  // find-password, verify-code, signup 같은 이메일 인증 관련 화면에서는 Header 보임
   const hideHeaderPaths = ["/login"];
+
   const shouldHideHeader =
     hideHeaderPaths.includes(location.pathname) || isAdminPage;
 
   return (
-    <div className="app">
+    <div className="app app-container">
       {!shouldHideHeader && (
         <Header onSearchClick={() => setIsSearchPopOpen(true)} />
       )}
@@ -75,37 +98,54 @@ function Layout() {
           shouldShowDefaultFooter || shouldShowAdminFooter ? "with-footer" : ""
         }`}
       >
-        <Routes>
-          <Route path="/" element={<OnBoarding />} />
-          <Route path="/onboarding2" element={<OnBoarding2 />} />
-          <Route path="/onboarding3" element={<OnBoarding3 />} />
-          <Route path="/Landing" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/recommend" element={<Recommend />} />
-          <Route path="/total" element={<Total />} />
-          <Route path="/mypage" element={<MyPage />} />
-          <Route path="/saved-places" element={<SavedPlaces />} />
-          <Route path="/mypage/recent-places" element={<RecentPlacesPage />} />
-          <Route path="/route-create" element={<RouteCreate />} />
-          <Route path="/detail" element={<Detail />} />
-          <Route path="/route-result" element={<RouteResult />} />
-          <Route path="/schedule" element={<Schedule />} />
-          <Route path="/popular-all" element={<PopularAll />} />
-          <Route path="/my-schedule" element={<MySchedule />} />
+        <div key={location.pathname} className="route-transition">
+          <Suspense fallback={<EarthLoader text="Connecting..." />}>
+            <Routes>
+              <Route path="/" element={<OnBoarding />} />
+              <Route path="/onboarding2" element={<OnBoarding2 />} />
+              <Route path="/onboarding3" element={<OnBoarding3 />} />
 
-          {/* 관리자 메인 페이지 */}
-          <Route path="/admin" element={<AdminMain />} />
+              <Route path="/Landing" element={<Landing />} />
 
-          {/* 관리자 문의 페이지 */}
-          <Route path="/admin/inquiry" element={<AdminInquiry />} />
-          <Route
-            path="/admin/inquiry/write"
-            element={<AdminInquiryWrite />}
-          />
-        </Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/find-password" element={<FindPassword />} />
+              <Route path="/verify-code" element={<VerifyCode />} />
+              <Route path="/signup" element={<SignUp />} />
+
+              <Route path="/home" element={<Home />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/recommend" element={<Recommend />} />
+              <Route path="/total" element={<Total />} />
+              <Route path="/mypage" element={<MyPage />} />
+              <Route path="/saved-places" element={<SavedPlaces />} />
+              <Route
+                path="/mypage/recent-places"
+                element={<RecentPlacesPage />}
+              />
+              <Route path="/route-create" element={<RouteCreate />} />
+              <Route path="/detail" element={<Detail />} />
+              <Route path="/route-result" element={<RouteResult />} />
+              <Route path="/schedule" element={<Schedule />} />
+              <Route path="/popular-all" element={<PopularAll />} />
+              <Route path="/my-schedule" element={<MySchedule />} />
+
+              {/* 일반 사용자 문의사항 페이지 */}
+              <Route path="/inquiry" element={<Inquiry />} />
+              <Route path="/inquiry/write" element={<InquiryWrite />} />
+              <Route path="/inquiry/:id" element={<InquiryDetail />} />
+
+              {/* 관리자 메인 페이지 */}
+              <Route path="/admin" element={<AdminMain />} />
+
+              {/* 관리자 문의 페이지 */}
+              <Route path="/admin/inquiry" element={<AdminInquiry />} />
+              <Route
+                path="/admin/inquiry/write"
+                element={<AdminInquiryWrite />}
+              />
+            </Routes>
+          </Suspense>
+        </div>
       </main>
 
       {shouldShowDefaultFooter && <Footer />}

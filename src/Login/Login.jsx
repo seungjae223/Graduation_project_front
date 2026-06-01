@@ -8,12 +8,15 @@ import eyeIcon from "../img/눈알.png";
 import kakaoIcon from "../img/카카오.png";
 import naverIcon from "../img/네이버.png";
 
-// 경로는 실제 파일 위치에 맞게 수정
-import { loginMockUser } from "../utils/mockAuth";
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
 
 const Login = () => {
   const navigate = useNavigate();
+
   const [showPw, setShowPw] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [loginForm, setLoginForm] = useState({
     email: "",
     password: "",
@@ -24,6 +27,10 @@ const Login = () => {
     navigate("/signup");
   };
 
+  const handleFindPasswordClick = () => {
+    navigate("/find-password");
+  };
+
   const handleChange = (key, value) => {
     setLoginForm((prev) => ({
       ...prev,
@@ -31,7 +38,7 @@ const Login = () => {
     }));
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     const email = loginForm.email.trim();
@@ -42,19 +49,48 @@ const Login = () => {
       return;
     }
 
-    const result = loginMockUser({
-      email,
-      password,
-      keepLogin: loginForm.keepLogin,
-    });
+    try {
+      setIsLoading(true);
 
-    if (!result.ok) {
-      alert(result.message || "로그인에 실패했습니다.");
-      return;
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const resultText = await response.text();
+
+      if (!response.ok) {
+        throw new Error(resultText || "로그인에 실패했습니다.");
+      }
+
+      const accessToken = resultText.trim();
+
+      if (!accessToken) {
+        throw new Error("서버에서 토큰이 반환되지 않았습니다.");
+      }
+
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("keepLogin", String(loginForm.keepLogin));
+
+      navigate("/home", { replace: true });
+    } catch (error) {
+      console.error("로그인 실패:", error);
+
+      if (error.message.includes("Failed to fetch")) {
+        alert("백엔드 서버 연결을 확인해주세요.");
+        return;
+      }
+
+      alert(error.message || "이메일 또는 비밀번호를 확인해주세요.");
+    } finally {
+      setIsLoading(false);
     }
-
-    // 관리자/일반회원 구분 없이 로그인 후 메인 홈으로 이동
-    navigate("/home", { replace: true });
   };
 
   return (
@@ -72,7 +108,7 @@ const Login = () => {
           <div className="input-group">
             <label>이메일</label>
             <input
-              type="text"
+              type="email"
               placeholder="이메일을 입력해주세요"
               value={loginForm.email}
               onChange={(e) => handleChange("email", e.target.value)}
@@ -106,11 +142,24 @@ const Login = () => {
               />{" "}
               로그인 상태 유지
             </label>
-            <span className="link">비밀번호 찾기</span>
+
+            <span
+              className="link"
+              onClick={handleFindPasswordClick}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  handleFindPasswordClick();
+                }
+              }}
+            >
+              비밀번호 찾기
+            </span>
           </div>
 
-          <button type="submit" className="login-btn">
-            로그인
+          <button type="submit" className="login-btn" disabled={isLoading}>
+            {isLoading ? "로그인 중..." : "로그인"}
           </button>
 
           <p className="signup">

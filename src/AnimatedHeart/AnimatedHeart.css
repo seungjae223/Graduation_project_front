@@ -1,0 +1,96 @@
+.heart-container {
+  --heart-outline-color: #cbd5e1;
+  --heart-active-color: #ff3b30;
+
+  position: relative;
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  transition: 0.3s ease;
+}
+
+.heart-svg-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.heart-svg-outline,
+.heart-svg-filled {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+.heart-svg-outline {
+  fill: var(--heart-outline-color);
+}
+
+.heart-svg-filled {
+  fill: var(--heart-active-color);
+  display: none;
+}
+
+.heart-svg-celebrate {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  display: none;
+  stroke: var(--heart-active-color);
+  fill: var(--heart-active-color);
+  stroke-width: 2px;
+  pointer-events: none;
+}
+
+.heart-container.is-active .heart-svg-outline {
+  opacity: 0;
+}
+
+.heart-container.is-active .heart-svg-filled {
+  display: block;
+  animation: heartFilled 0.55s ease;
+}
+
+.heart-container.is-active .heart-svg-celebrate {
+  display: block;
+  animation: heartCelebrate 0.55s ease forwards;
+}
+
+@keyframes heartFilled {
+  0% {
+    transform: scale(0);
+  }
+
+  35% {
+    transform: scale(1.25);
+  }
+
+  65% {
+    transform: scale(0.95);
+    filter: brightness(1.25);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes heartCelebrate {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  45% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1.2);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}

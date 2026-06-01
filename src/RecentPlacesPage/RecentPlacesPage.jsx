@@ -38,8 +38,31 @@ function RecentPlacesPage() {
     return groupPlacesByDate(recentPlaces);
   }, [recentPlaces]);
 
-  const handlePlaceClick = (placeId) => {
-    navigate(`/place/${placeId}`);
+  const handlePlaceClick = (place) => {
+    if (!place?.id) {
+      return;
+    }
+
+    const detailPlace = {
+      id: place.id,
+      title: place.title || place.name || "이름 없는 장소",
+      name: place.name || place.title || "이름 없는 장소",
+      address: place.address || place.desc || "주소 정보 없음",
+      image: place.image || place.thumb || "",
+      rating: place.rating || 4.8,
+      tags: place.tags || [],
+      reviewCount: place.reviewCount || 980,
+      category: place.category || place.type || "장소",
+      type: place.type || place.category || "장소",
+      latitude: place.latitude || place.lat || null,
+      longitude: place.longitude || place.lng || null,
+    };
+
+    navigate(`/detail?id=${detailPlace.id}`, {
+      state: {
+        place: detailPlace,
+      },
+    });
   };
 
   const handleAddRoute = (e, place) => {
@@ -114,7 +137,7 @@ function RecentPlacesPage() {
                   <article
                     className="recent-place-item"
                     key={place.id}
-                    onClick={() => handlePlaceClick(place.id)}
+                    onClick={() => handlePlaceClick(place)}
                   >
                     <PlaceThumb src={place.image} name={place.name} />
 

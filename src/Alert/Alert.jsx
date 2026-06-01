@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import "./Alert.css";
+import redTrashIcon from "../img/쓰레기통.png";
 
 const ALERT_PRESETS = {
   logout: {
@@ -27,11 +28,22 @@ const ALERT_PRESETS = {
     title: "장소 삭제",
     description: "선택한 장소를 일정에서 삭제할까요?",
     iconTone: "red",
+    iconSrc: redTrashIcon,
     primaryText: "삭제하기",
     secondaryText: "취소",
     primaryVariant: "red",
     secondaryVariant: "gray",
     buttonLayout: "row",
+  },
+  success: {
+    title: "삭제되었습니다",
+    description: "",
+    iconTone: "blue",
+    primaryText: "확인",
+    secondaryText: "",
+    primaryVariant: "blue",
+    secondaryVariant: "gray",
+    buttonLayout: "single",
   },
 };
 
@@ -54,13 +66,14 @@ function Alert({
 
     return {
       ...preset,
+      iconSrc: iconSrc ?? preset.iconSrc,
       title: title ?? preset.title,
       description: description ?? preset.description,
       primaryText: primaryText ?? preset.primaryText,
       secondaryText:
         secondaryText !== undefined ? secondaryText : preset.secondaryText,
     };
-  }, [type, title, description, primaryText, secondaryText]);
+  }, [type, iconSrc, title, description, primaryText, secondaryText]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -94,6 +107,7 @@ function Alert({
       onSecondary();
       return;
     }
+
     onClose?.();
   };
 
@@ -104,9 +118,9 @@ function Alert({
   return (
     <div className="alert-overlay" onClick={handleBackdropClick}>
       <div className="alert-modal" onClick={(e) => e.stopPropagation()}>
-        {iconSrc ? (
+        {config.iconSrc ? (
           <div className={`alert-icon-wrap ${config.iconTone}`}>
-            <img src={iconSrc} alt="" className="alert-icon-image" />
+            <img src={config.iconSrc} alt="" className="alert-icon-image" />
           </div>
         ) : null}
 
@@ -159,6 +173,7 @@ function Alert({
                   className="alert-btn-icon"
                 />
               ) : null}
+
               {config.primaryText}
             </button>
           )}

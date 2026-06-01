@@ -1,23 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
+import AnimatedHeart from "../AnimatedHeart/AnimatedHeart";
 import "./PopularAll.css";
 
 import tokyoImg from "../img/도쿄.png";
 import kyotoImg from "../img/교토.png";
 import beachImg from "../img/서비스 소개 .png";
-
-const HeartIcon = ({ active }) => (
-  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    <path
-      d="M12 21s-6.8-4.35-9.4-8.1C.3 9.55 1.1 5.2 5.4 4.3c2.3-.5 4.3.5 5.6 2.1 1.3-1.6 3.3-2.6 5.6-2.1 4.3.9 5.1 5.25 2.8 8.6C18.8 16.65 12 21 12 21z"
-      fill={active ? "#ffffff" : "none"}
-      stroke="#ffffff"
-      strokeWidth="2"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 const BookmarkIcon = ({ active }) => (
   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -138,7 +127,7 @@ function PopularAll() {
         ))}
       </div>
 
-      <section className="popular-grid">
+      <section className="popular-grid popular-grid-one-column">
         {filteredHotPlaces.map((place) => {
           const saved = isSaved(place.id);
 
@@ -163,7 +152,7 @@ function PopularAll() {
                 }}
                 aria-label={saved ? "저장 취소" : "저장"}
               >
-                <HeartIcon active={saved} />
+                <AnimatedHeart active={saved} />
               </button>
 
               <div className="popular-grid-overlay" />

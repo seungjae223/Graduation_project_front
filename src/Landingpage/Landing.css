@@ -11,10 +11,11 @@
 
 .landing-hero img {
   width: 100%;
+  height: auto;
   display: block;
   border-radius: 24px;
+  object-fit: contain;
 }
-
 
 .badge {
   background: #2b9ed8;
@@ -41,6 +42,7 @@
 .blue {
   color: #2b9ed8;
 }
+
 .feature {
   margin-top: 30px;
   display: flex;
@@ -88,6 +90,7 @@
   color: #6b7280;
   line-height: 1.4;
 }
+
 /* 공통 버튼 */
 .btn {
   width: 100%;
@@ -117,6 +120,7 @@
 .btn:active {
   transform: scale(0.97);
 }
+
 .scroll {
   margin-top: 16px;
   font-size: 12px;
@@ -144,4 +148,107 @@
   text-align: center;
   font-size: 12px;
   color: #999;
+}
+
+/* ================================
+   Landing 2번째 시안처럼 고정
+   기존 CSS 맨 아래에 붙여넣기
+================================ */
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  overflow-x: hidden;
+  background: #f8fbfd;
+}
+
+/* 전체 화면을 모바일 앱 시안처럼 중앙 고정 */
+.landing {
+  width: 100%;
+  max-width: 360px !important;
+  min-height: 100vh;
+  margin: 0 auto !important;
+  padding: 16px 0 40px !important;
+  box-sizing: border-box;
+  background: #f8fbfd;
+}
+
+/* 상단 이미지 카드 */
+.landing-hero {
+  width: 100%;
+  aspect-ratio: 4 / 5 !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  margin: 0;
+  box-shadow: 0 20px 36px rgba(15, 23, 42, 0.18);
+}
+
+/* 이미지가 두 번째 사진처럼 카드 안에 꽉 차게 */
+.landing-hero img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  border-radius: inherit !important;
+
+  aspect-ratio: auto !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+
+/* 텍스트 영역 */
+.landing-content {
+  margin-top: 44px !important;
+  padding: 0 18px;
+  text-align: center;
+}
+
+.landing-content h2 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: #111827;
+}
+
+.blue {
+  color: #0da6f2;
+}
+
+.landing-content p {
+  margin: 22px 0 0;
+  font-size: 16px;
+  line-height: 1.75;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  color: #5b6678;
+}
+
+/* 버튼은 아래쪽에 자연스럽게 */
+.btn {
+  margin-top: 18px;
+}
+
+/* 작은 모바일 대응 */
+@media (max-width: 360px) {
+  .landing {
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .landing-content h2 {
+    font-size: 30px;
+  }
+
+  .landing-content p {
+    font-size: 15px;
+  }
 }

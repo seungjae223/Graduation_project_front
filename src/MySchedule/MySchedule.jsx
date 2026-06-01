@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MySchedule.css";
 
-import tokyoImg from "../img/도쿄.png";
-import kyotoImg from "../img/교토.png";
 import beachImg from "../img/서비스 소개 .png";
+
+const ROUTE_STORAGE_KEY = "mock_saved_route_results";
+const ROUTE_STORAGE_EVENT = "mock-routes-updated";
 
 const ChevronRightIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -59,401 +60,230 @@ const PinIcon = () => (
   </svg>
 );
 
-const createIsoDate = (year, month, day) =>
-  new Date(year, month - 1, day, 9, 0, 0).toISOString();
+const readStoredRoutes = () => {
+  if (typeof window === "undefined") {
+    return [];
+  }
 
-const formatDateKeyFromIso = (isoString) => isoString.slice(0, 10);
+  try {
+    const raw = window.localStorage.getItem(ROUTE_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
 
-const buildSavedRoute = ({
-  id,
-  title,
-  image,
-  dateRange,
-  dayPlans,
-}) => {
-  const selectedDates = dateRange.map(([year, month, day]) =>
-    createIsoDate(year, month, day)
-  );
-
-  const placesByDate = {};
-
-  selectedDates.forEach((isoDate, index) => {
-    placesByDate[formatDateKeyFromIso(isoDate)] = dayPlans[index] || [];
-  });
-
-  const totalPlaces = dayPlans.reduce((sum, day) => sum + day.length, 0);
-
-  return {
-    id,
-    title,
-    createdAt: new Date().toISOString(),
-    thumbnail: image,
-    selectedDates,
-    placesByDate,
-    summary: {
-      daysCount: selectedDates.length,
-      totalPlaces,
-      dateRangeText: `${dateRange[0][1]}/${dateRange[0][2]} ~ ${
-        dateRange[dateRange.length - 1][1]
-      }/${dateRange[dateRange.length - 1][2]}`,
-    },
-  };
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error("저장된 일정 읽기 실패:", error);
+    return [];
+  }
 };
 
-const upcomingScheduleList = [
-  {
-    id: "my-schedule-seoul-healing",
-    dday: "D-5",
-    title: "서울 근교 힐링 여행",
-    dateText: "2024.03.15 - 03.16",
-    location: "경기 가평군",
-    image: tokyoImg,
-    route: buildSavedRoute({
-      id: "my-schedule-seoul-healing",
-      title: "서울 근교 힐링 여행",
-      image: tokyoImg,
-      dateRange: [
-        [2024, 3, 15],
-        [2024, 3, 16],
-      ],
-      dayPlans: [
-        [
-          {
-            name: "가평역 (출발)",
-            desc: "기차 도착 후 여행 시작",
-            timeLabel: "10:00 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 18분 이동 (7.2km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "아침고요수목원",
-            desc: "정원 산책 및 포토 스팟 관람",
-            timeLabel: "10:40 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 22분 이동 (12.4km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "남이섬",
-            desc: "점심 식사 및 자유 산책",
-            timeLabel: "01:10 PM",
-            isFixedTime: false,
-          },
-        ],
-        [
-          {
-            name: "잣향기푸른숲",
-            desc: "숲길 산책과 힐링 코스",
-            timeLabel: "09:30 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 16분 이동 (8.1km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "청평 카페거리",
-            desc: "브런치 및 카페 휴식",
-            timeLabel: "11:20 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 25분 이동 (19.3km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "서울 복귀",
-            desc: "기차 탑승",
-            timeLabel: "03:00 PM",
-            isFixedTime: true,
-          },
-        ],
-      ],
-    }),
-  },
-  {
-    id: "my-schedule-jeju-night",
-    dday: "D-24",
-    title: "제주도 푸른 밤 투어",
-    dateText: "2024.04.05 - 04.08",
-    location: "제주 서귀포시",
-    image: beachImg,
-    route: buildSavedRoute({
-      id: "my-schedule-jeju-night",
-      title: "제주도 푸른 밤 투어",
-      image: beachImg,
-      dateRange: [
-        [2024, 4, 5],
-        [2024, 4, 6],
-        [2024, 4, 7],
-        [2024, 4, 8],
-      ],
-      dayPlans: [
-        [
-          {
-            name: "제주공항 (출발)",
-            desc: "렌터카 수령 후 이동 시작",
-            timeLabel: "10:00 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 45분 이동 (28.1km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "협재해변",
-            desc: "오션뷰 산책 및 사진 촬영",
-            timeLabel: "11:20 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 26분 이동 (14.3km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "애월 카페거리",
-            desc: "브런치 및 카페 휴식",
-            timeLabel: "01:30 PM",
-            isFixedTime: false,
-          },
-        ],
-        [
-          {
-            name: "성산일출봉",
-            desc: "대표 자연 명소 관람",
-            timeLabel: "09:00 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 20분 이동 (8.7km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "우도",
-            desc: "섬 투어 및 점심 식사",
-            timeLabel: "11:40 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 24분 이동 (10.9km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "섭지코지",
-            desc: "해안 절경 감상",
-            timeLabel: "03:10 PM",
-            isFixedTime: false,
-          },
-        ],
-        [
-          {
-            name: "사려니숲길",
-            desc: "숲 산책 코스",
-            timeLabel: "10:10 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 42분 이동 (29.4km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "서귀포 올레시장",
-            desc: "먹거리 탐방",
-            timeLabel: "01:00 PM",
-            isFixedTime: false,
-            moveTextToNext: "버스 18분 이동 (9.8km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "중문 야경 포인트",
-            desc: "야간 드라이브 코스",
-            timeLabel: "07:00 PM",
-            isFixedTime: true,
-          },
-        ],
-        [
-          {
-            name: "용머리해안",
-            desc: "자연 절경 산책",
-            timeLabel: "09:30 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 17분 이동 (7.6km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "카멜리아힐",
-            desc: "꽃 정원 관람",
-            timeLabel: "11:00 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 39분 이동 (31.7km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "제주공항 복귀",
-            desc: "여행 마무리",
-            timeLabel: "03:30 PM",
-            isFixedTime: true,
-          },
-        ],
-      ],
-    }),
-  },
-  {
-    id: "my-schedule-busan-food",
-    dday: "D-52",
-    title: "부산 먹방 식도락 여행",
-    dateText: "2024.05.01 - 05.03",
-    location: "부산 수영구",
-    image: kyotoImg,
-    route: buildSavedRoute({
-      id: "my-schedule-busan-food",
-      title: "부산 먹방 식도락 여행",
-      image: kyotoImg,
-      dateRange: [
-        [2024, 5, 1],
-        [2024, 5, 2],
-        [2024, 5, 3],
-      ],
-      dayPlans: [
-        [
-          {
-            name: "부산역 (출발)",
-            desc: "KTX 도착 후 일정 시작",
-            timeLabel: "10:00 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 14분 이동 (3.6km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "자갈치시장",
-            desc: "로컬 해산물 맛집 탐방",
-            timeLabel: "11:00 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 28분 이동 (9.7km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "광안리 해변",
-            desc: "저녁 산책 및 야경 감상",
-            timeLabel: "06:30 PM",
-            isFixedTime: true,
-          },
-        ],
-        [
-          {
-            name: "해운대 블루라인파크",
-            desc: "해안열차 체험",
-            timeLabel: "09:40 AM",
-            isFixedTime: false,
-            moveTextToNext: "도보 12분 이동 (850m)",
-            moveTypeToNext: "walk",
-          },
-          {
-            name: "해운대 암소갈비",
-            desc: "점심 맛집 방문",
-            timeLabel: "12:20 PM",
-            isFixedTime: true,
-            moveTextToNext: "버스 22분 이동 (8.4km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "전포 카페거리",
-            desc: "디저트 및 카페 휴식",
-            timeLabel: "03:20 PM",
-            isFixedTime: false,
-          },
-        ],
-        [
-          {
-            name: "국제시장",
-            desc: "먹거리 및 쇼핑",
-            timeLabel: "10:10 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 18분 이동 (6.9km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "흰여울문화마을",
-            desc: "산책 및 사진 촬영",
-            timeLabel: "01:10 PM",
-            isFixedTime: false,
-            moveTextToNext: "버스 20분 이동 (7.4km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "부산역 복귀",
-            desc: "여행 마무리",
-            timeLabel: "04:20 PM",
-            isFixedTime: true,
-          },
-        ],
-      ],
-    }),
-  },
-];
+const normalizeDateOnly = (date) => {
+  const newDate = new Date(date);
+  newDate.setHours(0, 0, 0, 0);
+  return newDate;
+};
 
-const pastScheduleList = [
-  {
-    id: "past-1",
-    dday: "완료",
-    title: "교토 감성 여행",
-    dateText: "2024.01.10 - 01.13",
-    location: "교토, 일본",
-    image: kyotoImg,
-    route: buildSavedRoute({
-      id: "past-1",
-      title: "교토 감성 여행",
-      image: kyotoImg,
-      dateRange: [
-        [2024, 1, 10],
-        [2024, 1, 11],
-        [2024, 1, 12],
-        [2024, 1, 13],
-      ],
-      dayPlans: [
-        [
-          {
-            name: "교토역 (출발)",
-            desc: "여행 시작",
-            timeLabel: "10:00 AM",
-            isFixedTime: false,
-            moveTextToNext: "버스 17분 이동 (5.2km)",
-            moveTypeToNext: "bus",
-          },
-          {
-            name: "후시미 이나리 신사",
-            desc: "대표 명소 관람",
-            timeLabel: "11:00 AM",
-            isFixedTime: false,
-          },
-        ],
-        [
-          {
-            name: "기요미즈데라",
-            desc: "전통 거리 산책",
-            timeLabel: "09:30 AM",
-            isFixedTime: false,
-          },
-        ],
-        [
-          {
-            name: "아라시야마",
-            desc: "대나무숲 산책",
-            timeLabel: "10:30 AM",
-            isFixedTime: false,
-          },
-        ],
-        [
-          {
-            name: "교토 복귀",
-            desc: "마무리 일정",
-            timeLabel: "02:00 PM",
-            isFixedTime: true,
-          },
-        ],
-      ],
-    }),
-  },
-];
+const getDateKey = (date) => {
+  const targetDate = new Date(date);
+  const year = targetDate.getFullYear();
+  const month = String(targetDate.getMonth() + 1).padStart(2, "0");
+  const day = String(targetDate.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const formatDateText = (date, withYear = true) => {
+  const targetDate = new Date(date);
+  const year = targetDate.getFullYear();
+  const month = String(targetDate.getMonth() + 1).padStart(2, "0");
+  const day = String(targetDate.getDate()).padStart(2, "0");
+
+  return withYear ? `${year}.${month}.${day}` : `${month}.${day}`;
+};
+
+const getRouteDates = (route) => {
+  const selectedDates = Array.isArray(route?.selectedDates)
+    ? route.selectedDates
+    : [];
+
+  return selectedDates
+    .map((date) => new Date(date))
+    .filter((date) => !Number.isNaN(date.getTime()))
+    .sort((a, b) => a.getTime() - b.getTime());
+};
+
+const getAllPlacesFromRoute = (route) => {
+  const placesByDate = route?.placesByDate || {};
+
+  return Object.values(placesByDate)
+    .filter(Array.isArray)
+    .flat()
+    .filter(Boolean);
+};
+
+const getRouteFirstPlace = (route) => {
+  const dates = getRouteDates(route);
+  const placesByDate = route?.placesByDate || {};
+
+  if (dates.length > 0) {
+    const firstDateKey = getDateKey(dates[0]);
+    const firstDatePlaces = placesByDate[firstDateKey];
+
+    if (Array.isArray(firstDatePlaces) && firstDatePlaces.length > 0) {
+      return firstDatePlaces[0];
+    }
+  }
+
+  return getAllPlacesFromRoute(route)[0] || null;
+};
+
+const getRouteDateText = (route) => {
+  const dates = getRouteDates(route);
+
+  if (dates.length === 0) {
+    return "날짜 정보 없음";
+  }
+
+  const firstDate = dates[0];
+  const lastDate = dates[dates.length - 1];
+
+  if (dates.length === 1) {
+    return formatDateText(firstDate);
+  }
+
+  return `${formatDateText(firstDate)} - ${formatDateText(lastDate, false)}`;
+};
+
+const getRouteDday = (route) => {
+  const dates = getRouteDates(route);
+
+  if (dates.length === 0) {
+    return "D-Day";
+  }
+
+  const today = normalizeDateOnly(new Date());
+  const firstDate = normalizeDateOnly(dates[0]);
+
+  const diff = Math.ceil(
+    (firstDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (diff > 0) {
+    return `D-${diff}`;
+  }
+
+  if (diff === 0) {
+    return "D-Day";
+  }
+
+  return "완료";
+};
+
+const getRouteLocation = (route) => {
+  const firstPlace = getRouteFirstPlace(route);
+
+  return (
+    firstPlace?.city ||
+    firstPlace?.country ||
+    firstPlace?.desc ||
+    firstPlace?.address ||
+    "여행지 정보 없음"
+  );
+};
+
+const getRouteImage = (route) => {
+  const firstPlace = getRouteFirstPlace(route);
+
+  return route?.thumbnail || firstPlace?.thumb || firstPlace?.image || beachImg;
+};
+
+const convertRouteToSchedule = (route) => {
+  if (!route?.id) {
+    return null;
+  }
+
+  const dates = getRouteDates(route);
+  const firstDate = dates[0] || null;
+  const lastDate = dates[dates.length - 1] || null;
+
+  return {
+    id: String(route.id),
+    dday: getRouteDday(route),
+    title: route.title || "새 여행 일정",
+    dateText: getRouteDateText(route),
+    location: getRouteLocation(route),
+    image: getRouteImage(route),
+    route,
+    startTime: firstDate ? normalizeDateOnly(firstDate).getTime() : 0,
+    endTime: lastDate ? normalizeDateOnly(lastDate).getTime() : 0,
+  };
+};
 
 function MySchedule() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [savedRoutes, setSavedRoutes] = useState(() => readStoredRoutes());
 
-  const currentList = useMemo(() => {
-    return activeTab === "upcoming" ? upcomingScheduleList : pastScheduleList;
-  }, [activeTab]);
+  useEffect(() => {
+    const syncSavedRoutes = () => {
+      setSavedRoutes(readStoredRoutes());
+    };
+
+    const handleStorageChange = (event) => {
+      if (event.key === ROUTE_STORAGE_KEY || event.key === null) {
+        syncSavedRoutes();
+      }
+    };
+
+    syncSavedRoutes();
+
+    window.addEventListener(ROUTE_STORAGE_EVENT, syncSavedRoutes);
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener(ROUTE_STORAGE_EVENT, syncSavedRoutes);
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  const savedScheduleList = useMemo(() => {
+    return savedRoutes
+      .map(convertRouteToSchedule)
+      .filter(Boolean)
+      .sort((a, b) => b.startTime - a.startTime);
+  }, [savedRoutes]);
+
+  const { upcomingScheduleList, pastScheduleList } = useMemo(() => {
+    const today = normalizeDateOnly(new Date()).getTime();
+
+    const upcoming = [];
+    const past = [];
+
+    savedScheduleList.forEach((schedule) => {
+      if (schedule.endTime >= today) {
+        upcoming.push(schedule);
+      } else {
+        past.push(schedule);
+      }
+    });
+
+    upcoming.sort((a, b) => a.startTime - b.startTime);
+    past.sort((a, b) => b.endTime - a.endTime);
+
+    return {
+      upcomingScheduleList: upcoming,
+      pastScheduleList: past,
+    };
+  }, [savedScheduleList]);
+
+  const currentList =
+    activeTab === "upcoming" ? upcomingScheduleList : pastScheduleList;
 
   const handleOpenSchedule = (schedule) => {
-    navigate(`/route-result?id=${schedule.route.id}`, {
+    const routeId = schedule.route.id;
+
+    navigate(`/route-result?id=${encodeURIComponent(routeId)}`, {
       state: {
+        routeId,
         savedRoute: schedule.route,
       },
     });
@@ -538,13 +368,16 @@ function MySchedule() {
           ))}
         </div>
 
+        {currentList.length === 0 && (
+          <div className="my-schedule-empty">
+            <p>저장된 일정이 없습니다.</p>
+          </div>
+        )}
+
         <div className="my-schedule-recommend-card">
           <h3>어디로 떠나볼까요?</h3>
           <p>너만 오면 go가 추천하는 맞춤형 여행 코스</p>
-          <button
-            type="button"
-            onClick={() => navigate("/recommend")}
-          >
+          <button type="button" onClick={() => navigate("/recommend")}>
             추천 받기
           </button>
         </div>

@@ -1,23 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
+import AnimatedHeart from "../AnimatedHeart/AnimatedHeart";
 import "./Recommend.css";
 
 import forestImg from "../img/도쿄.png";
 import museumImg from "../img/교토.png";
 import beachImg from "../img/서비스 소개 .png";
-
-const HeartIcon = ({ active }) => (
-  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    <path
-      d="M12 21s-6.8-4.35-9.4-8.1C.3 9.55 1.1 5.2 5.4 4.3c2.3-.5 4.3.5 5.6 2.1 1.3-1.6 3.3-2.6 5.6-2.1 4.3.9 5.1 5.25 2.8 8.6C18.8 16.65 12 21 12 21z"
-      fill={active ? "#FF5A5F" : "#FFFFFF"}
-      stroke={active ? "#FF5A5F" : "#D9E1EB"}
-      strokeWidth="1.5"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 const PinIcon = () => (
   <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
@@ -333,7 +322,7 @@ function Recommend() {
                     }}
                     aria-label={saved ? "저장 취소" : "저장"}
                   >
-                    <HeartIcon active={saved} />
+                    <AnimatedHeart active={saved} />
                   </button>
                 </div>
 

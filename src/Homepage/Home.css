@@ -1,11 +1,38 @@
-.home {
-  padding: 0; /* 🔥 상단 그라데이션 때문에 제거 */
+.home,
+.home * {
+  box-sizing: border-box;
 }
 
-/* 🔥 상단 그라데이션 영역 */
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* 홈 전체 */
+.home {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100dvh;
+  height: auto;
+  margin: 0 auto;
+  padding: 0 0 calc(40px + env(safe-area-inset-bottom));
+  overflow: visible;
+  background: #f8fbfd;
+}
+
+/* 상단 그라데이션 영역 */
 .home-header {
-  padding: 20px;
-  border-radius: 0 0 20px 20px;
+  width: 100%;
+  padding: 32px 20px 28px;
+  border-radius: 0 0 28px 28px;
 
   background: linear-gradient(
     180deg,
@@ -17,46 +44,57 @@
 
 /* 제목 */
 .home-header h1 {
-  font-size: 22px;
+  margin: 0;
+  font-size: clamp(24px, 7vw, 32px);
   font-weight: 700;
-  margin-bottom: 8px;
+  line-height: 1.3;
   color: #1c1c1e;
+  word-break: keep-all;
 }
 
 .subtitle {
+  margin: 8px 0 0;
   color: #6b7280;
-  font-size: 14px;
-  margin-bottom: 20px;
+  font-size: clamp(14px, 4vw, 16px);
+  line-height: 1.5;
+  word-break: keep-all;
 }
 
 /* 검색창 */
 .search-box {
+  width: 100%;
+  height: 52px;
+  margin-top: 22px;
+
   display: flex;
   align-items: center;
-  gap: 12px;
-  width: 100%;
+  gap: 10px;
+
   background: #ffffff;
   border-radius: 28px;
-  padding: 18px 22px;
-  box-sizing: border-box;
+  padding: 0 22px;
 }
 
 .search-box img {
-  width: 22px;
-  height: 22px;
-  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
 }
 
 .search-box input {
   flex: 1;
-  width: 100%;
+  min-width: 0;
+  height: 100%;
+
   border: none;
-  outline: none ;
-  box-shadow: none ;
-  background: transparent ;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+
   -webkit-appearance: none;
   appearance: none;
-  font-size: 16px;
+
+  font-size: 14px;
   color: #64748b;
   padding: 0;
   margin: 0;
@@ -65,42 +103,38 @@
 .search-box input:focus,
 .search-box input:active {
   border: none;
-  outline: none ;
-  box-shadow: none ;
-  background: transparent ;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
 }
 
 .search-box input::placeholder {
   color: #8b95a1;
 }
 
-/* 🔥 아래 콘텐츠 영역 여백 따로 */
+/* 메뉴 카드 영역 */
 .quick-menu {
-  display: flex;
-  gap: 16px;
-  margin-top: 20px;
-  padding: 0 20px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 22px 20px 0;
 }
 
 .menu-card {
-  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 140px;
+
   background: #f2f2f7;
   border-radius: 20px;
-  padding: 20px;
+  padding: 18px 14px;
   text-align: center;
-}
-.section-more-btn {
-  border: none;
-  background: transparent;
-  padding: 0;
-  color: #7c8aa0;
-  font-size: 14px;
-  font-weight: 700;
   cursor: pointer;
 }
 
 .menu-card.active {
-  background: #0DA6F2;
+  background: #0da6f2;
   color: white;
 }
 
@@ -119,77 +153,413 @@
 }
 
 .icon-circle.white {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .icon-circle img {
-  width: 22px;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 32px 0 16px;
+.menu-card h3 {
+  margin: 14px 0 4px;
+  font-size: 17px;
+  line-height: 1.3;
 }
 
-.section-header h2 {
+.menu-card p {
   margin: 0;
-  font-size: 28px;
-  font-weight: 800;
-  color: #111827;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
-.section-header span {
-  font-size: 16px;
-  font-weight: 600;
-  color: #0da6f2;
-  cursor: pointer;
-}
+/* 인기 여행지 제목 */
+.section-header,
+.home-popular-header {
+  width: 100%;
+  padding: 26px 24px 14px;
 
-/* 가로 스와이프 영역 */
-.travel-list {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.home .section-header > h2,
+.home .home-popular-header > h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+
+.home .section-header > span,
+.home .section-header > button,
+.home .section-more-btn,
+.home .home-popular-more-button {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #0da6f2;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.7px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* 여행지 리스트 - 가로 1행 */
+.travel-list {
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 18px;
+  padding: 0 16px 24px;
+
   overflow-x: auto;
-  padding-bottom: 8px;
+  overflow-y: hidden;
+
   scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .travel-list::-webkit-scrollbar {
   display: none;
 }
 
+/* 여행지 카드 */
 .travel-card {
   position: relative;
-  flex: 0 0 auto;
+  flex: 0 0 180px;
   width: 180px;
-  height: 260px;
-  border-radius: 28px;
+  min-width: 180px;
+  aspect-ratio: 1 / 1.35;
+
+  border-radius: 24px;
   overflow: hidden;
-  scroll-snap-align: start;
   background: #ddd;
+  scroll-snap-align: start;
 }
 
 .travel-card img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
+  object-fit: cover;
 }
 
 /* 사진 위 제목 */
 .travel-overlay {
   position: absolute;
-  left: 16px;
-  bottom: 14px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  padding: 14px 16px;
 }
 
 .travel-overlay span {
   color: #ffffff;
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 800;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* 내 주변 탐색 카드 */
+.nearby-location-card {
+  width: calc(100% - 32px);
+  min-height: 84px;
+  margin: 28px 16px 80px;
+  padding: 14px 20px;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  border: 1.5px solid #cdeefe;
+  border-radius: 20px;
+  background: #eef8fd;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.nearby-location-icon {
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #18a8ed;
+  box-shadow: 0 8px 16px rgba(24, 168, 237, 0.22);
+}
+
+.nearby-location-text {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.nearby-location-text span {
+  margin-bottom: 4px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.nearby-location-text strong {
+  color: #111827;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.7px;
+  white-space: nowrap;
+}
+
+.nearby-location-arrow {
+  flex-shrink: 0;
+  color: #94a3b8;
+  font-size: 34px;
+  font-weight: 300;
+  line-height: 1;
+}
+/* ================================
+   홈 화면 전체 요소 Fade-up 애니메이션
+================================ */
+
+.home-header h1,
+.home-header .subtitle,
+.home-header .search-box,
+.quick-menu .menu-card,
+.home-popular-header,
+.travel-list .travel-card,
+.nearby-location-card {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: homeFadeUp 0.65s ease forwards;
+  will-change: opacity, transform;
+}
+
+/* 상단 문구 */
+.home-header h1 {
+  animation-delay: 0.05s;
+}
+
+.home-header .subtitle {
+  animation-delay: 0.15s;
+}
+
+.home-header .search-box {
+  animation-delay: 0.25s;
+}
+
+/* 테마 추천 / 경로 생성 카드 */
+.quick-menu .menu-card:nth-child(1) {
+  animation-delay: 0.35s;
+}
+
+.quick-menu .menu-card:nth-child(2) {
+  animation-delay: 0.45s;
+}
+
+/* 인기 급상승 여행지 제목 */
+.home-popular-header {
+  animation-delay: 0.55s;
+}
+
+/* 인기 여행지 카드 */
+.travel-list .travel-card:nth-child(1) {
+  animation-delay: 0.65s;
+}
+
+.travel-list .travel-card:nth-child(2) {
+  animation-delay: 0.75s;
+}
+
+.travel-list .travel-card:nth-child(3) {
+  animation-delay: 0.85s;
+}
+
+.travel-list .travel-card:nth-child(4) {
+  animation-delay: 0.95s;
+}
+
+/* 내 주변 탐색 카드 */
+.nearby-location-card {
+  animation-delay: 1.05s;
+}
+
+@keyframes homeFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 모션 줄이기 설정 사용자를 위한 처리 */
+@media (prefers-reduced-motion: reduce) {
+  .home-header h1,
+  .home-header .subtitle,
+  .home-header .search-box,
+  .quick-menu .menu-card,
+  .home-popular-header,
+  .travel-list .travel-card,
+  .nearby-location-card {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+/* 작은 모바일 */
+@media (max-width: 390px) {
+  .home {
+    max-width: 100%;
+  }
+
+  .home-header {
+    padding: 28px 16px 24px;
+  }
+
+  .quick-menu {
+    padding-left: 16px;
+    padding-right: 16px;
+    gap: 12px;
+  }
+
+  .menu-card {
+    min-height: 130px;
+    padding: 16px 12px;
+  }
+
+  .section-header,
+  .home-popular-header {
+    padding: 24px 24px 14px;
+  }
+
+  .home .section-header > h2,
+  .home .home-popular-header > h2 {
+    font-size: 24px;
+  }
+
+  .home .section-header > span,
+  .home .section-header > button,
+  .home .section-more-btn,
+  .home .home-popular-more-button {
+    font-size: 18px;
+  }
+
+  .travel-list {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 18px;
+    padding-left: 16px;
+    padding-right: 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .travel-card {
+    flex: 0 0 170px;
+    width: 170px;
+    min-width: 170px;
+    aspect-ratio: 1 / 1.35;
+    border-radius: 22px;
+  }
+
+  .nearby-location-card {
+    width: calc(100% - 32px);
+    margin: 26px 16px 80px;
+    padding: 14px 18px;
+  }
+
+  .nearby-location-text strong {
+    font-size: 17px;
+  }
+}
+
+/* 아주 작은 화면 */
+@media (max-width: 340px) {
+  .quick-menu {
+    gap: 10px;
+  }
+
+  .menu-card {
+    min-height: 120px;
+    padding: 14px 10px;
+  }
+
+  .menu-card h3 {
+    font-size: 15px;
+  }
+
+  .menu-card p {
+    font-size: 12px;
+  }
+
+  .section-header,
+  .home-popular-header {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .home .section-header > h2,
+  .home .home-popular-header > h2 {
+    font-size: 22px;
+  }
+
+  .home .section-header > span,
+  .home .section-header > button,
+  .home .section-more-btn,
+  .home .home-popular-more-button {
+    font-size: 16px;
+  }
+
+  .travel-card {
+    flex: 0 0 150px;
+    width: 150px;
+    min-width: 150px;
+  }
+
+  .nearby-location-card {
+    padding-left: 16px;
+    padding-right: 16px;
+    gap: 12px;
+  }
+
+  .nearby-location-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .nearby-location-text span {
+    font-size: 12px;
+  }
+
+  .nearby-location-text strong {
+    font-size: 15px;
+  }
+
+  .nearby-location-arrow {
+    font-size: 30px;
+  }
 }

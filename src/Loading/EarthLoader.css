@@ -1,0 +1,171 @@
+.earth-loading-screen {
+  width: 100%;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+}
+
+.earth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  --watercolor: #7dd3fc;
+  --landcolor: #7cc133;
+}
+
+.earth-loader {
+  width: 7.5em;
+  height: 7.5em;
+  background-color: #7dd3fc;
+  position: relative;
+  overflow: hidden;
+  border-radius: 50%;
+  box-shadow:
+    inset 0em 0.5em rgba(255, 255, 255, 0.35),
+    inset 0em -0.5em rgba(0, 0, 0, 0.12),
+    0 10px 24px rgba(125, 211, 252, 0.45);
+  border: solid 0.15em #ffffff;
+  animation: startround 1s ease-out;
+  animation-iteration-count: 1;
+}
+
+.earth p {
+  margin: 10px 0 0;
+  color: #0ea5e9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 0.25em;
+  font-size: 1.1em;
+  font-weight: 800;
+  font-family:
+    "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+}
+
+.earth-loader svg:nth-child(1) {
+  position: absolute;
+  bottom: -2em;
+  width: 7em;
+  height: auto;
+  animation: round1 5s infinite linear 0.75s;
+}
+
+.earth-loader svg:nth-child(2) {
+  position: absolute;
+  top: -3em;
+  width: 7em;
+  height: auto;
+  animation: round1 5s infinite linear;
+}
+
+.earth-loader svg:nth-child(3) {
+  position: absolute;
+  top: -2.5em;
+  width: 7em;
+  height: auto;
+  animation: round2 5s infinite linear;
+}
+
+.earth-loader svg:nth-child(4) {
+  position: absolute;
+  bottom: -2.2em;
+  width: 7em;
+  height: auto;
+  animation: round2 5s infinite linear 0.75s;
+}
+
+.earth-loader svg path {
+  fill: var(--landcolor);
+}
+
+@keyframes startround {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.96);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes round1 {
+  0% {
+    left: -2em;
+    opacity: 100%;
+    transform: skewX(0deg) rotate(0deg);
+  }
+
+  30% {
+    left: -6em;
+    opacity: 100%;
+    transform: skewX(-25deg) rotate(25deg);
+  }
+
+  31% {
+    left: -6em;
+    opacity: 0%;
+    transform: skewX(-25deg) rotate(25deg);
+  }
+
+  35% {
+    left: 7em;
+    opacity: 0%;
+    transform: skewX(25deg) rotate(-25deg);
+  }
+
+  45% {
+    left: 7em;
+    opacity: 100%;
+    transform: skewX(25deg) rotate(-25deg);
+  }
+
+  100% {
+    left: -2em;
+    opacity: 100%;
+    transform: skewX(0deg) rotate(0deg);
+  }
+}
+
+@keyframes round2 {
+  0% {
+    left: 5em;
+    opacity: 100%;
+    transform: skewX(0deg) rotate(0deg);
+  }
+
+  75% {
+    left: -7em;
+    opacity: 100%;
+    transform: skewX(-25deg) rotate(25deg);
+  }
+
+  76% {
+    left: -7em;
+    opacity: 0%;
+    transform: skewX(-25deg) rotate(25deg);
+  }
+
+  77% {
+    left: 8em;
+    opacity: 0%;
+    transform: skewX(25deg) rotate(-25deg);
+  }
+
+  80% {
+    left: 8em;
+    opacity: 100%;
+    transform: skewX(25deg) rotate(-25deg);
+  }
+
+  100% {
+    left: 5em;
+    opacity: 100%;
+    transform: skewX(0deg) rotate(0deg);
+  }
+}

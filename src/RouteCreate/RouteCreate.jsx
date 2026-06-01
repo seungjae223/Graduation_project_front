@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "./RouteCreate.css";
 import searchIcon from "../img/검색.png";
 import { saveRoute as saveRouteUtil } from "../utils/routeStorage";
+import StartPlaceModal from "./StartPlaceModal";
 
 const STORAGE_KEY = "mock_saved_route_results";
 const ROUTE_STORAGE_EVENT = "mock-routes-updated";
@@ -616,6 +617,32 @@ const formatDateKey = (date) => {
   return `${year}-${month}-${day}`;
 };
 
+const getStartPlaceDefaultMap = (dates = [], placeMap = {}) => {
+  return dates.reduce((acc, date) => {
+    const dateKey = formatDateKey(date);
+    const firstPlace = placeMap[dateKey]?.[0];
+
+    if (firstPlace?.id) {
+      acc[dateKey] = firstPlace.id;
+    }
+
+    return acc;
+  }, {});
+};
+
+const moveSelectedPlaceToFirst = (places = [], selectedId) => {
+  if (!selectedId) return places;
+
+  const selectedIndex = places.findIndex((place) => place.id === selectedId);
+
+  if (selectedIndex <= 0) return places;
+
+  const nextPlaces = [...places];
+  const [selectedPlace] = nextPlaces.splice(selectedIndex, 1);
+
+  return [selectedPlace, ...nextPlaces];
+};
+
 const formatTabDate = (date) => {
   return `${date.getMonth() + 1}/${date.getDate()}`;
 };
@@ -673,31 +700,8 @@ const getCalendarWeeks = (baseMonth) => {
   return weeks;
 };
 
-const getVisibleWeeks = (weeks, startDate, endDate, currentMonth) => {
-  const selectedDates = getDatesInRange(startDate, endDate);
-
-  const selectedDatesInMonth = selectedDates.filter(
-    (date) =>
-      date.getFullYear() === currentMonth.getFullYear() &&
-      date.getMonth() === currentMonth.getMonth()
-  );
-
-  if (selectedDatesInMonth.length === 0) {
-    return weeks.filter((week) => week.some((day) => day.isCurrentMonth));
-  }
-
-  const lastSelectedDate =
-    selectedDatesInMonth[selectedDatesInMonth.length - 1];
-
-  const lastWeekIndex = weeks.findIndex((week) =>
-    week.some((day) => isSameDate(day.date, lastSelectedDate))
-  );
-
-  if (lastWeekIndex === -1) {
-    return weeks.filter((week) => week.some((day) => day.isCurrentMonth));
-  }
-
-  return weeks.slice(0, lastWeekIndex + 1);
+const getVisibleWeeks = (weeks) => {
+  return weeks.filter((week) => week.some((day) => day.isCurrentMonth));
 };
 
 const createPlaceItem = (place, orderIndex = 0) => {
@@ -727,50 +731,27 @@ const createPlaceItem = (place, orderIndex = 0) => {
   };
 };
 
-const INITIAL_START_DATE = createDate(2024, 5, 12);
-const INITIAL_END_DATE = createDate(2024, 5, 14);
+const getTodayDate = () => {
+  const today = new Date();
+
+  return createDate(
+    today.getFullYear(),
+    today.getMonth() + 1,
+    today.getDate()
+  );
+};
+
+const addDays = (date, days) => {
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + days);
+  return normalizeDate(nextDate);
+};
+
+const INITIAL_START_DATE = getTodayDate();
+const INITIAL_END_DATE = INITIAL_START_DATE;
 
 const INITIAL_PLACES_BY_DATE = {
-  [formatDateKey(createDate(2024, 5, 12))]: [
-    {
-      id: "initial-1",
-      sourceId: "seoul-gyeongbokgung",
-      name: "경복궁",
-      desc: "서울특별시 종로구 사직로 161",
-      city: "서울",
-      country: "대한민국",
-      mapProvider: "kakao",
-      thumb: getThumb("seoul-gyeongbokgung"),
-      timeLabel: "09:30 AM",
-      isFixedTime: false,
-    },
-    {
-      id: "initial-2",
-      sourceId: "seoul-bukchon",
-      name: "북촌한옥마을",
-      desc: "서울특별시 종로구 계동길 37",
-      city: "서울",
-      country: "대한민국",
-      mapProvider: "kakao",
-      thumb: getThumb("seoul-bukchon"),
-      timeLabel: "12:30 PM",
-      isFixedTime: true,
-    },
-    {
-      id: "initial-3",
-      sourceId: "seoul-ikseondong",
-      name: "익선동 카페거리",
-      desc: "서울특별시 종로구 익선동",
-      city: "서울",
-      country: "대한민국",
-      mapProvider: "kakao",
-      thumb: getThumb("seoul-ikseondong"),
-      timeLabel: "03:00 PM",
-      isFixedTime: false,
-    },
-  ],
-  [formatDateKey(createDate(2024, 5, 13))]: [],
-  [formatDateKey(createDate(2024, 5, 14))]: [],
+  [formatDateKey(INITIAL_START_DATE)]: [],
 };
 
 const readLocalStorageJSON = (key, fallbackValue) => {
@@ -954,6 +935,10 @@ const RouteCreate = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
 
+  const [isStartPlaceModalOpen, setIsStartPlaceModalOpen] = useState(false);
+  const [startPlaceDayIndex, setStartPlaceDayIndex] = useState(0);
+  const [selectedStartPlaces, setSelectedStartPlaces] = useState({});
+
   const [fixModalPlace, setFixModalPlace] = useState(null);
   const [fixModalDateKey, setFixModalDateKey] = useState("");
   const [fixPeriod, setFixPeriod] = useState("PM");
@@ -974,8 +959,8 @@ const RouteCreate = () => {
   }, [currentMonth]);
 
   const visibleWeeks = useMemo(() => {
-    return getVisibleWeeks(calendarWeeks, rangeStart, rangeEnd, currentMonth);
-  }, [calendarWeeks, rangeStart, rangeEnd, currentMonth]);
+    return getVisibleWeeks(calendarWeeks);
+  }, [calendarWeeks]);
 
   const activeDate = selectedDates[activeDayIndex] || selectedDates[0];
   const activeDateKey = activeDate ? formatDateKey(activeDate) : "";
@@ -1021,15 +1006,10 @@ const RouteCreate = () => {
   }, [activeDayIndex, selectedDates.length]);
 
   useEffect(() => {
-    if (!isCompleteModalOpen && !fixModalPlace) return undefined;
-
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [isCompleteModalOpen, fixModalPlace]);
+    if (startPlaceDayIndex > selectedDates.length - 1) {
+      setStartPlaceDayIndex(0);
+    }
+  }, [startPlaceDayIndex, selectedDates.length]);
 
   const handlePrevMonth = () => {
     setCurrentMonth(
@@ -1179,6 +1159,48 @@ const RouteCreate = () => {
   };
 
   const handleGenerateRoute = () => {
+    const hasAnyPlace = selectedDates.some((date) => {
+      const dateKey = formatDateKey(date);
+      return (placesByDate[dateKey] || []).length > 0;
+    });
+
+    if (!hasAnyPlace) {
+      alert("장소를 1개 이상 추가해야 출발지를 설정할 수 있어요.");
+      return;
+    }
+
+    setSelectedStartPlaces(getStartPlaceDefaultMap(selectedDates, placesByDate));
+    setStartPlaceDayIndex(0);
+    setIsStartPlaceModalOpen(true);
+  };
+
+  const handleCloseStartPlaceModal = () => {
+    setIsStartPlaceModalOpen(false);
+  };
+
+  const handleSelectStartPlace = (dateKey, placeId) => {
+    setSelectedStartPlaces((prev) => ({
+      ...prev,
+      [dateKey]: placeId,
+    }));
+  };
+
+  const handleConfirmStartPlaces = () => {
+    const reorderedPlacesByDate = selectedDates.reduce(
+      (acc, date) => {
+        const dateKey = formatDateKey(date);
+        const dayPlaces = acc[dateKey] || [];
+        const selectedId = selectedStartPlaces[dateKey] || dayPlaces[0]?.id;
+
+        acc[dateKey] = moveSelectedPlaceToFirst(dayPlaces, selectedId);
+
+        return acc;
+      },
+      { ...placesByDate }
+    );
+
+    setPlacesByDate(reorderedPlacesByDate);
+    setIsStartPlaceModalOpen(false);
     setIsCompleteModalOpen(true);
   };
 
@@ -1233,6 +1255,13 @@ const RouteCreate = () => {
         placesByDate,
       },
     });
+  };
+
+  const handleSaveRouteLater = () => {
+    const savedRoute = buildSavedRouteMock();
+
+    persistRouteSafely(savedRoute);
+    setIsCompleteModalOpen(false);
   };
 
   return (
@@ -1503,6 +1532,19 @@ const RouteCreate = () => {
         onConfirm={handleConfirmFixModal}
       />
 
+      <StartPlaceModal
+        open={isStartPlaceModalOpen}
+        selectedDates={selectedDates}
+        placesByDate={placesByDate}
+        activeDayIndex={startPlaceDayIndex}
+        selectedStartPlaces={selectedStartPlaces}
+        getDateKey={formatDateKey}
+        onChangeDay={setStartPlaceDayIndex}
+        onSelectPlace={handleSelectStartPlace}
+        onClose={handleCloseStartPlaceModal}
+        onConfirm={handleConfirmStartPlaces}
+      />
+
       {isCompleteModalOpen && (
         <div
           className="route-complete-overlay"
@@ -1537,7 +1579,7 @@ const RouteCreate = () => {
             <button
               type="button"
               className="route-complete-later-btn"
-              onClick={handleCloseCompleteModal}
+              onClick={handleSaveRouteLater}
             >
               나중에 보기
             </button>

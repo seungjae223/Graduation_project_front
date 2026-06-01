@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { getSavedRouteById } from "../utils/routeStorage";
 import "./RouteResult.css";
 
@@ -10,6 +10,35 @@ const runtimeCoordinateCache = new Map();
 
 const TIMELINE_ITEM_BUTTON_STYLE = {
   cursor: "pointer",
+};
+
+const ROUTE_STORAGE_KEY = "mock_saved_route_results";
+const ROUTE_STORAGE_EVENT = "mock-routes-updated";
+const DELETE_ROUTE_EVENT = "route-result-delete-schedule";
+
+const deleteSavedRouteById = (routeId) => {
+  if (!routeId || typeof window === "undefined") {
+    return false;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(ROUTE_STORAGE_KEY);
+    const prev = raw ? JSON.parse(raw) : [];
+
+    if (!Array.isArray(prev)) {
+      return false;
+    }
+
+    const next = prev.filter((route) => String(route.id) !== String(routeId));
+
+    window.localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(next));
+    window.dispatchEvent(new CustomEvent(ROUTE_STORAGE_EVENT));
+
+    return prev.length !== next.length;
+  } catch (error) {
+    console.error("일정 삭제 실패:", error);
+    return false;
+  }
 };
 
 const ClockIcon = () => (
@@ -1988,6 +2017,7 @@ const RouteDayContent = ({
 
 function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const routeId = searchParams.get("id");
@@ -2000,6 +2030,33 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     initialSavedRoute ||
     savedRouteFromState ||
     (routeId ? getSavedRouteById(routeId) : null);
+
+  useEffect(() => {
+    if (isEmbedded) return undefined;
+
+    const handleDeleteSchedule = () => {
+      const targetRouteId = routeId || savedRoute?.id;
+
+      if (!targetRouteId) {
+        alert("삭제할 일정 정보를 찾지 못했어요.");
+        return;
+      }
+
+      const deleted = deleteSavedRouteById(targetRouteId);
+
+      if (!deleted) {
+        console.log("삭제할 일정이 localStorage에 없어요:", targetRouteId);
+      }
+
+      navigate("/my-schedule", { replace: true });
+    };
+
+    window.addEventListener(DELETE_ROUTE_EVENT, handleDeleteSchedule);
+
+    return () => {
+      window.removeEventListener(DELETE_ROUTE_EVENT, handleDeleteSchedule);
+    };
+  }, [routeId, savedRoute?.id, navigate, isEmbedded]);
 
   const resultDays = useMemo(() => {
     if (isOverseasMock) {

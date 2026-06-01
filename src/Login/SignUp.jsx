@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./SignUp.css";
 import eyeIcon from "../img/눈알.png";
 import warningIcon from "../img/워닝.png";
-import LoginAlert from "./LoginAlert";
+import PrivacyPolicyModal from "./PrivacyPolicyModal";
 
 const USERS_KEY = "mock_users";
 
@@ -19,12 +19,49 @@ const saveUsers = (users) => {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 };
 
+const SignUpTopAlert = ({ open, iconSrc, onConfirm }) => {
+  if (!open) return null;
+
+  return (
+    <div className="signup-alert-overlay">
+      <div
+        className="signup-alert-card"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="signup-alert-title"
+        aria-describedby="signup-alert-message"
+      >
+        <div className="signup-alert-icon-wrap">
+          <img src={iconSrc} alt="" />
+        </div>
+
+        <h2 id="signup-alert-title">이메일 형식 오류</h2>
+
+        <p id="signup-alert-message">
+          올바른 이메일 주소를 입력해주세요.
+          <br />
+          예시: example@travel.com
+        </p>
+
+        <button
+          type="button"
+          className="signup-alert-confirm-btn"
+          onClick={onConfirm}
+        >
+          확인
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const SignUp = () => {
   const navigate = useNavigate();
 
   const [showPw, setShowPw] = useState(false);
   const [showPwConfirm, setShowPwConfirm] = useState(false);
   const [isEmailAlertOpen, setIsEmailAlertOpen] = useState(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
   const [mockVerificationCode, setMockVerificationCode] = useState("");
   const [isCodeSent, setIsCodeSent] = useState(false);
@@ -87,9 +124,7 @@ const SignUp = () => {
       return;
     }
 
-    const generatedCode = String(
-      Math.floor(100000 + Math.random() * 900000)
-    );
+    const generatedCode = String(Math.floor(100000 + Math.random() * 900000));
 
     setForm((prev) => ({
       ...prev,
@@ -100,9 +135,7 @@ const SignUp = () => {
     setIsCodeSent(true);
     setIsCodeVerified(false);
 
-    alert(
-      `목업 인증번호가 발송되었습니다.\n\n인증번호: ${generatedCode}`
-    );
+    alert(`목업 인증번호가 발송되었습니다.\n\n인증번호: ${generatedCode}`);
   };
 
   const handleVerifyCode = () => {
@@ -124,6 +157,18 @@ const SignUp = () => {
 
     setIsCodeVerified(true);
     alert("이메일 인증이 완료되었습니다.");
+  };
+
+  const handleOpenPrivacyModal = () => {
+    setIsPrivacyModalOpen(true);
+  };
+
+  const handleAgreePrivacyPolicy = () => {
+    setForm((prev) => ({
+      ...prev,
+      agreed: true,
+    }));
+    setIsPrivacyModalOpen(false);
   };
 
   const handleSubmit = (e) => {
@@ -149,6 +194,11 @@ const SignUp = () => {
 
     if (form.password !== form.passwordConfirm) {
       alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    if (!form.agreed) {
+      alert("이용약관 및 개인정보 처리방침에 동의해주세요.");
       return;
     }
 
@@ -220,9 +270,10 @@ const SignUp = () => {
                   onChange={(e) => handleChange("email", e.target.value)}
                   onBlur={handleEmailBlur}
                 />
+
                 <button
                   type="button"
-                  className="signup-inline-btn signup-inline-btn--active"
+                  className="signup-inline-btn signup-code-send-btn"
                   onClick={handleSendCode}
                 >
                   인증번호 발송
@@ -265,6 +316,7 @@ const SignUp = () => {
                   value={form.code}
                   onChange={(e) => handleChange("code", e.target.value)}
                 />
+
                 <button
                   type="button"
                   className="signup-inline-btn"
@@ -285,6 +337,7 @@ const SignUp = () => {
                   value={form.password}
                   onChange={(e) => handleChange("password", e.target.value)}
                 />
+
                 <button
                   type="button"
                   className="signup-eye-btn"
@@ -307,6 +360,7 @@ const SignUp = () => {
                     handleChange("passwordConfirm", e.target.value)
                   }
                 />
+
                 <button
                   type="button"
                   className="signup-eye-btn"
@@ -317,11 +371,23 @@ const SignUp = () => {
               </div>
             </div>
 
-            <label className="signup-agreement">
+            <div
+              className="signup-agreement"
+              role="button"
+              tabIndex={0}
+              onClick={handleOpenPrivacyModal}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleOpenPrivacyModal();
+                }
+              }}
+            >
               <input
                 type="checkbox"
                 checked={form.agreed}
-                onChange={(e) => handleChange("agreed", e.target.checked)}
+                readOnly
+                onClick={(e) => e.preventDefault()}
               />
               <span>
                 <span className="signup-agreement-link">
@@ -329,7 +395,7 @@ const SignUp = () => {
                 </span>
                 에 동의합니다.
               </span>
-            </label>
+            </div>
 
             <button
               type="submit"
@@ -358,13 +424,16 @@ const SignUp = () => {
         </div>
       </div>
 
-      <LoginAlert
+      <SignUpTopAlert
         open={isEmailAlertOpen}
-        type="emailError"
         iconSrc={warningIcon}
         onConfirm={() => setIsEmailAlertOpen(false)}
-        onClose={() => setIsEmailAlertOpen(false)}
-        closeOnBackdrop={false}
+      />
+
+      <PrivacyPolicyModal
+        isOpen={isPrivacyModalOpen}
+        onClose={() => setIsPrivacyModalOpen(false)}
+        onAgree={handleAgreePrivacyPolicy}
       />
     </>
   );
