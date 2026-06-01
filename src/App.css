@@ -45,7 +45,6 @@ svg {
 
 .app {
   width: 100%;
-  max-width: var(--app-width);
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0 auto;
@@ -65,12 +64,11 @@ svg {
   overflow-x: hidden;
 }
 
-/* 푸터가 fixed일 때만 필요한 최소 여백 */
 .app-content.with-footer {
   padding-bottom: var(--footer-height);
 }
 
-/* 여기에는 padding-bottom 주면 큰 공백 생김 */
+/* 페이지 전환 애니메이션 */
 .route-transition {
   width: 100%;
   min-width: 0;
@@ -91,19 +89,32 @@ svg {
   }
 }
 
-/* 실제 모바일에서는 화면 꽉 차게 */
-@media (max-width: 390px) {
+/* 모바일에서는 화면 전체를 꽉 채움 */
+@media (max-width: 480px) {
+  body {
+    display: block;
+    background: #ffffff;
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100vh;
+  }
+
   .app {
     width: 100%;
     max-width: none;
+    margin: 0;
+    box-shadow: none;
   }
 }
 
-/* PC에서 모바일 화면처럼 가운데 정렬 */
-@media (min-width: 391px) {
+/* PC에서만 모바일 앱처럼 가운데 고정 */
+@media (min-width: 481px) {
   body {
     display: flex;
     justify-content: center;
+    background: #f2f4f7;
   }
 
   #root {
@@ -111,6 +122,7 @@ svg {
   }
 
   .app {
+    max-width: var(--app-width);
     box-shadow: 0 0 24px rgba(0, 0, 0, 0.08);
   }
 }
