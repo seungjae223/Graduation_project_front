@@ -15,7 +15,6 @@ const Landing = () => {
 
   return (
     <div className="landing">
-
       {/* 상단 이미지 */}
       <div className="landing-hero">
         <img src={bgImage} alt="hero" />
@@ -46,12 +45,12 @@ const Landing = () => {
           시작하기
         </button>
 
-        {/* 🔥 둘러보기 (수정 완료) */}
+        {/* 둘러보기 */}
         <button
           className={`btn ${activeBtn === "explore" ? "active" : "inactive"}`}
           onClick={() => {
             setActiveBtn("explore");
-            navigate("/home"); // 🔥 메인 페이지 이동
+            navigate("/home");
           }}
         >
           둘러보기
@@ -62,15 +61,16 @@ const Landing = () => {
 
       {/* 기능 카드 */}
       <div className="feature">
-
         <div className="card">
           <div className="icon-box">
             <img src={compass} alt="icon" />
           </div>
+
           <div>
             <h3>테마 여행 추천</h3>
             <p>
-              취향만 말씀하세요. 감성 카페부터 숨은 명소<br />
+              취향만 말씀하세요. 감성 카페부터 숨은 명소
+              <br />
               까지 테마별로 골라드려요.
             </p>
           </div>
@@ -80,6 +80,7 @@ const Landing = () => {
           <div className="icon-box">
             <img src={route} alt="icon" />
           </div>
+
           <div>
             <h3>최적 동선 설계</h3>
             <p>
@@ -92,6 +93,7 @@ const Landing = () => {
           <div className="icon-box">
             <img src={map} alt="icon" />
           </div>
+
           <div>
             <h3>지능형 맵 서비스</h3>
             <p>
@@ -99,16 +101,13 @@ const Landing = () => {
             </p>
           </div>
         </div>
-
       </div>
 
       {/* 푸터 */}
-      <div className="footer">
+      <div className="landing-footer">
         너만 오면 go
-        <br />
-        © 2025 All rights reserved.
+        <br />© 2025 All rights reserved.
       </div>
-
     </div>
   );
 };

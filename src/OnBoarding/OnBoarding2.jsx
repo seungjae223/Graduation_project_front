@@ -1,14 +1,13 @@
 import React from "react";
 import "./OnBoarding.css";
-import { useNavigate } from "react-router-dom"; // 🔥 추가
+import { useNavigate } from "react-router-dom";
 import mainImage from "../img/지도.png";
 
 const OnBoarding2 = () => {
-  const navigate = useNavigate(); // 🔥 추가
+  const navigate = useNavigate();
 
   return (
     <div className="onboarding">
-
       {/* 이미지 */}
       <div
         className="image-wrapper"
@@ -32,14 +31,10 @@ const OnBoarding2 = () => {
         <span className="dot"></span>
       </div>
 
-      {/* 🔥 버튼 수정 */}
-      <button
-        className="next-btn"
-        onClick={() => navigate("/onboarding3")} // 🔥 핵심
-      >
+      {/* 버튼 */}
+      <button className="next-btn" onClick={() => navigate("/onboarding3")}>
         다음으로 →
       </button>
-
     </div>
   );
 };
