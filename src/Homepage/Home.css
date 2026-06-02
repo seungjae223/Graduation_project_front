@@ -9,6 +9,7 @@ body,
   width: 100%;
   min-height: 100%;
   margin: 0;
+  background: #f8fbfd;
 }
 
 body {
@@ -20,10 +21,10 @@ body {
 .home {
   width: 100%;
   max-width: 430px;
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--footer-height, 70px));
   height: auto;
   margin: 0 auto;
-  padding: 0 0 calc(40px + env(safe-area-inset-bottom));
+  padding: 0;
   overflow: visible;
   background: #f8fbfd;
 }
@@ -277,12 +278,12 @@ body {
 .nearby-location-card {
   width: calc(100% - 32px);
   min-height: 84px;
-  margin: 28px 16px 80px;
+  margin: 20px 15px 19px;
   padding: 14px 20px;
 
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 20px;
 
   border: 1.5px solid #cdeefe;
   border-radius: 20px;
@@ -338,6 +339,7 @@ body {
   font-weight: 300;
   line-height: 1;
 }
+
 /* ================================
    홈 화면 전체 요소 Fade-up 애니메이션
 ================================ */
@@ -430,6 +432,7 @@ body {
     animation: none;
   }
 }
+
 /* 작은 모바일 */
 @media (max-width: 390px) {
   .home {
@@ -488,7 +491,7 @@ body {
 
   .nearby-location-card {
     width: calc(100% - 32px);
-    margin: 26px 16px 80px;
+    margin: 26px 16px 0;
     padding: 14px 18px;
   }
 

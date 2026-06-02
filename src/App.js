@@ -77,21 +77,14 @@ function Layout() {
     "/signup",
   ];
 
-  const hideHeaderPaths = [
-    "/",
-    "/onboarding",
-    "/onboarding2",
-    "/onboarding3",
-    "/landing",
-    "/login",
-  ];
+  const hideHeaderPaths = ["/login"];
 
   const shouldHideFooter = hideFooterPaths.includes(pathname);
   const shouldShowDefaultFooter = !shouldHideFooter && !isAdminPage;
   const shouldShowAdminFooter = isAdminPage;
 
-  // 온보딩, 랜딩, 로그인, 관리자 화면에서는 Header 숨김
-  // find-password, verify-code, signup 같은 이메일 인증 관련 화면에서는 Header 보임
+  // 로그인, 관리자 화면에서만 Header 숨김
+  // 랜딩, 온보딩, 온보딩2, 온보딩3, 이메일 인증 관련 화면에서는 Header 보임
   const shouldHideHeader = hideHeaderPaths.includes(pathname) || isAdminPage;
 
   return (

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
@@ -11,6 +11,11 @@ import routeIcon from "../img/경로.png";
 import tokyo from "../img/도쿄.png";
 import kyoto from "../img/교토.png";
 
+let kakaoMapsLoadingPromise = null;
+
+const LOCATION_STORAGE_KEY = "currentLocation";
+const LOCATION_LABEL_STORAGE_KEY = "currentLocationLabel";
+
 const travelMockData = [
   { id: 1, title: "도쿄", image: tokyo },
   { id: 2, title: "교토", image: kyoto },
@@ -22,6 +27,135 @@ const travelMockData = [
 
 const VISIBLE_TRAVEL_COUNT = 4;
 
+const loadKakaoMapsScript = () => {
+  if (window.kakao?.maps?.services) {
+    return Promise.resolve(window.kakao);
+  }
+
+  if (kakaoMapsLoadingPromise) {
+    return kakaoMapsLoadingPromise;
+  }
+
+  kakaoMapsLoadingPromise = new Promise((resolve, reject) => {
+    const appKey = process.env.REACT_APP_KAKAO_MAP_JS_KEY;
+
+    if (!appKey) {
+      reject(new Error("카카오맵 JS 키가 없습니다."));
+      return;
+    }
+
+    const initialize = () => {
+      if (!window.kakao?.maps?.load) {
+        reject(new Error("카카오맵 SDK 초기화에 실패했습니다."));
+        return;
+      }
+
+      window.kakao.maps.load(() => {
+        if (window.kakao?.maps?.services) {
+          resolve(window.kakao);
+        } else {
+          reject(new Error("카카오맵 services 라이브러리를 찾지 못했습니다."));
+        }
+      });
+    };
+
+    const existingScript = document.querySelector(
+      'script[data-kakao-maps="true"], script[src*="dapi.kakao.com/v2/maps/sdk.js"]'
+    );
+
+    if (existingScript) {
+      if (window.kakao?.maps?.services) {
+        resolve(window.kakao);
+        return;
+      }
+
+      if (window.kakao?.maps?.load) {
+        initialize();
+        return;
+      }
+
+      existingScript.addEventListener("load", initialize, { once: true });
+      existingScript.addEventListener(
+        "error",
+        () => reject(new Error("카카오맵 SDK 로드 실패")),
+        { once: true }
+      );
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src =
+      `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}` +
+      `&autoload=false&libraries=services`;
+    script.async = true;
+    script.defer = true;
+    script.dataset.kakaoMaps = "true";
+    script.onload = initialize;
+    script.onerror = () => reject(new Error("카카오맵 SDK 로드 실패"));
+
+    document.head.appendChild(script);
+  }).catch((error) => {
+    kakaoMapsLoadingPromise = null;
+    throw error;
+  });
+
+  return kakaoMapsLoadingPromise;
+};
+
+const getAddressLabelFromKakaoMap = async (latitude, longitude) => {
+  try {
+    const kakao = await loadKakaoMapsScript();
+    const geocoder = new kakao.maps.services.Geocoder();
+
+    return await new Promise((resolve) => {
+      geocoder.coord2RegionCode(longitude, latitude, (result, status) => {
+        if (status !== kakao.maps.services.Status.OK || !result?.length) {
+          resolve("주소 확인 실패");
+          return;
+        }
+
+        const region =
+          result.find((item) => item.region_type === "H") || result[0];
+
+        const city = region.region_1depth_name;
+        const district = region.region_2depth_name;
+        const town = region.region_3depth_name;
+
+        if (district && town) {
+          resolve(`${district} ${town}`);
+          return;
+        }
+
+        if (city && district) {
+          resolve(`${city} ${district}`);
+          return;
+        }
+
+        resolve(city || "현재 위치");
+      });
+    });
+  } catch (error) {
+    console.log("카카오 주소 변환 실패:", error);
+    return "주소 확인 실패";
+  }
+};
+
+const getLocationErrorMessage = (error) => {
+  if (error.code === error.PERMISSION_DENIED) {
+    return "위치 권한 필요";
+  }
+
+  if (error.code === error.POSITION_UNAVAILABLE) {
+    return "위치 확인 불가";
+  }
+
+  if (error.code === error.TIMEOUT) {
+    return "위치 확인 시간 초과";
+  }
+
+  return "위치 확인 실패";
+};
+
 const Home = () => {
   const navigate = useNavigate();
 
@@ -29,11 +163,71 @@ const Home = () => {
   const [keyword, setKeyword] = useState("");
   const [travelStartIndex, setTravelStartIndex] = useState(0);
 
-  const [locationLabel, setLocationLabel] = useState("서울특별시");
+  const [locationLabel, setLocationLabel] = useState("위치 확인 필요");
   const [isLocationLoading, setIsLocationLoading] = useState(false);
 
+  const requestCurrentLocation = useCallback(
+    ({ shouldNavigate = false } = {}) => {
+      if (!navigator.geolocation) {
+        setLocationLabel("위치 기능 미지원");
+        return;
+      }
+
+      setIsLocationLoading(true);
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+
+          const currentLocation = {
+            lat: latitude,
+            lng: longitude,
+          };
+
+          const nextLocationLabel = await getAddressLabelFromKakaoMap(
+            latitude,
+            longitude
+          );
+
+          localStorage.setItem(
+            LOCATION_STORAGE_KEY,
+            JSON.stringify(currentLocation)
+          );
+          localStorage.setItem(LOCATION_LABEL_STORAGE_KEY, nextLocationLabel);
+
+          setLocationLabel(nextLocationLabel);
+          setIsLocationLoading(false);
+
+          if (shouldNavigate) {
+            navigate("/search", {
+              state: {
+                mode: "nearby",
+                currentLocation,
+                locationLabel: nextLocationLabel,
+              },
+            });
+          }
+        },
+        (error) => {
+          console.log("위치 권한 오류:", error);
+
+          const errorMessage = getLocationErrorMessage(error);
+
+          setLocationLabel(errorMessage);
+          setIsLocationLoading(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    },
+    [navigate]
+  );
+
   useEffect(() => {
-    if (travelMockData.length <= VISIBLE_TRAVEL_COUNT) return;
+    if (travelMockData.length <= VISIBLE_TRAVEL_COUNT) return undefined;
 
     const timer = setInterval(() => {
       setTravelStartIndex((prev) => (prev + 1) % travelMockData.length);
@@ -41,6 +235,10 @@ const Home = () => {
 
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    requestCurrentLocation();
+  }, [requestCurrentLocation]);
 
   const visibleTravelData = Array.from(
     {
@@ -51,18 +249,6 @@ const Home = () => {
       return travelMockData[dataIndex];
     }
   );
-
-  const getLocationLabel = (latitude, longitude) => {
-    const isSeoul =
-      latitude >= 37.4 &&
-      latitude <= 37.75 &&
-      longitude >= 126.75 &&
-      longitude <= 127.25;
-
-    if (isSeoul) return "서울특별시";
-
-    return "현재 위치 확인 완료";
-  };
 
   const handleSearch = (e) => {
     if (e.key === "Enter") {
@@ -89,48 +275,9 @@ const Home = () => {
   };
 
   const handleNearbyClick = () => {
-    if (!navigator.geolocation) {
-      setLocationLabel("위치 기능 미지원");
-      return;
-    }
-
-    setIsLocationLoading(true);
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-
-        const currentLocation = {
-          lat: latitude,
-          lng: longitude,
-        };
-
-        localStorage.setItem(
-          "currentLocation",
-          JSON.stringify(currentLocation)
-        );
-
-        setLocationLabel(getLocationLabel(latitude, longitude));
-        setIsLocationLoading(false);
-
-        navigate("/search", {
-          state: {
-            mode: "nearby",
-            currentLocation,
-          },
-        });
-      },
-      (error) => {
-        console.log("위치 권한 오류:", error);
-        setLocationLabel("위치 권한 필요");
-        setIsLocationLoading(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
-    );
+    requestCurrentLocation({
+      shouldNavigate: true,
+    });
   };
 
   return (

@@ -10,17 +10,30 @@ body,
   padding: 0;
   width: 100%;
   min-height: 100%;
+  background: #f8fbfd;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 html {
   overflow-x: hidden;
 }
 
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 body {
   min-height: 100vh;
-  background: #ffffff;
+  background: #f8fbfd;
   overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 *,
@@ -50,11 +63,19 @@ svg {
   min-height: 100dvh;
   margin: 0;
   padding: 0;
-  background: #ffffff;
+  background: #f8fbfd;
   position: relative;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.app::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 .app-content {
@@ -62,10 +83,19 @@ svg {
   min-width: 0;
   flex: 1;
   overflow-x: hidden;
+  background: #f8fbfd;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.app-content::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 .app-content.with-footer {
-  padding-bottom: var(--footer-height);
+  padding-bottom: 0;
 }
 
 .route-transition {
@@ -73,7 +103,16 @@ svg {
   min-width: 0;
   min-height: auto;
   overflow-x: hidden;
+  background: #f8fbfd;
   animation: pageFadeUp 0.32s ease both;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.route-transition::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 @keyframes pageFadeUp {

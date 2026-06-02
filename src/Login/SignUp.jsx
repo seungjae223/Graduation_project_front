@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import "./SignUp.css";
 import eyeIcon from "../img/눈알.png";
 import warningIcon from "../img/워닝.png";
+import successIcon from "../img/축하.png";
 import PrivacyPolicyModal from "./PrivacyPolicyModal";
 
 const USERS_KEY = "mock_users";
@@ -55,6 +57,54 @@ const SignUpTopAlert = ({ open, iconSrc, onConfirm }) => {
   );
 };
 
+const SignupCompleteModal = ({ open, onStart }) => {
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  return createPortal(
+    <div className="signup-complete-overlay">
+      <section
+        className="signup-complete-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="signup-complete-title"
+      >
+        <div className="signup-complete-icon-circle">
+          <img src={successIcon} alt="회원가입 완료" />
+        </div>
+
+        <div className="signup-complete-text">
+          <h2 id="signup-complete-title">알림</h2>
+          <p>
+            회원가입이 완료되었습니다!
+            <br />
+            너만 오면 go와 함께 즐거운 여행을 시작해 보세요.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="signup-complete-button"
+          onClick={onStart}
+        >
+          시작하기 <span>→</span>
+        </button>
+      </section>
+    </div>,
+    document.body
+  );
+};
+
 const SignUp = () => {
   const navigate = useNavigate();
 
@@ -62,6 +112,7 @@ const SignUp = () => {
   const [showPwConfirm, setShowPwConfirm] = useState(false);
   const [isEmailAlertOpen, setIsEmailAlertOpen] = useState(false);
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
 
   const [mockVerificationCode, setMockVerificationCode] = useState("");
   const [isCodeSent, setIsCodeSent] = useState(false);
@@ -221,7 +272,11 @@ const SignUp = () => {
 
     saveUsers([...users, newUser]);
 
-    alert("회원가입이 완료되었습니다.");
+    setIsCompleteModalOpen(true);
+  };
+
+  const handleStartAfterSignup = () => {
+    setIsCompleteModalOpen(false);
     navigate("/login");
   };
 
@@ -434,6 +489,11 @@ const SignUp = () => {
         isOpen={isPrivacyModalOpen}
         onClose={() => setIsPrivacyModalOpen(false)}
         onAgree={handleAgreePrivacyPolicy}
+      />
+
+      <SignupCompleteModal
+        open={isCompleteModalOpen}
+        onStart={handleStartAfterSignup}
       />
     </>
   );
