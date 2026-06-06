@@ -5,9 +5,17 @@ import "./FindPassword.css";
 import passwordIcon from "../img/비번찾기.png";
 import arrowIcon from "../img/화살표.png";
 import warningIcon from "../img/주의.png";
+import api from "../api/api";
 
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+const getErrorMessage = (error, fallbackMessage) => {
+  const data = error.response?.data;
+
+  if (typeof data === "string") {
+    return data;
+  }
+
+  return data?.message || data?.error || fallbackMessage;
+};
 
 const FindPassword = () => {
   const navigate = useNavigate();
@@ -18,7 +26,7 @@ const FindPassword = () => {
   const handleSendMail = async (e) => {
     e.preventDefault();
 
-    const trimmedEmail = email.trim();
+    const trimmedEmail = email.trim().toLowerCase();
 
     if (!trimmedEmail) {
       alert("이메일 주소를 입력해주세요.");
@@ -28,21 +36,9 @@ const FindPassword = () => {
     try {
       setIsSending(true);
 
-      const response = await fetch(`${API_BASE_URL}/api/email/send`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: trimmedEmail,
-        }),
+      await api.post("/api/email/verification-requests", {
+        email: trimmedEmail,
       });
-
-      const resultText = await response.text();
-
-      if (!response.ok) {
-        throw new Error(resultText || "인증번호 발송에 실패했습니다.");
-      }
 
       navigate(`/verify-code?email=${encodeURIComponent(trimmedEmail)}`, {
         state: {
@@ -52,12 +48,17 @@ const FindPassword = () => {
     } catch (error) {
       console.error("인증번호 발송 실패:", error);
 
-      if (error.message.includes("Failed to fetch")) {
-        alert("백엔드 서버 연결을 확인해주세요.");
+      if (error.message.includes("Network Error")) {
+        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
         return;
       }
 
-      alert(error.message || "인증번호 발송에 실패했습니다.");
+      alert(
+        getErrorMessage(
+          error,
+          "인증번호 발송에 실패했습니다. 잠시 후 다시 시도해주세요."
+        )
+      );
     } finally {
       setIsSending(false);
     }
@@ -109,7 +110,9 @@ const FindPassword = () => {
             className="find-password-submit"
             disabled={isSending}
           >
-            <span>{isSending ? "메일 보내는 중..." : "비밀번호 찾기 메일 보내기"}</span>
+            <span>
+              {isSending ? "메일 보내는 중..." : "비밀번호 찾기 메일 보내기"}
+            </span>
             {!isSending && <img src={arrowIcon} alt="" />}
           </button>
 

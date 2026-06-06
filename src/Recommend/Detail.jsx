@@ -9,10 +9,15 @@ import { saveRecentPlace } from "../utils/recentPlaces";
 import html2pdf from "html2pdf.js";
 import ShareModal from "../ShareModal/ShareModal";
 import "./Detail.css";
+import api from "../api/api";
 
 import forestImg from "../img/도쿄.png";
 import museumImg from "../img/교토.png";
 import beachImg from "../img/서비스 소개 .png";
+
+const PLACES_API = "/api/places";
+const SAVED_PLACES_API = "/api/saved-places";
+const RECENT_PLACES_API = "/api/recent-places";
 
 const BackIcon = () => (
   <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
@@ -363,7 +368,8 @@ const buildFallbackReviews = (place) => [
     name: "주말산책러",
     badge: "리뷰어",
     rating: 5,
-    content: `동선에 넣기 좋고 주변 분위기도 만족스러웠어요. 여유 있게 방문하면 더 좋습니다.`,
+    content:
+      "동선에 넣기 좋고 주변 분위기도 만족스러웠어요. 여유 있게 방문하면 더 좋습니다.",
   },
 ];
 
@@ -450,47 +456,229 @@ const createPdfClone = (target) => {
   return { wrapper, clone, pageWidthPx };
 };
 
+const getResponseData = (data) => {
+  if (data?.data) return data.data;
+  if (data?.place) return data.place;
+  if (data?.destination) return data.destination;
+  if (data?.item) return data.item;
+
+  return data;
+};
+
+const getArrayData = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.places)) return data.places;
+  if (Array.isArray(data?.savedPlaces)) return data.savedPlaces;
+
+  return [];
+};
+
+const normalizeTags = (tags) => {
+  if (!Array.isArray(tags)) return [];
+
+  return tags
+    .map((tag) => {
+      const value =
+        typeof tag === "string"
+          ? tag
+          : tag?.name || tag?.tagName || tag?.title || "";
+
+      if (!value) return "";
+
+      return value.startsWith("#") ? value : `#${value}`;
+    })
+    .filter(Boolean);
+};
+
+const normalizeReviews = (reviews, fallbackPlace) => {
+  if (!Array.isArray(reviews) || reviews.length === 0) {
+    return buildFallbackReviews(fallbackPlace);
+  }
+
+  return reviews.map((review, index) => ({
+    id: review.id || review.reviewId || index + 1,
+    name: review.name || review.nickname || review.userName || "여행자",
+    badge: review.badge || review.level || review.role || "리뷰어",
+    rating: review.rating || review.score || 5,
+    content: review.content || review.reviewContent || review.text || "",
+  }));
+};
+
+const normalizePlaceDetail = (place, fallbackPlace) => {
+  const special = SPECIAL_DETAIL_COPY[place?.title || place?.name] || {};
+  const title =
+    place?.title ||
+    place?.name ||
+    place?.placeName ||
+    place?.destinationName ||
+    fallbackPlace.title;
+
+  const mergedPlace = {
+    ...fallbackPlace,
+    ...place,
+    title,
+    address:
+      special.address ||
+      place?.address ||
+      place?.roadAddress ||
+      place?.location ||
+      place?.addr ||
+      fallbackPlace.address,
+    rating:
+      special.rating ||
+      place?.rating ||
+      place?.score ||
+      place?.avgRating ||
+      fallbackPlace.rating ||
+      4.8,
+    image:
+      place?.image ||
+      place?.imageUrl ||
+      place?.thumbnail ||
+      place?.thumbnailUrl ||
+      place?.photoUrl ||
+      fallbackPlace.image ||
+      forestImg,
+    reviewCount:
+      special.reviewCount ||
+      place?.reviewCount ||
+      place?.reviewsCount ||
+      place?.reviewCnt ||
+      fallbackPlace.reviewCount ||
+      0,
+    tags:
+      (special.tags && special.tags.length > 0 && special.tags) ||
+      normalizeTags(place?.tags) ||
+      normalizeTags(place?.hashtags) ||
+      fallbackPlace.tags ||
+      ["#추천"],
+  };
+
+  return {
+    id: place?.id || place?.placeId || place?.destinationId || fallbackPlace.id,
+    title: mergedPlace.title,
+    image: mergedPlace.image,
+    address: mergedPlace.address,
+    rating: mergedPlace.rating,
+    reviewCount: mergedPlace.reviewCount,
+    tags: mergedPlace.tags.length > 0 ? mergedPlace.tags : ["#추천"],
+    intro:
+      special.intro ||
+      place?.intro ||
+      place?.description ||
+      place?.content ||
+      place?.summary ||
+      buildFallbackIntro(mergedPlace),
+    reviews:
+      special.reviews ||
+      normalizeReviews(place?.reviews || place?.reviewList, mergedPlace),
+    originalData: place,
+  };
+};
+
+const getErrorMessage = (error, fallbackMessage) => {
+  const data = error.response?.data;
+
+  if (typeof data === "string") {
+    return data;
+  }
+
+  return data?.message || data?.error || fallbackMessage;
+};
+
 function Detail() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { isSaved, toggleSavedPlace } = useSavedPlaces();
 
-  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const idParam = Number(searchParams.get("id"));
 
-  const detailPlace = useMemo(() => {
-    const idParam = Number(searchParams.get("id"));
+  const fallbackDetailPlace = useMemo(() => {
     const placeFromState = location.state?.place;
     const fallbackPlace =
       PLACE_FALLBACK_BY_ID[idParam] || PLACE_FALLBACK_BY_ID[201];
 
-    const basePlace = placeFromState || fallbackPlace;
-    const special = SPECIAL_DETAIL_COPY[basePlace.title] || {};
+    return normalizePlaceDetail(placeFromState || fallbackPlace, fallbackPlace);
+  }, [location.state, idParam]);
 
-    return {
-      id: basePlace.id || fallbackPlace.id,
-      title: basePlace.title || fallbackPlace.title,
-      image: basePlace.image || fallbackPlace.image || forestImg,
-      address: special.address || basePlace.address || fallbackPlace.address,
-      rating: special.rating || basePlace.rating || fallbackPlace.rating || 4.8,
-      reviewCount: special.reviewCount || basePlace.reviewCount || 980,
-      tags:
-        (special.tags && special.tags.length > 0 && special.tags) ||
-        (basePlace.tags && basePlace.tags.length > 0 && basePlace.tags) ||
-        fallbackPlace.tags ||
-        ["#추천"],
-      intro: special.intro || buildFallbackIntro(basePlace),
-      reviews: special.reviews || buildFallbackReviews(basePlace),
+  const [detailPlace, setDetailPlace] = useState(fallbackDetailPlace);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSavingPlace, setIsSavingPlace] = useState(false);
+  const [serverSaved, setServerSaved] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+
+  useEffect(() => {
+    setDetailPlace(fallbackDetailPlace);
+  }, [fallbackDetailPlace]);
+
+  useEffect(() => {
+    const fetchPlaceDetail = async () => {
+      if (!idParam) return;
+
+      try {
+        setIsLoading(true);
+
+        const response = await api.get(`${PLACES_API}/${idParam}`);
+        const placeData = getResponseData(response.data);
+
+        setDetailPlace(normalizePlaceDetail(placeData, fallbackDetailPlace));
+      } catch (error) {
+        console.error("장소 상세 조회 실패:", error);
+
+        if (!error.message.includes("Network Error")) {
+          alert(
+            getErrorMessage(
+              error,
+              "장소 상세 정보를 불러오지 못했습니다. 기본 정보를 표시합니다."
+            )
+          );
+        }
+      } finally {
+        setIsLoading(false);
+      }
     };
-  }, [location.state, searchParams]);
 
-  // 최근 본 장소 저장
+    fetchPlaceDetail();
+  }, [idParam, fallbackDetailPlace]);
+
+  useEffect(() => {
+    const fetchSavedState = async () => {
+      if (!detailPlace?.id) return;
+
+      try {
+        const response = await api.get(SAVED_PLACES_API);
+        const savedPlaces = getArrayData(response.data);
+
+        const exists = savedPlaces.some((savedPlace) => {
+          const placeData = savedPlace.place || savedPlace;
+          const savedId =
+            placeData.id ||
+            placeData.placeId ||
+            savedPlace.placeId ||
+            savedPlace.savedPlaceId;
+
+          return String(savedId) === String(detailPlace.id);
+        });
+
+        setServerSaved(exists);
+      } catch (error) {
+        console.error("관심 장소 상태 조회 실패:", error);
+      }
+    };
+
+    fetchSavedState();
+  }, [detailPlace.id]);
+
   useEffect(() => {
     if (!detailPlace?.id) {
       return;
     }
 
-    saveRecentPlace({
+    const recentPlace = {
       id: detailPlace.id,
       title: detailPlace.title,
       address: detailPlace.address,
@@ -498,7 +686,17 @@ function Detail() {
       image: detailPlace.image,
       tags: detailPlace.tags,
       reviewCount: detailPlace.reviewCount,
-    });
+    };
+
+    saveRecentPlace(recentPlace);
+
+    api
+      .post(RECENT_PLACES_API, {
+        placeId: detailPlace.id,
+      })
+      .catch((error) => {
+        console.error("최근 본 장소 서버 저장 실패:", error);
+      });
   }, [
     detailPlace.id,
     detailPlace.title,
@@ -509,7 +707,8 @@ function Detail() {
     detailPlace.reviewCount,
   ]);
 
-  const saved = isSaved(detailPlace.id);
+  const contextSaved = isSaved(detailPlace.id);
+  const saved = serverSaved || contextSaved;
 
   const shareUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -517,15 +716,59 @@ function Detail() {
     return `${window.location.origin}${location.pathname}?id=${detailPlace.id}`;
   }, [location.pathname, detailPlace.id]);
 
-  const handleToggleSaved = () => {
-    toggleSavedPlace({
+  const handleToggleSaved = async () => {
+    if (isSavingPlace) return;
+
+    const savedPlacePayload = {
       id: detailPlace.id,
       title: detailPlace.title,
       address: detailPlace.address,
       rating: detailPlace.rating,
       image: detailPlace.image,
       tags: detailPlace.tags,
-    });
+    };
+
+    try {
+      setIsSavingPlace(true);
+
+      if (saved) {
+        await api.delete(`${SAVED_PLACES_API}/${detailPlace.id}`);
+
+        setServerSaved(false);
+
+        if (contextSaved) {
+          toggleSavedPlace(savedPlacePayload);
+        }
+
+        return;
+      }
+
+      await api.post(SAVED_PLACES_API, {
+        placeId: detailPlace.id,
+      });
+
+      setServerSaved(true);
+
+      if (!contextSaved) {
+        toggleSavedPlace(savedPlacePayload);
+      }
+    } catch (error) {
+      console.error("관심 장소 변경 실패:", error);
+
+      if (error.message.includes("Network Error")) {
+        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        return;
+      }
+
+      alert(
+        getErrorMessage(
+          error,
+          "관심 장소 변경에 실패했습니다. 잠시 후 다시 시도해주세요."
+        )
+      );
+    } finally {
+      setIsSavingPlace(false);
+    }
   };
 
   const handleOpenShareModal = () => {
@@ -621,6 +864,7 @@ function Detail() {
                 type="button"
                 className="detail-action-btn"
                 onClick={handleToggleSaved}
+                disabled={isSavingPlace}
                 aria-label={saved ? "관심 장소 해제" : "관심 장소 추가"}
               >
                 <HeartIcon active={saved} />
@@ -630,7 +874,9 @@ function Detail() {
         </section>
 
         <section className="detail-sheet">
-          <h1 className="detail-title">{detailPlace.title}</h1>
+          <h1 className="detail-title">
+            {isLoading ? "장소 정보를 불러오는 중..." : detailPlace.title}
+          </h1>
 
           <div className="detail-location-row">
             <PinIcon />
@@ -658,7 +904,7 @@ function Detail() {
                 <span className="detail-review-star">★</span>
                 <span>{Number(detailPlace.rating).toFixed(1)}</span>
                 <small>
-                  ({detailPlace.reviewCount.toLocaleString("ko-KR")})
+                  ({Number(detailPlace.reviewCount).toLocaleString("ko-KR")})
                 </small>
               </div>
             </div>
@@ -699,9 +945,16 @@ function Detail() {
             type="button"
             className={`detail-save-btn ${saved ? "saved" : ""}`}
             onClick={handleToggleSaved}
+            disabled={isSavingPlace}
           >
             <SavePlaceIcon active={saved} />
-            <span>{saved ? "관심 장소에 저장됨" : "관심 장소에 추가하기"}</span>
+            <span>
+              {isSavingPlace
+                ? "처리 중..."
+                : saved
+                ? "관심 장소에 저장됨"
+                : "관심 장소에 추가하기"}
+            </span>
           </button>
         </div>
       </div>

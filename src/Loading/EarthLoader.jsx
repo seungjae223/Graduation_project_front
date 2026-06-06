@@ -1,7 +1,7 @@
 import React from "react";
 import "./EarthLoader.css";
 
-const EarthLoader = ({ text = "Connecting..." }) => {
+const EarthLoader = ({ text = " Loading... " }) => {
   return (
     <div className="earth-loading-screen">
       <div className="earth">

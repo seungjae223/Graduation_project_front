@@ -1,11 +1,15 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import "./Total.css";
+import api from "../api/api";
 
 import forestImg from "../img/도쿄.png";
 import museumImg from "../img/교토.png";
 import beachImg from "../img/서비스 소개 .png";
+
+const RECOMMENDATIONS_API = "/api/recommendations";
+const SAVED_PLACES_API = "/api/saved-places";
 
 const BookmarkIcon = ({ active }) => (
   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -150,18 +154,195 @@ const totalMockByTheme = {
   },
 };
 
+const getPlaceArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.places)) return data.places;
+  if (Array.isArray(data?.recommendations)) return data.recommendations;
+  if (Array.isArray(data?.data?.places)) return data.data.places;
+  if (Array.isArray(data?.data?.content)) return data.data.content;
+  if (Array.isArray(data?.data?.items)) return data.data.items;
+  if (Array.isArray(data?.data?.recommendations)) {
+    return data.data.recommendations;
+  }
+
+  return [];
+};
+
+const getIntroText = (data) => {
+  return (
+    data?.intro ||
+    data?.message ||
+    data?.description ||
+    data?.data?.intro ||
+    data?.data?.message ||
+    data?.data?.description ||
+    ""
+  );
+};
+
+const normalizeTags = (tags) => {
+  if (!Array.isArray(tags)) return [];
+
+  return tags
+    .map((tag) => {
+      const value =
+        typeof tag === "string"
+          ? tag
+          : tag?.name || tag?.tagName || tag?.title || "";
+
+      if (!value) return "";
+
+      return value.startsWith("#") ? value : `#${value}`;
+    })
+    .filter(Boolean);
+};
+
+const normalizePlace = (place) => ({
+  id: place.id || place.placeId || place.destinationId,
+  title:
+    place.title ||
+    place.name ||
+    place.placeName ||
+    place.destinationName ||
+    "장소 이름 없음",
+  address:
+    place.address ||
+    place.roadAddress ||
+    place.location ||
+    place.addr ||
+    "주소 정보 없음",
+  rating: place.rating || place.score || place.avgRating || 0,
+  distance:
+    Number(place.distance || place.distanceKm || place.km || place.range) || 999,
+  image:
+    place.image ||
+    place.imageUrl ||
+    place.thumbnail ||
+    place.thumbnailUrl ||
+    place.photoUrl ||
+    forestImg,
+  tags: normalizeTags(place.tags || place.hashtags),
+  originalData: place,
+});
+
+const getSavedPlaceArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.places)) return data.places;
+  if (Array.isArray(data?.savedPlaces)) return data.savedPlaces;
+  if (Array.isArray(data?.data?.savedPlaces)) return data.data.savedPlaces;
+  if (Array.isArray(data?.data?.places)) return data.data.places;
+
+  return [];
+};
+
+const getSavedPlaceId = (savedPlace) => {
+  const placeData = savedPlace.place || savedPlace.destination || savedPlace;
+
+  return (
+    placeData.id ||
+    placeData.placeId ||
+    savedPlace.placeId ||
+    savedPlace.savedPlaceId ||
+    savedPlace.bookmarkId ||
+    savedPlace.id
+  );
+};
+
+const getErrorMessage = (error, fallbackMessage) => {
+  const data = error.response?.data;
+
+  if (typeof data === "string") {
+    return data;
+  }
+
+  return data?.message || data?.error || fallbackMessage;
+};
+
 function Total() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { isSaved, toggleSavedPlace } = useSavedPlaces();
+
   const [sortBy, setSortBy] = useState("인기순");
+  const [serverPlaces, setServerPlaces] = useState([]);
+  const [serverSavedIds, setServerSavedIds] = useState([]);
+  const [serverIntro, setServerIntro] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSavingId, setIsSavingId] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const selectedTheme = searchParams.get("theme") || "힐링";
-  const themeData =
-    totalMockByTheme[selectedTheme] || totalMockByTheme["힐링"];
+  const themeData = totalMockByTheme[selectedTheme] || totalMockByTheme["힐링"];
+
+  useEffect(() => {
+    const fetchTotalPlaces = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
+
+        const response = await api.get(RECOMMENDATIONS_API, {
+          params: {
+            theme: selectedTheme,
+          },
+        });
+
+        const places = getPlaceArray(response.data).map(normalizePlace);
+
+        setServerPlaces(places);
+        setServerIntro(getIntroText(response.data));
+      } catch (error) {
+        console.error("전체 추천 장소 조회 실패:", error);
+
+        if (error.message.includes("Network Error")) {
+          setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+          return;
+        }
+
+        setErrorMessage(
+          getErrorMessage(
+            error,
+            "추천 장소를 불러오지 못했습니다. 기본 추천 장소를 표시합니다."
+          )
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTotalPlaces();
+  }, [selectedTheme]);
+
+  useEffect(() => {
+    const fetchSavedPlaces = async () => {
+      try {
+        const response = await api.get(SAVED_PLACES_API);
+        const savedPlaces = getSavedPlaceArray(response.data);
+
+        setServerSavedIds(
+          savedPlaces
+            .map(getSavedPlaceId)
+            .filter(Boolean)
+            .map((id) => String(id))
+        );
+      } catch (error) {
+        console.error("저장 장소 상태 조회 실패:", error);
+      }
+    };
+
+    fetchSavedPlaces();
+  }, []);
+
+  const places = serverPlaces.length > 0 ? serverPlaces : themeData.places;
+  const introText = serverIntro || themeData.intro;
 
   const sortedPlaces = useMemo(() => {
-    const copied = [...themeData.places];
+    const copied = [...places];
 
     if (sortBy === "거리순") {
       return copied.sort((a, b) => a.distance - b.distance);
@@ -172,7 +353,7 @@ function Total() {
     }
 
     return copied;
-  }, [themeData.places, sortBy]);
+  }, [places, sortBy]);
 
   const handleDetailClick = (place) => {
     navigate(`/detail?id=${place.id}`, {
@@ -180,10 +361,63 @@ function Total() {
     });
   };
 
+  const handleToggleSaved = async (event, place, saved) => {
+    event.stopPropagation();
+
+    if (isSavingId === place.id) return;
+
+    try {
+      setIsSavingId(place.id);
+
+      if (saved) {
+        await api.delete(`${SAVED_PLACES_API}/${place.id}`);
+
+        setServerSavedIds((prev) =>
+          prev.filter((savedId) => savedId !== String(place.id))
+        );
+
+        if (isSaved(place.id)) {
+          toggleSavedPlace(place);
+        }
+
+        return;
+      }
+
+      await api.post(SAVED_PLACES_API, {
+        placeId: place.id,
+      });
+
+      setServerSavedIds((prev) => {
+        const nextId = String(place.id);
+        return prev.includes(nextId) ? prev : [...prev, nextId];
+      });
+
+      if (!isSaved(place.id)) {
+        toggleSavedPlace(place);
+      }
+    } catch (error) {
+      console.error("관심 장소 변경 실패:", error);
+
+      if (error.message.includes("Network Error")) {
+        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        return;
+      }
+
+      alert(
+        getErrorMessage(
+          error,
+          "관심 장소 변경에 실패했습니다. 잠시 후 다시 시도해주세요."
+        )
+      );
+    } finally {
+      setIsSavingId(null);
+    }
+  };
+
   return (
     <div className="total-page">
       <section className="total-intro">
-        <h1>{themeData.intro}</h1>
+        <h1>{isLoading ? "추천 장소를 불러오는 중입니다." : introText}</h1>
       </section>
 
       <div className="sort-chip-row">
@@ -215,9 +449,22 @@ function Total() {
         </button>
       </div>
 
+      {errorMessage && (
+        <p
+          style={{
+            margin: "0 20px 14px",
+            fontSize: "13px",
+            color: "#ef4444",
+          }}
+        >
+          {errorMessage}
+        </p>
+      )}
+
       <section className="theme-total-list">
         {sortedPlaces.map((place) => {
-          const saved = isSaved(place.id);
+          const saved =
+            serverSavedIds.includes(String(place.id)) || isSaved(place.id);
 
           return (
             <article key={place.id} className="theme-total-card">
@@ -231,7 +478,8 @@ function Total() {
                 <button
                   type="button"
                   className="theme-total-save-btn"
-                  onClick={() => toggleSavedPlace(place)}
+                  onClick={(event) => handleToggleSaved(event, place, saved)}
+                  disabled={isSavingId === place.id}
                   aria-label={saved ? "저장 취소" : "저장"}
                 >
                   <BookmarkIcon active={saved} />
@@ -250,7 +498,7 @@ function Total() {
                 <p className="theme-total-address">{place.address}</p>
 
                 <div className="theme-total-tag-row">
-                  {place.tags.map((tag) => (
+                  {(place.tags || []).map((tag) => (
                     <span key={tag} className="theme-total-tag">
                       {tag}
                     </span>

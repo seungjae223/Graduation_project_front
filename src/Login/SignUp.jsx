@@ -6,19 +6,24 @@ import eyeIcon from "../img/눈알.png";
 import warningIcon from "../img/워닝.png";
 import successIcon from "../img/축하.png";
 import PrivacyPolicyModal from "./PrivacyPolicyModal";
+import api from "../api/api";
 
-const USERS_KEY = "mock_users";
+const getErrorMessage = (error, fallbackMessage) => {
+  const data = error.response?.data;
 
-const readUsers = () => {
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-  } catch (error) {
-    return [];
+  if (typeof data === "string" && data.trim()) {
+    return data;
   }
-};
 
-const saveUsers = (users) => {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  if (data?.message) {
+    return data.message;
+  }
+
+  if (data?.error) {
+    return data.error;
+  }
+
+  return fallbackMessage;
 };
 
 const SignUpTopAlert = ({ open, iconSrc, onConfirm }) => {
@@ -114,9 +119,12 @@ const SignUp = () => {
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
 
-  const [mockVerificationCode, setMockVerificationCode] = useState("");
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isCodeVerified, setIsCodeVerified] = useState(false);
+
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -134,7 +142,7 @@ const SignUp = () => {
         email: value,
         code: "",
       }));
-      setMockVerificationCode("");
+
       setIsCodeSent(false);
       setIsCodeVerified(false);
       return;
@@ -145,6 +153,7 @@ const SignUp = () => {
         ...prev,
         code: value,
       }));
+
       setIsCodeVerified(false);
       return;
     }
@@ -167,7 +176,7 @@ const SignUp = () => {
     }
   };
 
-  const handleSendCode = () => {
+  const handleSendCode = async () => {
     const normalizedEmail = form.email.trim().toLowerCase();
 
     if (!normalizedEmail || !isValidEmail(normalizedEmail)) {
@@ -175,39 +184,75 @@ const SignUp = () => {
       return;
     }
 
-    const generatedCode = String(Math.floor(100000 + Math.random() * 900000));
+    try {
+      setIsSendingCode(true);
 
-    setForm((prev) => ({
-      ...prev,
-      email: normalizedEmail,
-      code: "",
-    }));
-    setMockVerificationCode(generatedCode);
-    setIsCodeSent(true);
-    setIsCodeVerified(false);
+      await api.post("/api/email/send", {
+        email: normalizedEmail,
+      });
 
-    alert(`목업 인증번호가 발송되었습니다.\n\n인증번호: ${generatedCode}`);
+      setForm((prev) => ({
+        ...prev,
+        email: normalizedEmail,
+        code: "",
+      }));
+
+      setIsCodeSent(true);
+      setIsCodeVerified(false);
+
+      alert("인증번호가 발송되었습니다. 이메일을 확인해주세요.");
+    } catch (error) {
+      console.error("인증번호 발송 실패:", error);
+
+      alert(
+        getErrorMessage(
+          error,
+          "인증번호 발송에 실패했습니다. 입력한 이메일 또는 서버 상태를 확인해주세요."
+        )
+      );
+    } finally {
+      setIsSendingCode(false);
+    }
   };
 
-  const handleVerifyCode = () => {
-    if (!isCodeSent || !mockVerificationCode) {
+  const handleVerifyCode = async () => {
+    const normalizedEmail = form.email.trim().toLowerCase();
+    const verificationCode = form.code.trim();
+
+    if (!isCodeSent) {
       alert("먼저 인증번호를 발송해주세요.");
       return;
     }
 
-    if (!form.code.trim()) {
+    if (!verificationCode) {
       alert("인증번호를 입력해주세요.");
       return;
     }
 
-    if (form.code.trim() !== mockVerificationCode) {
-      setIsCodeVerified(false);
-      alert("인증번호가 일치하지 않습니다.");
-      return;
-    }
+    try {
+      setIsVerifyingCode(true);
 
-    setIsCodeVerified(true);
-    alert("이메일 인증이 완료되었습니다.");
+      await api.post("/api/email/verify", {
+        email: normalizedEmail,
+        code: verificationCode,
+      });
+
+      setIsCodeVerified(true);
+      alert("이메일 인증이 완료되었습니다.");
+    } catch (error) {
+      console.error("이메일 인증 실패:", error);
+
+      setIsCodeVerified(false);
+
+      alert(
+        getErrorMessage(
+          error,
+          "인증번호가 일치하지 않거나 인증 시간이 만료되었습니다."
+        )
+      );
+    } finally {
+      setIsVerifyingCode(false);
+    }
   };
 
   const handleOpenPrivacyModal = () => {
@@ -219,14 +264,20 @@ const SignUp = () => {
       ...prev,
       agreed: true,
     }));
+
     setIsPrivacyModalOpen(false);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const trimmedName = form.name.trim();
     const normalizedEmail = form.email.trim().toLowerCase();
+
+    if (!trimmedName) {
+      alert("이름을 입력해주세요.");
+      return;
+    }
 
     if (!isValidEmail(normalizedEmail)) {
       setIsEmailAlertOpen(true);
@@ -253,26 +304,28 @@ const SignUp = () => {
       return;
     }
 
-    const users = readUsers();
-    const duplicatedUser = users.some((user) => user.email === normalizedEmail);
+    try {
+      setIsSubmitting(true);
 
-    if (duplicatedUser) {
-      alert("이미 가입된 이메일입니다.");
-      return;
+      await api.post("/api/auth/signup", {
+        email: normalizedEmail,
+        password: form.password,
+        nickname: trimmedName,
+      });
+
+      setIsCompleteModalOpen(true);
+    } catch (error) {
+      console.error("회원가입 실패:", error);
+
+      alert(
+        getErrorMessage(
+          error,
+          "회원가입에 실패했습니다. 입력 정보를 다시 확인해주세요."
+        )
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const newUser = {
-      id: Date.now().toString(),
-      name: trimmedName,
-      email: normalizedEmail,
-      password: form.password,
-      createdAt: new Date().toISOString(),
-      verifiedAt: new Date().toISOString(),
-    };
-
-    saveUsers([...users, newUser]);
-
-    setIsCompleteModalOpen(true);
   };
 
   const handleStartAfterSignup = () => {
@@ -330,8 +383,9 @@ const SignUp = () => {
                   type="button"
                   className="signup-inline-btn signup-code-send-btn"
                   onClick={handleSendCode}
+                  disabled={isSendingCode}
                 >
-                  인증번호 발송
+                  {isSendingCode ? "발송 중..." : "인증번호 발송"}
                 </button>
               </div>
 
@@ -344,7 +398,7 @@ const SignUp = () => {
                     color: "#1da1f2",
                   }}
                 >
-                  목업 인증번호: {mockVerificationCode}
+                  인증번호가 발송되었습니다. 이메일을 확인해주세요.
                 </p>
               )}
 
@@ -367,6 +421,8 @@ const SignUp = () => {
                 <input
                   className="signup-input"
                   type="text"
+                  inputMode="numeric"
+                  maxLength={6}
                   placeholder="인증번호 6자리 입력"
                   value={form.code}
                   onChange={(e) => handleChange("code", e.target.value)}
@@ -376,8 +432,9 @@ const SignUp = () => {
                   type="button"
                   className="signup-inline-btn"
                   onClick={handleVerifyCode}
+                  disabled={!isCodeSent || isVerifyingCode}
                 >
-                  인증 확인
+                  {isVerifyingCode ? "확인 중..." : "인증 확인"}
                 </button>
               </div>
             </div>
@@ -455,9 +512,9 @@ const SignUp = () => {
             <button
               type="submit"
               className={`signup-submit-btn ${isFormValid ? "enabled" : ""}`}
-              disabled={!isFormValid}
+              disabled={!isFormValid || isSubmitting}
             >
-              회원가입 하기
+              {isSubmitting ? "회원가입 중..." : "회원가입 하기"}
             </button>
           </form>
 

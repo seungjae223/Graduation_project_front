@@ -2,8 +2,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import "./MyPage.css";
+import api, { getAccessToken } from "../api/api";
 
 import adminMenuIcon from "../img/관리자.png";
+
+const DEFAULT_USER_NAME = "여행자";
 
 const POLICY_SECTIONS = [
   {
@@ -176,13 +179,7 @@ const LocationIcon = () => (
       strokeWidth="2"
       strokeLinejoin="round"
     />
-    <circle
-      cx="12"
-      cy="9.8"
-      r="2.4"
-      stroke="#4C5A73"
-      strokeWidth="2"
-    />
+    <circle cx="12" cy="9.8" r="2.4" stroke="#4C5A73" strokeWidth="2" />
   </svg>
 );
 
@@ -242,14 +239,10 @@ const LocationPolicyModal = ({ onClose, onAgree }) => (
           <section key={section.id} className="location-policy-section">
             <div className="location-policy-section-title-wrap">
               <span className="location-policy-bar" />
-              <h4 className="location-policy-section-title">
-                {section.title}
-              </h4>
+              <h4 className="location-policy-section-title">{section.title}</h4>
             </div>
 
-            <p className="location-policy-section-content">
-              {section.content}
-            </p>
+            <p className="location-policy-section-content">{section.content}</p>
           </section>
         ))}
       </div>
@@ -303,33 +296,446 @@ const AvatarIllustration = () => (
   </svg>
 );
 
+const pickText = (...values) => {
+  const value = values.find((item) => {
+    return typeof item === "string" && item.trim();
+  });
+
+  return value ? value.trim() : "";
+};
+
+const pickRealText = (...values) => {
+  const value = values.find((item) => {
+    return (
+      typeof item === "string" &&
+      item.trim() &&
+      item.trim() !== DEFAULT_USER_NAME
+    );
+  });
+
+  return value ? value.trim() : "";
+};
+
+const isObject = (value) => {
+  return value && typeof value === "object" && !Array.isArray(value);
+};
+
+const getEmailLocalPart = (email) => {
+  if (!email || typeof email !== "string") return "";
+
+  return email.includes("@") ? email.split("@")[0] : email;
+};
+
+const getCachedNicknameByEmail = (email) => {
+  if (!email) return "";
+
+  return pickRealText(
+    localStorage.getItem(`nickname:${email}`),
+    sessionStorage.getItem(`nickname:${email}`)
+  );
+};
+
+const normalizeToken = (token) => {
+  if (!token || typeof token !== "string") return "";
+
+  const trimmedToken = token.trim();
+
+  if (!trimmedToken) return "";
+
+  try {
+    const parsed = JSON.parse(trimmedToken);
+
+    const parsedToken = pickText(
+      parsed?.accessToken,
+      parsed?.token,
+      parsed?.data?.accessToken,
+      parsed?.data?.token
+    );
+
+    if (parsedToken) {
+      return parsedToken.replace(/^Bearer\s+/i, "").trim();
+    }
+  } catch {
+    // JSON 문자열이 아니면 일반 토큰으로 처리
+  }
+
+  return trimmedToken.replace(/^Bearer\s+/i, "").trim();
+};
+
 const getStoredUser = () => {
   try {
-    const localUser = localStorage.getItem("mock_current_user");
+    const localUser = localStorage.getItem("currentUser");
     if (localUser) return JSON.parse(localUser);
 
-    const sessionUser = sessionStorage.getItem("mock_current_user");
+    const sessionUser = sessionStorage.getItem("currentUser");
     if (sessionUser) return JSON.parse(sessionUser);
 
-    const users = JSON.parse(localStorage.getItem("mock_users") || "[]");
-    if (Array.isArray(users) && users.length > 0) {
-      return users[users.length - 1];
-    }
+    const mockLocalUser = localStorage.getItem("mock_current_user");
+    if (mockLocalUser) return JSON.parse(mockLocalUser);
+
+    const mockSessionUser = sessionStorage.getItem("mock_current_user");
+    if (mockSessionUser) return JSON.parse(mockSessionUser);
 
     return null;
   } catch (error) {
+    localStorage.removeItem("currentUser");
+    sessionStorage.removeItem("currentUser");
     return null;
+  }
+};
+
+const parseJwtPayload = (token) => {
+  try {
+    const cleanToken = normalizeToken(token);
+
+    if (!cleanToken) return null;
+
+    const payload = cleanToken.split(".")[1];
+    if (!payload) return null;
+
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const paddedBase64 = base64.padEnd(
+      base64.length + ((4 - (base64.length % 4)) % 4),
+      "="
+    );
+
+    const decodedPayload = atob(paddedBase64);
+    const jsonPayload = decodeURIComponent(
+      decodedPayload
+        .split("")
+        .map((char) => {
+          return `%${`00${char.charCodeAt(0).toString(16)}`.slice(-2)}`;
+        })
+        .join("")
+    );
+
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    return null;
+  }
+};
+
+const normalizeRole = (role) => {
+  if (Array.isArray(role)) {
+    const firstRole = role[0];
+
+    if (typeof firstRole === "object" && firstRole !== null) {
+      return firstRole.authority || firstRole.role || "";
+    }
+
+    return firstRole || "";
+  }
+
+  if (typeof role === "object" && role !== null) {
+    return role.authority || role.role || "";
+  }
+
+  return role || "";
+};
+
+const getUserData = (data) => {
+  const candidates = [
+    data?.data?.user,
+    data?.data?.member,
+    data?.data?.userInfo,
+    data?.data?.memberInfo,
+    data?.data?.profile,
+    data?.data,
+
+    data?.result?.user,
+    data?.result?.member,
+    data?.result?.userInfo,
+    data?.result?.memberInfo,
+    data?.result?.profile,
+    data?.result,
+
+    data?.user,
+    data?.member,
+    data?.userInfo,
+    data?.memberInfo,
+    data?.profile,
+    data,
+  ];
+
+  return candidates.find(isObject) || null;
+};
+
+const getNestedUserData = (user) => {
+  if (isObject(user?.user)) return user.user;
+  if (isObject(user?.member)) return user.member;
+  if (isObject(user?.userInfo)) return user.userInfo;
+  if (isObject(user?.memberInfo)) return user.memberInfo;
+  if (isObject(user?.profile)) return user.profile;
+
+  return {};
+};
+
+const getStoredAccessToken = () => {
+  try {
+    return (
+      getAccessToken() ||
+      localStorage.getItem("accessToken") ||
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("accessToken") ||
+      sessionStorage.getItem("token") ||
+      ""
+    );
+  } catch {
+    return (
+      localStorage.getItem("accessToken") ||
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("accessToken") ||
+      sessionStorage.getItem("token") ||
+      ""
+    );
+  }
+};
+
+const normalizeUserData = (data) => {
+  const user = getUserData(data);
+  const nestedUser = getNestedUserData(user || {});
+  const token = getStoredAccessToken();
+  const payload = parseJwtPayload(token);
+
+  const userIsFallback = user?._isNicknameFallback === true;
+
+  const username = pickText(
+    user?.username,
+    user?.loginId,
+    user?.userId,
+    nestedUser?.username,
+    nestedUser?.loginId,
+    nestedUser?.userId
+  );
+
+  const usernameIsEmail = username.includes("@");
+
+  const storedEmail = pickText(
+    localStorage.getItem("userEmail"),
+    sessionStorage.getItem("userEmail")
+  );
+
+  const email = pickText(
+    user?.email,
+    user?.userEmail,
+    user?.memberEmail,
+    user?.loginEmail,
+    user?.accountEmail,
+    user?.emailAddress,
+    user?.mail,
+
+    nestedUser?.email,
+    nestedUser?.userEmail,
+    nestedUser?.memberEmail,
+    nestedUser?.loginEmail,
+    nestedUser?.accountEmail,
+    nestedUser?.emailAddress,
+    nestedUser?.mail,
+
+    usernameIsEmail ? username : "",
+    storedEmail,
+
+    payload?.email,
+    payload?.userEmail,
+    payload?.memberEmail,
+    typeof payload?.sub === "string" && payload.sub.includes("@")
+      ? payload.sub
+      : "",
+    typeof payload?.username === "string" && payload.username.includes("@")
+      ? payload.username
+      : ""
+  );
+
+  const storedName = pickRealText(
+    getCachedNicknameByEmail(email),
+    localStorage.getItem("userNickname"),
+    localStorage.getItem("userName"),
+    sessionStorage.getItem("userNickname"),
+    sessionStorage.getItem("userName")
+  );
+
+  const serverName = userIsFallback
+    ? ""
+    : pickRealText(
+        user?.nickname,
+        user?.name,
+        user?.userName,
+        user?.memberName,
+        user?.displayName,
+        user?.realName,
+        user?.fullName,
+
+        nestedUser?.nickname,
+        nestedUser?.name,
+        nestedUser?.userName,
+        nestedUser?.memberName,
+        nestedUser?.displayName,
+        nestedUser?.realName,
+        nestedUser?.fullName,
+
+        !usernameIsEmail ? username : ""
+      );
+
+  const payloadName = pickRealText(
+    payload?.nickname,
+    payload?.name,
+    payload?.userName,
+    payload?.memberName,
+    typeof payload?.sub === "string" && !payload.sub.includes("@")
+      ? payload.sub
+      : ""
+  );
+
+  const realNickname = pickRealText(serverName, storedName, payloadName);
+  const emailFallbackName = getEmailLocalPart(email);
+  const displayName = realNickname || emailFallbackName || DEFAULT_USER_NAME;
+
+  const role = normalizeRole(
+    user?.role ||
+      user?.roles ||
+      user?.authority ||
+      user?.authorities ||
+      nestedUser?.role ||
+      nestedUser?.roles ||
+      nestedUser?.authority ||
+      nestedUser?.authorities ||
+      payload?.role ||
+      payload?.roles ||
+      payload?.authority ||
+      payload?.authorities
+  );
+
+  const hasUserObject = user && Object.keys(user).length > 0;
+
+  if (!hasUserObject && !email && !displayName) {
+    return null;
+  }
+
+  return {
+    ...(user || {}),
+    name: displayName,
+    nickname: realNickname || displayName,
+    username: realNickname || displayName,
+    email: email || "",
+    role,
+    _isNicknameFallback: !realNickname,
+  };
+};
+
+const getFallbackUser = () => {
+  return normalizeUserData(null);
+};
+
+const getInitialUser = () => {
+  return normalizeUserData(getStoredUser()) || getFallbackUser();
+};
+
+const getUserDisplayName = (user) => {
+  if (!user) return DEFAULT_USER_NAME;
+
+  return (
+    pickRealText(user.name, user.nickname, user.username) ||
+    getEmailLocalPart(user.email) ||
+    DEFAULT_USER_NAME
+  );
+};
+
+const saveUserToStorage = (user) => {
+  if (!user) return;
+
+  try {
+    localStorage.setItem("currentUser", JSON.stringify(user));
+
+    if (user.email) {
+      localStorage.setItem("userEmail", user.email);
+    }
+
+    if (!user._isNicknameFallback) {
+      const realNickname = pickRealText(user.nickname, user.name, user.username);
+
+      if (realNickname) {
+        localStorage.setItem("userName", realNickname);
+        localStorage.setItem("userNickname", realNickname);
+
+        if (user.email) {
+          localStorage.setItem(`nickname:${user.email}`, realNickname);
+        }
+      }
+    }
+  } catch (storageError) {
+    console.error("사용자 정보 저장 실패:", storageError);
   }
 };
 
 const MyPage = () => {
   const navigate = useNavigate();
   const { savedPlaces } = useSavedPlaces();
-  const currentUser = getStoredUser();
-  const isAdmin = currentUser?.role === "admin";
 
+  const [currentUser, setCurrentUser] = useState(getInitialUser());
+  const [isUserLoading, setIsUserLoading] = useState(false);
   const [locationAllowed, setLocationAllowed] = useState(false);
   const [isLocationPolicyOpen, setIsLocationPolicyOpen] = useState(false);
+
+  const currentRole = String(currentUser?.role || "").toUpperCase();
+  const isAdmin = currentRole === "ADMIN" || currentRole === "ROLE_ADMIN";
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchMyInfo = async () => {
+      const token = getStoredAccessToken();
+
+      if (!token) {
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      const fallbackUser = getInitialUser();
+
+      if (fallbackUser && isMounted) {
+        setCurrentUser(fallbackUser);
+        saveUserToStorage(fallbackUser);
+      }
+
+      try {
+        setIsUserLoading(true);
+
+        const response = await api.get("/api/users/me");
+
+        console.log("내 정보 응답:", response.data);
+
+        const userData = normalizeUserData(response.data);
+
+        if (!userData) {
+          throw new Error("사용자 정보가 비어 있습니다.");
+        }
+
+        if (!isMounted) return;
+
+        setCurrentUser(userData);
+        saveUserToStorage(userData);
+      } catch (error) {
+        console.error("내 정보 조회 실패:", error);
+
+        const safeFallbackUser = getInitialUser();
+
+        if (safeFallbackUser && isMounted) {
+          setCurrentUser(safeFallbackUser);
+          saveUserToStorage(safeFallbackUser);
+        }
+      } finally {
+        if (isMounted) {
+          setIsUserLoading(false);
+        }
+      }
+    };
+
+    fetchMyInfo();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
 
   const saveLocationAllowed = useCallback((isAllowed) => {
     setLocationAllowed(isAllowed);
@@ -478,9 +884,28 @@ const MyPage = () => {
   };
 
   const stats = [
-    { label: "다녀온 곳", value: 12 },
-    { label: "저장한 곳", value: savedPlaces.length },
-    { label: "작성한 리뷰", value: 25 },
+    {
+      label: "다녀온 곳",
+      value:
+        currentUser?.visitedPlaceCount ??
+        currentUser?.visitedCount ??
+        currentUser?.tripCount ??
+        0,
+    },
+    {
+      label: "저장한 곳",
+      value:
+        currentUser?.savedPlaceCount ??
+        currentUser?.bookmarkCount ??
+        savedPlaces.length,
+    },
+    {
+      label: "작성한 리뷰",
+      value:
+        currentUser?.reviewCount ??
+        currentUser?.writtenReviewCount ??
+        0,
+    },
   ];
 
   const myActivityMenus = [
@@ -531,7 +956,28 @@ const MyPage = () => {
 
   const handleLogout = () => {
     try {
+      localStorage.removeItem("petapp_session_v1");
+      localStorage.removeItem("jakdang_access_token");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("token");
+      localStorage.removeItem("tokenType");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("keepLogin");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userNickname");
+      localStorage.removeItem("currentUser");
       localStorage.removeItem("mock_current_user");
+
+      sessionStorage.removeItem("petapp_session_v1");
+      sessionStorage.removeItem("jakdang_access_token");
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("userEmail");
+      sessionStorage.removeItem("userName");
+      sessionStorage.removeItem("userNickname");
+      sessionStorage.removeItem("currentUser");
       sessionStorage.removeItem("mock_current_user");
     } catch (error) {
       console.error("로그아웃 실패:", error);
@@ -551,7 +997,11 @@ const MyPage = () => {
 
             <div className="mypage-user-info">
               <div className="mypage-name-row">
-                <h1>{currentUser?.name || "김여행"}</h1>
+                <h1>
+                  {isUserLoading && !currentUser
+                    ? "불러오는 중..."
+                    : getUserDisplayName(currentUser)}
+                </h1>
 
                 <button
                   type="button"
@@ -567,7 +1017,7 @@ const MyPage = () => {
                 </button>
               </div>
 
-              <p>{currentUser?.email || "traveler_kim@email.com"}</p>
+              <p>{currentUser?.email || "이메일 정보 없음"}</p>
             </div>
           </div>
 

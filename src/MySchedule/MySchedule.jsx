@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MySchedule.css";
+import api from "../api/api";
 
 import beachImg from "../img/서비스 소개 .png";
 
-const ROUTE_STORAGE_KEY = "mock_saved_route_results";
-const ROUTE_STORAGE_EVENT = "mock-routes-updated";
+const SCHEDULES_API = "/api/schedules";
 
 const ChevronRightIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -60,22 +60,6 @@ const PinIcon = () => (
   </svg>
 );
 
-const readStoredRoutes = () => {
-  if (typeof window === "undefined") {
-    return [];
-  }
-
-  try {
-    const raw = window.localStorage.getItem(ROUTE_STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    console.error("저장된 일정 읽기 실패:", error);
-    return [];
-  }
-};
-
 const normalizeDateOnly = (date) => {
   const newDate = new Date(date);
   newDate.setHours(0, 0, 0, 0);
@@ -100,29 +84,85 @@ const formatDateText = (date, withYear = true) => {
   return withYear ? `${year}.${month}.${day}` : `${month}.${day}`;
 };
 
-const getRouteDates = (route) => {
-  const selectedDates = Array.isArray(route?.selectedDates)
-    ? route.selectedDates
-    : [];
+const getScheduleArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.schedules)) return data.schedules;
+  if (Array.isArray(data?.routes)) return data.routes;
+  if (Array.isArray(data?.items)) return data.items;
 
-  return selectedDates
-    .map((date) => new Date(date))
-    .filter((date) => !Number.isNaN(date.getTime()))
-    .sort((a, b) => a.getTime() - b.getTime());
+  return [];
 };
 
-const getAllPlacesFromRoute = (route) => {
-  const placesByDate = route?.placesByDate || {};
+const getScheduleDates = (schedule) => {
+  const selectedDates = Array.isArray(schedule?.selectedDates)
+    ? schedule.selectedDates
+    : Array.isArray(schedule?.dates)
+    ? schedule.dates
+    : Array.isArray(schedule?.travelDates)
+    ? schedule.travelDates
+    : [];
 
-  return Object.values(placesByDate)
+  const dateArray = selectedDates
+    .map((date) => new Date(date))
+    .filter((date) => !Number.isNaN(date.getTime()));
+
+  const startDateValue =
+    schedule?.startDate ||
+    schedule?.startedAt ||
+    schedule?.travelStartDate ||
+    schedule?.departureDate;
+
+  const endDateValue =
+    schedule?.endDate ||
+    schedule?.endedAt ||
+    schedule?.travelEndDate ||
+    schedule?.arrivalDate;
+
+  const startDate = startDateValue ? new Date(startDateValue) : null;
+  const endDate = endDateValue ? new Date(endDateValue) : null;
+
+  if (startDate && !Number.isNaN(startDate.getTime())) {
+    dateArray.push(startDate);
+  }
+
+  if (endDate && !Number.isNaN(endDate.getTime())) {
+    dateArray.push(endDate);
+  }
+
+  return dateArray.sort((a, b) => a.getTime() - b.getTime());
+};
+
+const getAllPlacesFromSchedule = (schedule) => {
+  const placesByDate = schedule?.placesByDate || schedule?.placesByDay || {};
+
+  const placesFromObject = Object.values(placesByDate)
     .filter(Array.isArray)
     .flat()
     .filter(Boolean);
+
+  const placesFromArray = [
+    ...(Array.isArray(schedule?.places) ? schedule.places : []),
+    ...(Array.isArray(schedule?.routePlaces) ? schedule.routePlaces : []),
+    ...(Array.isArray(schedule?.destinations) ? schedule.destinations : []),
+  ];
+
+  const placesFromDays = Array.isArray(schedule?.days)
+    ? schedule.days
+        .map((day) => day.places || day.destinations || day.items || [])
+        .filter(Array.isArray)
+        .flat()
+    : [];
+
+  return [...placesFromObject, ...placesFromArray, ...placesFromDays].filter(
+    Boolean
+  );
 };
 
-const getRouteFirstPlace = (route) => {
-  const dates = getRouteDates(route);
-  const placesByDate = route?.placesByDate || {};
+const getScheduleFirstPlace = (schedule) => {
+  const dates = getScheduleDates(schedule);
+  const placesByDate = schedule?.placesByDate || schedule?.placesByDay || {};
 
   if (dates.length > 0) {
     const firstDateKey = getDateKey(dates[0]);
@@ -133,11 +173,11 @@ const getRouteFirstPlace = (route) => {
     }
   }
 
-  return getAllPlacesFromRoute(route)[0] || null;
+  return getAllPlacesFromSchedule(schedule)[0] || null;
 };
 
-const getRouteDateText = (route) => {
-  const dates = getRouteDates(route);
+const getScheduleDateText = (schedule) => {
+  const dates = getScheduleDates(schedule);
 
   if (dates.length === 0) {
     return "날짜 정보 없음";
@@ -153,8 +193,8 @@ const getRouteDateText = (route) => {
   return `${formatDateText(firstDate)} - ${formatDateText(lastDate, false)}`;
 };
 
-const getRouteDday = (route) => {
-  const dates = getRouteDates(route);
+const getScheduleDday = (schedule) => {
+  const dates = getScheduleDates(schedule);
 
   if (dates.length === 0) {
     return "D-Day";
@@ -178,79 +218,125 @@ const getRouteDday = (route) => {
   return "완료";
 };
 
-const getRouteLocation = (route) => {
-  const firstPlace = getRouteFirstPlace(route);
+const getScheduleLocation = (schedule) => {
+  const firstPlace = getScheduleFirstPlace(schedule);
 
   return (
+    schedule?.location ||
+    schedule?.destination ||
+    schedule?.city ||
+    schedule?.country ||
     firstPlace?.city ||
     firstPlace?.country ||
     firstPlace?.desc ||
     firstPlace?.address ||
+    firstPlace?.location ||
     "여행지 정보 없음"
   );
 };
 
-const getRouteImage = (route) => {
-  const firstPlace = getRouteFirstPlace(route);
+const getScheduleImage = (schedule) => {
+  const firstPlace = getScheduleFirstPlace(schedule);
 
-  return route?.thumbnail || firstPlace?.thumb || firstPlace?.image || beachImg;
+  return (
+    schedule?.thumbnail ||
+    schedule?.thumbnailUrl ||
+    schedule?.image ||
+    schedule?.imageUrl ||
+    firstPlace?.thumb ||
+    firstPlace?.thumbnail ||
+    firstPlace?.thumbnailUrl ||
+    firstPlace?.image ||
+    firstPlace?.imageUrl ||
+    beachImg
+  );
 };
 
-const convertRouteToSchedule = (route) => {
-  if (!route?.id) {
+const convertScheduleToCard = (schedule) => {
+  const scheduleId =
+    schedule?.id || schedule?.scheduleId || schedule?.routeId || schedule?.planId;
+
+  if (!scheduleId) {
     return null;
   }
 
-  const dates = getRouteDates(route);
+  const dates = getScheduleDates(schedule);
   const firstDate = dates[0] || null;
   const lastDate = dates[dates.length - 1] || null;
 
   return {
-    id: String(route.id),
-    dday: getRouteDday(route),
-    title: route.title || "새 여행 일정",
-    dateText: getRouteDateText(route),
-    location: getRouteLocation(route),
-    image: getRouteImage(route),
-    route,
+    id: String(scheduleId),
+    routeId: schedule?.routeId || schedule?.id || scheduleId,
+    dday: getScheduleDday(schedule),
+    title:
+      schedule?.title ||
+      schedule?.scheduleTitle ||
+      schedule?.routeTitle ||
+      schedule?.name ||
+      "새 여행 일정",
+    dateText: getScheduleDateText(schedule),
+    location: getScheduleLocation(schedule),
+    image: getScheduleImage(schedule),
+    route: schedule,
     startTime: firstDate ? normalizeDateOnly(firstDate).getTime() : 0,
     endTime: lastDate ? normalizeDateOnly(lastDate).getTime() : 0,
   };
 };
 
+const getErrorMessage = (error, fallbackMessage) => {
+  const data = error.response?.data;
+
+  if (typeof data === "string") {
+    return data;
+  }
+
+  return data?.message || data?.error || fallbackMessage;
+};
+
 function MySchedule() {
   const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState("upcoming");
-  const [savedRoutes, setSavedRoutes] = useState(() => readStoredRoutes());
+  const [scheduleList, setScheduleList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    const syncSavedRoutes = () => {
-      setSavedRoutes(readStoredRoutes());
-    };
+    const fetchSchedules = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
 
-    const handleStorageChange = (event) => {
-      if (event.key === ROUTE_STORAGE_KEY || event.key === null) {
-        syncSavedRoutes();
+        const response = await api.get(SCHEDULES_API);
+        const schedules = getScheduleArray(response.data);
+
+        setScheduleList(
+          schedules
+            .map(convertScheduleToCard)
+            .filter(Boolean)
+            .sort((a, b) => b.startTime - a.startTime)
+        );
+      } catch (error) {
+        console.error("내 일정 목록 조회 실패:", error);
+
+        if (error.message.includes("Network Error")) {
+          setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+          return;
+        }
+
+        setErrorMessage(
+          getErrorMessage(
+            error,
+            "저장된 일정을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+          )
+        );
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    syncSavedRoutes();
-
-    window.addEventListener(ROUTE_STORAGE_EVENT, syncSavedRoutes);
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener(ROUTE_STORAGE_EVENT, syncSavedRoutes);
-      window.removeEventListener("storage", handleStorageChange);
-    };
+    fetchSchedules();
   }, []);
-
-  const savedScheduleList = useMemo(() => {
-    return savedRoutes
-      .map(convertRouteToSchedule)
-      .filter(Boolean)
-      .sort((a, b) => b.startTime - a.startTime);
-  }, [savedRoutes]);
 
   const { upcomingScheduleList, pastScheduleList } = useMemo(() => {
     const today = normalizeDateOnly(new Date()).getTime();
@@ -258,7 +344,7 @@ function MySchedule() {
     const upcoming = [];
     const past = [];
 
-    savedScheduleList.forEach((schedule) => {
+    scheduleList.forEach((schedule) => {
       if (schedule.endTime >= today) {
         upcoming.push(schedule);
       } else {
@@ -273,17 +359,18 @@ function MySchedule() {
       upcomingScheduleList: upcoming,
       pastScheduleList: past,
     };
-  }, [savedScheduleList]);
+  }, [scheduleList]);
 
   const currentList =
     activeTab === "upcoming" ? upcomingScheduleList : pastScheduleList;
 
   const handleOpenSchedule = (schedule) => {
-    const routeId = schedule.route.id;
+    const routeId = schedule.routeId || schedule.id;
 
     navigate(`/route-result?id=${encodeURIComponent(routeId)}`, {
       state: {
         routeId,
+        scheduleId: schedule.id,
         savedRoute: schedule.route,
       },
     });
@@ -308,9 +395,7 @@ function MySchedule() {
 
         <button
           type="button"
-          className={`my-schedule-tab ${
-            activeTab === "past" ? "active" : ""
-          }`}
+          className={`my-schedule-tab ${activeTab === "past" ? "active" : ""}`}
           onClick={() => setActiveTab("past")}
         >
           지난 일정
@@ -334,44 +419,56 @@ function MySchedule() {
           </h2>
         </div>
 
-        <div className="my-schedule-list">
-          {currentList.map((schedule) => (
-            <article
-              key={schedule.id}
-              className="my-schedule-card"
-              onClick={() => handleOpenSchedule(schedule)}
-            >
-              <img
-                src={schedule.image}
-                alt={schedule.title}
-                className="my-schedule-thumb"
-              />
-
-              <div className="my-schedule-card-body">
-                <div className="my-schedule-card-top">
-                  <span className="my-schedule-dday">{schedule.dday}</span>
-                </div>
-
-                <h3>{schedule.title}</h3>
-                <p className="my-schedule-date">{schedule.dateText}</p>
-
-                <div className="my-schedule-location">
-                  <PinIcon />
-                  <span>{schedule.location}</span>
-                </div>
-              </div>
-
-              <div className="my-schedule-chevron">
-                <ChevronRightIcon />
-              </div>
-            </article>
-          ))}
-        </div>
-
-        {currentList.length === 0 && (
+        {isLoading ? (
           <div className="my-schedule-empty">
-            <p>저장된 일정이 없습니다.</p>
+            <p>저장된 일정을 불러오는 중입니다.</p>
           </div>
+        ) : errorMessage ? (
+          <div className="my-schedule-empty">
+            <p>{errorMessage}</p>
+          </div>
+        ) : (
+          <>
+            <div className="my-schedule-list">
+              {currentList.map((schedule) => (
+                <article
+                  key={schedule.id}
+                  className="my-schedule-card"
+                  onClick={() => handleOpenSchedule(schedule)}
+                >
+                  <img
+                    src={schedule.image}
+                    alt={schedule.title}
+                    className="my-schedule-thumb"
+                  />
+
+                  <div className="my-schedule-card-body">
+                    <div className="my-schedule-card-top">
+                      <span className="my-schedule-dday">{schedule.dday}</span>
+                    </div>
+
+                    <h3>{schedule.title}</h3>
+                    <p className="my-schedule-date">{schedule.dateText}</p>
+
+                    <div className="my-schedule-location">
+                      <PinIcon />
+                      <span>{schedule.location}</span>
+                    </div>
+                  </div>
+
+                  <div className="my-schedule-chevron">
+                    <ChevronRightIcon />
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {currentList.length === 0 && (
+              <div className="my-schedule-empty">
+                <p>저장된 일정이 없습니다.</p>
+              </div>
+            )}
+          </>
         )}
 
         <div className="my-schedule-recommend-card">

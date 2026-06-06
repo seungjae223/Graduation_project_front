@@ -5,20 +5,27 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import "./VerifyCode.css";
-
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+import api from "../api/api";
 
 const CODE_LENGTH = 6;
 const TIMER_SECONDS = 180;
+
+const getErrorMessage = (error, fallbackMessage) => {
+  const data = error.response?.data;
+
+  if (typeof data === "string") {
+    return data;
+  }
+
+  return data?.message || data?.error || fallbackMessage;
+};
 
 const VerifyCode = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  const email =
-    location.state?.email || searchParams.get("email") || "";
+  const email = location.state?.email || searchParams.get("email") || "";
 
   const inputRefs = useRef([]);
 
@@ -104,9 +111,7 @@ const VerifyCode = () => {
     setCode(nextCode);
 
     const nextFocusIndex =
-      pastedValue.length >= CODE_LENGTH
-        ? CODE_LENGTH - 1
-        : pastedValue.length;
+      pastedValue.length >= CODE_LENGTH ? CODE_LENGTH - 1 : pastedValue.length;
 
     inputRefs.current[nextFocusIndex]?.focus();
   };
@@ -117,21 +122,9 @@ const VerifyCode = () => {
     try {
       setIsResending(true);
 
-      const response = await fetch(`${API_BASE_URL}/api/email/send`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-        }),
+      await api.post("/api/email/verification-requests", {
+        email,
       });
-
-      const resultText = await response.text();
-
-      if (!response.ok) {
-        throw new Error(resultText || "인증번호 재발송에 실패했습니다.");
-      }
 
       setCode(Array(CODE_LENGTH).fill(""));
       setTimeLeft(TIMER_SECONDS);
@@ -141,12 +134,17 @@ const VerifyCode = () => {
     } catch (error) {
       console.error("인증번호 재발송 실패:", error);
 
-      if (error.message.includes("Failed to fetch")) {
-        alert("백엔드 서버 연결을 확인해주세요.");
+      if (error.message.includes("Network Error")) {
+        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
         return;
       }
 
-      alert(error.message || "인증번호 재발송에 실패했습니다.");
+      alert(
+        getErrorMessage(
+          error,
+          "인증번호 재발송에 실패했습니다. 잠시 후 다시 시도해주세요."
+        )
+      );
     } finally {
       setIsResending(false);
     }
@@ -170,36 +168,34 @@ const VerifyCode = () => {
     try {
       setIsVerifying(true);
 
-      const response = await fetch(`${API_BASE_URL}/api/email/verify`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          code: verificationCode,
-        }),
+      const response = await api.post("/api/email/verifications", {
+        email,
+        code: verificationCode,
       });
 
-      const resultText = await response.text();
+      const successMessage =
+        typeof response.data === "string"
+          ? response.data
+          : response.data?.message;
 
-      if (!response.ok) {
-        throw new Error(resultText || "인증번호가 올바르지 않습니다.");
-      }
-
-      alert(resultText || "인증이 완료되었습니다.");
+      alert(successMessage || "인증이 완료되었습니다.");
 
       // 비밀번호 재설정 페이지가 생기면 여기 경로만 바꾸면 됨
       navigate("/login", { replace: true });
     } catch (error) {
       console.error("인증번호 확인 실패:", error);
 
-      if (error.message.includes("Failed to fetch")) {
-        alert("백엔드 서버 연결을 확인해주세요.");
+      if (error.message.includes("Network Error")) {
+        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
         return;
       }
 
-      alert(error.message || "인증번호 확인에 실패했습니다.");
+      alert(
+        getErrorMessage(
+          error,
+          "인증번호가 올바르지 않거나 인증 시간이 만료되었습니다."
+        )
+      );
     } finally {
       setIsVerifying(false);
     }
@@ -257,9 +253,7 @@ const VerifyCode = () => {
               disabled={isResending}
             >
               <span className="resend-icon">↻</span>
-              <span>
-                {isResending ? "재발송 중..." : "인증번호 재발송"}
-              </span>
+              <span>{isResending ? "재발송 중..." : "인증번호 재발송"}</span>
             </button>
           </div>
         </section>

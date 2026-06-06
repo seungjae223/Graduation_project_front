@@ -1,34 +1,205 @@
-.saved-places-page {
-  min-height: 100vh;
-  padding: 0 8px 110px;
+.saved-places-page,
+.saved-places-page * {
   box-sizing: border-box;
-  background: #f7f9fc;
 }
 
-.saved-tab-bar {
-  width: calc(100% + 16px);
-  height: 58px;
-
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  align-items: center;
-
-  gap: 0;
-  padding: 0;
-  margin: 0 -8px 14px;
-
-  background: #ffffff;
-  border-bottom: 1px solid #e9eef5;
-}
-
-.saved-tab {
-  position: relative;
-
+.saved-places-page {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
+  padding: 30px 10px 120px;
+  background: #f4f7fb;
+}
 
-  padding: 0;
+/* 상단 제목 + 새 폴더 버튼 */
+.saved-places-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.saved-places-title-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.saved-places-title-box h1 {
+  margin: 0 0 8px;
+  color: #17233c;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.8px;
+}
+
+.saved-places-title-box p {
   margin: 0;
+  color: #7b8ca4;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.saved-add-folder-button {
+  flex-shrink: 0;
+  height: 48px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  background: #e7f6ff;
+  color: #159deb;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.saved-add-folder-button img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+}
+
+/* 정렬 버튼 */
+.saved-sort-tabs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 52px;
+}
+
+.saved-sort-tab {
+  height: 50px;
+  min-width: 106px;
+  padding: 0 22px;
+
+  border: 1px solid #dbe7f2;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #6f8098;
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.saved-sort-tab.active {
+  border-color: #1ea0f2;
+  background: #1ea0f2;
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(30, 160, 242, 0.24);
+}
+
+/* 폴더 리스트 */
+.saved-folder-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.saved-folder-card,
+.saved-create-folder-card {
+  width: 100%;
+  min-height: 126px;
+  padding: 26px 26px;
+
+  border: 1px solid #e7edf5;
+  border-radius: 22px;
+  background: #ffffff;
+
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  text-align: left;
+  box-shadow: 0 4px 14px rgba(23, 35, 60, 0.04);
+  cursor: pointer;
+}
+
+.saved-folder-icon-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #eaf7ff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+}
+
+.saved-folder-icon {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  display: block;
+}
+
+.saved-folder-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.saved-folder-info h2 {
+  margin: 0 0 8px;
+  color: #17233c;
+
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.6px;
+}
+
+.saved-folder-info p {
+  margin: 0;
+  color: #75869d;
+
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.saved-folder-dot {
+  color: #bdc7d6;
+}
+
+/* 연필 / 화살표 버튼 */
+.saved-folder-actions {
+  position: relative;
+  z-index: 5;
+  pointer-events: auto;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.saved-folder-action-button {
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
+
+  width: 28px;
+  height: 28px;
+  padding: 0;
 
   border: none;
   background: transparent;
@@ -37,103 +208,561 @@
   align-items: center;
   justify-content: center;
 
-  color: #8d98ab;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.3px;
+  cursor: pointer;
+}
+
+.saved-folder-action-button img {
+  width: 21px;
+  height: 21px;
+  object-fit: contain;
+  display: block;
+}
+
+.saved-folder-action-button img,
+.saved-folder-action-button svg {
+  pointer-events: none;
+}
+
+.saved-folder-edit-button {
+  cursor: pointer;
+}
+
+.saved-create-folder-card {
+  border: 2px dashed #edf2f7;
+  background: #ffffff;
+}
+
+/* 폴더 관리 모달 */
+.folder-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+
+  background: rgba(24, 31, 43, 0.42);
+  backdrop-filter: blur(2px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+}
+
+.folder-modal {
+  width: min(100%, 356px);
+  overflow: hidden;
+
+  border-radius: 32px;
+  background: #ffffff;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.22);
+}
+
+.folder-modal-header {
+  padding: 34px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.folder-modal-header h2 {
+  margin: 0;
+  color: #151d31;
+
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -1px;
+}
+
+.folder-modal-body {
+  padding: 0 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.folder-modal-menu-item {
+  width: 100%;
+  min-height: 92px;
+  padding: 0;
+
+  border: none;
+  background: transparent;
+
+  display: flex;
+  align-items: center;
+  gap: 18px;
+
+  text-align: left;
+  cursor: pointer;
+}
+
+.folder-modal-divider {
+  height: 1px;
+  margin-left: 72px;
+  background: #e2e8f0;
+}
+
+.folder-modal-icon-circle {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+}
+
+.folder-modal-icon-circle.blue {
+  background: #e5f7ff;
+}
+
+.folder-modal-icon-circle.red {
+  background: #ffe1df;
+}
+
+.folder-modal-icon-circle img {
+  width: 31px;
+  height: 31px;
+  object-fit: contain;
+  display: block;
+}
+
+.folder-modal-menu-text {
+  flex: 1;
+  min-width: 0;
+
+  color: #151d31;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.7px;
+}
+
+.folder-modal-menu-item.delete .folder-modal-menu-text {
+  color: #c72020;
+}
+
+.folder-modal-arrow {
+  width: 24px;
+  height: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+}
+
+.folder-modal-footer {
+  padding: 24px 20px 26px;
+}
+
+.folder-modal-cancel {
+  width: 100%;
+  height: 62px;
+
+  border: none;
+  border-radius: 999px;
+  background: #f0f4fa;
+  color: #6e7c91;
+
+  font-size: 22px;
+  font-weight: 800;
 
   cursor: pointer;
 }
 
-.saved-tab.active {
-  color: #18a0f5;
+/* 예전 저장 장소 탭 코드가 남아 있어도 안 보이게 */
+.saved-tab-bar,
+.saved-actions,
+.saved-place-list,
+.saved-empty {
+  display: none;
+}
+/* 폴더 이름 변경 모달 */
+.folder-rename-modal {
+  width: min(100%, 368px);
+  padding: 28px 24px 18px;
+  border-radius: 26px;
+  background: #ffffff;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.22);
+}
+
+.folder-rename-modal h2 {
+  margin: 0 0 22px;
+  color: #151d31;
+  font-size: 24px;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: -0.7px;
+}
+
+.folder-rename-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.folder-rename-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.folder-rename-form label span {
+  color: #7b8ca4;
+  font-size: 13px;
   font-weight: 800;
 }
 
-.saved-tab.active::after {
-  content: "";
-  position: absolute;
-
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-
-  width: 34px;
-  height: 3px;
-
-  border-radius: 999px;
-  background: #18a0f5;
-}
-
-.saved-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0 8px 8px;
-}
-
-.saved-actions button {
+.folder-rename-form input {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
   border: none;
-  background: transparent;
-  color: #18a0f5;
-  font-size: 14px;
-  font-weight: 700;
+  outline: none;
+  background: #f0f4fa;
+  color: #151d31;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.folder-rename-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.folder-rename-cancel,
+.folder-rename-submit {
+  height: 52px;
+  border: none;
+  border-radius: 999px;
+  font-size: 17px;
+  font-weight: 800;
   cursor: pointer;
 }
 
-.saved-place-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.folder-rename-cancel {
+  background: #f0f4fa;
+  color: #6e7c91;
 }
 
-.saved-empty {
-  margin: 24px 8px 0;
-  padding: 32px 20px;
-  border-radius: 18px;
+.folder-rename-submit {
+  background: #18a8f5;
+  color: #ffffff;
+}
+
+/* 폴더 삭제 확인 모달 */
+.folder-delete-modal {
+  width: min(100%, 370px);
+  overflow: hidden;
+  border-radius: 28px;
   background: #ffffff;
-  border: 1px solid #edf1f6;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.22);
+}
+
+.folder-delete-top {
+  height: 112px;
+  background: #fff8f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-delete-warning-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #ffd8d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-delete-warning-circle img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+}
+
+.folder-delete-content {
+  padding: 24px 26px 30px;
   text-align: center;
 }
 
-.saved-empty p {
-  margin: 0 0 8px;
-  font-size: 18px;
-  font-weight: 700;
-  color: #15213b;
+.folder-delete-content h2 {
+  margin: 0 0 14px;
+  color: #151d31;
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.6px;
 }
 
-.saved-empty span {
-  color: #8d98ab;
+.folder-delete-content p {
+  margin: 0;
+  color: #73829a;
   font-size: 14px;
+  font-weight: 600;
+  line-height: 1.65;
 }
 
-@media (max-width: 380px) {
-  .saved-tab-bar {
-    height: 56px;
+.folder-delete-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.folder-delete-cancel,
+.folder-delete-submit {
+  height: 56px;
+  border: none;
+  border-radius: 999px;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.folder-delete-cancel {
+  background: #f0f4fa;
+  color: #6e7c91;
+}
+
+.folder-delete-submit {
+  background: #c91d1d;
+  color: #ffffff;
+  box-shadow: 0 8px 16px rgba(201, 29, 29, 0.22);
+}
+
+@media (max-width: 390px) {
+  .folder-rename-modal {
+    width: min(100%, 348px);
+    padding: 26px 24px 18px;
   }
 
-  .saved-tab {
+  .folder-rename-modal h2 {
+    font-size: 23px;
+  }
+
+  .folder-delete-modal {
+    width: min(100%, 348px);
+  }
+
+  .folder-delete-content {
+    padding: 24px 24px 28px;
+  }
+}
+
+@media (max-width: 360px) {
+  .folder-rename-modal,
+  .folder-delete-modal {
+    width: min(100%, 324px);
+  }
+
+  .folder-rename-actions,
+  .folder-delete-actions {
+    gap: 12px;
+  }
+
+  .folder-rename-cancel,
+  .folder-rename-submit,
+  .folder-delete-cancel,
+  .folder-delete-submit {
+    height: 52px;
+    font-size: 16px;
+  }
+}
+
+/* 모바일 조정 */
+@media (max-width: 390px) {
+  .saved-places-page {
+    padding: 28px 8px 120px;
+  }
+
+  .saved-places-header {
+    gap: 10px;
+  }
+
+  .saved-places-title-box h1 {
+    font-size: 26px;
+  }
+
+  .saved-places-title-box p {
     font-size: 14px;
   }
 
-  .saved-tab.active::after {
-    width: 32px;
-    height: 3px;
+  .saved-add-folder-button {
+    height: 46px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+
+  .saved-add-folder-button img {
+    width: 21px;
+    height: 21px;
+  }
+
+  .saved-sort-tabs {
+    gap: 10px;
+    margin-bottom: 52px;
+  }
+
+  .saved-sort-tab {
+    min-width: 100px;
+    height: 48px;
+    padding: 0 20px;
+    font-size: 14px;
+  }
+
+  .saved-folder-card,
+  .saved-create-folder-card {
+    min-height: 126px;
+    padding: 24px 24px;
+    gap: 18px;
+  }
+
+  .saved-folder-icon-circle {
+    width: 72px;
+    height: 72px;
+  }
+
+  .saved-folder-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .saved-folder-info h2 {
+    font-size: 21px;
+  }
+
+  .saved-folder-info p {
+    font-size: 14px;
+  }
+
+  .folder-modal {
+    width: min(100%, 348px);
+    border-radius: 30px;
+  }
+
+  .folder-modal-header {
+    padding: 32px 24px;
+  }
+
+  .folder-modal-header h2 {
+    font-size: 29px;
+  }
+
+  .folder-modal-menu-item {
+    min-height: 90px;
+  }
+
+  .folder-modal-menu-text {
+    font-size: 21px;
+  }
+
+  .folder-modal-cancel {
+    height: 60px;
+    font-size: 21px;
   }
 }
 
-@media (max-width: 340px) {
-  .saved-tab-bar {
-    height: 54px;
+@media (max-width: 360px) {
+  .saved-places-page {
+    padding: 24px 8px 110px;
   }
 
-  .saved-tab {
+  .saved-places-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .saved-add-folder-button {
+    height: 44px;
+  }
+
+  .saved-sort-tabs {
+    gap: 8px;
+  }
+
+  .saved-sort-tab {
+    min-width: 90px;
+    height: 44px;
+    padding: 0 16px;
     font-size: 13px;
   }
 
-  .saved-tab.active::after {
-    width: 30px;
-    height: 3px;
+  .saved-folder-card,
+  .saved-create-folder-card {
+    padding: 20px 18px;
+    gap: 14px;
+  }
+
+  .saved-folder-icon-circle {
+    width: 64px;
+    height: 64px;
+  }
+
+  .saved-folder-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .saved-folder-info h2 {
+    font-size: 19px;
+  }
+
+  .saved-folder-info p {
+    font-size: 13px;
+  }
+
+  .folder-modal-backdrop {
+    padding: 20px;
+  }
+
+  .folder-modal {
+    width: min(100%, 324px);
+    border-radius: 28px;
+  }
+
+  .folder-modal-header {
+    padding: 28px 22px;
+  }
+
+  .folder-modal-header h2 {
+    font-size: 27px;
+  }
+
+  .folder-modal-body {
+    padding: 0 22px;
+  }
+
+  .folder-modal-menu-item {
+    min-height: 84px;
+    gap: 16px;
+  }
+
+  .folder-modal-icon-circle {
+    width: 54px;
+    height: 54px;
+  }
+
+  .folder-modal-icon-circle img {
+    width: 29px;
+    height: 29px;
+  }
+
+  .folder-modal-menu-text {
+    font-size: 19px;
+  }
+
+  .folder-modal-footer {
+    padding: 22px 18px 24px;
+  }
+
+  .folder-modal-cancel {
+    height: 56px;
+    font-size: 19px;
   }
 }

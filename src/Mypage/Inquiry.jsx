@@ -1,16 +1,106 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Inquiry.css";
-import { getInquiryList } from "./inquiryMockData";
+import api from "../api/api";
 
 const ITEMS_PER_PAGE = 5;
 
+const formatDate = (value) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toISOString().slice(0, 10);
+};
+
+const getInquiryArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.inquiries)) return data.inquiries;
+  if (Array.isArray(data?.items)) return data.items;
+
+  return [];
+};
+
+const normalizeInquiry = (inquiry) => {
+  const rawStatus = String(inquiry.status || "").toLowerCase();
+  const hasAnswer = Boolean(inquiry.answer || inquiry.reply || inquiry.answerContent);
+
+  const isAnswered =
+    hasAnswer ||
+    rawStatus === "answered" ||
+    rawStatus === "complete" ||
+    rawStatus === "completed" ||
+    rawStatus === "done" ||
+    rawStatus === "답변완료";
+
+  return {
+    id: inquiry.id || inquiry.inquiryId || inquiry.questionId,
+    title: inquiry.title || inquiry.subject || "제목 없음",
+    content: inquiry.content || inquiry.question || inquiry.body || "",
+    answer: inquiry.answer || inquiry.reply || inquiry.answerContent || "",
+    date: formatDate(inquiry.createdAt || inquiry.date || inquiry.createdDate),
+    status: isAnswered ? "answered" : "waiting",
+    statusText:
+      inquiry.statusText || inquiry.statusName || (isAnswered ? "답변 완료" : "답변 대기"),
+    originalData: inquiry,
+  };
+};
+
+const getErrorMessage = (error, fallbackMessage) => {
+  const data = error.response?.data;
+
+  if (typeof data === "string") {
+    return data;
+  }
+
+  return data?.message || data?.error || fallbackMessage;
+};
+
 const Inquiry = () => {
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const inquiries = useMemo(() => {
-    return getInquiryList();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [inquiries, setInquiries] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const fetchInquiries = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
+
+        const response = await api.get("/api/inquiries");
+        const inquiryArray = getInquiryArray(response.data);
+
+        setInquiries(inquiryArray.map(normalizeInquiry));
+        setCurrentPage(1);
+      } catch (error) {
+        console.error("문의사항 목록 조회 실패:", error);
+
+        if (error.message.includes("Network Error")) {
+          setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+          return;
+        }
+
+        setErrorMessage(
+          getErrorMessage(
+            error,
+            "문의사항 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+          )
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInquiries();
   }, []);
 
   const totalPages = Math.ceil(inquiries.length / ITEMS_PER_PAGE);
@@ -66,64 +156,88 @@ const Inquiry = () => {
           </header>
 
           <section className="inquiry-list" aria-label="문의사항 목록">
-            {currentInquiries.map((inquiry) => {
-              const isAnswered =
-                inquiry.status === "answered" && Boolean(inquiry.answer);
+            {isLoading && (
+              <article className="inquiry-card">
+                <p className="inquiry-card-content">
+                  문의사항을 불러오는 중입니다.
+                </p>
+              </article>
+            )}
 
-              return (
-                <article
-                  key={inquiry.id}
-                  className={`inquiry-card ${
-                    isAnswered ? "is-clickable" : ""
-                  }`}
-                  role={isAnswered ? "button" : undefined}
-                  tabIndex={isAnswered ? 0 : undefined}
-                  onClick={
-                    isAnswered ? () => handleCheckAnswer(inquiry) : undefined
-                  }
-                  onKeyDown={(event) =>
-                    handleCardKeyDown(event, inquiry, isAnswered)
-                  }
-                >
-                  <div className="inquiry-card-top">
-                    <span
-                      className={`inquiry-status-badge ${
-                        isAnswered ? "is-done" : "is-waiting"
-                      }`}
-                    >
-                      {inquiry.statusText}
-                    </span>
+            {!isLoading && errorMessage && (
+              <article className="inquiry-card">
+                <p className="inquiry-card-content">{errorMessage}</p>
+              </article>
+            )}
 
-                    <time className="inquiry-date">{inquiry.date}</time>
-                  </div>
+            {!isLoading && !errorMessage && currentInquiries.length === 0 && (
+              <article className="inquiry-card">
+                <p className="inquiry-card-content">
+                  등록된 문의사항이 없습니다.
+                </p>
+              </article>
+            )}
 
-                  <h2 className="inquiry-card-title">{inquiry.title}</h2>
+            {!isLoading &&
+              !errorMessage &&
+              currentInquiries.map((inquiry) => {
+                const isAnswered =
+                  inquiry.status === "answered" && Boolean(inquiry.answer);
 
-                  <p className="inquiry-card-content">{inquiry.content}</p>
-
-                  {isAnswered && (
-                    <>
-                      <div className="inquiry-card-divider" />
-
-                      <button
-                        type="button"
-                        className="inquiry-answer-button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          handleCheckAnswer(inquiry);
-                        }}
+                return (
+                  <article
+                    key={inquiry.id}
+                    className={`inquiry-card ${
+                      isAnswered ? "is-clickable" : ""
+                    }`}
+                    role={isAnswered ? "button" : undefined}
+                    tabIndex={isAnswered ? 0 : undefined}
+                    onClick={
+                      isAnswered ? () => handleCheckAnswer(inquiry) : undefined
+                    }
+                    onKeyDown={(event) =>
+                      handleCardKeyDown(event, inquiry, isAnswered)
+                    }
+                  >
+                    <div className="inquiry-card-top">
+                      <span
+                        className={`inquiry-status-badge ${
+                          isAnswered ? "is-done" : "is-waiting"
+                        }`}
                       >
-                        답변 확인하기
-                        <span aria-hidden="true">›</span>
-                      </button>
-                    </>
-                  )}
-                </article>
-              );
-            })}
+                        {inquiry.statusText}
+                      </span>
+
+                      <time className="inquiry-date">{inquiry.date}</time>
+                    </div>
+
+                    <h2 className="inquiry-card-title">{inquiry.title}</h2>
+
+                    <p className="inquiry-card-content">{inquiry.content}</p>
+
+                    {isAnswered && (
+                      <>
+                        <div className="inquiry-card-divider" />
+
+                        <button
+                          type="button"
+                          className="inquiry-answer-button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleCheckAnswer(inquiry);
+                          }}
+                        >
+                          답변 확인하기
+                          <span aria-hidden="true">›</span>
+                        </button>
+                      </>
+                    )}
+                  </article>
+                );
+              })}
           </section>
 
-          {totalPages > 1 && (
+          {!isLoading && !errorMessage && totalPages > 1 && (
             <nav className="inquiry-pagination" aria-label="문의사항 페이지 이동">
               <button
                 type="button"

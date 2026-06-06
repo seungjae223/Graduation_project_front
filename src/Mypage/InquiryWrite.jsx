@@ -3,8 +3,17 @@ import { useNavigate } from "react-router-dom";
 import "./InquiryWrite.css";
 import mailIcon from "../img/메일.png";
 import InquirySuccessModal from "./InquirySuccessModal";
+import api from "../api/api";
 
-const MOCK_INQUIRY_STORAGE_KEY = "mock_user_inquiries";
+const getErrorMessage = (error, fallbackMessage) => {
+  const data = error.response?.data;
+
+  if (typeof data === "string") {
+    return data;
+  }
+
+  return data?.message || data?.error || fallbackMessage;
+};
 
 const InquiryWrite = () => {
   const navigate = useNavigate();
@@ -13,23 +22,9 @@ const InquiryWrite = () => {
   const [content, setContent] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const saveMockInquiry = (newInquiry) => {
-    try {
-      const savedInquiries = JSON.parse(
-        localStorage.getItem(MOCK_INQUIRY_STORAGE_KEY) || "[]"
-      );
-
-      localStorage.setItem(
-        MOCK_INQUIRY_STORAGE_KEY,
-        JSON.stringify([newInquiry, ...savedInquiries])
-      );
-    } catch (error) {
-      console.error("문의사항 목업 저장 실패:", error);
-    }
-  };
-
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const trimmedTitle = title.trim();
@@ -45,19 +40,33 @@ const InquiryWrite = () => {
       return;
     }
 
-    const newInquiry = {
-      id: Date.now(),
-      status: "pending",
-      statusText: "대기 중",
-      date: new Date().toISOString().slice(0, 10).replaceAll("-", "."),
-      title: trimmedTitle,
-      content: trimmedContent,
-      answer: null,
-    };
+    try {
+      setIsSubmitting(true);
+      setErrorMessage("");
 
-    saveMockInquiry(newInquiry);
-    setErrorMessage("");
-    setIsSuccessModalOpen(true);
+      await api.post("/api/inquiries", {
+        title: trimmedTitle,
+        content: trimmedContent,
+      });
+
+      setIsSuccessModalOpen(true);
+    } catch (error) {
+      console.error("문의사항 등록 실패:", error);
+
+      if (error.message.includes("Network Error")) {
+        setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        return;
+      }
+
+      setErrorMessage(
+        getErrorMessage(
+          error,
+          "문의사항 등록에 실패했습니다. 잠시 후 다시 시도해주세요."
+        )
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleConfirmSuccessModal = () => {
@@ -105,8 +114,12 @@ const InquiryWrite = () => {
             <p className="inquiry-write-error-message">{errorMessage}</p>
           )}
 
-          <button type="submit" className="inquiry-write-submit-button">
-            문의하기
+          <button
+            type="submit"
+            className="inquiry-write-submit-button"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "문의 등록 중..." : "문의하기"}
           </button>
         </form>
 

@@ -1,16 +1,30 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./RouteCreate.css";
+
 import searchIcon from "../img/검색.png";
+import heartIcon from "../img/파랑색 하트.png";
+import scheduleIcon from "../img/파랑색 일정.png";
+import blueFolderIcon from "../img/파랑색폴더.png";
+import darkFolderIcon from "../img/검정색폴더.png";
+
+import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import { saveRoute as saveRouteUtil } from "../utils/routeStorage";
 import StartPlaceModal from "./StartPlaceModal";
+import api from "../api/api";
 
 const STORAGE_KEY = "mock_saved_route_results";
 const ROUTE_STORAGE_EVENT = "mock-routes-updated";
-
 const ROUTE_SELECTED_PLACE_KEY = "routeSelectedPlace";
 const ROUTE_DRAFT_PLACES_KEY = "routeDraftPlaces";
 const RECENT_PLACES_KEY = "recentPlaces";
+const PLACE_SEARCH_API = "/api/places";
+const TRIPS_API = "/api/trips";
+
+const DEFAULT_COORDS = {
+  latitude: 37.5665,
+  longitude: 126.978,
+};
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -418,11 +432,7 @@ const parseTimeLabel = (timeLabel = "12:30 PM") => {
   const match = String(timeLabel).match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
 
   if (!match) {
-    return {
-      period: "PM",
-      hour: 12,
-      minute: 30,
-    };
+    return { period: "PM", hour: 12, minute: 30 };
   }
 
   const hour = Number(match[1]);
@@ -600,6 +610,247 @@ const FixPointModal = ({
   );
 };
 
+const FavoritePlacesModal = ({
+  open,
+  folders,
+  selectedPlaceIds,
+  expandedFolderIds,
+  selectedDayIndex,
+  selectedDates,
+  onClose,
+  onToggleFolder,
+  onTogglePlace,
+  onChangeDay,
+  onConfirm,
+}) => {
+  const dayTabsRef = useRef(null);
+  const isDayDraggingRef = useRef(false);
+  const hasDayDraggedRef = useRef(false);
+  const dayDragStartXRef = useRef(0);
+  const dayScrollStartLeftRef = useRef(0);
+  const [isDayDragging, setIsDayDragging] = useState(false);
+
+  if (!open) return null;
+
+  const selectedCount = selectedPlaceIds.length;
+
+  const handleDayWheel = (event) => {
+    if (!dayTabsRef.current) return;
+
+    event.preventDefault();
+
+    const scrollAmount =
+      Math.abs(event.deltaX) > Math.abs(event.deltaY)
+        ? event.deltaX
+        : event.deltaY;
+
+    dayTabsRef.current.scrollLeft += scrollAmount;
+  };
+
+  const handleDayMouseDown = (event) => {
+    if (!dayTabsRef.current) return;
+
+    isDayDraggingRef.current = true;
+    hasDayDraggedRef.current = false;
+    dayDragStartXRef.current = event.pageX;
+    dayScrollStartLeftRef.current = dayTabsRef.current.scrollLeft;
+    setIsDayDragging(true);
+  };
+
+  const handleDayMouseMove = (event) => {
+    if (!isDayDraggingRef.current || !dayTabsRef.current) return;
+
+    const moveX = event.pageX - dayDragStartXRef.current;
+
+    if (Math.abs(moveX) > 3) {
+      hasDayDraggedRef.current = true;
+      event.preventDefault();
+    }
+
+    dayTabsRef.current.scrollLeft = dayScrollStartLeftRef.current - moveX;
+  };
+
+  const handleDayMouseUp = () => {
+    isDayDraggingRef.current = false;
+    setIsDayDragging(false);
+
+    window.setTimeout(() => {
+      hasDayDraggedRef.current = false;
+    }, 0);
+  };
+
+  const handleDayMouseLeave = () => {
+    if (!isDayDraggingRef.current) return;
+
+    isDayDraggingRef.current = false;
+    setIsDayDragging(false);
+
+    window.setTimeout(() => {
+      hasDayDraggedRef.current = false;
+    }, 0);
+  };
+
+  return (
+    <div className="favorite-place-overlay" onClick={onClose}>
+      <div
+        className="favorite-place-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="관심장소에서 추가"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="favorite-place-header">
+          <h2>관심장소에서 추가</h2>
+
+          <button
+            type="button"
+            className="favorite-place-close"
+            onClick={onClose}
+            aria-label="닫기"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="favorite-folder-list">
+          {folders.map((folder) => {
+            const isExpanded = expandedFolderIds.includes(folder.id);
+
+            return (
+              <section key={folder.id} className="favorite-folder-section">
+                <button
+                  type="button"
+                  className="favorite-folder-header"
+                  onClick={() => onToggleFolder(folder.id)}
+                >
+                  <span
+                    className={`favorite-folder-icon-circle ${
+                      isExpanded ? "is-open" : ""
+                    }`}
+                  >
+                    <img
+                      src={isExpanded ? blueFolderIcon : darkFolderIcon}
+                      alt=""
+                    />
+                  </span>
+
+                  <span className="favorite-folder-title-box">
+                    <strong>{folder.title}</strong>
+                    <small>{folder.places.length}개의 장소</small>
+                  </span>
+
+                  <span
+                    className={`favorite-folder-arrow ${
+                      isExpanded ? "is-open" : ""
+                    }`}
+                  >
+                    ⌄
+                  </span>
+                </button>
+
+                {isExpanded && (
+                  <div className="favorite-place-list">
+                    {folder.places.map((place) => {
+                      const isChecked = selectedPlaceIds.includes(
+                        place.sourceId
+                      );
+
+                      return (
+                        <button
+                          type="button"
+                          key={place.sourceId}
+                          className={`favorite-place-item ${
+                            isChecked ? "is-selected" : ""
+                          }`}
+                          onClick={() => onTogglePlace(place.sourceId)}
+                        >
+                          <span
+                            className={`favorite-place-checkbox ${
+                              isChecked ? "is-checked" : ""
+                            }`}
+                          >
+                            {isChecked ? "✓" : ""}
+                          </span>
+
+                          <img
+                            src={place.thumb}
+                            alt={place.name}
+                            className="favorite-place-thumb"
+                          />
+
+                          <span className="favorite-place-text">
+                            <strong>{place.name}</strong>
+                            <small>{place.desc}</small>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </div>
+
+        <div className="favorite-schedule-section">
+          <div className="favorite-schedule-title">
+            <img src={scheduleIcon} alt="" />
+            <strong>일정 선택</strong>
+          </div>
+
+          <div
+            ref={dayTabsRef}
+            className={`favorite-day-tabs ${
+              isDayDragging ? "is-dragging" : ""
+            }`}
+            onWheel={handleDayWheel}
+            onMouseDown={handleDayMouseDown}
+            onMouseMove={handleDayMouseMove}
+            onMouseUp={handleDayMouseUp}
+            onMouseLeave={handleDayMouseLeave}
+          >
+            {selectedDates.map((date, index) => (
+              <button
+                key={formatDateKey(date)}
+                type="button"
+                className={`favorite-day-tab ${
+                  selectedDayIndex === index ? "is-active" : ""
+                }`}
+                onClick={() => {
+                  if (!hasDayDraggedRef.current) {
+                    onChangeDay(index);
+                  }
+                }}
+              >
+                Day {index + 1} ({formatTabDate(date)})
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="favorite-modal-actions">
+          <button
+            type="button"
+            className="favorite-cancel-button"
+            onClick={onClose}
+          >
+            취소
+          </button>
+
+          <button
+            type="button"
+            className="favorite-add-button"
+            onClick={onConfirm}
+            disabled={selectedCount === 0}
+          >
+            + 일정에 추가 ({selectedCount})
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const normalizeDate = (date) => {
   const newDate = new Date(date);
   newDate.setHours(0, 0, 0, 0);
@@ -611,9 +862,15 @@ const createDate = (year, month, day) => {
 };
 
 const formatDateKey = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+  const safeDate = date instanceof Date ? date : new Date(date);
+
+  if (Number.isNaN(safeDate.getTime())) {
+    return "";
+  }
+
+  const year = safeDate.getFullYear();
+  const month = String(safeDate.getMonth() + 1).padStart(2, "0");
+  const day = String(safeDate.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
 
@@ -654,7 +911,6 @@ const isSameDate = (a, b) => {
 const getDatesInRange = (startDate, endDate) => {
   const start = normalizeDate(startDate);
   const end = normalizeDate(endDate);
-
   const from = start <= end ? start : end;
   const to = start <= end ? end : start;
 
@@ -675,6 +931,7 @@ const getCalendarWeeks = (baseMonth) => {
 
   const firstDayOfMonth = new Date(year, month, 1);
   const calendarStart = new Date(firstDayOfMonth);
+
   calendarStart.setDate(firstDayOfMonth.getDate() - firstDayOfMonth.getDay());
   calendarStart.setHours(0, 0, 0, 0);
 
@@ -711,6 +968,8 @@ const createPlaceItem = (place, orderIndex = 0) => {
       .slice(2, 7)}`,
     sourceId: place.sourceId,
     originalId: place.originalId || place.id || place.placeId || null,
+    placeId: place.placeId || place.id || place.originalId || null,
+    destinationId: place.destinationId || null,
     name: place.name,
     desc: place.desc,
     city: place.city,
@@ -721,6 +980,7 @@ const createPlaceItem = (place, orderIndex = 0) => {
     tags: place.tags || [],
     latitude: place.latitude || null,
     longitude: place.longitude || null,
+    placeType: place.placeType || "",
     timeLabel:
       place.timeLabel ||
       DEFAULT_TIME_SLOTS[orderIndex % DEFAULT_TIME_SLOTS.length],
@@ -733,20 +993,12 @@ const createPlaceItem = (place, orderIndex = 0) => {
 
 const getTodayDate = () => {
   const today = new Date();
-
-  return createDate(
-    today.getFullYear(),
-    today.getMonth() + 1,
-    today.getDate()
-  );
+  return createDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
 };
 
 const INITIAL_START_DATE = getTodayDate();
 const INITIAL_END_DATE = INITIAL_START_DATE;
-
-const INITIAL_PLACES_BY_DATE = {
-  [formatDateKey(INITIAL_START_DATE)]: [],
-};
+const INITIAL_PLACES_BY_DATE = { [formatDateKey(INITIAL_START_DATE)]: [] };
 
 const readLocalStorageJSON = (key, fallbackValue) => {
   try {
@@ -814,6 +1066,8 @@ const normalizeIncomingRoutePlace = (place) => {
   return {
     sourceId,
     originalId,
+    placeId: place.placeId || place.id || null,
+    destinationId: place.destinationId || null,
     name,
     desc,
     city: place.city || place.region || "",
@@ -829,6 +1083,7 @@ const normalizeIncomingRoutePlace = (place) => {
     tags: place.tags || [],
     latitude: place.latitude || place.lat || null,
     longitude: place.longitude || place.lng || null,
+    placeType: place.placeType || place.type || "",
   };
 };
 
@@ -855,6 +1110,7 @@ const getIncomingRoutePlaces = (navigationState, search = "") => {
   }
 
   const draftPlaces = readLocalStorageJSON(ROUTE_DRAFT_PLACES_KEY, []);
+
   const matchedDraftPlaces = Array.isArray(draftPlaces)
     ? draftPlaces.filter((place) => isSamePlaceId(place, placeId))
     : [];
@@ -878,6 +1134,7 @@ const getIncomingRoutePlaces = (navigationState, search = "") => {
   }
 
   const recentPlaces = readLocalStorageJSON(RECENT_PLACES_KEY, []);
+
   const recentPlace = Array.isArray(recentPlaces)
     ? recentPlaces.find((place) => isSamePlaceId(place, placeId))
     : null;
@@ -903,10 +1160,316 @@ const createInitialPlacesByDate = (incomingPlaces = []) => {
   return clonedPlacesByDate;
 };
 
+const getArrayData = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.places)) return data.places;
+  if (Array.isArray(data?.data?.content)) return data.data.content;
+  if (Array.isArray(data?.data?.items)) return data.data.items;
+  if (Array.isArray(data?.data?.places)) return data.data.places;
+
+  return [];
+};
+
+const normalizeSearchPlace = (place) => {
+  const name =
+    place.name ||
+    place.title ||
+    place.placeName ||
+    place.destinationName ||
+    place.place_name ||
+    "이름 없는 장소";
+
+  const sourceId = normalizeSourceId(
+    place.sourceId || place.id || place.placeId || place.destinationId || name
+  );
+
+  return {
+    sourceId,
+    originalId: place.id ?? place.placeId ?? place.destinationId ?? null,
+    placeId: place.placeId ?? place.id ?? null,
+    destinationId: place.destinationId ?? null,
+    name,
+    desc:
+      place.desc ||
+      place.address ||
+      place.roadAddress ||
+      place.location ||
+      place.addressName ||
+      place.address_name ||
+      "주소 정보 없음",
+    city: place.city || place.region || "",
+    country: place.country || "대한민국",
+    mapProvider: place.mapProvider || place.provider || "server",
+    thumb:
+      place.thumb ||
+      place.image ||
+      place.imageUrl ||
+      place.thumbnail ||
+      place.thumbnailUrl ||
+      place.photoUrl ||
+      getThumb(sourceId || name),
+    rating: place.rating || place.score || place.avgRating || null,
+    tags: place.tags || place.hashtags || [],
+    latitude: place.latitude ?? place.lat ?? null,
+    longitude: place.longitude ?? place.lng ?? null,
+    placeType: place.placeType || place.type || "",
+  };
+};
+
+const getErrorMessage = (error, fallbackMessage) => {
+  const data = error.response?.data;
+
+  if (typeof data === "string" && data.trim()) {
+    return data;
+  }
+
+  return data?.message || data?.error || fallbackMessage;
+};
+
+const getResponseData = (data) => {
+  return data?.data || data?.trip || data?.tripPlace || data;
+};
+
+const getAllRoutePlaces = (savedRoute) => {
+  return Object.values(savedRoute?.placesByDate || {}).flatMap((places) =>
+    Array.isArray(places) ? places : []
+  );
+};
+
+const toNumberOrDefault = (value, defaultValue) => {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : defaultValue;
+};
+
+const getNumericPlaceId = (place) => {
+  const candidates = [
+    place?.placeId,
+    place?.originalId,
+    place?.destinationId,
+    place?.serverPlaceId,
+  ];
+
+  for (const value of candidates) {
+    const numberValue = Number(value);
+
+    if (Number.isInteger(numberValue) && numberValue > 0) {
+      return numberValue;
+    }
+  }
+
+  return null;
+};
+
+const buildTripPayload = (savedRoute) => {
+  const allPlaces = getAllRoutePlaces(savedRoute);
+  const firstPlace = allPlaces[0];
+
+  const startDate = formatDateKey(savedRoute.selectedDates[0]);
+  const endDate = formatDateKey(
+    savedRoute.selectedDates[savedRoute.selectedDates.length - 1]
+  );
+
+  return {
+    title: savedRoute.title || `${firstPlace?.name || "새로운"} 여행 일정`,
+    destination:
+      firstPlace?.city ||
+      firstPlace?.country ||
+      firstPlace?.name ||
+      savedRoute.destination ||
+      "서울",
+    startDate,
+    endDate,
+    latitude: toNumberOrDefault(firstPlace?.latitude, DEFAULT_COORDS.latitude),
+    longitude: toNumberOrDefault(
+      firstPlace?.longitude,
+      DEFAULT_COORDS.longitude
+    ),
+  };
+};
+
+const mergeTripResponseWithSavedRoute = (savedRoute, tripData, tripPayload) => {
+  const serverId =
+    tripData?.id || tripData?.tripId || tripData?.routeId || savedRoute.id;
+
+  return {
+    ...savedRoute,
+    id: String(serverId),
+    title: tripData?.title || tripPayload.title || savedRoute.title,
+    destination:
+      tripData?.destination || tripPayload.destination || savedRoute.destination,
+    startDate: tripData?.startDate || tripPayload.startDate,
+    endDate: tripData?.endDate || tripPayload.endDate,
+    mapType: tripData?.mapType || savedRoute.mapType || "",
+    routeUrl: tripData?.routeUrl || savedRoute.routeUrl || "",
+    serverData: tripData,
+  };
+};
+
+const addPlacesToTrip = async (tripId, savedRoute) => {
+  const tripPlaceMap = {};
+  const addedCountByDay = {};
+
+  for (let dayIndex = 0; dayIndex < savedRoute.selectedDates.length; dayIndex++) {
+    const day = dayIndex + 1;
+    const dateKey = formatDateKey(savedRoute.selectedDates[dayIndex]);
+    const dayPlaces = savedRoute.placesByDate[dateKey] || [];
+
+    for (let placeIndex = 0; placeIndex < dayPlaces.length; placeIndex++) {
+      const place = dayPlaces[placeIndex];
+      const placeId = getNumericPlaceId(place);
+
+      if (!placeId) {
+        console.warn(
+          "[RouteCreate] 숫자 placeId가 없어 서버 장소 추가를 건너뜁니다:",
+          place
+        );
+        continue;
+      }
+
+      const response = await api.post(
+        `${TRIPS_API}/${tripId}/places/${placeId}`,
+        null,
+        {
+          params: {
+            day,
+            visitOrder: placeIndex + 1,
+          },
+        }
+      );
+
+      const tripPlaceData = getResponseData(response.data);
+      const localPlaceKey = place.id || `${dateKey}-${placeIndex}`;
+
+      tripPlaceMap[localPlaceKey] = tripPlaceData;
+      tripPlaceMap[String(placeId)] = tripPlaceData;
+
+      addedCountByDay[day] = (addedCountByDay[day] || 0) + 1;
+    }
+  }
+
+  return {
+    tripPlaceMap,
+    addedCountByDay,
+  };
+};
+
+const setStartPointsToServer = async ({
+  tripId,
+  savedRoute,
+  selectedStartPlaces,
+  tripPlaceMap,
+  addedCountByDay,
+}) => {
+  for (let dayIndex = 0; dayIndex < savedRoute.selectedDates.length; dayIndex++) {
+    const day = dayIndex + 1;
+
+    if (!addedCountByDay[day]) continue;
+
+    const dateKey = formatDateKey(savedRoute.selectedDates[dayIndex]);
+    const dayPlaces = savedRoute.placesByDate[dateKey] || [];
+    const selectedLocalPlaceId =
+      selectedStartPlaces?.[dateKey] || dayPlaces[0]?.id;
+
+    const selectedPlace =
+      dayPlaces.find((place) => place.id === selectedLocalPlaceId) ||
+      dayPlaces[0];
+
+    if (!selectedPlace) continue;
+
+    const numericPlaceId = getNumericPlaceId(selectedPlace);
+
+    const tripPlaceData =
+      tripPlaceMap[selectedLocalPlaceId] ||
+      tripPlaceMap[String(numericPlaceId)];
+
+    const tripPlaceId = tripPlaceData?.id || tripPlaceData?.tripPlaceId;
+
+    if (!tripPlaceId) continue;
+
+    await api.post(
+      `${TRIPS_API}/${tripId}/days/${day}/places/${tripPlaceId}/start`
+    );
+  }
+};
+
+const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}) => {
+  const optimizedByDay = {};
+
+  for (let dayIndex = 0; dayIndex < savedRoute.selectedDates.length; dayIndex++) {
+    const day = dayIndex + 1;
+
+    if (!addedCountByDay[day]) continue;
+
+    const response = await api.post(`${TRIPS_API}/${tripId}/days/${day}/optimize`);
+
+    optimizedByDay[day] = getArrayData(response.data);
+  }
+
+  return optimizedByDay;
+};
+
+const mapOptimizedPlacesToSavedRoute = (savedRoute, optimizedByDay) => {
+  const nextPlacesByDate = JSON.parse(
+    JSON.stringify(savedRoute.placesByDate || {})
+  );
+
+  Object.entries(optimizedByDay).forEach(([dayString, tripPlaces]) => {
+    if (!Array.isArray(tripPlaces) || tripPlaces.length === 0) return;
+
+    const dayIndex = Number(dayString) - 1;
+    const date = savedRoute.selectedDates[dayIndex];
+    const dateKey = formatDateKey(date);
+
+    if (!dateKey) return;
+
+    const existingPlaces = nextPlacesByDate[dateKey] || [];
+
+    nextPlacesByDate[dateKey] = tripPlaces
+      .slice()
+      .sort((a, b) => Number(a.visitOrder || 0) - Number(b.visitOrder || 0))
+      .map((tripPlace, index) => {
+        const matchedPlace =
+          existingPlaces.find((place) => {
+            const localPlaceId = getNumericPlaceId(place);
+            return localPlaceId && localPlaceId === Number(tripPlace.placeId);
+          }) ||
+          existingPlaces[index] ||
+          {};
+
+        return {
+          ...matchedPlace,
+          id: matchedPlace.id || `trip-place-${tripPlace.id}`,
+          sourceId:
+            matchedPlace.sourceId ||
+            String(tripPlace.placeId || tripPlace.placeName),
+          originalId: tripPlace.placeId || matchedPlace.originalId,
+          placeId: tripPlace.placeId || matchedPlace.placeId,
+          serverTripPlaceId: tripPlace.id,
+          name: tripPlace.placeName || matchedPlace.name || "장소명 없음",
+          desc: tripPlace.address || matchedPlace.desc || "주소 정보 없음",
+          latitude: tripPlace.latitude ?? matchedPlace.latitude ?? null,
+          longitude: tripPlace.longitude ?? matchedPlace.longitude ?? null,
+          placeType: tripPlace.placeType || matchedPlace.placeType || "",
+          visitOrder: tripPlace.visitOrder || index + 1,
+          isStartPoint: Boolean(tripPlace.isStartPoint),
+        };
+      });
+  });
+
+  return {
+    ...savedRoute,
+    placesByDate: nextPlacesByDate,
+  };
+};
+
 const RouteCreate = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const searchInputRef = useRef(null);
+  const { savedPlaces } = useSavedPlaces();
 
   const incomingRoutePlaces = useMemo(() => {
     return getIncomingRoutePlaces(location.state, location.search);
@@ -920,25 +1483,32 @@ const RouteCreate = () => {
     createInitialPlacesByDate(incomingRoutePlaces)
   );
   const [currentMonth, setCurrentMonth] = useState(
-    new Date(
-      INITIAL_START_DATE.getFullYear(),
-      INITIAL_START_DATE.getMonth(),
-      1
-    )
+    new Date(INITIAL_START_DATE.getFullYear(), INITIAL_START_DATE.getMonth(), 1)
   );
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [serverSearchResults, setServerSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchErrorMessage, setSearchErrorMessage] = useState("");
+  const [hasServerSearchCompleted, setHasServerSearchCompleted] =
+    useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
-
+  const [isSavingRoute, setIsSavingRoute] = useState(false);
   const [isStartPlaceModalOpen, setIsStartPlaceModalOpen] = useState(false);
   const [startPlaceDayIndex, setStartPlaceDayIndex] = useState(0);
   const [selectedStartPlaces, setSelectedStartPlaces] = useState({});
-
   const [fixModalPlace, setFixModalPlace] = useState(null);
   const [fixModalDateKey, setFixModalDateKey] = useState("");
   const [fixPeriod, setFixPeriod] = useState("PM");
   const [fixHour, setFixHour] = useState(12);
   const [fixMinute, setFixMinute] = useState(30);
   const [fixIsFixed, setFixIsFixed] = useState(true);
+
+  const [isFavoriteModalOpen, setIsFavoriteModalOpen] = useState(false);
+  const [favoriteModalDayIndex, setFavoriteModalDayIndex] = useState(0);
+  const [selectedFavoritePlaceIds, setSelectedFavoritePlaceIds] = useState([]);
+  const [expandedFavoriteFolderIds, setExpandedFavoriteFolderIds] = useState([
+    "solo",
+  ]);
 
   const selectedDates = useMemo(() => {
     return getDatesInRange(rangeStart, rangeEnd);
@@ -960,10 +1530,200 @@ const RouteCreate = () => {
   const activeDateKey = activeDate ? formatDateKey(activeDate) : "";
   const currentPlaces = activeDate ? placesByDate[activeDateKey] || [] : [];
 
+  const fallbackFavoritePlaces = useMemo(
+    () => [
+      {
+        sourceId: "favorite-seongsan",
+        name: "성산 일출봉",
+        desc: "자연명소 · 제주도",
+        city: "제주",
+        country: "대한민국",
+        mapProvider: "kakao",
+        thumb: getThumb("favorite-seongsan"),
+      },
+      {
+        sourceId: "favorite-osulloc",
+        name: "오설록 티 뮤지엄",
+        desc: "카페/디저트 · 제주도",
+        city: "제주",
+        country: "대한민국",
+        mapProvider: "kakao",
+        thumb: getThumb("favorite-osulloc"),
+      },
+      {
+        sourceId: "favorite-aewol",
+        name: "애월 카페거리",
+        desc: "카페거리 · 제주도",
+        city: "제주",
+        country: "대한민국",
+        mapProvider: "kakao",
+        thumb: getThumb("favorite-aewol"),
+      },
+      {
+        sourceId: "favorite-gyeongbokgung",
+        name: "경복궁",
+        desc: "역사명소 · 서울",
+        city: "서울",
+        country: "대한민국",
+        mapProvider: "kakao",
+        thumb: getThumb("favorite-gyeongbokgung"),
+      },
+      {
+        sourceId: "favorite-bukchon",
+        name: "북촌한옥마을",
+        desc: "전통마을 · 서울",
+        city: "서울",
+        country: "대한민국",
+        mapProvider: "kakao",
+        thumb: getThumb("favorite-bukchon"),
+      },
+    ],
+    []
+  );
+
+  const normalizedSavedFavoritePlaces = useMemo(() => {
+    if (!Array.isArray(savedPlaces) || savedPlaces.length === 0) {
+      return fallbackFavoritePlaces;
+    }
+
+    return savedPlaces.map((place, index) => {
+      const name =
+        place.name ||
+        place.title ||
+        place.placeName ||
+        place.destinationName ||
+        `저장 장소 ${index + 1}`;
+
+      const sourceId = normalizeSourceId(
+        place.sourceId || place.id || place.placeId || name
+      );
+
+      return {
+        sourceId,
+        originalId: place.id || place.placeId || place.destinationId || null,
+        placeId: place.placeId || place.id || null,
+        destinationId: place.destinationId || null,
+        name,
+        desc:
+          place.desc ||
+          place.address ||
+          place.roadAddress ||
+          place.location ||
+          place.description ||
+          "저장한 장소",
+        city: place.city || place.region || "",
+        country: place.country || "대한민국",
+        mapProvider: place.mapProvider || place.provider || "kakao",
+        thumb:
+          place.thumb ||
+          place.image ||
+          place.imageUrl ||
+          place.thumbnail ||
+          place.thumbnailUrl ||
+          getThumb(sourceId || name),
+        rating: place.rating || null,
+        tags: place.tags || [],
+        latitude: place.latitude || place.lat || null,
+        longitude: place.longitude || place.lng || null,
+        placeType: place.placeType || place.type || "",
+      };
+    });
+  }, [savedPlaces, fallbackFavoritePlaces]);
+
+  const favoriteFolders = useMemo(
+    () => [
+      {
+        id: "solo",
+        title: "나홀로 여행",
+        places: normalizedSavedFavoritePlaces.slice(0, 3),
+      },
+      {
+        id: "family",
+        title: "가족 휴가",
+        places: normalizedSavedFavoritePlaces.slice(3, 8),
+      },
+    ],
+    [normalizedSavedFavoritePlaces]
+  );
+
+  useEffect(() => {
+    if (!isSearchOpen) {
+      setServerSearchResults([]);
+      setSearchErrorMessage("");
+      setHasServerSearchCompleted(false);
+      return;
+    }
+
+    const keyword = searchKeyword.trim();
+
+    const timer = setTimeout(async () => {
+      try {
+        setIsSearching(true);
+        setSearchErrorMessage("");
+        setHasServerSearchCompleted(false);
+
+        const response = await api.get(PLACE_SEARCH_API);
+        const keywordLower = keyword.toLowerCase();
+
+        const places = getArrayData(response.data)
+          .map(normalizeSearchPlace)
+          .filter(Boolean)
+          .filter((place) => {
+            if (!keywordLower) return true;
+
+            return [
+              place.name,
+              place.desc,
+              place.city,
+              place.country,
+              place.mapProvider,
+              place.placeType,
+            ]
+              .filter(Boolean)
+              .some((value) =>
+                String(value).toLowerCase().includes(keywordLower)
+              );
+          });
+
+        setServerSearchResults(places.slice(0, 12));
+        setHasServerSearchCompleted(true);
+      } catch (error) {
+        console.error("장소 검색 실패:", error);
+        setHasServerSearchCompleted(true);
+
+        if (error.message.includes("Network Error")) {
+          setSearchErrorMessage(
+            "백엔드 서버 연결 또는 CORS 설정을 확인해주세요."
+          );
+          return;
+        }
+
+        setSearchErrorMessage(
+          getErrorMessage(
+            error,
+            "장소 검색에 실패했습니다. 기본 검색 결과를 표시합니다."
+          )
+        );
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [isSearchOpen, searchKeyword]);
+
   const filteredSearchResults = useMemo(() => {
     if (!isSearchOpen) return [];
 
     const keyword = searchKeyword.trim().toLowerCase();
+
+    if (serverSearchResults.length > 0) {
+      return serverSearchResults;
+    }
+
+    if (hasServerSearchCompleted && !searchErrorMessage) {
+      return [];
+    }
 
     const baseList = keyword
       ? MOCK_PLACE_RESULTS.filter((place) =>
@@ -974,7 +1734,13 @@ const RouteCreate = () => {
       : MOCK_PLACE_RESULTS;
 
     return baseList.slice(0, 12);
-  }, [isSearchOpen, searchKeyword]);
+  }, [
+    hasServerSearchCompleted,
+    isSearchOpen,
+    searchErrorMessage,
+    searchKeyword,
+    serverSearchResults,
+  ]);
 
   const monthTitle = `${currentMonth.getFullYear()}년 ${
     currentMonth.getMonth() + 1
@@ -1048,6 +1814,11 @@ const RouteCreate = () => {
       if (item.sourceId && place.sourceId) {
         return item.sourceId === place.sourceId;
       }
+
+      if (item.originalId && place.originalId) {
+        return String(item.originalId) === String(place.originalId);
+      }
+
       return item.name === place.name && item.desc === place.desc;
     });
   };
@@ -1057,10 +1828,16 @@ const RouteCreate = () => {
 
     setPlacesByDate((prev) => {
       const targetPlaces = prev[activeDateKey] || [];
+
       const alreadyExists = targetPlaces.some((item) => {
         if (item.sourceId && place.sourceId) {
           return item.sourceId === place.sourceId;
         }
+
+        if (item.originalId && place.originalId) {
+          return String(item.originalId) === String(place.originalId);
+        }
+
         return item.name === place.name && item.desc === place.desc;
       });
 
@@ -1077,6 +1854,9 @@ const RouteCreate = () => {
 
     setSearchKeyword("");
     setIsSearchOpen(false);
+    setServerSearchResults([]);
+    setSearchErrorMessage("");
+    setHasServerSearchCompleted(false);
   };
 
   const handleSearchKeyDown = (e) => {
@@ -1096,6 +1876,75 @@ const RouteCreate = () => {
   const handleOpenSearch = () => {
     setIsSearchOpen(true);
     searchInputRef.current?.focus();
+  };
+
+  const handleFavoritePlacesClick = () => {
+    setFavoriteModalDayIndex(activeDayIndex);
+    setSelectedFavoritePlaceIds([]);
+    setExpandedFavoriteFolderIds(["solo"]);
+    setIsFavoriteModalOpen(true);
+  };
+
+  const handleCloseFavoriteModal = () => {
+    setIsFavoriteModalOpen(false);
+    setSelectedFavoritePlaceIds([]);
+  };
+
+  const handleToggleFavoriteFolder = (folderId) => {
+    setExpandedFavoriteFolderIds((prev) =>
+      prev.includes(folderId)
+        ? prev.filter((id) => id !== folderId)
+        : [...prev, folderId]
+    );
+  };
+
+  const handleToggleFavoritePlace = (placeId) => {
+    setSelectedFavoritePlaceIds((prev) =>
+      prev.includes(placeId)
+        ? prev.filter((id) => id !== placeId)
+        : [...prev, placeId]
+    );
+  };
+
+  const handleConfirmFavoritePlaces = () => {
+    const targetDate = selectedDates[favoriteModalDayIndex];
+
+    if (!targetDate) return;
+
+    const targetDateKey = formatDateKey(targetDate);
+    const allFavoritePlaces = favoriteFolders.flatMap((folder) => folder.places);
+
+    const placesToAdd = allFavoritePlaces.filter((place) =>
+      selectedFavoritePlaceIds.includes(place.sourceId)
+    );
+
+    if (placesToAdd.length === 0) return;
+
+    setPlacesByDate((prev) => {
+      const targetPlaces = prev[targetDateKey] || [];
+
+      const nextPlaces = placesToAdd
+        .filter((place) => {
+          return !targetPlaces.some((item) => {
+            if (item.sourceId && place.sourceId) {
+              return item.sourceId === place.sourceId;
+            }
+
+            return item.name === place.name && item.desc === place.desc;
+          });
+        })
+        .map((place, index) =>
+          createPlaceItem(place, targetPlaces.length + index)
+        );
+
+      return {
+        ...prev,
+        [targetDateKey]: [...targetPlaces, ...nextPlaces],
+      };
+    });
+
+    setActiveDayIndex(favoriteModalDayIndex);
+    handleCloseFavoriteModal();
   };
 
   const handleRemovePlace = (id) => {
@@ -1140,11 +1989,7 @@ const RouteCreate = () => {
       ...prev,
       [fixModalDateKey]: (prev[fixModalDateKey] || []).map((place) =>
         place.id === fixModalPlace.id
-          ? {
-              ...place,
-              timeLabel: nextTimeLabel,
-              isFixedTime: fixIsFixed,
-            }
+          ? { ...place, timeLabel: nextTimeLabel, isFixedTime: fixIsFixed }
           : place
       ),
     }));
@@ -1173,10 +2018,7 @@ const RouteCreate = () => {
   };
 
   const handleSelectStartPlace = (dateKey, placeId) => {
-    setSelectedStartPlaces((prev) => ({
-      ...prev,
-      [dateKey]: placeId,
-    }));
+    setSelectedStartPlaces((prev) => ({ ...prev, [dateKey]: placeId }));
   };
 
   const handleConfirmStartPlaces = () => {
@@ -1195,10 +2037,14 @@ const RouteCreate = () => {
 
     setPlacesByDate(reorderedPlacesByDate);
     setIsStartPlaceModalOpen(false);
-    setIsCompleteModalOpen(true);
+
+    setTimeout(() => {
+      setIsCompleteModalOpen(true);
+    }, 50);
   };
 
   const handleCloseCompleteModal = () => {
+    if (isSavingRoute) return;
     setIsCompleteModalOpen(false);
   };
 
@@ -1212,6 +2058,7 @@ const RouteCreate = () => {
     }, 0);
 
     const firstDateKey = firstDate ? formatDateKey(firstDate) : "";
+
     const firstPlace = firstDateKey
       ? (placesByDate[firstDateKey] || [])[0]
       : null;
@@ -1236,26 +2083,144 @@ const RouteCreate = () => {
     };
   };
 
-  const handleConfirmRoute = () => {
-    const savedRoute = buildSavedRouteMock();
+  const saveRouteToServer = async (savedRoute) => {
+    const tripPayload = buildTripPayload(savedRoute);
 
-    persistRouteSafely(savedRoute);
-    setIsCompleteModalOpen(false);
+    const tripResponse = await api.post(TRIPS_API, tripPayload);
+    const tripData = getResponseData(tripResponse.data);
 
-    navigate(`/route-result?id=${savedRoute.id}`, {
-      state: {
-        savedRoute,
-        selectedDates,
-        placesByDate,
-      },
+    let serverSavedRoute = mergeTripResponseWithSavedRoute(
+      savedRoute,
+      tripData,
+      tripPayload
+    );
+
+    const tripId = Number(tripData?.id || tripData?.tripId || serverSavedRoute.id);
+
+    if (!Number.isInteger(tripId) || tripId <= 0) {
+      return serverSavedRoute;
+    }
+
+    const { tripPlaceMap, addedCountByDay } = await addPlacesToTrip(
+      tripId,
+      savedRoute
+    );
+
+    await setStartPointsToServer({
+      tripId,
+      savedRoute,
+      selectedStartPlaces,
+      tripPlaceMap,
+      addedCountByDay,
     });
+
+    const optimizedByDay = await optimizeTripDays(
+      tripId,
+      savedRoute,
+      addedCountByDay
+    );
+
+    serverSavedRoute = mapOptimizedPlacesToSavedRoute(
+      serverSavedRoute,
+      optimizedByDay
+    );
+
+    const uniqueTripPlaces = Array.from(
+      new Map(
+        Object.values(tripPlaceMap)
+          .filter(Boolean)
+          .map((tripPlace) => [
+            tripPlace.id || tripPlace.tripPlaceId || JSON.stringify(tripPlace),
+            tripPlace,
+          ])
+      ).values()
+    );
+
+    return {
+      ...serverSavedRoute,
+      serverData: {
+        trip: tripData,
+        tripPlaces: uniqueTripPlaces,
+        optimizedByDay,
+      },
+    };
   };
 
-  const handleSaveRouteLater = () => {
+  const handleConfirmRoute = async () => {
     const savedRoute = buildSavedRouteMock();
 
-    persistRouteSafely(savedRoute);
-    setIsCompleteModalOpen(false);
+    try {
+      setIsSavingRoute(true);
+
+      const serverSavedRoute = await saveRouteToServer(savedRoute);
+      persistRouteSafely(serverSavedRoute);
+
+      setIsCompleteModalOpen(false);
+
+      navigate(`/route-result?id=${serverSavedRoute.id}`, {
+        state: { savedRoute: serverSavedRoute, selectedDates, placesByDate },
+      });
+    } catch (error) {
+      console.error("여행 생성 실패:", error);
+
+      if (error.message.includes("Network Error")) {
+        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+      } else if (error.response?.status === 401 || error.response?.status === 403) {
+        alert("로그인 정보가 만료되었거나 권한이 없습니다. 다시 로그인해주세요.");
+      } else {
+        alert(
+          getErrorMessage(
+            error,
+            "여행 생성에 실패했습니다. 로컬에 임시 저장 후 이동합니다."
+          )
+        );
+      }
+
+      persistRouteSafely(savedRoute);
+      setIsCompleteModalOpen(false);
+
+      navigate(`/route-result?id=${savedRoute.id}`, {
+        state: { savedRoute, selectedDates, placesByDate },
+      });
+    } finally {
+      setIsSavingRoute(false);
+    }
+  };
+
+  const handleSaveRouteLater = async () => {
+    const savedRoute = buildSavedRouteMock();
+
+    try {
+      setIsSavingRoute(true);
+
+      const serverSavedRoute = await saveRouteToServer(savedRoute);
+      persistRouteSafely(serverSavedRoute);
+
+      setIsCompleteModalOpen(false);
+      alert("일정이 저장되었습니다.");
+    } catch (error) {
+      console.error("여행 저장 실패:", error);
+
+      if (error.message.includes("Network Error")) {
+        alert(
+          "백엔드 서버 연결 또는 CORS 설정을 확인해주세요. 로컬에 임시 저장합니다."
+        );
+      } else if (error.response?.status === 401 || error.response?.status === 403) {
+        alert("로그인 정보가 만료되었거나 권한이 없습니다. 로컬에 임시 저장합니다.");
+      } else {
+        alert(
+          getErrorMessage(
+            error,
+            "여행 저장에 실패했습니다. 로컬에 임시 저장합니다."
+          )
+        );
+      }
+
+      persistRouteSafely(savedRoute);
+      setIsCompleteModalOpen(false);
+    } finally {
+      setIsSavingRoute(false);
+    }
   };
 
   return (
@@ -1295,18 +2260,17 @@ const RouteCreate = () => {
               week.map((dayObj, dayIndex) => {
                 const dateKey = formatDateKey(dayObj.date);
                 const isSelected = selectedDateKeys.has(dateKey);
-
                 const prevDay = week[dayIndex - 1];
                 const nextDay = week[dayIndex + 1];
 
                 const hasPrevSelected =
-                  prevDay &&
-                  selectedDateKeys.has(formatDateKey(prevDay.date));
+                  prevDay && selectedDateKeys.has(formatDateKey(prevDay.date));
+
                 const hasNextSelected =
-                  nextDay &&
-                  selectedDateKeys.has(formatDateKey(nextDay.date));
+                  nextDay && selectedDateKeys.has(formatDateKey(nextDay.date));
 
                 let rangeClass = "";
+
                 if (isSelected) {
                   if (hasPrevSelected && hasNextSelected) {
                     rangeClass = "is-range-middle";
@@ -1352,57 +2316,82 @@ const RouteCreate = () => {
         </div>
 
         <section className="route-search-area">
-          <div className="route-search-box">
-            <img src={searchIcon} alt="검색" className="route-search-icon" />
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="장소 검색 및 추가"
-              value={searchKeyword}
-              onFocus={() => setIsSearchOpen(true)}
-              onChange={(e) => {
-                setSearchKeyword(e.target.value);
-                setIsSearchOpen(true);
-              }}
-              onKeyDown={handleSearchKeyDown}
-            />
+          <div className="route-search-top-row">
+            <div className="route-search-box">
+              <img src={searchIcon} alt="검색" className="route-search-icon" />
+
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="장소 검색 및 추가"
+                value={searchKeyword}
+                onFocus={() => setIsSearchOpen(true)}
+                onChange={(e) => {
+                  setSearchKeyword(e.target.value);
+                  setIsSearchOpen(true);
+                }}
+                onKeyDown={handleSearchKeyDown}
+              />
+            </div>
+
+            <button
+              type="button"
+              className="route-favorite-button"
+              onClick={handleFavoritePlacesClick}
+            >
+              <img src={heartIcon} alt="" />
+              <span>관심장소</span>
+            </button>
           </div>
 
           {isSearchOpen && (
             <div className="route-search-result-list">
-              {filteredSearchResults.length === 0 ? (
-                <div className="route-search-empty">검색 결과가 없어요.</div>
+              {isSearching ? (
+                <div className="route-search-empty">검색 중입니다.</div>
+              ) : filteredSearchResults.length === 0 ? (
+                <div className="route-search-empty">
+                  {searchErrorMessage || "검색 결과가 없어요."}
+                </div>
               ) : (
-                filteredSearchResults.map((place) => {
-                  const alreadyAdded = isPlaceAlreadyAdded(place);
-
-                  return (
-                    <div
-                      key={place.sourceId}
-                      className="route-search-result-card"
-                    >
-                      <div className="route-search-result-text">
-                        <div className="route-search-result-name">
-                          {place.name}
-                        </div>
-                        <div className="route-search-result-desc">
-                          {place.desc}
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        className={`route-search-add-button ${
-                          alreadyAdded ? "is-disabled" : ""
-                        }`}
-                        onClick={() => handleAddPlace(place)}
-                        disabled={alreadyAdded}
-                      >
-                        {alreadyAdded ? "추가됨" : "추가"}
-                      </button>
+                <>
+                  {searchErrorMessage && (
+                    <div className="route-search-empty">
+                      {searchErrorMessage}
                     </div>
-                  );
-                })
+                  )}
+
+                  {filteredSearchResults.map((place) => {
+                    const alreadyAdded = isPlaceAlreadyAdded(place);
+
+                    return (
+                      <div
+                        key={place.sourceId}
+                        className="route-search-result-card"
+                      >
+                        <div className="route-search-result-text">
+                          <div className="route-search-result-name">
+                            {place.name}
+                          </div>
+
+                          <div className="route-search-result-desc">
+                            {place.desc}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className={`route-search-add-button ${
+                            alreadyAdded ? "is-disabled" : ""
+                          }`}
+                          onClick={() => handleAddPlace(place)}
+                          disabled={alreadyAdded}
+                        >
+                          {alreadyAdded ? "추가됨" : "추가"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </>
               )}
             </div>
           )}
@@ -1411,6 +2400,7 @@ const RouteCreate = () => {
         <section className="selected-place-section">
           <div className="selected-place-header schedule-list-header">
             <h2>일정 리스트</h2>
+
             <span className="selected-place-count">
               {currentPlaces.length}개 장소 선택됨
             </span>
@@ -1425,10 +2415,12 @@ const RouteCreate = () => {
               const timeLabel =
                 place.timeLabel ||
                 DEFAULT_TIME_SLOTS[index % DEFAULT_TIME_SLOTS.length];
+
               const isFixedTime =
                 typeof place.isFixedTime === "boolean"
                   ? place.isFixedTime
                   : false;
+
               const thumb =
                 place.thumb || getThumb(place.sourceId || `place-${index}`);
 
@@ -1466,6 +2458,7 @@ const RouteCreate = () => {
                       >
                         <div className="schedule-time-text">
                           {isFixedTime ? <LockIcon /> : <ClockIcon />}
+
                           <span>
                             {isFixedTime
                               ? `${timeLabel} (고정됨)`
@@ -1494,8 +2487,7 @@ const RouteCreate = () => {
               className="add-place-button schedule-add-place-button"
               onClick={handleOpenSearch}
             >
-              <span className="add-place-plus">＋</span>
-              장소 추가하기
+              <span className="add-place-plus">＋</span> 장소 추가하기
             </button>
           </div>
         </section>
@@ -1539,6 +2531,20 @@ const RouteCreate = () => {
         onConfirm={handleConfirmStartPlaces}
       />
 
+      <FavoritePlacesModal
+        open={isFavoriteModalOpen}
+        folders={favoriteFolders}
+        selectedPlaceIds={selectedFavoritePlaceIds}
+        expandedFolderIds={expandedFavoriteFolderIds}
+        selectedDayIndex={favoriteModalDayIndex}
+        selectedDates={selectedDates}
+        onClose={handleCloseFavoriteModal}
+        onToggleFolder={handleToggleFavoriteFolder}
+        onTogglePlace={handleToggleFavoritePlace}
+        onChangeDay={setFavoriteModalDayIndex}
+        onConfirm={handleConfirmFavoritePlaces}
+      />
+
       {isCompleteModalOpen && (
         <div
           className="route-complete-overlay"
@@ -1555,10 +2561,8 @@ const RouteCreate = () => {
             <h3 className="route-complete-title">동선 제작 완료!</h3>
 
             <p className="route-complete-desc">
-              AI가 분석한 최적의 경로가
-              <br />
-              생성되었습니다.
-              <br />
+              AI가 분석한 최적의 경로가 <br />
+              생성되었습니다. <br />
               지금 바로 확인해 보세요.
             </p>
 
@@ -1566,16 +2570,18 @@ const RouteCreate = () => {
               type="button"
               className="route-complete-confirm-btn"
               onClick={handleConfirmRoute}
+              disabled={isSavingRoute}
             >
-              경로 확인하기 →
+              {isSavingRoute ? "저장 중..." : "경로 확인하기 →"}
             </button>
 
             <button
               type="button"
               className="route-complete-later-btn"
               onClick={handleSaveRouteLater}
+              disabled={isSavingRoute}
             >
-              나중에 보기
+              {isSavingRoute ? "저장 중..." : "나중에 보기"}
             </button>
           </div>
         </div>

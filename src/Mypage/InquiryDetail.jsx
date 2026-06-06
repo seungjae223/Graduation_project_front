@@ -1,7 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "./InquiryDetail.css";
-import { getInquiryList } from "./inquiryMockData";
+import api from "../api/api";
 
 import customerCenterIcon from "../img/고객센터.png";
 import verifyIcon from "../img/인증.png";
@@ -25,15 +25,48 @@ const normalizeInquiryId = (value, id) => {
   return String(value).replace("#", "");
 };
 
+const formatDate = (value) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toISOString().slice(0, 10);
+};
+
 const getStatusText = (inquiry) => {
   if (inquiry.statusText) return inquiry.statusText;
-  if (inquiry.status === "answered") return "답변 완료";
-  if (inquiry.status === "waiting") return "답변 대기";
+  if (inquiry.statusName) return inquiry.statusName;
+
+  const rawStatus = String(inquiry.status || "").toLowerCase();
+
+  if (
+    rawStatus === "answered" ||
+    rawStatus === "complete" ||
+    rawStatus === "completed" ||
+    rawStatus === "done" ||
+    rawStatus === "답변완료"
+  ) {
+    return "답변 완료";
+  }
+
+  if (
+    rawStatus === "waiting" ||
+    rawStatus === "pending" ||
+    rawStatus === "답변대기"
+  ) {
+    return "답변 대기";
+  }
+
   return "답변 완료";
 };
 
 const getAnswerData = (inquiry) => {
-  const answer = inquiry.answer;
+  const answer =
+    inquiry.answer || inquiry.reply || inquiry.answerContent || inquiry.response;
 
   if (!answer) {
     return DEFAULT_ANSWER;
@@ -48,12 +81,15 @@ const getAnswerData = (inquiry) => {
 
   return {
     team: answer.team || answer.answerTeam || DEFAULT_ANSWER.team,
-    date: answer.date || answer.answerDate || DEFAULT_ANSWER.date,
+    date:
+      formatDate(answer.date || answer.answerDate || answer.createdAt) ||
+      DEFAULT_ANSWER.date,
     intro: answer.intro || answer.answerIntro || DEFAULT_ANSWER.intro,
     body:
       answer.body ||
       answer.content ||
       answer.answerBody ||
+      answer.answerContent ||
       DEFAULT_ANSWER.body,
     progressTitle:
       answer.progressTitle ||
@@ -66,6 +102,24 @@ const getAnswerData = (inquiry) => {
     outro: answer.outro || answer.answerOutro || DEFAULT_ANSWER.outro,
     end: answer.end || answer.answerEnd || DEFAULT_ANSWER.end,
   };
+};
+
+const getInquiryData = (data) => {
+  if (data?.data) return data.data;
+  if (data?.inquiry) return data.inquiry;
+  if (data?.item) return data.item;
+
+  return data;
+};
+
+const getErrorMessage = (error, fallbackMessage) => {
+  const data = error.response?.data;
+
+  if (typeof data === "string") {
+    return data;
+  }
+
+  return data?.message || data?.error || fallbackMessage;
 };
 
 const UserIcon = () => (
@@ -91,20 +145,64 @@ const InquiryDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const inquiry = useMemo(() => {
-    if (location.state?.inquiry) {
-      return location.state.inquiry;
-    }
+  const [inquiry, setInquiry] = useState(location.state?.inquiry || null);
+  const [isLoading, setIsLoading] = useState(!location.state?.inquiry);
+  const [errorMessage, setErrorMessage] = useState("");
 
-    const savedInquiries = getInquiryList();
-    return savedInquiries.find((item) => String(item.id) === String(id));
-  }, [location.state, id]);
+  useEffect(() => {
+    const fetchInquiryDetail = async () => {
+      if (!id) return;
 
-  if (!inquiry) {
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
+
+        const response = await api.get(`/api/inquiries/${id}`);
+        const inquiryData = getInquiryData(response.data);
+
+        setInquiry(inquiryData);
+      } catch (error) {
+        console.error("문의 상세 조회 실패:", error);
+
+        if (location.state?.inquiry) {
+          setInquiry(location.state.inquiry);
+          return;
+        }
+
+        if (error.message.includes("Network Error")) {
+          setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+          return;
+        }
+
+        setErrorMessage(
+          getErrorMessage(
+            error,
+            "문의 내용을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+          )
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInquiryDetail();
+  }, [id, location.state]);
+
+  if (isLoading) {
     return (
       <main className="inquiry-detail-page">
         <section className="inquiry-empty-box">
-          <p>문의 내용을 찾을 수 없습니다.</p>
+          <p>문의 내용을 불러오는 중입니다.</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (!inquiry || errorMessage) {
+    return (
+      <main className="inquiry-detail-page">
+        <section className="inquiry-empty-box">
+          <p>{errorMessage || "문의 내용을 찾을 수 없습니다."}</p>
           <button type="button" onClick={() => navigate("/inquiry")}>
             문의 목록으로 돌아가기
           </button>
@@ -117,17 +215,21 @@ const InquiryDetail = () => {
 
   const detail = {
     statusText: getStatusText(inquiry),
-    title: inquiry.title || "문의 제목",
-    date: inquiry.date || inquiry.createdDate || "2024.05.21",
+    title: inquiry.title || inquiry.subject || "문의 제목",
+    date:
+      formatDate(inquiry.date || inquiry.createdDate || inquiry.createdAt) ||
+      "2024.05.21",
     inquiryId: normalizeInquiryId(
       inquiry.inquiryId || inquiry.inquiryCode || inquiry.code,
-      inquiry.id
+      inquiry.id || id
     ),
     time: inquiry.time || inquiry.createdTime || "오후 2:14",
     content:
       inquiry.detailContent ||
       inquiry.fullContent ||
       inquiry.content ||
+      inquiry.question ||
+      inquiry.body ||
       "문의 내용이 없습니다.",
   };
 

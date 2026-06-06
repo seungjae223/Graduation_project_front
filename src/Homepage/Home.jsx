@@ -250,10 +250,16 @@ const Home = () => {
     }
   );
 
-  const handleSearch = (e) => {
-    if (e.key === "Enter") {
-      console.log("검색어:", keyword);
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+
+    const trimmedKeyword = keyword.trim();
+
+    if (!trimmedKeyword) {
+      return;
     }
+
+    navigate(`/search?keyword=${encodeURIComponent(trimmedKeyword)}`);
   };
 
   const handleRecommendClick = () => {
@@ -289,16 +295,21 @@ const Home = () => {
           당신만을 위한 완벽한 여행 계획을 시작하세요.
         </p>
 
-        <div className="search-box">
-          <img src={searchIcon} alt="search" />
+        <form className="search-box" onSubmit={handleSearchSubmit}>
+          <img
+            src={searchIcon}
+            alt="search"
+            onClick={handleSearchSubmit}
+            role="button"
+          />
+
           <input
             type="text"
             placeholder="목적지 또는 테마를 검색하세요"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={handleSearch}
           />
-        </div>
+        </form>
       </div>
 
       {/* 카드 2개 */}
