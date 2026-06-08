@@ -8,6 +8,10 @@ import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import { saveRecentPlace } from "../utils/recentPlaces";
 import html2pdf from "html2pdf.js";
 import ShareModal from "../ShareModal/ShareModal";
+import FolderSelectModal, {
+  removePlaceFolderLink,
+  savePlaceFolderLink,
+} from "../FolderSelectModal/FolderSelectModal";
 import "./Detail.css";
 import api from "../api/api";
 
@@ -689,6 +693,7 @@ function Detail() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingPlace, setIsSavingPlace] = useState(false);
   const [serverSaved, setServerSaved] = useState(false);
+  const [folderModalOpen, setFolderModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
   useEffect(() => {
@@ -811,47 +816,60 @@ function Detail() {
     return `${window.location.origin}${location.pathname}?id=${detailPlace.id}`;
   }, [location.pathname, detailPlace.id]);
 
-  const handleToggleSaved = async () => {
-    if (isSavingPlace) return;
+  const buildSavedPlacePayload = (folder) => ({
+    id: detailPlace.id,
+    title: detailPlace.title,
+    name: detailPlace.name,
+    region: detailPlace.region,
+    theme: detailPlace.theme,
+    description: detailPlace.description,
+    address: detailPlace.address,
+    latitude: detailPlace.latitude,
+    longitude: detailPlace.longitude,
+    placeType: detailPlace.placeType,
+    rating: detailPlace.rating,
+    image: detailPlace.image,
+    tags: detailPlace.tags,
+    folder,
+  });
 
-    const savedPlacePayload = {
-      id: detailPlace.id,
-      title: detailPlace.title,
-      name: detailPlace.name,
-      region: detailPlace.region,
-      theme: detailPlace.theme,
-      description: detailPlace.description,
-      address: detailPlace.address,
-      latitude: detailPlace.latitude,
-      longitude: detailPlace.longitude,
-      placeType: detailPlace.placeType,
-      rating: detailPlace.rating,
-      image: detailPlace.image,
-      tags: detailPlace.tags,
+  const closeFolderModal = () => {
+    if (isSavingPlace) return;
+    setFolderModalOpen(false);
+  };
+
+  const postSavedPlaceWithFolder = async (placeId, folder) => {
+    const payload = {
+      placeId,
+      folderId: folder.id,
+      folderName: folder.name,
     };
+
+    try {
+      return await api.post(SAVED_PLACES_API, payload);
+    } catch (error) {
+      if (error.response?.status === 400 || error.response?.status === 422) {
+        return api.post(SAVED_PLACES_API, {
+          placeId,
+        });
+      }
+
+      throw error;
+    }
+  };
+
+  const removeSavedPlace = async () => {
+    const savedPlacePayload = buildSavedPlacePayload();
 
     try {
       setIsSavingPlace(true);
 
-      if (saved) {
-        await api.delete(`${SAVED_PLACES_API}/${detailPlace.id}`);
+      await api.delete(`${SAVED_PLACES_API}/${detailPlace.id}`);
 
-        setServerSaved(false);
+      removePlaceFolderLink(detailPlace.id);
+      setServerSaved(false);
 
-        if (contextSaved) {
-          toggleSavedPlace(savedPlacePayload);
-        }
-
-        return;
-      }
-
-      await api.post(SAVED_PLACES_API, {
-        placeId: detailPlace.id,
-      });
-
-      setServerSaved(true);
-
-      if (!contextSaved) {
+      if (contextSaved) {
         toggleSavedPlace(savedPlacePayload);
       }
     } catch (error) {
@@ -871,6 +889,52 @@ function Detail() {
     } finally {
       setIsSavingPlace(false);
     }
+  };
+
+  const savePlaceToFolder = async (folder) => {
+    const savedPlacePayload = buildSavedPlacePayload(folder);
+
+    try {
+      setIsSavingPlace(true);
+
+      await postSavedPlaceWithFolder(detailPlace.id, folder);
+
+      savePlaceFolderLink(detailPlace.id, folder);
+      setServerSaved(true);
+
+      if (!contextSaved) {
+        toggleSavedPlace(savedPlacePayload);
+      }
+
+      setFolderModalOpen(false);
+    } catch (error) {
+      console.error("관심 장소 변경 실패:", error);
+
+      if (error.message.includes("Network Error")) {
+        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        return;
+      }
+
+      alert(
+        getErrorMessage(
+          error,
+          "관심 장소 변경에 실패했습니다. 잠시 후 다시 시도해주세요."
+        )
+      );
+    } finally {
+      setIsSavingPlace(false);
+    }
+  };
+
+  const handleToggleSaved = async () => {
+    if (isSavingPlace) return;
+
+    if (saved) {
+      await removeSavedPlace();
+      return;
+    }
+
+    setFolderModalOpen(true);
   };
 
   const handleOpenShareModal = () => {
@@ -1070,6 +1134,13 @@ function Detail() {
         previewSubtitle={detailPlace.address}
         previewImage={detailPlace.image}
         onSavePdf={handleSavePdf}
+      />
+
+      <FolderSelectModal
+        open={folderModalOpen}
+        onClose={closeFolderModal}
+        onSave={savePlaceToFolder}
+        isSaving={isSavingPlace}
       />
     </>
   );

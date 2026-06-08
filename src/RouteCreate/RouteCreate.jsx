@@ -1291,6 +1291,59 @@ const getNumericPlaceId = (place) => {
   return null;
 };
 
+
+const buildPlaceRegistrationPayload = (place) => {
+  const name =
+    place?.name ||
+    place?.title ||
+    place?.placeName ||
+    place?.destinationName ||
+    "이름 없는 장소";
+
+  return {
+    name,
+    latitude: toNumberOrDefault(place?.latitude, DEFAULT_COORDS.latitude),
+    longitude: toNumberOrDefault(place?.longitude, DEFAULT_COORDS.longitude),
+    address:
+      place?.desc ||
+      place?.address ||
+      place?.roadAddress ||
+      place?.addr ||
+      "주소 정보 없음",
+    placeType:
+      place?.placeType || place?.tabType || place?.category || "PLACE",
+  };
+};
+
+const ensureServerPlaceId = async (place) => {
+  const existingPlaceId = getNumericPlaceId(place);
+
+  if (existingPlaceId) {
+    return existingPlaceId;
+  }
+
+  const response = await api.post(
+    PLACE_SEARCH_API,
+    buildPlaceRegistrationPayload(place)
+  );
+
+  const placeData = getResponseData(response.data);
+  const registeredPlaceIdValue =
+    typeof placeData === "number"
+      ? placeData
+      : placeData?.id ?? placeData?.placeId ?? placeData?.destinationId;
+
+  const registeredPlaceId = Number(registeredPlaceIdValue);
+
+  if (!Number.isInteger(registeredPlaceId) || registeredPlaceId <= 0) {
+    throw new Error(
+      `${place?.name || "장소"} 등록 응답에서 placeId를 찾지 못했습니다.`
+    );
+  }
+
+  return registeredPlaceId;
+};
+
 const buildTripPayload = (savedRoute) => {
   const allPlaces = getAllRoutePlaces(savedRoute);
   const firstPlace = allPlaces[0];
@@ -1339,6 +1392,7 @@ const mergeTripResponseWithSavedRoute = (savedRoute, tripData, tripPayload) => {
 const addPlacesToTrip = async (tripId, savedRoute) => {
   const tripPlaceMap = {};
   const addedCountByDay = {};
+  const serverPlaceIdByLocalId = {};
 
   for (let dayIndex = 0; dayIndex < savedRoute.selectedDates.length; dayIndex++) {
     const day = dayIndex + 1;
@@ -1347,15 +1401,7 @@ const addPlacesToTrip = async (tripId, savedRoute) => {
 
     for (let placeIndex = 0; placeIndex < dayPlaces.length; placeIndex++) {
       const place = dayPlaces[placeIndex];
-      const placeId = getNumericPlaceId(place);
-
-      if (!placeId) {
-        console.warn(
-          "[RouteCreate] 숫자 placeId가 없어 서버 장소 추가를 건너뜁니다:",
-          place
-        );
-        continue;
-      }
+      const placeId = await ensureServerPlaceId(place);
 
       const response = await api.post(
         `${TRIPS_API}/${tripId}/places/${placeId}`,
@@ -1373,6 +1419,7 @@ const addPlacesToTrip = async (tripId, savedRoute) => {
 
       tripPlaceMap[localPlaceKey] = tripPlaceData;
       tripPlaceMap[String(placeId)] = tripPlaceData;
+      serverPlaceIdByLocalId[localPlaceKey] = placeId;
 
       addedCountByDay[day] = (addedCountByDay[day] || 0) + 1;
     }
@@ -1381,6 +1428,7 @@ const addPlacesToTrip = async (tripId, savedRoute) => {
   return {
     tripPlaceMap,
     addedCountByDay,
+    serverPlaceIdByLocalId,
   };
 };
 
@@ -1439,7 +1487,11 @@ const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}) => {
   return optimizedByDay;
 };
 
-const mapOptimizedPlacesToSavedRoute = (savedRoute, optimizedByDay) => {
+const mapOptimizedPlacesToSavedRoute = (
+  savedRoute,
+  optimizedByDay,
+  serverPlaceIdByLocalId = {}
+) => {
   const nextPlacesByDate = JSON.parse(
     JSON.stringify(savedRoute.placesByDate || {})
   );
@@ -1461,8 +1513,14 @@ const mapOptimizedPlacesToSavedRoute = (savedRoute, optimizedByDay) => {
       .map((tripPlace, index) => {
         const matchedPlace =
           existingPlaces.find((place) => {
-            const localPlaceId = getNumericPlaceId(place);
-            return localPlaceId && localPlaceId === Number(tripPlace.placeId);
+            const localKey = place.id;
+            const localPlaceId =
+              serverPlaceIdByLocalId[localKey] || getNumericPlaceId(place);
+
+            return (
+              localPlaceId &&
+              Number(localPlaceId) === Number(tripPlace.placeId)
+            );
           }) ||
           existingPlaces[index] ||
           {};
@@ -1521,6 +1579,9 @@ const RouteCreate = () => {
     useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [isSavingRoute, setIsSavingRoute] = useState(false);
+  const [isGeneratingRoute, setIsGeneratingRoute] = useState(false);
+  const [generatedRoute, setGeneratedRoute] = useState(null);
+  const [startPlaceErrorMessage, setStartPlaceErrorMessage] = useState("");
   const [isStartPlaceModalOpen, setIsStartPlaceModalOpen] = useState(false);
   const [startPlaceDayIndex, setStartPlaceDayIndex] = useState(0);
   const [selectedStartPlaces, setSelectedStartPlaces] = useState({});
@@ -2039,12 +2100,18 @@ const RouteCreate = () => {
       return;
     }
 
+    setGeneratedRoute(null);
+    setStartPlaceErrorMessage("");
+    setIsCompleteModalOpen(false);
     setSelectedStartPlaces(getStartPlaceDefaultMap(selectedDates, placesByDate));
     setStartPlaceDayIndex(0);
     setIsStartPlaceModalOpen(true);
   };
 
   const handleCloseStartPlaceModal = () => {
+    if (isGeneratingRoute) return;
+
+    setStartPlaceErrorMessage("");
     setIsStartPlaceModalOpen(false);
   };
 
@@ -2052,7 +2119,7 @@ const RouteCreate = () => {
     setSelectedStartPlaces((prev) => ({ ...prev, [dateKey]: placeId }));
   };
 
-  const handleConfirmStartPlaces = () => {
+  const handleConfirmStartPlaces = async () => {
     const reorderedPlacesByDate = selectedDates.reduce(
       (acc, date) => {
         const dateKey = formatDateKey(date);
@@ -2066,32 +2133,76 @@ const RouteCreate = () => {
       { ...placesByDate }
     );
 
-    setPlacesByDate(reorderedPlacesByDate);
-    setIsStartPlaceModalOpen(false);
+    const savedRoute = buildSavedRouteMock(reorderedPlacesByDate);
 
-    setTimeout(() => {
-      setIsCompleteModalOpen(true);
-    }, 50);
+    try {
+      setIsGeneratingRoute(true);
+      setStartPlaceErrorMessage("");
+      setPlacesByDate(reorderedPlacesByDate);
+
+      const serverSavedRoute = await saveRouteToServer(
+        savedRoute,
+        selectedStartPlaces
+      );
+
+      persistRouteSafely(serverSavedRoute);
+      setGeneratedRoute(serverSavedRoute);
+
+      if (serverSavedRoute.placesByDate) {
+        setPlacesByDate(serverSavedRoute.placesByDate);
+      }
+
+      setIsStartPlaceModalOpen(false);
+
+      setTimeout(() => {
+        setIsCompleteModalOpen(true);
+      }, 50);
+    } catch (error) {
+      console.error("최적 경로 생성 실패:", error);
+
+      if (error.message.includes("Network Error")) {
+        setStartPlaceErrorMessage(
+          "백엔드 서버 연결 또는 CORS 설정을 확인해주세요."
+        );
+        return;
+      }
+
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        setStartPlaceErrorMessage(
+          "로그인 정보가 만료되었거나 권한이 없습니다. 다시 로그인해주세요."
+        );
+        return;
+      }
+
+      setStartPlaceErrorMessage(
+        getErrorMessage(
+          error,
+          "최적 경로 생성에 실패했습니다. 잠시 후 다시 시도해주세요."
+        )
+      );
+    } finally {
+      setIsGeneratingRoute(false);
+    }
   };
 
   const handleCloseCompleteModal = () => {
-    if (isSavingRoute) return;
+    if (isSavingRoute || isGeneratingRoute) return;
     setIsCompleteModalOpen(false);
   };
 
-  const buildSavedRouteMock = () => {
+  const buildSavedRouteMock = (placesSnapshot = placesByDate) => {
     const firstDate = selectedDates[0];
     const lastDate = selectedDates[selectedDates.length - 1];
 
     const totalPlaces = selectedDates.reduce((sum, date) => {
       const dateKey = formatDateKey(date);
-      return sum + (placesByDate[dateKey] || []).length;
+      return sum + (placesSnapshot[dateKey] || []).length;
     }, 0);
 
     const firstDateKey = firstDate ? formatDateKey(firstDate) : "";
 
     const firstPlace = firstDateKey
-      ? (placesByDate[firstDateKey] || [])[0]
+      ? (placesSnapshot[firstDateKey] || [])[0]
       : null;
 
     return {
@@ -2101,7 +2212,7 @@ const RouteCreate = () => {
         : `${selectedDates.length}일 여행 일정`,
       createdAt: new Date().toISOString(),
       selectedDates: selectedDates.map((date) => new Date(date).toISOString()),
-      placesByDate: JSON.parse(JSON.stringify(placesByDate)),
+      placesByDate: JSON.parse(JSON.stringify(placesSnapshot)),
       thumbnail: firstPlace?.thumb || "",
       summary: {
         daysCount: selectedDates.length,
@@ -2114,7 +2225,7 @@ const RouteCreate = () => {
     };
   };
 
-  const saveRouteToServer = async (savedRoute) => {
+  const saveRouteToServer = async (savedRoute, startPlaceMap = selectedStartPlaces) => {
     const tripPayload = buildTripPayload(savedRoute);
 
     const tripResponse = await api.post(TRIPS_API, tripPayload);
@@ -2132,15 +2243,13 @@ const RouteCreate = () => {
       return serverSavedRoute;
     }
 
-    const { tripPlaceMap, addedCountByDay } = await addPlacesToTrip(
-      tripId,
-      savedRoute
-    );
+    const { tripPlaceMap, addedCountByDay, serverPlaceIdByLocalId } =
+      await addPlacesToTrip(tripId, savedRoute);
 
     await setStartPointsToServer({
       tripId,
       savedRoute,
-      selectedStartPlaces,
+      selectedStartPlaces: startPlaceMap,
       tripPlaceMap,
       addedCountByDay,
     });
@@ -2153,7 +2262,8 @@ const RouteCreate = () => {
 
     serverSavedRoute = mapOptimizedPlacesToSavedRoute(
       serverSavedRoute,
-      optimizedByDay
+      optimizedByDay,
+      serverPlaceIdByLocalId
     );
 
     const uniqueTripPlaces = Array.from(
@@ -2178,18 +2288,40 @@ const RouteCreate = () => {
   };
 
   const handleConfirmRoute = async () => {
+    if (generatedRoute) {
+      persistRouteSafely(generatedRoute);
+      setIsCompleteModalOpen(false);
+
+      navigate(`/route-result?id=${generatedRoute.id}`, {
+        state: {
+          savedRoute: generatedRoute,
+          selectedDates,
+          placesByDate: generatedRoute.placesByDate || placesByDate,
+        },
+      });
+
+      return;
+    }
+
     const savedRoute = buildSavedRouteMock();
 
     try {
       setIsSavingRoute(true);
 
-      const serverSavedRoute = await saveRouteToServer(savedRoute);
+      const serverSavedRoute = await saveRouteToServer(
+        savedRoute,
+        selectedStartPlaces
+      );
       persistRouteSafely(serverSavedRoute);
 
       setIsCompleteModalOpen(false);
 
       navigate(`/route-result?id=${serverSavedRoute.id}`, {
-        state: { savedRoute: serverSavedRoute, selectedDates, placesByDate },
+        state: {
+          savedRoute: serverSavedRoute,
+          selectedDates,
+          placesByDate: serverSavedRoute.placesByDate || placesByDate,
+        },
       });
     } catch (error) {
       console.error("여행 생성 실패:", error);
@@ -2219,12 +2351,22 @@ const RouteCreate = () => {
   };
 
   const handleSaveRouteLater = async () => {
+    if (generatedRoute) {
+      persistRouteSafely(generatedRoute);
+      setIsCompleteModalOpen(false);
+      alert("일정이 저장되었습니다.");
+      return;
+    }
+
     const savedRoute = buildSavedRouteMock();
 
     try {
       setIsSavingRoute(true);
 
-      const serverSavedRoute = await saveRouteToServer(savedRoute);
+      const serverSavedRoute = await saveRouteToServer(
+        savedRoute,
+        selectedStartPlaces
+      );
       persistRouteSafely(serverSavedRoute);
 
       setIsCompleteModalOpen(false);
@@ -2560,6 +2702,8 @@ const RouteCreate = () => {
         onSelectPlace={handleSelectStartPlace}
         onClose={handleCloseStartPlaceModal}
         onConfirm={handleConfirmStartPlaces}
+        isSubmitting={isGeneratingRoute}
+        submitError={startPlaceErrorMessage}
       />
 
       <FavoritePlacesModal
@@ -2592,7 +2736,7 @@ const RouteCreate = () => {
             <h3 className="route-complete-title">동선 제작 완료!</h3>
 
             <p className="route-complete-desc">
-              AI가 분석한 최적의 경로가 <br />
+              알고리즘이 분석한 최적의 경로가 <br />
               생성되었습니다. <br />
               지금 바로 확인해 보세요.
             </p>
@@ -2601,7 +2745,7 @@ const RouteCreate = () => {
               type="button"
               className="route-complete-confirm-btn"
               onClick={handleConfirmRoute}
-              disabled={isSavingRoute}
+              disabled={isSavingRoute || isGeneratingRoute}
             >
               {isSavingRoute ? "저장 중..." : "경로 확인하기 →"}
             </button>
@@ -2610,7 +2754,7 @@ const RouteCreate = () => {
               type="button"
               className="route-complete-later-btn"
               onClick={handleSaveRouteLater}
-              disabled={isSavingRoute}
+              disabled={isSavingRoute || isGeneratingRoute}
             >
               {isSavingRoute ? "저장 중..." : "나중에 보기"}
             </button>

@@ -38,6 +38,8 @@ const StartPlaceModal = ({
   onSelectPlace,
   onClose,
   onConfirm,
+  isSubmitting = false,
+  submitError = "",
 }) => {
   const [isPlaceDropdownOpen, setIsPlaceDropdownOpen] = useState(false);
 
@@ -77,7 +79,14 @@ const StartPlaceModal = ({
     return !dayPlaces.some((place) => place.id === selectedId);
   });
 
+  const handleRequestClose = () => {
+    if (isSubmitting) return;
+    onClose?.();
+  };
+
   const handleDayScrollMouseDown = (event) => {
+    if (isSubmitting) return;
+
     const scrollTarget = dayScrollRef.current;
 
     if (!scrollTarget) return;
@@ -143,6 +152,8 @@ const StartPlaceModal = ({
   };
 
   const handleDayButtonClick = (event, index) => {
+    if (isSubmitting) return;
+
     if (dayDragRef.current.hasMoved) {
       event.preventDefault();
       event.stopPropagation();
@@ -154,7 +165,7 @@ const StartPlaceModal = ({
   };
 
   return (
-    <div className="start-place-overlay" onClick={onClose}>
+    <div className="start-place-overlay" onClick={handleRequestClose}>
       <div
         className="start-place-modal"
         role="dialog"
@@ -166,8 +177,9 @@ const StartPlaceModal = ({
           <button
             type="button"
             className="start-place-back-btn"
-            onClick={onClose}
+            onClick={handleRequestClose}
             aria-label="출발 장소 설정 닫기"
+            disabled={isSubmitting}
           >
             ←
           </button>
@@ -201,6 +213,7 @@ const StartPlaceModal = ({
                     activeDayIndex === index ? "is-active" : ""
                   }`}
                   onClick={(event) => handleDayButtonClick(event, index)}
+                  disabled={isSubmitting}
                 >
                   <span>DAY</span>
                   <strong>{padDayNumber(index + 1)}</strong>
@@ -224,6 +237,7 @@ const StartPlaceModal = ({
               className="start-place-list-card-header"
               onClick={() => setIsPlaceDropdownOpen((prev) => !prev)}
               aria-expanded={isPlaceDropdownOpen}
+              disabled={isSubmitting}
             >
               <img
                 src={locationIcon}
@@ -259,6 +273,7 @@ const StartPlaceModal = ({
                         }`}
                         aria-pressed={isSelected}
                         onClick={() => onSelectPlace(activeDateKey, place.id)}
+                        disabled={isSubmitting}
                       >
                         <span className="start-place-thumb">
                           {placeImage ? (
@@ -293,13 +308,18 @@ const StartPlaceModal = ({
               </div>
             )}
           </section>
+
+          {submitError && (
+            <p className="start-place-error-message">{submitError}</p>
+          )}
         </div>
 
         <div className="start-place-actions">
           <button
             type="button"
             className="start-place-cancel-btn"
-            onClick={onClose}
+            onClick={handleRequestClose}
+            disabled={isSubmitting}
           >
             취소
           </button>
@@ -308,9 +328,9 @@ const StartPlaceModal = ({
             type="button"
             className="start-place-confirm-btn"
             onClick={onConfirm}
-            disabled={isConfirmDisabled}
+            disabled={isConfirmDisabled || isSubmitting}
           >
-            확인
+            {isSubmitting ? "생성 중..." : "확인"}
           </button>
         </div>
       </div>

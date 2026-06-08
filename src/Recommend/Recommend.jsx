@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import AnimatedHeart from "../AnimatedHeart/AnimatedHeart";
+import FolderSelectModal, {
+  removePlaceFolderLink,
+  savePlaceFolderLink,
+} from "../FolderSelectModal/FolderSelectModal";
 import "./Recommend.css";
 import api from "../api/api";
 
@@ -300,6 +304,8 @@ function Recommend() {
   const [serverSavedIds, setServerSavedIds] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingId, setIsSavingId] = useState(null);
+  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+  const [folderTargetPlace, setFolderTargetPlace] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -421,53 +427,47 @@ function Recommend() {
     });
   };
 
-  const handleToggleSaved = async (event, place, saved) => {
-    event.stopPropagation();
+  const closeFolderModal = () => {
+    if (isSavingId) return;
 
-    if (isSavingId === place.id) return;
+    setIsFolderModalOpen(false);
+    setFolderTargetPlace(null);
+  };
 
+  const postSavedPlaceWithFolder = async (placeId, folder) => {
+    const payload = {
+      placeId,
+      folderId: folder.id,
+      folderName: folder.name,
+    };
+
+    try {
+      return await api.post(SAVED_PLACES_API, payload);
+    } catch (error) {
+      if (error.response?.status === 400 || error.response?.status === 422) {
+        return api.post(SAVED_PLACES_API, {
+          placeId,
+        });
+      }
+
+      throw error;
+    }
+  };
+
+  const removeSavedPlace = async (place) => {
     try {
       setIsSavingId(place.id);
 
-      if (saved) {
-        await api.delete(`${SAVED_PLACES_API}/${place.id}`);
+      await api.delete(`${SAVED_PLACES_API}/${place.id}`);
 
-        setServerSavedIds((prev) =>
-          prev.filter((savedId) => savedId !== String(place.id))
-        );
+      removePlaceFolderLink(place.id);
 
-        if (isSaved(place.id)) {
-          toggleSavedPlace(place);
-        }
+      setServerSavedIds((prev) =>
+        prev.filter((savedId) => savedId !== String(place.id))
+      );
 
-        return;
-      }
-
-      const numericPlaceId = Number(place.id);
-
-      const placePayload = {
-        id: Number.isFinite(numericPlaceId) ? numericPlaceId : 0,
-        name: place.title,
-        latitude: place.latitude || 0,
-        longitude: place.longitude || 0,
-        address: place.address,
-        placeType: place.placeType || place.tabType,
-      };
-
-      const placeResponse = await api.post(PLACES_API, placePayload);
-      const registeredPlaceId = placeResponse.data?.id ?? place.id;
-
-      await api.post(SAVED_PLACES_API, {
-        placeId: registeredPlaceId,
-      });
-
-      setServerSavedIds((prev) => {
-        const nextId = String(registeredPlaceId);
-        return prev.includes(nextId) ? prev : [...prev, nextId];
-      });
-
-      if (!isSaved(registeredPlaceId)) {
-        toggleSavedPlace({ ...place, id: registeredPlaceId });
+      if (isSaved(place.id)) {
+        toggleSavedPlace(place);
       }
     } catch (error) {
       console.error("관심 장소 연동 실패:", error);
@@ -488,8 +488,84 @@ function Recommend() {
     }
   };
 
+  const savePlaceToFolder = async (place, folder) => {
+    try {
+      setIsSavingId(place.id);
+
+      const numericPlaceId = Number(place.id);
+
+      const placePayload = {
+        id: Number.isFinite(numericPlaceId) ? numericPlaceId : 0,
+        name: place.title,
+        latitude: place.latitude || 0,
+        longitude: place.longitude || 0,
+        address: place.address,
+        placeType: place.placeType || place.tabType,
+      };
+
+      const placeResponse = await api.post(PLACES_API, placePayload);
+      const registeredPlaceId = placeResponse.data?.id ?? place.id;
+
+      await postSavedPlaceWithFolder(registeredPlaceId, folder);
+
+      setServerSavedIds((prev) => {
+        const nextIds = new Set(prev);
+        nextIds.add(String(place.id));
+        nextIds.add(String(registeredPlaceId));
+        return [...nextIds];
+      });
+
+      savePlaceFolderLink(place.id, folder);
+      savePlaceFolderLink(registeredPlaceId, folder);
+
+      if (!isSaved(place.id) && !isSaved(registeredPlaceId)) {
+        toggleSavedPlace({ ...place, id: registeredPlaceId, folder });
+      }
+
+      setIsFolderModalOpen(false);
+      setFolderTargetPlace(null);
+    } catch (error) {
+      console.error("관심 장소 연동 실패:", error);
+
+      if (error.message.includes("Network Error")) {
+        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        return;
+      }
+
+      alert(
+        getErrorMessage(
+          error,
+          "관심 장소 연동에 실패했습니다. 잠시 후 다시 시도해주세요."
+        )
+      );
+    } finally {
+      setIsSavingId(null);
+    }
+  };
+
+  const handleSaveFolder = async (folder) => {
+    if (!folderTargetPlace || isSavingId === folderTargetPlace.id) return;
+
+    await savePlaceToFolder(folderTargetPlace, folder);
+  };
+
+  const handleToggleSaved = async (event, place, saved) => {
+    event.stopPropagation();
+
+    if (isSavingId === place.id) return;
+
+    if (saved) {
+      await removeSavedPlace(place);
+      return;
+    }
+
+    setFolderTargetPlace(place);
+    setIsFolderModalOpen(true);
+  };
+
   return (
-    <div className="recommend-page">
+    <>
+      <div className="recommend-page">
       <section className="recommend-hero">
         <h1 className="recommend-title">
           어떤 여행을 꿈꾸시나요?
@@ -673,7 +749,15 @@ function Recommend() {
           </>
         )}
       </section>
-    </div>
+      </div>
+
+      <FolderSelectModal
+        open={isFolderModalOpen}
+        onClose={closeFolderModal}
+        onSave={handleSaveFolder}
+        isSaving={isSavingId === folderTargetPlace?.id}
+      />
+    </>
   );
 }
 
