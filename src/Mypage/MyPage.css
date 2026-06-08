@@ -265,6 +265,13 @@
   background: transparent;
 }
 
+.admin-menu-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+  object-fit: contain;
+}
+
 /* 저장한 장소 파란 하트 아이콘 */
 .mypage-blue-heart-icon {
   width: 22px;
@@ -377,223 +384,243 @@
   line-height: 0;
 }
 
+/* 토글이 메뉴 클릭을 가로채지 않게 처리 */
+.location-permission-check,
+.location-permission-check * {
+  pointer-events: none;
+}
+
 /* ================================
-   위치기반서비스 약관 모달
-   화면 전체 배경 유지 + 작은 카드
+   위치 권한 안내 모달
+   뒤 페이지 보이는 더 작은 카드 버전
 ================================ */
 
-body:has(.location-policy-overlay),
-body:has(.location-terms-backdrop) {
+html:has(.location-permission-overlay),
+body:has(.location-permission-overlay) {
   overflow: hidden;
 }
 
-.location-policy-overlay,
-.location-terms-backdrop,
-.location-policy-overlay *,
-.location-terms-backdrop * {
+.location-permission-overlay,
+.location-permission-overlay * {
   box-sizing: border-box;
 }
 
-.location-policy-overlay,
-.location-terms-backdrop {
+.location-permission-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 99999;
+
+  width: 100vw;
+  height: 100dvh;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  padding: 24px;
+  padding: 18px 14px;
 
-  background: rgba(0, 0, 0, 0.58);
-  backdrop-filter: blur(2px);
+  background: rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
 
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
-.location-policy-modal,
-.location-terms-modal {
-  width: min(330px, calc(100vw - 48px));
-  max-height: min(620px, calc(100dvh - 48px));
+.location-permission-modal {
+  position: relative;
+
+  width: min(300px, calc(100vw - 44px));
+  height: auto;
+  min-height: 0;
+  max-height: calc(100dvh - 36px);
+
+  padding: 24px 18px 16px;
 
   background: #ffffff;
-  border-radius: 22px;
+  border-radius: 32px;
+
+  text-align: center;
+
   overflow: hidden;
+  overscroll-behavior: none;
 
   display: flex;
   flex-direction: column;
+  align-items: stretch;
 
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.28);
+  box-shadow:
+    0 18px 42px rgba(34, 50, 68, 0.22),
+    0 6px 18px rgba(23, 159, 244, 0.08);
 }
 
-.location-policy-header,
-.location-terms-header {
+.location-permission-hero {
   position: relative;
-  flex-shrink: 0;
 
-  padding: 22px 48px 16px 22px;
-  border-bottom: 1px solid #edf2f7;
+  width: 66px;
+  height: 60px;
 
-  text-align: center;
+  margin: 0 auto;
+  flex: 0 0 auto;
 }
 
-.location-policy-header h2,
-.location-terms-header h2 {
-  margin: 0;
+.location-permission-pin-glow {
+  width: 60px;
+  height: 60px;
 
-  color: #101827;
-  font-size: 17px;
-  font-weight: 900;
-  line-height: 1.25;
-  letter-spacing: -0.04em;
-}
+  margin: 0 auto;
 
-.location-policy-close,
-.location-terms-close {
-  position: absolute;
-  top: 50%;
-  right: 16px;
-  transform: translateY(-50%);
+  border-radius: 50%;
+  background: rgba(190, 232, 255, 0.74);
 
-  width: 30px;
-  height: 30px;
-
-  border: none;
-  background: transparent;
-  color: #6e7d91;
-
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1;
-
-  padding: 0;
-  cursor: pointer;
-}
-
-.location-policy-content,
-.location-terms-content {
-  flex: 1;
-  min-height: 0;
-
-  padding: 22px 22px 18px;
-
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-.location-policy-content h1,
-.location-terms-content h1,
-.location-policy-service-title,
-.location-terms-service-title {
-  margin: 0 0 12px;
-
-  color: #101827;
-  font-size: 30px;
-  font-weight: 900;
-  line-height: 1.15;
-  text-align: center;
-  letter-spacing: -0.06em;
-}
-
-.location-policy-description,
-.location-terms-description,
-.location-policy-content > p,
-.location-terms-content > p {
-  margin: 0 0 24px;
-
-  color: #71829a;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.45;
-  text-align: center;
-  word-break: keep-all;
-}
-
-.location-policy-section,
-.location-terms-section {
-  margin-bottom: 24px;
-}
-
-.location-policy-section-title-wrap,
-.location-terms-section-title-wrap {
   display: flex;
   align-items: center;
+  justify-content: center;
+}
+
+.location-permission-pin {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  display: block;
+}
+
+.location-permission-arrow-badge {
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+
+  filter: drop-shadow(0 6px 8px rgba(42, 61, 83, 0.2));
+}
+
+.location-permission-title {
+  margin: 17px 0 0;
+
+  color: #111827;
+
+  font-size: 19px;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.8px;
+
+  flex: 0 0 auto;
+}
+
+.location-permission-message {
+  margin: 11px 0 0;
+
+  color: #6f7f97;
+
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.45px;
+
+  word-break: keep-all;
+  flex: 0 0 auto;
+}
+
+.location-permission-message span,
+.location-permission-message strong {
+  display: block;
+}
+
+.location-permission-message strong {
+  color: #172033;
+  font-weight: 500;
+}
+
+.location-permission-features {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 
-  margin-bottom: 12px;
+  margin: 21px 0 0;
+
+  flex: 0 0 auto;
 }
 
-.location-policy-bar,
-.location-terms-bar {
-  width: 5px;
-  height: 20px;
+.location-permission-feature {
+  width: 100%;
+  min-height: 52px;
+
+  padding: 8px 11px 8px 9px;
 
   border-radius: 999px;
-  background: #1daaf2;
+  background: #f1f5fb;
 
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  text-align: left;
 }
 
-.location-policy-section-title,
-.location-terms-section-title,
-.location-policy-content h3,
-.location-terms-content h3,
-.location-policy-content h4,
-.location-terms-content h4 {
-  margin: 0;
+.location-permission-feature-icon {
+  flex: 0 0 34px;
 
-  color: #101827;
-  font-size: 18px;
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+  background: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 8px 14px rgba(31, 49, 70, 0.1),
+    inset 0 0 0 1px rgba(236, 242, 248, 0.85);
+}
+
+.location-permission-feature-icon img {
+  width: 19px;
+  height: 19px;
+  object-fit: contain;
+  display: block;
+}
+
+.location-permission-feature-text {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.location-permission-feature-text strong {
+  color: #111827;
+
+  font-size: 13.5px;
   font-weight: 900;
-  line-height: 1.3;
-  letter-spacing: -0.04em;
-}
+  line-height: 1.15;
+  letter-spacing: -0.55px;
 
-.location-policy-section-content,
-.location-terms-section-content,
-.location-policy-content p,
-.location-terms-content p,
-.location-policy-content li,
-.location-terms-content li {
-  color: #71829a;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.65;
-  letter-spacing: -0.03em;
   word-break: keep-all;
 }
 
-.location-policy-section-content,
-.location-terms-section-content,
-.location-policy-content p,
-.location-terms-content p {
-  margin: 0;
-  white-space: pre-line;
+.location-permission-feature-text span {
+  color: #65748a;
+
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+
+  word-break: keep-all;
 }
 
-.location-policy-content ol,
-.location-policy-content ul,
-.location-terms-content ol,
-.location-terms-content ul {
-  margin: 0;
-  padding-left: 18px;
-}
-
-.location-policy-footer,
-.location-terms-actions {
-  flex-shrink: 0;
-
-  padding: 14px 22px 22px;
-
-  background: #ffffff;
-  box-shadow: 0 -12px 24px rgba(255, 255, 255, 0.95);
-}
-
-.location-policy-agree,
-.location-terms-agree {
+.location-permission-allow {
   width: 100%;
-  height: 52px;
+  height: 42px;
+
+  margin-top: 22px;
 
   border: none;
   border-radius: 999px;
@@ -604,10 +631,53 @@ body:has(.location-terms-backdrop) {
   font-family: inherit;
   font-size: 17px;
   font-weight: 900;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.55px;
 
   cursor: pointer;
-  box-shadow: 0 10px 22px rgba(29, 170, 242, 0.24);
+
+  box-shadow:
+    0 8px 12px rgba(23, 159, 244, 0.24),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+
+  flex: 0 0 auto;
+}
+
+.location-permission-allow:active {
+  transform: translateY(1px);
+}
+
+.location-permission-later {
+  margin-top: 12px;
+
+  border: none;
+  background: transparent;
+
+  color: #6f7f95;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.4px;
+
+  cursor: pointer;
+
+  flex: 0 0 auto;
+}
+
+.location-permission-privacy {
+  margin: 17px 0 0;
+
+  color: #a9b6c6;
+
+  font-size: 7.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+
+  white-space: nowrap;
+
+  flex: 0 0 auto;
 }
 
 @media (hover: none) {
@@ -638,81 +708,88 @@ body:has(.location-terms-backdrop) {
 }
 
 @media (max-width: 390px) {
-  .location-policy-overlay,
-  .location-terms-backdrop {
-    padding: 20px;
+  .location-permission-overlay {
+    padding: 18px 12px;
   }
 
-  .location-policy-modal,
-  .location-terms-modal {
-    width: min(310px, calc(100vw - 40px));
-    max-height: calc(100dvh - 40px);
-    border-radius: 20px;
+  .location-permission-modal {
+    width: min(286px, calc(100vw - 36px));
+    padding: 22px 16px 15px;
+    border-radius: 30px;
   }
 
-  .location-policy-header,
-  .location-terms-header {
-    padding: 20px 42px 15px 18px;
+  .location-permission-hero {
+    width: 60px;
+    height: 54px;
   }
 
-  .location-policy-header h2,
-  .location-terms-header h2 {
-    font-size: 16px;
+  .location-permission-pin-glow {
+    width: 54px;
+    height: 54px;
   }
 
-  .location-policy-close,
-  .location-terms-close {
-    right: 14px;
-    font-size: 22px;
+  .location-permission-pin {
+    width: 24px;
+    height: 24px;
   }
 
-  .location-policy-content,
-  .location-terms-content {
-    padding: 20px 20px 16px;
+  .location-permission-arrow-badge {
+    width: 26px;
+    height: 26px;
   }
 
-  .location-policy-content h1,
-  .location-terms-content h1,
-  .location-policy-service-title,
-  .location-terms-service-title {
-    font-size: 27px;
+  .location-permission-title {
+    margin-top: 15px;
+    font-size: 18px;
   }
 
-  .location-policy-description,
-  .location-terms-description,
-  .location-policy-content > p,
-  .location-terms-content > p {
-    margin-bottom: 22px;
-    font-size: 12px;
-  }
-
-  .location-policy-section-title,
-  .location-terms-section-title,
-  .location-policy-content h3,
-  .location-terms-content h3,
-  .location-policy-content h4,
-  .location-terms-content h4 {
-    font-size: 17px;
-  }
-
-  .location-policy-section-content,
-  .location-terms-section-content,
-  .location-policy-content p,
-  .location-terms-content p,
-  .location-policy-content li,
-  .location-terms-content li {
+  .location-permission-message {
+    margin-top: 9px;
     font-size: 13px;
   }
 
-  .location-policy-footer,
-  .location-terms-actions {
-    padding: 12px 20px 20px;
+  .location-permission-features {
+    margin-top: 18px;
+    gap: 7px;
   }
 
-  .location-policy-agree,
-  .location-terms-agree {
-    height: 50px;
+  .location-permission-feature {
+    min-height: 48px;
+  }
+
+  .location-permission-feature-icon {
+    flex-basis: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .location-permission-feature-icon img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .location-permission-feature-text strong {
+    font-size: 13px;
+  }
+
+  .location-permission-feature-text span {
+    font-size: 10.5px;
+  }
+
+  .location-permission-allow {
+    height: 40px;
+    margin-top: 19px;
     font-size: 16px;
+  }
+
+  .location-permission-later {
+    margin-top: 10px;
+    font-size: 13px;
+  }
+
+  .location-permission-privacy {
+    margin-top: 14px;
+    font-size: 7px;
   }
 }
 
@@ -760,15 +837,175 @@ body:has(.location-terms-backdrop) {
     font-size: 23px;
   }
 
-  .location-policy-modal,
-  .location-terms-modal {
-    width: min(294px, calc(100vw - 32px));
+  .location-permission-modal {
+    width: min(274px, calc(100vw - 32px));
+    padding: 20px 15px 14px;
+    border-radius: 28px;
   }
 
-  .location-policy-content h1,
-  .location-terms-content h1,
-  .location-policy-service-title,
-  .location-terms-service-title {
-    font-size: 25px;
+  .location-permission-hero {
+    width: 56px;
+    height: 50px;
+  }
+
+  .location-permission-pin-glow {
+    width: 50px;
+    height: 50px;
+  }
+
+  .location-permission-pin {
+    width: 22px;
+    height: 22px;
+  }
+
+  .location-permission-arrow-badge {
+    width: 24px;
+    height: 24px;
+  }
+
+  .location-permission-title {
+    margin-top: 12px;
+    font-size: 17px;
+  }
+
+  .location-permission-message {
+    margin-top: 8px;
+    font-size: 12.5px;
+    line-height: 1.38;
+  }
+
+  .location-permission-features {
+    margin-top: 15px;
+    gap: 6px;
+  }
+
+  .location-permission-feature {
+    min-height: 44px;
+    padding: 7px 10px 7px 8px;
+  }
+
+  .location-permission-feature-icon {
+    flex-basis: 30px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .location-permission-feature-icon img {
+    width: 17px;
+    height: 17px;
+  }
+
+  .location-permission-feature-text strong {
+    font-size: 12.5px;
+  }
+
+  .location-permission-feature-text span {
+    font-size: 10px;
+  }
+
+  .location-permission-allow {
+    height: 38px;
+    margin-top: 16px;
+    font-size: 15px;
+  }
+
+  .location-permission-later {
+    margin-top: 8px;
+    font-size: 12.5px;
+  }
+
+  .location-permission-privacy {
+    margin-top: 12px;
+    font-size: 6.8px;
+    white-space: normal;
+  }
+}
+
+@media (max-height: 680px) {
+  .location-permission-overlay {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .location-permission-modal {
+    width: min(274px, calc(100vw - 32px));
+    padding: 18px 15px 12px;
+    border-radius: 26px;
+  }
+
+  .location-permission-hero {
+    width: 52px;
+    height: 46px;
+  }
+
+  .location-permission-pin-glow {
+    width: 46px;
+    height: 46px;
+  }
+
+  .location-permission-pin {
+    width: 20px;
+    height: 20px;
+  }
+
+  .location-permission-arrow-badge {
+    width: 22px;
+    height: 22px;
+  }
+
+  .location-permission-title {
+    margin-top: 10px;
+    font-size: 16px;
+  }
+
+  .location-permission-message {
+    margin-top: 7px;
+    font-size: 12px;
+    line-height: 1.36;
+  }
+
+  .location-permission-features {
+    margin-top: 13px;
+    gap: 6px;
+  }
+
+  .location-permission-feature {
+    min-height: 42px;
+    padding: 7px 9px 7px 8px;
+  }
+
+  .location-permission-feature-icon {
+    flex-basis: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .location-permission-feature-icon img {
+    width: 16px;
+    height: 16px;
+  }
+
+  .location-permission-feature-text strong {
+    font-size: 12px;
+  }
+
+  .location-permission-feature-text span {
+    font-size: 9.5px;
+  }
+
+  .location-permission-allow {
+    height: 36px;
+    margin-top: 14px;
+    font-size: 14.5px;
+  }
+
+  .location-permission-later {
+    margin-top: 7px;
+    font-size: 12px;
+  }
+
+  .location-permission-privacy {
+    margin-top: 10px;
+    font-size: 6.5px;
   }
 }

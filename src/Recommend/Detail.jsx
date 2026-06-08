@@ -375,6 +375,7 @@ const buildFallbackReviews = (place) => [
 
 const buildFallbackIntro = (place) => {
   const firstTag = place.tags?.[0]?.replace("#", "") || "여행";
+
   return `${place.title}은(는) ${place.address}에 위치한 매력적인 여행지입니다. ${firstTag} 분위기를 느끼며 여유롭게 둘러보기 좋고, 사진을 남기기에도 좋아 여행 동선에 넣기 편한 장소예요.`;
 };
 
@@ -461,17 +462,31 @@ const getResponseData = (data) => {
   if (data?.place) return data.place;
   if (data?.destination) return data.destination;
   if (data?.item) return data.item;
+  if (data?.result) return data.result;
+  if (data?.response) return data.response;
 
   return data;
 };
 
 const getArrayData = (data) => {
   if (Array.isArray(data)) return data;
+
   if (Array.isArray(data?.data)) return data.data;
   if (Array.isArray(data?.content)) return data.content;
   if (Array.isArray(data?.items)) return data.items;
   if (Array.isArray(data?.places)) return data.places;
   if (Array.isArray(data?.savedPlaces)) return data.savedPlaces;
+  if (Array.isArray(data?.recommendations)) return data.recommendations;
+  if (Array.isArray(data?.result)) return data.result;
+  if (Array.isArray(data?.results)) return data.results;
+
+  if (Array.isArray(data?.data?.content)) return data.data.content;
+  if (Array.isArray(data?.data?.items)) return data.data.items;
+  if (Array.isArray(data?.data?.places)) return data.data.places;
+  if (Array.isArray(data?.data?.savedPlaces)) return data.data.savedPlaces;
+  if (Array.isArray(data?.data?.recommendations)) {
+    return data.data.recommendations;
+  }
 
   return [];
 };
@@ -493,13 +508,19 @@ const normalizeTags = (tags) => {
     .filter(Boolean);
 };
 
+const toNumber = (value, fallbackValue = 0) => {
+  const numberValue = Number(value);
+
+  return Number.isFinite(numberValue) ? numberValue : fallbackValue;
+};
+
 const normalizeReviews = (reviews, fallbackPlace) => {
   if (!Array.isArray(reviews) || reviews.length === 0) {
     return buildFallbackReviews(fallbackPlace);
   }
 
   return reviews.map((review, index) => ({
-    id: review.id || review.reviewId || index + 1,
+    id: review.id ?? review.reviewId ?? index + 1,
     name: review.name || review.nickname || review.userName || "여행자",
     badge: review.badge || review.level || review.role || "리뷰어",
     rating: review.rating || review.score || 5,
@@ -507,74 +528,133 @@ const normalizeReviews = (reviews, fallbackPlace) => {
   }));
 };
 
+const buildDetailTags = (place, special, fallbackPlace) => {
+  const placeTags = normalizeTags(place?.tags);
+  if (placeTags.length > 0) return placeTags;
+
+  const hashTags = normalizeTags(place?.hashtags);
+  if (hashTags.length > 0) return hashTags;
+
+  const fieldTags = normalizeTags(
+    [place?.region, place?.theme, place?.placeType || place?.category].filter(
+      Boolean
+    )
+  );
+  if (fieldTags.length > 0) return fieldTags;
+
+  const specialTags = normalizeTags(special?.tags);
+  if (specialTags.length > 0) return specialTags;
+
+  const fallbackTags = normalizeTags(fallbackPlace?.tags);
+  if (fallbackTags.length > 0) return fallbackTags;
+
+  return ["#추천"];
+};
+
 const normalizePlaceDetail = (place, fallbackPlace) => {
-  const special = SPECIAL_DETAIL_COPY[place?.title || place?.name] || {};
   const title =
-    place?.title ||
     place?.name ||
+    place?.title ||
     place?.placeName ||
     place?.destinationName ||
     fallbackPlace.title;
 
+  const special = SPECIAL_DETAIL_COPY[title] || {};
+
+  const id =
+    place?.id ??
+    place?.placeId ??
+    place?.destinationId ??
+    fallbackPlace.id;
+
+  const address =
+    place?.address ||
+    place?.roadAddress ||
+    place?.location ||
+    place?.addr ||
+    special.address ||
+    fallbackPlace.address ||
+    "주소 정보 없음";
+
+  const rating = toNumber(
+    place?.rating ?? place?.score ?? place?.avgRating ?? special.rating,
+    fallbackPlace.rating || 0
+  );
+
+  const reviewCount = toNumber(
+    place?.reviewCount ??
+      place?.reviewsCount ??
+      place?.reviewCnt ??
+      special.reviewCount,
+    fallbackPlace.reviewCount || 0
+  );
+
+  const image =
+    place?.image ||
+    place?.imageUrl ||
+    place?.thumbnail ||
+    place?.thumbnailUrl ||
+    place?.photoUrl ||
+    fallbackPlace.image ||
+    forestImg;
+
+  const region = place?.region || fallbackPlace.region || "";
+  const theme = place?.theme || place?.themeName || fallbackPlace.theme || "";
+  const placeType =
+    place?.placeType ||
+    place?.category ||
+    place?.categoryName ||
+    fallbackPlace.placeType ||
+    "";
+
+  const tags = buildDetailTags(place, special, fallbackPlace);
+
   const mergedPlace = {
     ...fallbackPlace,
     ...place,
+    id,
     title,
-    address:
-      special.address ||
-      place?.address ||
-      place?.roadAddress ||
-      place?.location ||
-      place?.addr ||
-      fallbackPlace.address,
-    rating:
-      special.rating ||
-      place?.rating ||
-      place?.score ||
-      place?.avgRating ||
-      fallbackPlace.rating ||
-      4.8,
-    image:
-      place?.image ||
-      place?.imageUrl ||
-      place?.thumbnail ||
-      place?.thumbnailUrl ||
-      place?.photoUrl ||
-      fallbackPlace.image ||
-      forestImg,
-    reviewCount:
-      special.reviewCount ||
-      place?.reviewCount ||
-      place?.reviewsCount ||
-      place?.reviewCnt ||
-      fallbackPlace.reviewCount ||
-      0,
-    tags:
-      (special.tags && special.tags.length > 0 && special.tags) ||
-      normalizeTags(place?.tags) ||
-      normalizeTags(place?.hashtags) ||
-      fallbackPlace.tags ||
-      ["#추천"],
+    name: title,
+    address,
+    rating,
+    reviewCount,
+    image,
+    region,
+    theme,
+    placeType,
+    tags,
   };
 
+  const intro =
+    place?.description ||
+    place?.intro ||
+    place?.content ||
+    place?.summary ||
+    special.intro ||
+    buildFallbackIntro(mergedPlace);
+
+  const reviews = normalizeReviews(
+    place?.reviews || place?.reviewList || special.reviews,
+    mergedPlace
+  );
+
   return {
-    id: place?.id || place?.placeId || place?.destinationId || fallbackPlace.id,
-    title: mergedPlace.title,
-    image: mergedPlace.image,
-    address: mergedPlace.address,
-    rating: mergedPlace.rating,
-    reviewCount: mergedPlace.reviewCount,
-    tags: mergedPlace.tags.length > 0 ? mergedPlace.tags : ["#추천"],
-    intro:
-      special.intro ||
-      place?.intro ||
-      place?.description ||
-      place?.content ||
-      place?.summary ||
-      buildFallbackIntro(mergedPlace),
-    reviews:
-      special.reviews ||
-      normalizeReviews(place?.reviews || place?.reviewList, mergedPlace),
+    id,
+    title,
+    name: title,
+    region,
+    theme,
+    description: place?.description || "",
+    address,
+    latitude: toNumber(place?.latitude ?? fallbackPlace.latitude, 0),
+    longitude: toNumber(place?.longitude ?? fallbackPlace.longitude, 0),
+    placeType,
+    image,
+    rating,
+    reviewCount,
+    tags: tags.length > 0 ? tags : ["#추천"],
+    intro,
+    reviews,
     originalData: place,
   };
 };
@@ -656,10 +736,11 @@ function Detail() {
         const exists = savedPlaces.some((savedPlace) => {
           const placeData = savedPlace.place || savedPlace;
           const savedId =
-            placeData.id ||
-            placeData.placeId ||
-            savedPlace.placeId ||
-            savedPlace.savedPlaceId;
+            placeData.id ??
+            placeData.placeId ??
+            savedPlace.placeId ??
+            savedPlace.savedPlaceId ??
+            savedPlace.bookmarkId;
 
           return String(savedId) === String(detailPlace.id);
         });
@@ -681,7 +762,14 @@ function Detail() {
     const recentPlace = {
       id: detailPlace.id,
       title: detailPlace.title,
+      name: detailPlace.name,
+      region: detailPlace.region,
+      theme: detailPlace.theme,
+      description: detailPlace.description,
       address: detailPlace.address,
+      latitude: detailPlace.latitude,
+      longitude: detailPlace.longitude,
+      placeType: detailPlace.placeType,
       rating: detailPlace.rating,
       image: detailPlace.image,
       tags: detailPlace.tags,
@@ -700,7 +788,14 @@ function Detail() {
   }, [
     detailPlace.id,
     detailPlace.title,
+    detailPlace.name,
+    detailPlace.region,
+    detailPlace.theme,
+    detailPlace.description,
     detailPlace.address,
+    detailPlace.latitude,
+    detailPlace.longitude,
+    detailPlace.placeType,
     detailPlace.rating,
     detailPlace.image,
     detailPlace.tags,
@@ -722,7 +817,14 @@ function Detail() {
     const savedPlacePayload = {
       id: detailPlace.id,
       title: detailPlace.title,
+      name: detailPlace.name,
+      region: detailPlace.region,
+      theme: detailPlace.theme,
+      description: detailPlace.description,
       address: detailPlace.address,
+      latitude: detailPlace.latitude,
+      longitude: detailPlace.longitude,
+      placeType: detailPlace.placeType,
       rating: detailPlace.rating,
       image: detailPlace.image,
       tags: detailPlace.tags,

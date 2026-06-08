@@ -2,6 +2,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import "./SearchPop.css";
+import api from "../api/api";
+
+const RECOMMENDATIONS_API = "/api/recommendations";
+
+const THEME_KEYS = ["healing", "activity", "food", "photo"];
 
 const SearchIcon = () => (
   <svg
@@ -39,25 +44,185 @@ const PinIcon = () => (
   </svg>
 );
 
-const mockPlaces = [
-  { id: 1, name: "경복궁", address: "서울 종로구" },
-  { id: 2, name: "남산타워", address: "서울 용산구" },
-  { id: 3, name: "광장시장", address: "서울 종로구" },
-];
+const getArrayData = (data) => {
+  if (Array.isArray(data)) return data;
+
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.places)) return data.places;
+  if (Array.isArray(data?.recommendations)) return data.recommendations;
+  if (Array.isArray(data?.savedPlaces)) return data.savedPlaces;
+  if (Array.isArray(data?.result)) return data.result;
+  if (Array.isArray(data?.results)) return data.results;
+
+  if (Array.isArray(data?.data?.content)) return data.data.content;
+  if (Array.isArray(data?.data?.items)) return data.data.items;
+  if (Array.isArray(data?.data?.places)) return data.data.places;
+  if (Array.isArray(data?.data?.recommendations)) {
+    return data.data.recommendations;
+  }
+
+  return [];
+};
+
+const normalizeSearchText = (value) => {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/\s+/g, "");
+};
+
+const normalizePlace = (place) => {
+  const name =
+    place.name ||
+    place.title ||
+    place.placeName ||
+    place.destinationName ||
+    "장소 이름 없음";
+
+  return {
+    id: place.id ?? place.placeId ?? place.destinationId,
+    name,
+    title: name,
+    address:
+      place.address ||
+      place.roadAddress ||
+      place.location ||
+      place.addr ||
+      "주소 정보 없음",
+    description: place.description || "",
+    region: place.region || "",
+    theme: place.theme || "",
+    placeType: place.placeType || place.category || "PLACE",
+    latitude: Number(place.latitude ?? 0),
+    longitude: Number(place.longitude ?? 0),
+    originalData: place,
+  };
+};
+
+const mergeUniquePlaces = (places) => {
+  const placeMap = new Map();
+
+  places.forEach((place) => {
+    const key =
+      place.id !== undefined && place.id !== null
+        ? `id-${place.id}`
+        : `${place.name}-${place.address}`;
+
+    if (!placeMap.has(key)) {
+      placeMap.set(key, place);
+    }
+  });
+
+  return Array.from(placeMap.values());
+};
+
+const fetchAllRecommendations = async () => {
+  const response = await api.get(RECOMMENDATIONS_API);
+  const directPlaces = getArrayData(response.data);
+
+  if (directPlaces.length > 0) {
+    return directPlaces;
+  }
+
+  const themeResponses = await Promise.all(
+    THEME_KEYS.map((theme) =>
+      api
+        .get(RECOMMENDATIONS_API, {
+          params: {
+            theme,
+          },
+        })
+        .catch((error) => {
+          console.error(`${theme} 검색 데이터 조회 실패:`, error);
+          return null;
+        })
+    )
+  );
+
+  return themeResponses.flatMap((themeResponse) => {
+    if (!themeResponse) return [];
+    return getArrayData(themeResponse.data);
+  });
+};
 
 const SearchPop = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-  const [keyword, setKeyword] = useState("서울");
+
+  const [keyword, setKeyword] = useState("");
+  const [places, setPlaces] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const filteredPlaces = useMemo(() => {
-    const value = keyword.trim().toLowerCase();
+    const value = normalizeSearchText(keyword);
 
-    if (!value) return [];
+    if (!value) {
+      return places;
+    }
 
-    return mockPlaces.filter((place) =>
-      `${place.name} ${place.address}`.toLowerCase().includes(value)
-    );
-  }, [keyword]);
+    return places.filter((place) => {
+      const searchableText = normalizeSearchText(
+        [
+          place.name,
+          place.title,
+          place.address,
+          place.description,
+          place.region,
+          place.theme,
+          place.placeType,
+        ].join(" ")
+      );
+
+      return searchableText.includes(value);
+    });
+  }, [keyword, places]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let isMounted = true;
+
+    const fetchSearchPlaces = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
+
+        const recommendationData = await fetchAllRecommendations();
+
+        if (!isMounted) return;
+
+        const nextPlaces = mergeUniquePlaces(
+          recommendationData.map(normalizePlace)
+        );
+
+        setPlaces(nextPlaces);
+      } catch (error) {
+        console.error("검색 장소 조회 실패:", error);
+
+        if (!isMounted) return;
+
+        setPlaces([]);
+
+        if (error.message?.includes("Network Error")) {
+          setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+          return;
+        }
+
+        setErrorMessage("검색 데이터를 불러오지 못했습니다.");
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchSearchPlaces();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -87,9 +252,26 @@ const SearchPop = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleDetailClick = () => {
+  const handleDetailClick = (place) => {
     onClose?.();
-    navigate("/detail");
+
+    navigate(`/detail?id=${place.id}`, {
+      state: {
+        place: {
+          id: place.id,
+          title: place.title,
+          name: place.name,
+          address: place.address,
+          description: place.description,
+          region: place.region,
+          theme: place.theme,
+          placeType: place.placeType,
+          latitude: place.latitude,
+          longitude: place.longitude,
+          originalData: place.originalData,
+        },
+      },
+    });
   };
 
   return createPortal(
@@ -120,31 +302,43 @@ const SearchPop = ({ isOpen, onClose }) => {
           </div>
 
           <div className="search-pop-list">
-            {filteredPlaces.map((place) => (
-              <div key={place.id} className="search-pop-card">
-                <div className="search-pop-card-left">
-                  <strong>{place.name}</strong>
-
-                  <div className="search-pop-location">
-                    <PinIcon />
-                    <span>{place.address}</span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  className="search-pop-detail-btn"
-                  onClick={handleDetailClick}
-                >
-                  상세보기
-                </button>
-              </div>
-            ))}
-
-            {filteredPlaces.length === 0 && (
+            {isLoading ? (
               <div className="search-pop-empty">
-                <p>검색 결과가 없습니다.</p>
+                <p>검색 데이터를 불러오는 중입니다.</p>
               </div>
+            ) : errorMessage ? (
+              <div className="search-pop-empty">
+                <p>{errorMessage}</p>
+              </div>
+            ) : (
+              <>
+                {filteredPlaces.map((place) => (
+                  <div key={place.id || place.name} className="search-pop-card">
+                    <div className="search-pop-card-left">
+                      <strong>{place.name}</strong>
+
+                      <div className="search-pop-location">
+                        <PinIcon />
+                        <span>{place.address}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="search-pop-detail-btn"
+                      onClick={() => handleDetailClick(place)}
+                    >
+                      상세보기
+                    </button>
+                  </div>
+                ))}
+
+                {filteredPlaces.length === 0 && (
+                  <div className="search-pop-empty">
+                    <p>검색 결과가 없습니다.</p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

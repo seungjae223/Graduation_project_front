@@ -1,12 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import "./Total.css";
 import api from "../api/api";
-
-import forestImg from "../img/도쿄.png";
-import museumImg from "../img/교토.png";
-import beachImg from "../img/서비스 소개 .png";
 
 const RECOMMENDATIONS_API = "/api/recommendations";
 const SAVED_PLACES_API = "/api/saved-places";
@@ -22,137 +17,6 @@ const BookmarkIcon = ({ active }) => (
     />
   </svg>
 );
-
-const totalMockByTheme = {
-  힐링: {
-    intro: "당신의 지친 몸과 마음을 달래줄 힐링 장소들이에요.",
-    places: [
-      {
-        id: 201,
-        title: "담양 죽녹원",
-        address: "전라남도 담양군",
-        rating: 4.8,
-        distance: 3.1,
-        image: forestImg,
-        tags: ["#자연", "#조용함", "#산책로"],
-      },
-      {
-        id: 202,
-        title: "제주 사려니숲길",
-        address: "제주특별자치도 제주시",
-        rating: 4.9,
-        distance: 6.8,
-        image: museumImg,
-        tags: ["#숲체험", "#힐링", "#인생샷"],
-      },
-      {
-        id: 203,
-        title: "강릉 안목해변",
-        address: "강원도 강릉시",
-        rating: 4.7,
-        distance: 8.2,
-        image: beachImg,
-        tags: ["#바다", "#카페거리", "#힐숨"],
-      },
-    ],
-  },
-  액티비티: {
-    intro: "몸이 먼저 반응하는 짜릿한 액티비티 장소들이에요.",
-    places: [
-      {
-        id: 301,
-        title: "평창 패러글라이딩",
-        address: "강원도 평창군",
-        rating: 4.6,
-        distance: 5.3,
-        image: forestImg,
-        tags: ["#스릴", "#하늘체험", "#액티비티"],
-      },
-      {
-        id: 302,
-        title: "양양 서핑비치",
-        address: "강원도 양양군",
-        rating: 4.8,
-        distance: 9.1,
-        image: beachImg,
-        tags: ["#서핑", "#바다", "#도전"],
-      },
-      {
-        id: 303,
-        title: "제주 카트 체험장",
-        address: "제주특별자치도 제주시",
-        rating: 4.7,
-        distance: 7.2,
-        image: museumImg,
-        tags: ["#속도감", "#가족체험", "#실외"],
-      },
-    ],
-  },
-  "맛집 탐방": {
-    intro: "여행의 한 끼를 더 특별하게 만들어줄 맛집들이에요.",
-    places: [
-      {
-        id: 401,
-        title: "우도 해녀의 집",
-        address: "제주특별자치도 제주시",
-        rating: 4.8,
-        distance: 2.7,
-        image: beachImg,
-        tags: ["#제주맛집", "#해산물", "#로컬"],
-      },
-      {
-        id: 402,
-        title: "전주 한옥마을 비빔밥집",
-        address: "전라북도 전주시",
-        rating: 4.7,
-        distance: 4.2,
-        image: forestImg,
-        tags: ["#한식", "#전주", "#필수코스"],
-      },
-      {
-        id: 403,
-        title: "부산 해운대 횟집",
-        address: "부산광역시 해운대구",
-        rating: 4.9,
-        distance: 8.9,
-        image: museumImg,
-        tags: ["#회맛집", "#바다뷰", "#신선함"],
-      },
-    ],
-  },
-  "인스타 감성": {
-    intro: "사진 한 장만 찍어도 분위기가 살아나는 감성 장소들이에요.",
-    places: [
-      {
-        id: 501,
-        title: "무드 스테이",
-        address: "서울 성동구",
-        rating: 4.8,
-        distance: 1.8,
-        image: museumImg,
-        tags: ["#감성숙소", "#포토스팟", "#무드"],
-      },
-      {
-        id: 502,
-        title: "서울 루프탑 카페",
-        address: "서울 용산구",
-        rating: 4.7,
-        distance: 3.6,
-        image: beachImg,
-        tags: ["#야경", "#카페", "#인생샷"],
-      },
-      {
-        id: 503,
-        title: "제주 필름무드 스팟",
-        address: "제주특별자치도 서귀포시",
-        rating: 4.9,
-        distance: 6.4,
-        image: forestImg,
-        tags: ["#필름감성", "#오션뷰", "#사진명소"],
-      },
-    ],
-  },
-};
 
 const getPlaceArray = (data) => {
   if (Array.isArray(data)) return data;
@@ -200,33 +64,38 @@ const normalizeTags = (tags) => {
     .filter(Boolean);
 };
 
-const normalizePlace = (place) => ({
-  id: place.id || place.placeId || place.destinationId,
-  title:
-    place.title ||
-    place.name ||
-    place.placeName ||
-    place.destinationName ||
-    "장소 이름 없음",
-  address:
-    place.address ||
-    place.roadAddress ||
-    place.location ||
-    place.addr ||
-    "주소 정보 없음",
-  rating: place.rating || place.score || place.avgRating || 0,
-  distance:
-    Number(place.distance || place.distanceKm || place.km || place.range) || 999,
-  image:
-    place.image ||
-    place.imageUrl ||
-    place.thumbnail ||
-    place.thumbnailUrl ||
-    place.photoUrl ||
-    forestImg,
-  tags: normalizeTags(place.tags || place.hashtags),
-  originalData: place,
-});
+const normalizePlace = (place) => {
+  const id = place.id || place.placeId || place.destinationId;
+
+  return {
+    id,
+    title:
+      place.title ||
+      place.name ||
+      place.placeName ||
+      place.destinationName ||
+      "장소 이름 없음",
+    address:
+      place.address ||
+      place.roadAddress ||
+      place.location ||
+      place.addr ||
+      "주소 정보 없음",
+    rating: Number(place.rating || place.score || place.avgRating) || 0,
+    distance: Number(
+      place.distance || place.distanceKm || place.km || place.range || 0
+    ),
+    image:
+      place.image ||
+      place.imageUrl ||
+      place.thumbnail ||
+      place.thumbnailUrl ||
+      place.photoUrl ||
+      "",
+    tags: normalizeTags(place.tags || place.hashtags),
+    originalData: place,
+  };
+};
 
 const getSavedPlaceArray = (data) => {
   if (Array.isArray(data)) return data;
@@ -245,19 +114,24 @@ const getSavedPlaceId = (savedPlace) => {
   const placeData = savedPlace.place || savedPlace.destination || savedPlace;
 
   return (
-    placeData.id ||
     placeData.placeId ||
+    placeData.id ||
     savedPlace.placeId ||
+    savedPlace.destinationId ||
     savedPlace.savedPlaceId ||
     savedPlace.bookmarkId ||
     savedPlace.id
   );
 };
 
+const getSavedRecordId = (savedPlace) => {
+  return savedPlace.savedPlaceId || savedPlace.bookmarkId || savedPlace.id;
+};
+
 const getErrorMessage = (error, fallbackMessage) => {
   const data = error.response?.data;
 
-  if (typeof data === "string") {
+  if (typeof data === "string" && data.trim()) {
     return data;
   }
 
@@ -267,18 +141,17 @@ const getErrorMessage = (error, fallbackMessage) => {
 function Total() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isSaved, toggleSavedPlace } = useSavedPlaces();
 
   const [sortBy, setSortBy] = useState("인기순");
-  const [serverPlaces, setServerPlaces] = useState([]);
+  const [places, setPlaces] = useState([]);
   const [serverSavedIds, setServerSavedIds] = useState([]);
-  const [serverIntro, setServerIntro] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [serverSavedRecordMap, setServerSavedRecordMap] = useState({});
+  const [introText, setIntroText] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [isSavingId, setIsSavingId] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
 
   const selectedTheme = searchParams.get("theme") || "힐링";
-  const themeData = totalMockByTheme[selectedTheme] || totalMockByTheme["힐링"];
 
   useEffect(() => {
     const fetchTotalPlaces = async () => {
@@ -292,22 +165,31 @@ function Total() {
           },
         });
 
-        const places = getPlaceArray(response.data).map(normalizePlace);
+        const nextPlaces = getPlaceArray(response.data)
+          .map(normalizePlace)
+          .filter((place) => place.id !== undefined && place.id !== null);
 
-        setServerPlaces(places);
-        setServerIntro(getIntroText(response.data));
+        setPlaces(nextPlaces);
+        setIntroText(getIntroText(response.data));
       } catch (error) {
         console.error("전체 추천 장소 조회 실패:", error);
+        setPlaces([]);
+        setIntroText("");
 
         if (error.message.includes("Network Error")) {
           setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
           return;
         }
 
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          setErrorMessage("로그인 정보가 만료되었거나 권한이 없습니다.");
+          return;
+        }
+
         setErrorMessage(
           getErrorMessage(
             error,
-            "추천 장소를 불러오지 못했습니다. 기본 추천 장소를 표시합니다."
+            "추천 장소를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
           )
         );
       } finally {
@@ -323,23 +205,34 @@ function Total() {
       try {
         const response = await api.get(SAVED_PLACES_API);
         const savedPlaces = getSavedPlaceArray(response.data);
+        const savedIds = [];
+        const savedRecordMap = {};
 
-        setServerSavedIds(
-          savedPlaces
-            .map(getSavedPlaceId)
-            .filter(Boolean)
-            .map((id) => String(id))
-        );
+        savedPlaces.forEach((savedPlace) => {
+          const placeId = getSavedPlaceId(savedPlace);
+          const savedRecordId = getSavedRecordId(savedPlace);
+
+          if (!placeId) return;
+
+          const placeIdText = String(placeId);
+          savedIds.push(placeIdText);
+
+          if (savedRecordId) {
+            savedRecordMap[placeIdText] = savedRecordId;
+          }
+        });
+
+        setServerSavedIds([...new Set(savedIds)]);
+        setServerSavedRecordMap(savedRecordMap);
       } catch (error) {
         console.error("저장 장소 상태 조회 실패:", error);
+        setServerSavedIds([]);
+        setServerSavedRecordMap({});
       }
     };
 
     fetchSavedPlaces();
   }, []);
-
-  const places = serverPlaces.length > 0 ? serverPlaces : themeData.places;
-  const introText = serverIntro || themeData.intro;
 
   const sortedPlaces = useMemo(() => {
     const copied = [...places];
@@ -364,42 +257,57 @@ function Total() {
   const handleToggleSaved = async (event, place, saved) => {
     event.stopPropagation();
 
-    if (isSavingId === place.id) return;
+    if (!place.id || isSavingId === place.id) return;
 
     try {
       setIsSavingId(place.id);
 
       if (saved) {
-        await api.delete(`${SAVED_PLACES_API}/${place.id}`);
+        const deleteId = serverSavedRecordMap[String(place.id)] || place.id;
+
+        await api.delete(`${SAVED_PLACES_API}/${deleteId}`);
 
         setServerSavedIds((prev) =>
           prev.filter((savedId) => savedId !== String(place.id))
         );
 
-        if (isSaved(place.id)) {
-          toggleSavedPlace(place);
-        }
+        setServerSavedRecordMap((prev) => {
+          const next = { ...prev };
+          delete next[String(place.id)];
+          return next;
+        });
 
         return;
       }
 
-      await api.post(SAVED_PLACES_API, {
+      const response = await api.post(SAVED_PLACES_API, {
         placeId: place.id,
       });
+
+      const savedData = response.data?.data || response.data;
+      const savedRecordId = getSavedRecordId(savedData);
 
       setServerSavedIds((prev) => {
         const nextId = String(place.id);
         return prev.includes(nextId) ? prev : [...prev, nextId];
       });
 
-      if (!isSaved(place.id)) {
-        toggleSavedPlace(place);
+      if (savedRecordId) {
+        setServerSavedRecordMap((prev) => ({
+          ...prev,
+          [String(place.id)]: savedRecordId,
+        }));
       }
     } catch (error) {
       console.error("관심 장소 변경 실패:", error);
 
       if (error.message.includes("Network Error")) {
         alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        return;
+      }
+
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        alert("로그인 정보가 만료되었거나 권한이 없습니다.");
         return;
       }
 
@@ -414,10 +322,12 @@ function Total() {
     }
   };
 
+  const pageTitle = introText || `${selectedTheme} 추천 장소`;
+
   return (
     <div className="total-page">
       <section className="total-intro">
-        <h1>{isLoading ? "추천 장소를 불러오는 중입니다." : introText}</h1>
+        <h1>{isLoading ? "추천 장소를 불러오는 중입니다." : pageTitle}</h1>
       </section>
 
       <div className="sort-chip-row">
@@ -461,19 +371,47 @@ function Total() {
         </p>
       )}
 
+      {!isLoading && !errorMessage && sortedPlaces.length === 0 && (
+        <p
+          style={{
+            margin: "0 20px 14px",
+            fontSize: "13px",
+            color: "#6b7280",
+          }}
+        >
+          추천 장소가 없습니다.
+        </p>
+      )}
+
       <section className="theme-total-list">
         {sortedPlaces.map((place) => {
-          const saved =
-            serverSavedIds.includes(String(place.id)) || isSaved(place.id);
+          const saved = serverSavedIds.includes(String(place.id));
 
           return (
             <article key={place.id} className="theme-total-card">
               <div className="theme-total-image-wrap">
-                <img
-                  src={place.image}
-                  alt={place.title}
-                  className="theme-total-image"
-                />
+                {place.image ? (
+                  <img
+                    src={place.image}
+                    alt={place.title}
+                    className="theme-total-image"
+                  />
+                ) : (
+                  <div
+                    className="theme-total-image"
+                    aria-label={`${place.title} 이미지 없음`}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "#e5f4ff",
+                      color: "#6b7280",
+                      fontSize: "13px",
+                    }}
+                  >
+                    이미지 없음
+                  </div>
+                )}
 
                 <button
                   type="button"
@@ -497,13 +435,15 @@ function Total() {
 
                 <p className="theme-total-address">{place.address}</p>
 
-                <div className="theme-total-tag-row">
-                  {(place.tags || []).map((tag) => (
-                    <span key={tag} className="theme-total-tag">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                {place.tags.length > 0 && (
+                  <div className="theme-total-tag-row">
+                    {place.tags.map((tag) => (
+                      <span key={tag} className="theme-total-tag">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
                 <button
                   type="button"

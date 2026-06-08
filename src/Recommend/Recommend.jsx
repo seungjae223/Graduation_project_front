@@ -10,6 +10,8 @@ import forestImg from "../img/도쿄.png"; // 기본 이미지(Fallback)로 사�
 const RECOMMENDATIONS_API = "/api/recommendations";
 const SAVED_PLACES_API = "/api/saved-places";
 const PLACES_API = "/api/places";
+const ITEMS_PER_PAGE = 5;
+const PAGE_NUMBER_COUNT = 3; // 이전/다음 버튼까지 합쳐서 한 줄에 총 5개만 표시
 
 const PinIcon = () => (
   <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
@@ -162,11 +164,12 @@ const CameraIcon = () => (
   </svg>
 );
 
+// key는 DB에 저장된 theme 값, label은 화면에 보여줄 한글 값
 const themeCards = [
-  { key: "힐링", label: "힐링", icon: <LeafIcon /> },
-  { key: "액티비티", label: "액티비티", icon: <ActivityIcon /> },
-  { key: "맛집 탐방", label: "맛집 탐방", icon: <FoodIcon /> },
-  { key: "인스타 감성", label: "인스타 감성", icon: <CameraIcon /> },
+  { key: "healing", label: "힐링", icon: <LeafIcon /> },
+  { key: "activity", label: "액티비티", icon: <ActivityIcon /> },
+  { key: "food", label: "맛집 탐방", icon: <FoodIcon /> },
+  { key: "photo", label: "인스타 감성", icon: <CameraIcon /> },
 ];
 
 const getArrayData = (data) => {
@@ -199,13 +202,14 @@ const normalizeTags = (tags) => {
 };
 
 const getTabType = (place) => {
-  const rawType =
+  const rawType = String(
     place.tabType ||
-    place.category ||
-    place.categoryName ||
-    place.type ||
-    place.placeType ||
-    "";
+      place.category ||
+      place.categoryName ||
+      place.type ||
+      place.placeType ||
+      ""
+  );
 
   if (rawType.includes("맛") || rawType.toLowerCase().includes("restaurant")) {
     return "맛집";
@@ -223,25 +227,33 @@ const getTabType = (place) => {
 };
 
 const normalizePlace = (place, selectedTheme) => {
+  const theme = place.theme || place.themeName || selectedTheme;
+  const tabType = getTabType(place);
+  const placeType = place.placeType || place.category || tabType;
+
   return {
-    id: place.id || place.placeId || place.destinationId,
-    theme: place.theme || place.themeName || selectedTheme,
+    id: place.id ?? place.placeId ?? place.destinationId,
+    theme,
     title:
-      place.title ||
       place.name ||
+      place.title ||
       place.placeName ||
       place.destinationName ||
       "장소 이름 없음",
+    description: place.description || "",
     address:
       place.address ||
       place.roadAddress ||
       place.location ||
       place.addr ||
       "주소 정보 없음",
+    latitude: Number(place.latitude ?? 0),
+    longitude: Number(place.longitude ?? 0),
     rating: place.rating || place.score || place.avgRating || 0,
     reviewCount: place.reviewCount || place.reviewsCount || place.reviewCnt || 0,
-    badge: place.badge || place.badgeText || place.category || "PLACE",
-    tabType: getTabType(place),
+    badge: place.badge || place.badgeText || placeType || "PLACE",
+    placeType,
+    tabType,
     image:
       place.image ||
       place.imageUrl ||
@@ -249,7 +261,9 @@ const normalizePlace = (place, selectedTheme) => {
       place.thumbnailUrl ||
       place.photoUrl ||
       forestImg,
-    tags: normalizeTags(place.tags || place.hashtags),
+    tags: normalizeTags(
+      place.tags || place.hashtags || [theme, placeType].filter(Boolean)
+    ),
     originalData: place,
   };
 };
@@ -258,11 +272,11 @@ const getSavedPlaceId = (savedPlace) => {
   const placeData = savedPlace.place || savedPlace.destination || savedPlace;
 
   return (
-    placeData.id ||
-    placeData.placeId ||
-    savedPlace.placeId ||
-    savedPlace.savedPlaceId ||
-    savedPlace.bookmarkId ||
+    placeData.id ??
+    placeData.placeId ??
+    savedPlace.placeId ??
+    savedPlace.savedPlaceId ??
+    savedPlace.bookmarkId ??
     savedPlace.id
   );
 };
@@ -281,12 +295,17 @@ function Recommend() {
   const navigate = useNavigate();
   const { isSaved, toggleSavedPlace } = useSavedPlaces();
 
-  const [selectedTheme, setSelectedTheme] = useState("힐링");
+  const [selectedTheme, setSelectedTheme] = useState("healing");
   const [recommendedPlaces, setRecommendedPlaces] = useState([]);
   const [serverSavedIds, setServerSavedIds] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingId, setIsSavingId] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedTheme]);
 
   useEffect(() => {
     const fetchRecommendedPlaces = async () => {
@@ -347,6 +366,47 @@ function Recommend() {
     fetchSavedPlaces();
   }, []);
 
+  const totalPages = Math.max(
+    1,
+    Math.ceil(recommendedPlaces.length / ITEMS_PER_PAGE)
+  );
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedPlaces = recommendedPlaces.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
+
+  const halfPageNumberCount = Math.floor(PAGE_NUMBER_COUNT / 2);
+  let firstVisiblePage = Math.max(1, currentPage - halfPageNumberCount);
+  let lastVisiblePage = Math.min(
+    totalPages,
+    firstVisiblePage + PAGE_NUMBER_COUNT - 1
+  );
+
+  if (lastVisiblePage - firstVisiblePage + 1 < PAGE_NUMBER_COUNT) {
+    firstVisiblePage = Math.max(
+      1,
+      lastVisiblePage - PAGE_NUMBER_COUNT + 1
+    );
+  }
+
+  const visiblePageNumbers = Array.from(
+    { length: lastVisiblePage - firstVisiblePage + 1 },
+    (_, index) => firstVisiblePage + index
+  );
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    setCurrentPage(page);
+  };
+
   const handleViewAll = () => {
     const params = new URLSearchParams({
       theme: selectedTheme,
@@ -379,20 +439,23 @@ function Recommend() {
         if (isSaved(place.id)) {
           toggleSavedPlace(place);
         }
+
         return;
       }
 
+      const numericPlaceId = Number(place.id);
+
       const placePayload = {
-        id: typeof place.id === 'number' ? place.id : 0, 
+        id: Number.isFinite(numericPlaceId) ? numericPlaceId : 0,
         name: place.title,
-        latitude: place.originalData?.latitude || 0,
-        longitude: place.originalData?.longitude || 0,
+        latitude: place.latitude || 0,
+        longitude: place.longitude || 0,
         address: place.address,
-        placeType: place.tabType
+        placeType: place.placeType || place.tabType,
       };
 
       const placeResponse = await api.post(PLACES_API, placePayload);
-      const registeredPlaceId = placeResponse.data?.id || place.id;
+      const registeredPlaceId = placeResponse.data?.id ?? place.id;
 
       await api.post(SAVED_PLACES_API, {
         placeId: registeredPlaceId,
@@ -406,7 +469,6 @@ function Recommend() {
       if (!isSaved(registeredPlaceId)) {
         toggleSavedPlace({ ...place, id: registeredPlaceId });
       }
-
     } catch (error) {
       console.error("관심 장소 연동 실패:", error);
 
@@ -484,15 +546,23 @@ function Recommend() {
 
             {recommendedPlaces.length === 0 && !errorMessage ? (
               <div className="recommend-card-list">
-                <p style={{ textAlign: "center", color: "#94a3b8", padding: "20px 0" }}>
+                <p
+                  style={{
+                    textAlign: "center",
+                    color: "#94a3b8",
+                    padding: "20px 0",
+                  }}
+                >
                   해당 테마의 추천 장소가 아직 없습니다.
                 </p>
               </div>
             ) : (
-              <div className="recommend-card-list">
-                {recommendedPlaces.map((place) => {
+              <>
+                <div className="recommend-card-list">
+                  {paginatedPlaces.map((place) => {
                   const saved =
-                    serverSavedIds.includes(String(place.id)) || isSaved(place.id);
+                    serverSavedIds.includes(String(place.id)) ||
+                    isSaved(place.id);
 
                   return (
                     <article
@@ -539,6 +609,12 @@ function Recommend() {
                           <span>{place.address}</span>
                         </div>
 
+                        {place.description && (
+                          <p className="recommend-description">
+                            {place.description}
+                          </p>
+                        )}
+
                         <div className="recommend-tag-row">
                           {place.tags.map((tag) => (
                             <span key={tag} className="recommend-tag">
@@ -550,7 +626,49 @@ function Recommend() {
                     </article>
                   );
                 })}
-              </div>
+                </div>
+
+                {recommendedPlaces.length > ITEMS_PER_PAGE && (
+                  <div
+                    className="recommend-pagination"
+                    aria-label="추천 장소 페이지네이션"
+                  >
+                    <button
+                      type="button"
+                      className="recommend-page-btn recommend-page-nav"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      이전
+                    </button>
+
+                    {visiblePageNumbers.map((page) => (
+                      <button
+                        key={page}
+                        type="button"
+                        className={`recommend-page-btn ${
+                          currentPage === page ? "active" : ""
+                        }`}
+                        onClick={() => handlePageChange(page)}
+                        aria-current={
+                          currentPage === page ? "page" : undefined
+                        }
+                      >
+                        {page}
+                      </button>
+                    ))}
+
+                    <button
+                      type="button"
+                      className="recommend-page-btn recommend-page-nav"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      다음
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}

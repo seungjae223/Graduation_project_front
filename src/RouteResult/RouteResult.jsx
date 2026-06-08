@@ -253,6 +253,7 @@ const MoreVerticalIcon = () => (
 const FALLBACK_CENTER = { lat: 37.5665, lng: 126.978 };
 const KR = "KR";
 const JP = "JP";
+const OVERSEAS = "OVERSEAS";
 const withCountry = (countryCode, lat, lng) => ({ lat, lng, countryCode });
 const PLACE_COORDS = {
   서울역: withCountry(KR, 37.5547, 126.9706),
@@ -361,10 +362,68 @@ const getMemoDisplayTitle = (memo = "") =>
     .split(/\r?\n/)
     .map((line) => line.trim())
     .find(Boolean) || "";
-const normalizeCountryCode = (value = "") =>
-  String(value || "")
-    .trim()
-    .toUpperCase();
+const COUNTRY_ALIAS_TO_CODE = {
+  KR: KR,
+  KOR: KR,
+  ROK: KR,
+  KOREA: KR,
+  "SOUTH KOREA": KR,
+  "REPUBLIC OF KOREA": KR,
+  "KOREA, REPUBLIC OF": KR,
+  "대한민국": KR,
+  "한국": KR,
+  "남한": KR,
+  "국내": KR,
+  "제주": KR,
+  "제주도": KR,
+  "제주특별자치도": KR,
+  JEJU: KR,
+  "JEJU ISLAND": KR,
+  "JEJU-DO": KR,
+  SEOUL: KR,
+  "서울": KR,
+  "서울특별시": KR,
+  BUSAN: KR,
+  "부산": KR,
+  "부산광역시": KR,
+
+  JP: JP,
+  JPN: JP,
+  JAPAN: JP,
+  "일본": JP,
+  TOKYO: JP,
+  "도쿄": JP,
+  KYOTO: JP,
+  "교토": JP,
+  OSAKA: JP,
+  "오사카": JP,
+  FUKUOKA: JP,
+  "후쿠오카": JP,
+  SAPPORO: JP,
+  "삿포로": JP,
+  NAGOYA: JP,
+  "나고야": JP,
+  OKINAWA: JP,
+  "오키나와": JP,
+  KOBE: JP,
+  "고베": JP,
+  YOKOHAMA: JP,
+  "요코하마": JP,
+};
+
+const normalizeCountryCode = (value = "") => {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+
+  const normalizedRaw = raw.replace(/\s+/g, " ");
+  const upper = normalizedRaw.toUpperCase();
+
+  return (
+    COUNTRY_ALIAS_TO_CODE[normalizedRaw] ||
+    COUNTRY_ALIAS_TO_CODE[upper] ||
+    upper
+  );
+};
 const normalizeMapProvider = (value = "") => {
   const normalized = String(value || "")
     .trim()
@@ -472,20 +531,236 @@ const getCoordFromItem = (item = {}) => {
 };
 const getCountryCodeByTitle = (title = "") =>
   getPlaceMetaByTitle(title)?.countryCode || "";
+const isCoordinateInKorea = (coord) => {
+  const lat = Number(coord?.lat);
+  const lng = Number(coord?.lng);
+
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= 32.5 &&
+    lat <= 39.5 &&
+    lng >= 124 &&
+    lng <= 132
+  );
+};
+
+const hasValidCoordinate = (coord) => {
+  const lat = Number(coord?.lat);
+  const lng = Number(coord?.lng);
+
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    !(lat === 0 && lng === 0)
+  );
+};
+
+const isCoordinateInJapan = (coord) => {
+  const lat = Number(coord?.lat);
+  const lng = Number(coord?.lng);
+
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= 24 &&
+    lat <= 46 &&
+    lng >= 122 &&
+    lng <= 154
+  );
+};
+
+const getCountryCodeByCoordinate = (coord) => {
+  if (!hasValidCoordinate(coord)) return "";
+
+  if (isCoordinateInKorea(coord)) return KR;
+  if (isCoordinateInJapan(coord)) return JP;
+
+  return OVERSEAS;
+};
+
+const getCountryCodeByText = (value = "") => {
+  const textValue = String(value || "").trim();
+
+  if (!textValue) return "";
+
+  const normalizedCode = normalizeCountryCode(textValue);
+  if (normalizedCode === KR || normalizedCode === JP) {
+    return normalizedCode;
+  }
+
+  if (
+    /일본|도쿄|교토|오사카|후쿠오카|삿포로|나고야|오키나와|고베|요코하마|japan|tokyo|kyoto|osaka|fukuoka|sapporo|nagoya|okinawa|kobe|yokohama/i.test(
+      textValue,
+    )
+  ) {
+    return JP;
+  }
+
+  if (
+    /대한민국|한국|서울|부산|제주|강원|경기|인천|전주|경주|여수|korea|seoul|busan|jeju/i.test(
+      textValue,
+    )
+  ) {
+    return KR;
+  }
+
+  return "";
+};
+
+const getTripCountryCode = (trip = {}) => {
+  const directCountryCandidates = [
+    trip.countryCode,
+    trip.destinationCountryCode,
+    trip.travelCountryCode,
+    trip.country,
+    trip.countryName,
+    trip.destinationCountry,
+    trip.addressCountry,
+    trip.nationCode,
+  ];
+
+  const directCode = directCountryCandidates
+    .map((candidate) => normalizeCountryCode(candidate))
+    .find(Boolean);
+
+  const textCountryCandidates = [trip.destination, trip.title, trip.address];
+  const textCode = textCountryCandidates
+    .map((candidate) => getCountryCodeByText(candidate))
+    .find(Boolean);
+
+  const coordinateCode = getCountryCodeByCoordinate({
+    lat: getNumberValue(trip.latitude, trip.lat, trip.y),
+    lng: getNumberValue(trip.longitude, trip.lng, trip.lon, trip.x),
+  });
+
+  // 예전 저장 데이터나 서버 기본값이 KR로 들어와도 목적지가 일본/해외면 해외 판단을 우선합니다.
+  if (textCode && textCode !== KR) return textCode;
+  if (coordinateCode && coordinateCode !== KR) return coordinateCode;
+
+  return directCode || textCode || coordinateCode || "";
+};
+
+const getMapProviderFromTrip = (trip = {}) => {
+  const countryCode = getTripCountryCode(trip);
+
+  if (countryCode) {
+    return countryCode === KR ? "kakao" : "google";
+  }
+
+  return normalizeMapProvider(trip.mapProvider || trip.provider || trip.mapType);
+};
+
+const getSafeServerRouteUrl = (routeUrl = "", provider = "") => {
+  const url = String(routeUrl || "").trim();
+  const normalizedProvider = normalizeMapProvider(provider);
+
+  if (!url) return "";
+
+  const lowerUrl = url.toLowerCase();
+
+  if (normalizedProvider === "google" && lowerUrl.includes("kakao")) {
+    return "";
+  }
+
+  if (
+    normalizedProvider === "kakao" &&
+    (lowerUrl.includes("google") || lowerUrl.includes("maps.app.goo.gl"))
+  ) {
+    return "";
+  }
+
+  return url;
+};
+
 const getItemCountryCode = (item = {}) => {
   const directCountryCandidates = [
     item.countryCode,
     item.destinationCountryCode,
+    item.travelCountryCode,
     item.country,
+    item.countryName,
+    item.destinationCountry,
+    item.addressCountry,
     item.nationCode,
   ];
-  for (const candidate of directCountryCandidates) {
-    const code = normalizeCountryCode(candidate);
-    if (code) return code;
+
+  const directCode = directCountryCandidates
+    .map((candidate) => normalizeCountryCode(candidate))
+    .find(Boolean);
+
+  const textCountryCandidates = [
+    item.title,
+    item.placeName,
+    item.name,
+    item.destination,
+    item.address,
+    item.desc,
+  ];
+
+  const textCode = textCountryCandidates
+    .map((candidate) => getCountryCodeByText(candidate))
+    .find(Boolean);
+
+  const titleCountryCode = getCountryCodeByTitle(item.title);
+  const itemCoord = getCoordFromItem(item);
+  const coordinateCountryCode = getCountryCodeByCoordinate(itemCoord);
+
+  // 예전 코드가 일본 장소에 countryCode: "KR"를 넣어둔 경우에도 제목/주소/좌표가 해외면 구글맵을 우선합니다.
+  if (textCode && textCode !== KR) return textCode;
+  if (titleCountryCode && titleCountryCode !== KR) return titleCountryCode;
+  if (coordinateCountryCode && coordinateCountryCode !== KR) {
+    return coordinateCountryCode;
   }
-  return getCountryCodeByTitle(item.title);
+
+  return directCode || textCode || titleCountryCode || coordinateCountryCode || "";
 };
+
 const getExplicitMapProviderFromContext = (savedRoute, routeState) => {
+  const countryCandidates = [
+    savedRoute?.countryCode,
+    savedRoute?.destinationCountryCode,
+    savedRoute?.travelCountryCode,
+    savedRoute?.country,
+    savedRoute?.countryName,
+    savedRoute?.destinationCountry,
+    savedRoute?.destination?.countryCode,
+    savedRoute?.destination?.country,
+    savedRoute?.destination?.countryName,
+
+    routeState?.countryCode,
+    routeState?.destinationCountryCode,
+    routeState?.travelCountryCode,
+    routeState?.country,
+    routeState?.countryName,
+    routeState?.destinationCountry,
+    routeState?.destination?.countryCode,
+    routeState?.destination?.country,
+    routeState?.destination?.countryName,
+  ];
+
+  for (const candidate of countryCandidates) {
+    const code = normalizeCountryCode(candidate);
+
+    if (code) {
+      return code === KR ? "kakao" : "google";
+    }
+  }
+
+  const booleanDomesticCandidates = [
+    savedRoute?.isDomestic,
+    savedRoute?.domestic,
+    routeState?.isDomestic,
+    routeState?.domestic,
+    savedRoute?.destination?.isDomestic,
+    routeState?.destination?.isDomestic,
+  ];
+
+  for (const candidate of booleanDomesticCandidates) {
+    if (candidate === true) return "kakao";
+    if (candidate === false) return "google";
+  }
+
   const providerCandidates = [
     savedRoute?.mapProvider,
     savedRoute?.provider,
@@ -496,87 +771,115 @@ const getExplicitMapProviderFromContext = (savedRoute, routeState) => {
     savedRoute?.destination?.mapProvider,
     routeState?.destination?.mapProvider,
   ];
+
   for (const candidate of providerCandidates) {
     const provider = normalizeMapProvider(candidate);
     if (provider) return provider;
   }
-  const booleanDomesticCandidates = [
-    savedRoute?.isDomestic,
-    savedRoute?.domestic,
-    routeState?.isDomestic,
-    routeState?.domestic,
-    savedRoute?.destination?.isDomestic,
-    routeState?.destination?.isDomestic,
-  ];
-  for (const candidate of booleanDomesticCandidates) {
-    if (candidate === true) return "kakao";
-    if (candidate === false) return "google";
-  }
-  const countryCandidates = [
-    savedRoute?.countryCode,
-    savedRoute?.destinationCountryCode,
-    savedRoute?.travelCountryCode,
-    savedRoute?.destination?.countryCode,
-    routeState?.countryCode,
-    routeState?.destinationCountryCode,
-    routeState?.travelCountryCode,
-    routeState?.destination?.countryCode,
-  ];
-  for (const candidate of countryCandidates) {
-    const code = normalizeCountryCode(candidate);
-    if (code) {
-      return code === KR ? "kakao" : "google";
-    }
-  }
+
   return "";
 };
+
 const getMapProviderForDay = (day, dayIndex, tripLevelMapProvider = "") => {
-  if (tripLevelMapProvider) {
-    return tripLevelMapProvider;
-  }
   const sourceItems = getSourceItemsForDay(day, dayIndex);
+  const countryCodes = sourceItems.map(getItemCountryCode).filter(Boolean);
+
+  // 일정 자체가 해외이거나 서버가 google을 명시하면 무조건 구글맵을 사용합니다.
+  if (tripLevelMapProvider === "google") {
+    return "google";
+  }
+
+  // 장소 중 하나라도 한국이 아니면 해외 일정으로 보고 무조건 구글맵을 사용합니다.
+  if (countryCodes.some((code) => code !== KR)) {
+    return "google";
+  }
+
   const itemLevelProviders = sourceItems
     .map((item) => normalizeMapProvider(item?.mapProvider || item?.provider))
     .filter(Boolean);
-  if (itemLevelProviders.includes("google")) return "google";
-  if (itemLevelProviders.includes("kakao")) return "kakao";
-  const countryCodes = sourceItems.map(getItemCountryCode).filter(Boolean);
-  if (countryCodes.some((code) => code !== KR)) return "google";
-  if (countryCodes.some((code) => code === KR)) return "kakao";
+
+  // 장소 단위에서 google이 명시되어도 구글맵을 사용합니다.
+  if (itemLevelProviders.includes("google")) {
+    return "google";
+  }
+
+  // 여기부터 국내 일정 처리입니다.
+  if (tripLevelMapProvider === "kakao") {
+    return "kakao";
+  }
+
+  if (countryCodes.length > 0 && countryCodes.every((code) => code === KR)) {
+    return "kakao";
+  }
+
+  if (itemLevelProviders.includes("kakao")) {
+    return "kakao";
+  }
+
   return "kakao";
 };
-const buildGoogleMapsPlaceUrl = (title = "") => {
-  const query = normalizeTitle(title);
+const getCoordinateQueryText = (itemOrCoord = {}) => {
+  const coord = getCoordFromItem(itemOrCoord) || itemOrCoord;
+  const lat = Number(coord?.lat ?? coord?.latitude);
+  const lng = Number(coord?.lng ?? coord?.lon ?? coord?.longitude);
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return "";
+  }
+
+  return `${lat},${lng}`;
+};
+
+const buildGoogleMapsPlaceUrl = (title = "", itemOrCoord = null) => {
+  const coordinateQuery = itemOrCoord ? getCoordinateQueryText(itemOrCoord) : "";
+  const query = coordinateQuery || normalizeTitle(title);
+
   if (!query) return "";
+
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 };
 const buildGoogleMapsRouteUrl = (day) => {
-  const placeNames = (day?.items || [])
-    .map((item) => normalizeTitle(item.title))
+  const placeQueries = (day?.items || [])
+    .map((item) => getCoordinateQueryText(item) || normalizeTitle(item.title))
     .filter(Boolean);
-  if (placeNames.length === 0) return "";
-  if (placeNames.length === 1) {
-    return buildGoogleMapsPlaceUrl(placeNames[0]);
+
+  if (placeQueries.length === 0) return "";
+
+  if (placeQueries.length === 1) {
+    return buildGoogleMapsPlaceUrl(placeQueries[0]);
   }
-  const origin = placeNames[0];
-  const destination = placeNames[placeNames.length - 1];
-  const waypoints = placeNames.slice(1, -1);
+
+  const origin = placeQueries[0];
+  const destination = placeQueries[placeQueries.length - 1];
+  const waypoints = placeQueries.slice(1, -1);
   let url =
     `https://www.google.com/maps/dir/?api=1` +
     `&origin=${encodeURIComponent(origin)}` +
     `&destination=${encodeURIComponent(destination)}`;
+
   if (waypoints.length > 0) {
     url += `&waypoints=${encodeURIComponent(waypoints.join("|"))}`;
   }
+
   return url;
 };
-const buildKakaoMapsPlaceUrl = (title = "") => {
+const buildKakaoMapsPlaceUrl = (title = "", itemOrCoord = null) => {
   const name = normalizeTitle(title);
   if (!name) return "";
+
+  const itemCoord = itemOrCoord ? getCoordFromItem(itemOrCoord) || itemOrCoord : null;
+  const lat = Number(itemCoord?.lat ?? itemCoord?.latitude);
+  const lng = Number(itemCoord?.lng ?? itemCoord?.lon ?? itemCoord?.longitude);
+
+  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+    return `https://map.kakao.com/link/map/${encodeURIComponent(name)},${lat},${lng}`;
+  }
+
   const place = getPlaceMetaByTitle(title);
   if (place) {
     return `https://map.kakao.com/link/map/${encodeURIComponent(name)},${place.lat},${place.lng}`;
   }
+
   return `https://map.kakao.com/link/search/${encodeURIComponent(name)}`;
 };
 const buildKakaoMapsRouteUrl = (day) => {
@@ -694,7 +997,9 @@ const loadKakaoMapsScript = () => {
     return kakaoMapsLoadingPromise;
   }
   kakaoMapsLoadingPromise = new Promise((resolve, reject) => {
-    const appKey = process.env.REACT_APP_KAKao_MAP_JS_KEY;
+    const appKey =
+      process.env.REACT_APP_KAKAO_MAP_JS_KEY ||
+      process.env.REACT_APP_KAKao_MAP_JS_KEY;
     if (!appKey) {
       reject(new Error("카카오맵 JS 키가 없습니다."));
       return;
@@ -906,16 +1211,128 @@ const makeMockMove = (index) => {
 };
 
 // ✅ 서버에서 받아온 데이터를 화면용 포맷으로 변환해주는 함수
-const buildDaysFromServerData = (trip, places) => {
-  if (!trip || !places || places.length === 0) return [];
+const getResponseData = (data) => {
+  if (data?.data) return data.data;
+  if (data?.trip) return data.trip;
+  if (data?.result) return data.result;
+  if (data?.response) return data.response;
 
+  return data;
+};
+
+const getArrayData = (data) => {
+  if (Array.isArray(data)) return data;
+
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.places)) return data.places;
+  if (Array.isArray(data?.tripPlaces)) return data.tripPlaces;
+  if (Array.isArray(data?.result)) return data.result;
+  if (Array.isArray(data?.results)) return data.results;
+
+  if (Array.isArray(data?.data?.content)) return data.data.content;
+  if (Array.isArray(data?.data?.items)) return data.data.items;
+  if (Array.isArray(data?.data?.places)) return data.data.places;
+  if (Array.isArray(data?.data?.tripPlaces)) return data.data.tripPlaces;
+
+  return [];
+};
+
+const getTripDaysCount = (trip = {}) => {
   const start = new Date(trip.startDate);
   const end = new Date(trip.endDate);
-  const daysCount = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return 1;
+  }
+
+  return Math.max(
+    1,
+    Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1,
+  );
+};
+
+const normalizeServerTrip = (trip = {}) => ({
+  ...trip,
+  id: trip.id ?? trip.tripId,
+  title: trip.title || "여행 일정",
+  destination: trip.destination || "",
+  startDate: trip.startDate,
+  endDate: trip.endDate,
+  mapType: trip.mapType || trip.mapProvider || trip.provider || "",
+  routeUrl: trip.routeUrl || trip.mapUrl || trip.url || "",
+});
+
+const normalizeServerTripPlace = (place = {}, fallbackDay = 1) => {
+  const latitude = getNumberValue(
+    place.latitude,
+    place.lat,
+    place.y,
+    place.placeLatitude,
+    place.placeLat,
+    place.mapY,
+  );
+  const longitude = getNumberValue(
+    place.longitude,
+    place.lng,
+    place.lon,
+    place.x,
+    place.placeLongitude,
+    place.placeLng,
+    place.placeLon,
+    place.mapX,
+  );
+  const normalizedDay = getNumberValue(place.day, place.dayNumber, fallbackDay) || fallbackDay;
+  const normalizedVisitOrder = getNumberValue(
+    place.visitOrder,
+    place.order,
+    place.sequence,
+    place.sortOrder,
+    0,
+  );
+
+  return {
+    ...place,
+    id: place.id ?? place.tripPlaceId,
+    tripId: place.tripId,
+    tripPlaceId: place.tripPlaceId ?? place.id,
+    placeId: place.placeId,
+    placeName:
+      place.placeName ||
+      place.name ||
+      place.title ||
+      place.destinationName ||
+      "이름 없는 장소",
+    latitude,
+    longitude,
+    address: place.address || place.roadAddress || place.location || "",
+    placeType: place.placeType || place.category || place.categoryName || "",
+    day: normalizedDay,
+    visitOrder: normalizedVisitOrder,
+    isStartPoint: Boolean(place.isStartPoint || place.startPoint),
+    memo: place.memo || place.memoText || place.note || place.notes || "",
+    mapProvider: normalizeMapProvider(place.mapProvider || place.provider || place.mapType),
+    countryCode: normalizeCountryCode(place.countryCode || place.country || place.nationCode),
+  };
+};
+
+// ✅ 서버에서 받아온 여행/장소 데이터를 지도와 상세 일정에서 바로 쓸 수 있는 포맷으로 변환합니다.
+const buildDaysFromServerData = (trip, places = []) => {
+  if (!trip) return [];
+
+  const normalizedTrip = normalizeServerTrip(trip);
+  const daysCount = getTripDaysCount(normalizedTrip);
+  const normalizedPlaces = places.map((place) => normalizeServerTripPlace(place));
+  const tripCountryCode = getTripCountryCode(normalizedTrip);
+  const tripMapProvider = getMapProviderFromTrip(normalizedTrip);
 
   const days = [];
-  for (let i = 1; i <= daysCount; i++) {
-    const dayPlaces = places.filter(p => p.day === i).sort((a, b) => a.visitOrder - b.visitOrder);
+
+  for (let i = 1; i <= daysCount; i += 1) {
+    const dayPlaces = normalizedPlaces
+      .filter((place) => Number(place.day || 1) === i)
+      .sort((a, b) => Number(a.visitOrder || 0) - Number(b.visitOrder || 0));
 
     if (dayPlaces.length === 0) {
       days.push({
@@ -923,6 +1340,7 @@ const buildDaysFromServerData = (trip, places) => {
         totalDuration: "0시간 0분",
         totalDistance: "0km",
         sectionDistance: "일정이 없습니다.",
+        routeUrl: normalizedTrip.routeUrl || "",
         items: [],
       });
       continue;
@@ -931,19 +1349,72 @@ const buildDaysFromServerData = (trip, places) => {
     const items = dayPlaces.map((place, index) => {
       const isLast = index === dayPlaces.length - 1;
       const mockMove = makeMockMove(index);
+      const title = place.placeName || "이름 없는 장소";
+      const coord = {
+        lat: getNumberValue(place.latitude, place.lat, place.y),
+        lng: getNumberValue(place.longitude, place.lng, place.lon, place.x),
+      };
+
+      const directPlaceCountryCode = normalizeCountryCode(
+        place.countryCode ||
+          place.destinationCountryCode ||
+          place.travelCountryCode ||
+          place.country ||
+          place.countryName ||
+          place.destinationCountry ||
+          place.addressCountry ||
+          place.nationCode,
+      );
+      const textPlaceCountryCode =
+        getCountryCodeByText(title) ||
+        getCountryCodeByText(place.address) ||
+        getCountryCodeByTitle(title);
+      const coordinatePlaceCountryCode = getCountryCodeByCoordinate(coord);
+      const placeCountryCode =
+        (textPlaceCountryCode && textPlaceCountryCode !== KR
+          ? textPlaceCountryCode
+          : "") ||
+        (coordinatePlaceCountryCode && coordinatePlaceCountryCode !== KR
+          ? coordinatePlaceCountryCode
+          : "") ||
+        directPlaceCountryCode ||
+        textPlaceCountryCode ||
+        coordinatePlaceCountryCode ||
+        tripCountryCode;
+
+      const placeProvider =
+        placeCountryCode && placeCountryCode !== KR
+          ? "google"
+          : normalizeMapProvider(place.mapProvider || place.provider || place.mapType) ||
+            tripMapProvider ||
+            "kakao";
 
       return {
-        time: ["10:00 AM", "11:30 AM", "01:00 PM", "03:00 PM", "05:00 PM", "07:00 PM"][index % 6] || "10:00 AM",
-        title: place.placeName || "이름 없는 장소",
+        id: place.id,
+        tripPlaceId: place.tripPlaceId,
+        placeId: place.placeId,
+        time:
+          place.time ||
+          place.timeLabel ||
+          ["10:00 AM", "11:30 AM", "01:00 PM", "03:00 PM", "05:00 PM", "07:00 PM"][index % 6] ||
+          "10:00 AM",
+        title,
         desc: place.address || "",
-        badge: place.isStartPoint ? "출발" : (place.placeType || ""),
-        move: isLast ? "" : mockMove.move,
-        moveType: isLast ? "walk" : mockMove.moveType,
+        badge: place.isStartPoint ? "출발" : place.placeType || "",
+        move: isLast ? "" : place.move || place.moveText || mockMove.move,
+        moveType: isLast ? "walk" : place.moveType || place.moveTypeToNext || mockMove.moveType,
         lat: place.latitude,
         lng: place.longitude,
-        countryCode: "KR", // 기본값
-        mapProvider: "kakao", // 기본값
-        memo: ""
+        latitude: place.latitude,
+        longitude: place.longitude,
+        address: place.address || "",
+        placeType: place.placeType || "",
+        day: place.day,
+        visitOrder: place.visitOrder,
+        isStartPoint: place.isStartPoint,
+        countryCode: placeCountryCode,
+        mapProvider: placeProvider,
+        memo: place.memo || "",
       };
     });
 
@@ -958,9 +1429,11 @@ const buildDaysFromServerData = (trip, places) => {
       totalDuration: `${hour}시간 ${minute}분`,
       totalDistance: `${totalDistanceNumber}km`,
       sectionDistance: `총 ${sectionDistanceNumber}km 이동`,
+      routeUrl: normalizedTrip.routeUrl || "",
       items,
     });
   }
+
   return days;
 };
 
@@ -1821,14 +2294,47 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
 
       try {
         setIsLoading(true);
-        // 일정 기본 정보와 그 일정에 딸린 장소 목록을 병렬로 가져옵니다.
+
+        // 1. 일정 기본 정보와 일정 전체 장소 목록을 먼저 가져옵니다.
         const [tripRes, placesRes] = await Promise.all([
           api.get(`/api/trips/${routeId}`),
-          api.get(`/api/trips/${routeId}/places`)
+          api.get(`/api/trips/${routeId}/places`),
         ]);
 
-        setServerTrip(tripRes.data);
-        setServerTripPlaces(placesRes.data || []);
+        const nextTrip = normalizeServerTrip(getResponseData(tripRes.data));
+        let nextPlaces = getArrayData(placesRes.data).map((place) =>
+          normalizeServerTripPlace(place),
+        );
+
+        // 2. 전체 장소 API가 비어 있으면 일차별 장소 API로 한 번 더 조회합니다.
+        if (nextPlaces.length === 0) {
+          const daysCount = getTripDaysCount(nextTrip);
+          const dayResponses = await Promise.all(
+            Array.from({ length: daysCount }, (_, index) => {
+              const day = index + 1;
+
+              return api
+                .get(`/api/trips/${routeId}/days/${day}/places`)
+                .then((response) => ({ day, data: response.data }))
+                .catch((error) => {
+                  console.error(`${day}일차 장소 조회 실패:`, error);
+                  return { day, data: [] };
+                });
+            }),
+          );
+
+          nextPlaces = dayResponses.flatMap(({ day, data }) =>
+            getArrayData(data).map((place) =>
+              normalizeServerTripPlace({ ...place, day: place.day ?? day }, day),
+            ),
+          );
+        }
+
+        console.log("서버 여행 정보:", nextTrip);
+        console.log("서버 여행 장소 목록:", nextPlaces);
+
+        setServerTrip(nextTrip);
+        setServerTripPlaces(nextPlaces);
       } catch (error) {
         console.error("여행 정보 조회 실패:", error);
       } finally {
@@ -1868,8 +2374,9 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     }
 
     // ✅ 1. 서버에서 조회한 데이터가 있다면 최우선으로 화면에 그려줍니다.
-    if (serverTrip && serverTripPlaces.length > 0) {
-      return buildDaysFromServerData(serverTrip, serverTripPlaces);
+    if (serverTrip) {
+      const serverDays = buildDaysFromServerData(serverTrip, serverTripPlaces);
+      return serverDays.length > 0 ? serverDays : DEFAULT_RESULT_DAYS;
     }
 
     // ✅ 2. 서버 데이터가 없는데 이전 화면(RouteCreate)에서 넘겨준 임시 데이터가 있다면 렌더링
@@ -1947,8 +2454,18 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   const tripLevelMapProvider = useMemo(() => {
     if (isOverseasMock) return "google";
     if (isDomesticMock) return "kakao";
+
+    const serverMapProvider = getMapProviderFromTrip(serverTrip || {});
+    if (serverMapProvider) return serverMapProvider;
+
     return getExplicitMapProviderFromContext(savedRoute, location.state);
-  }, [savedRoute, location.state, isDomesticMock, isOverseasMock]);
+  }, [
+    serverTrip,
+    savedRoute,
+    location.state,
+    isDomesticMock,
+    isOverseasMock,
+  ]);
 
   const activeMapProvider = useMemo(
     () => getMapProviderForDay(activeDay, activeDayIndex, tripLevelMapProvider),
@@ -1961,16 +2478,24 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   };
 
   const handleOpenRouteMap = () => {
+    const serverRouteUrl = getSafeServerRouteUrl(
+      activeDay?.routeUrl || serverTrip?.routeUrl,
+      activeMapProvider,
+    );
+
     const url =
-      activeMapProvider === "kakao"
+      serverRouteUrl ||
+      (activeMapProvider === "kakao"
         ? buildKakaoMapsRouteUrl(activeDay)
-        : buildGoogleMapsRouteUrl(activeDay);
+        : buildGoogleMapsRouteUrl(activeDay));
+
     if (!url) {
       alert(
         `${activeMapProvider === "kakao" ? "카카오맵" : "구글맵"}으로 넘길 장소 정보가 없어요.`,
       );
       return;
     }
+
     openInNewTab(url);
   };
 
@@ -1978,27 +2503,30 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     const currentDayItem = activeDay?.items?.find(
       (item) => item.title === title,
     );
+
     const itemLevelProvider = normalizeMapProvider(
       currentDayItem?.mapProvider || currentDayItem?.provider,
     );
     const itemCountryCode = getItemCountryCode(currentDayItem || { title });
-    const provider =
-      itemLevelProvider ||
-      (itemCountryCode
-        ? itemCountryCode === KR
-          ? "kakao"
-          : "google"
-        : activeMapProvider);
+
+    const provider = itemCountryCode
+      ? itemCountryCode === KR
+        ? "kakao"
+        : "google"
+      : itemLevelProvider || activeMapProvider;
+
     const url =
       provider === "kakao"
-        ? buildKakaoMapsPlaceUrl(title)
-        : buildGoogleMapsPlaceUrl(title);
+        ? buildKakaoMapsPlaceUrl(title, currentDayItem)
+        : buildGoogleMapsPlaceUrl(title, currentDayItem);
+
     if (!url) {
       alert(
         `${provider === "kakao" ? "카카오맵" : "구글맵"}으로 넘길 장소 정보가 없어요.`,
       );
       return;
     }
+
     openInNewTab(url);
   };
 
