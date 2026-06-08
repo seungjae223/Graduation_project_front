@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import "./Search.css";
 
 import hotMainImg from "../img/도쿄.png";
@@ -304,7 +304,6 @@ const travelSearchPlaces = [
 ];
 
 function Search() {
-  const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
