@@ -391,24 +391,6 @@ const COUNTRY_ALIAS_TO_CODE = {
   JPN: JP,
   JAPAN: JP,
   "일본": JP,
-  TOKYO: JP,
-  "도쿄": JP,
-  KYOTO: JP,
-  "교토": JP,
-  OSAKA: JP,
-  "오사카": JP,
-  FUKUOKA: JP,
-  "후쿠오카": JP,
-  SAPPORO: JP,
-  "삿포로": JP,
-  NAGOYA: JP,
-  "나고야": JP,
-  OKINAWA: JP,
-  "오키나와": JP,
-  KOBE: JP,
-  "고베": JP,
-  YOKOHAMA: JP,
-  "요코하마": JP,
 };
 
 const normalizeCountryCode = (value = "") => {
@@ -545,135 +527,35 @@ const isCoordinateInKorea = (coord) => {
   );
 };
 
-const hasValidCoordinate = (coord) => {
-  const lat = Number(coord?.lat);
-  const lng = Number(coord?.lng);
+const getMapProviderByCoordinate = (coord = {}) => {
+  const lat = Number(coord?.lat ?? coord?.latitude);
+  const lng = Number(coord?.lng ?? coord?.lon ?? coord?.longitude);
 
-  return (
-    Number.isFinite(lat) &&
-    Number.isFinite(lng) &&
-    !(lat === 0 && lng === 0)
-  );
-};
-
-const isCoordinateInJapan = (coord) => {
-  const lat = Number(coord?.lat);
-  const lng = Number(coord?.lng);
-
-  return (
-    Number.isFinite(lat) &&
-    Number.isFinite(lng) &&
-    lat >= 24 &&
-    lat <= 46 &&
-    lng >= 122 &&
-    lng <= 154
-  );
-};
-
-const getCountryCodeByCoordinate = (coord) => {
-  if (!hasValidCoordinate(coord)) return "";
-
-  if (isCoordinateInKorea(coord)) return KR;
-  if (isCoordinateInJapan(coord)) return JP;
-
-  return OVERSEAS;
-};
-
-const getCountryCodeByText = (value = "") => {
-  const textValue = String(value || "").trim();
-
-  if (!textValue) return "";
-
-  const normalizedCode = normalizeCountryCode(textValue);
-  if (normalizedCode === KR || normalizedCode === JP) {
-    return normalizedCode;
-  }
-
-  if (
-    /일본|도쿄|교토|오사카|후쿠오카|삿포로|나고야|오키나와|고베|요코하마|japan|tokyo|kyoto|osaka|fukuoka|sapporo|nagoya|okinawa|kobe|yokohama/i.test(
-      textValue,
-    )
-  ) {
-    return JP;
-  }
-
-  if (
-    /대한민국|한국|서울|부산|제주|강원|경기|인천|전주|경주|여수|korea|seoul|busan|jeju/i.test(
-      textValue,
-    )
-  ) {
-    return KR;
-  }
-
-  return "";
-};
-
-const getTripCountryCode = (trip = {}) => {
-  const directCountryCandidates = [
-    trip.countryCode,
-    trip.destinationCountryCode,
-    trip.travelCountryCode,
-    trip.country,
-    trip.countryName,
-    trip.destinationCountry,
-    trip.addressCountry,
-    trip.nationCode,
-  ];
-
-  const directCode = directCountryCandidates
-    .map((candidate) => normalizeCountryCode(candidate))
-    .find(Boolean);
-
-  const textCountryCandidates = [trip.destination, trip.title, trip.address];
-  const textCode = textCountryCandidates
-    .map((candidate) => getCountryCodeByText(candidate))
-    .find(Boolean);
-
-  const coordinateCode = getCountryCodeByCoordinate({
-    lat: getNumberValue(trip.latitude, trip.lat, trip.y),
-    lng: getNumberValue(trip.longitude, trip.lng, trip.lon, trip.x),
-  });
-
-  // 예전 저장 데이터나 서버 기본값이 KR로 들어와도 목적지가 일본/해외면 해외 판단을 우선합니다.
-  if (textCode && textCode !== KR) return textCode;
-  if (coordinateCode && coordinateCode !== KR) return coordinateCode;
-
-  return directCode || textCode || coordinateCode || "";
-};
-
-const getMapProviderFromTrip = (trip = {}) => {
-  const countryCode = getTripCountryCode(trip);
-
-  if (countryCode) {
-    return countryCode === KR ? "kakao" : "google";
-  }
-
-  return normalizeMapProvider(trip.mapProvider || trip.provider || trip.mapType);
-};
-
-const getSafeServerRouteUrl = (routeUrl = "", provider = "") => {
-  const url = String(routeUrl || "").trim();
-  const normalizedProvider = normalizeMapProvider(provider);
-
-  if (!url) return "";
-
-  const lowerUrl = url.toLowerCase();
-
-  if (normalizedProvider === "google" && lowerUrl.includes("kakao")) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return "";
   }
 
-  if (
-    normalizedProvider === "kakao" &&
-    (lowerUrl.includes("google") || lowerUrl.includes("maps.app.goo.gl"))
-  ) {
+  return isCoordinateInKorea({ lat, lng }) ? "kakao" : "google";
+};
+
+const getCountryCodeByCoordinate = (coord = {}) => {
+  const lat = Number(coord?.lat ?? coord?.latitude);
+  const lng = Number(coord?.lng ?? coord?.lon ?? coord?.longitude);
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return "";
   }
 
-  return url;
+  return isCoordinateInKorea({ lat, lng }) ? KR : OVERSEAS;
 };
 
 const getItemCountryCode = (item = {}) => {
+  const coordinateCountryCode = getCountryCodeByCoordinate(getCoordFromItem(item));
+  if (coordinateCountryCode) return coordinateCountryCode;
+
+  const titleCountryCode = getCountryCodeByTitle(item.title);
+  if (titleCountryCode) return titleCountryCode;
+
   const directCountryCandidates = [
     item.countryCode,
     item.destinationCountryCode,
@@ -685,35 +567,12 @@ const getItemCountryCode = (item = {}) => {
     item.nationCode,
   ];
 
-  const directCode = directCountryCandidates
-    .map((candidate) => normalizeCountryCode(candidate))
-    .find(Boolean);
-
-  const textCountryCandidates = [
-    item.title,
-    item.placeName,
-    item.name,
-    item.destination,
-    item.address,
-    item.desc,
-  ];
-
-  const textCode = textCountryCandidates
-    .map((candidate) => getCountryCodeByText(candidate))
-    .find(Boolean);
-
-  const titleCountryCode = getCountryCodeByTitle(item.title);
-  const itemCoord = getCoordFromItem(item);
-  const coordinateCountryCode = getCountryCodeByCoordinate(itemCoord);
-
-  // 예전 코드가 일본 장소에 countryCode: "KR"를 넣어둔 경우에도 제목/주소/좌표가 해외면 구글맵을 우선합니다.
-  if (textCode && textCode !== KR) return textCode;
-  if (titleCountryCode && titleCountryCode !== KR) return titleCountryCode;
-  if (coordinateCountryCode && coordinateCountryCode !== KR) {
-    return coordinateCountryCode;
+  for (const candidate of directCountryCandidates) {
+    const code = normalizeCountryCode(candidate);
+    if (code) return code;
   }
 
-  return directCode || textCode || titleCountryCode || coordinateCountryCode || "";
+  return "";
 };
 
 const getExplicitMapProviderFromContext = (savedRoute, routeState) => {
@@ -782,41 +641,48 @@ const getExplicitMapProviderFromContext = (savedRoute, routeState) => {
 
 const getMapProviderForDay = (day, dayIndex, tripLevelMapProvider = "") => {
   const sourceItems = getSourceItemsForDay(day, dayIndex);
-  const countryCodes = sourceItems.map(getItemCountryCode).filter(Boolean);
 
-  // 일정 자체가 해외이거나 서버가 google을 명시하면 무조건 구글맵을 사용합니다.
-  if (tripLevelMapProvider === "google") {
+  // 좌표가 있으면 좌표 기준을 최우선으로 사용합니다.
+  // 한국 좌표는 카카오맵, 한국 밖 좌표는 구글맵입니다.
+  const coordinateProviders = sourceItems
+    .map((item) => getMapProviderByCoordinate(getCoordFromItem(item)))
+    .filter(Boolean);
+
+  if (coordinateProviders.includes("google")) {
     return "google";
   }
 
-  // 장소 중 하나라도 한국이 아니면 해외 일정으로 보고 무조건 구글맵을 사용합니다.
+  if (
+    coordinateProviders.length > 0 &&
+    coordinateProviders.every((provider) => provider === "kakao")
+  ) {
+    return "kakao";
+  }
+
+  const countryCodes = sourceItems.map(getItemCountryCode).filter(Boolean);
+
+  // 해외 국가 코드가 하나라도 있으면 구글맵을 사용합니다.
   if (countryCodes.some((code) => code !== KR)) {
     return "google";
+  }
+
+  // 전부 한국 국가 코드면 카카오맵을 사용합니다.
+  if (countryCodes.length > 0 && countryCodes.every((code) => code === KR)) {
+    return "kakao";
   }
 
   const itemLevelProviders = sourceItems
     .map((item) => normalizeMapProvider(item?.mapProvider || item?.provider))
     .filter(Boolean);
 
-  // 장소 단위에서 google이 명시되어도 구글맵을 사용합니다.
-  if (itemLevelProviders.includes("google")) {
-    return "google";
+  if (itemLevelProviders.includes("google")) return "google";
+  if (itemLevelProviders.includes("kakao")) return "kakao";
+
+  if (tripLevelMapProvider) {
+    return tripLevelMapProvider;
   }
 
-  // 여기부터 국내 일정 처리입니다.
-  if (tripLevelMapProvider === "kakao") {
-    return "kakao";
-  }
-
-  if (countryCodes.length > 0 && countryCodes.every((code) => code === KR)) {
-    return "kakao";
-  }
-
-  if (itemLevelProviders.includes("kakao")) {
-    return "kakao";
-  }
-
-  return "kakao";
+  return "google";
 };
 const getCoordinateQueryText = (itemOrCoord = {}) => {
   const coord = getCoordFromItem(itemOrCoord) || itemOrCoord;
@@ -911,6 +777,21 @@ const buildKakaoMapsRouteUrl = (day) => {
     (place) => `${encodeURIComponent(place.name)},${place.lat},${place.lng}`,
   );
   return `https://map.kakao.com/link/by/${movementType}/${segments.join("/")}`;
+};
+const isMapUrlForProvider = (url = "", provider = "") => {
+  const normalizedUrl = String(url || "").toLowerCase();
+
+  if (!normalizedUrl) return false;
+  if (provider === "kakao") return normalizedUrl.includes("kakao.com");
+  if (provider === "google") {
+    return (
+      normalizedUrl.includes("google.") ||
+      normalizedUrl.includes("goo.gl/maps") ||
+      normalizedUrl.includes("maps.app.goo.gl")
+    );
+  }
+
+  return true;
 };
 const buildMapDataFromResolvedPoints = (sourceItems, resolvedPoints) => {
   const filteredPoints = filterResolvedPointsForMap(resolvedPoints);
@@ -1324,8 +1205,7 @@ const buildDaysFromServerData = (trip, places = []) => {
   const normalizedTrip = normalizeServerTrip(trip);
   const daysCount = getTripDaysCount(normalizedTrip);
   const normalizedPlaces = places.map((place) => normalizeServerTripPlace(place));
-  const tripCountryCode = getTripCountryCode(normalizedTrip);
-  const tripMapProvider = getMapProviderFromTrip(normalizedTrip);
+  const tripMapProvider = normalizeMapProvider(normalizedTrip.mapType);
 
   const days = [];
 
@@ -1349,45 +1229,18 @@ const buildDaysFromServerData = (trip, places = []) => {
     const items = dayPlaces.map((place, index) => {
       const isLast = index === dayPlaces.length - 1;
       const mockMove = makeMockMove(index);
-      const title = place.placeName || "이름 없는 장소";
-      const coord = {
-        lat: getNumberValue(place.latitude, place.lat, place.y),
-        lng: getNumberValue(place.longitude, place.lng, place.lon, place.x),
-      };
-
-      const directPlaceCountryCode = normalizeCountryCode(
-        place.countryCode ||
-          place.destinationCountryCode ||
-          place.travelCountryCode ||
-          place.country ||
-          place.countryName ||
-          place.destinationCountry ||
-          place.addressCountry ||
-          place.nationCode,
-      );
-      const textPlaceCountryCode =
-        getCountryCodeByText(title) ||
-        getCountryCodeByText(place.address) ||
-        getCountryCodeByTitle(title);
-      const coordinatePlaceCountryCode = getCountryCodeByCoordinate(coord);
-      const placeCountryCode =
-        (textPlaceCountryCode && textPlaceCountryCode !== KR
-          ? textPlaceCountryCode
-          : "") ||
-        (coordinatePlaceCountryCode && coordinatePlaceCountryCode !== KR
-          ? coordinatePlaceCountryCode
-          : "") ||
-        directPlaceCountryCode ||
-        textPlaceCountryCode ||
-        coordinatePlaceCountryCode ||
-        tripCountryCode;
-
+      const hasCoordinate =
+        Number.isFinite(Number(place.latitude)) && Number.isFinite(Number(place.longitude));
+      const placeCoordinate = hasCoordinate
+        ? { lat: place.latitude, lng: place.longitude }
+        : null;
+      const coordinateProvider = getMapProviderByCoordinate(placeCoordinate);
+      const coordinateCountryCode = getCountryCodeByCoordinate(placeCoordinate);
       const placeProvider =
-        placeCountryCode && placeCountryCode !== KR
-          ? "google"
-          : normalizeMapProvider(place.mapProvider || place.provider || place.mapType) ||
-            tripMapProvider ||
-            "kakao";
+        coordinateProvider ||
+        place.mapProvider ||
+        tripMapProvider ||
+        "google";
 
       return {
         id: place.id,
@@ -1398,7 +1251,7 @@ const buildDaysFromServerData = (trip, places = []) => {
           place.timeLabel ||
           ["10:00 AM", "11:30 AM", "01:00 PM", "03:00 PM", "05:00 PM", "07:00 PM"][index % 6] ||
           "10:00 AM",
-        title,
+        title: place.placeName || "이름 없는 장소",
         desc: place.address || "",
         badge: place.isStartPoint ? "출발" : place.placeType || "",
         move: isLast ? "" : place.move || place.moveText || mockMove.move,
@@ -1412,7 +1265,7 @@ const buildDaysFromServerData = (trip, places = []) => {
         day: place.day,
         visitOrder: place.visitOrder,
         isStartPoint: place.isStartPoint,
-        countryCode: placeCountryCode,
+        countryCode: coordinateCountryCode || place.countryCode,
         mapProvider: placeProvider,
         memo: place.memo || "",
       };
@@ -2455,14 +2308,14 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     if (isOverseasMock) return "google";
     if (isDomesticMock) return "kakao";
 
-    const serverMapProvider = getMapProviderFromTrip(serverTrip || {});
+    const serverMapProvider = normalizeMapProvider(serverTrip?.mapType);
     if (serverMapProvider) return serverMapProvider;
 
     return getExplicitMapProviderFromContext(savedRoute, location.state);
   }, [
-    serverTrip,
     savedRoute,
     location.state,
+    serverTrip?.mapType,
     isDomesticMock,
     isOverseasMock,
   ]);
@@ -2478,13 +2331,12 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   };
 
   const handleOpenRouteMap = () => {
-    const serverRouteUrl = getSafeServerRouteUrl(
-      activeDay?.routeUrl || serverTrip?.routeUrl,
-      activeMapProvider,
-    );
-
+    const serverRouteUrl = activeDay?.routeUrl || serverTrip?.routeUrl;
+    const matchedServerRouteUrl = isMapUrlForProvider(serverRouteUrl, activeMapProvider)
+      ? serverRouteUrl
+      : "";
     const url =
-      serverRouteUrl ||
+      matchedServerRouteUrl ||
       (activeMapProvider === "kakao"
         ? buildKakaoMapsRouteUrl(activeDay)
         : buildGoogleMapsRouteUrl(activeDay));
@@ -2508,12 +2360,17 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
       currentDayItem?.mapProvider || currentDayItem?.provider,
     );
     const itemCountryCode = getItemCountryCode(currentDayItem || { title });
+    const coordinateProvider = getMapProviderByCoordinate(
+      getCoordFromItem(currentDayItem || {}),
+    );
 
-    const provider = itemCountryCode
-      ? itemCountryCode === KR
-        ? "kakao"
-        : "google"
-      : itemLevelProvider || activeMapProvider;
+    const provider = coordinateProvider
+      ? coordinateProvider
+      : itemCountryCode
+        ? itemCountryCode === KR
+          ? "kakao"
+          : "google"
+        : itemLevelProvider || activeMapProvider || "google";
 
     const url =
       provider === "kakao"

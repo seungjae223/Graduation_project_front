@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./RouteCreate.css";
 
@@ -480,21 +481,49 @@ const FixPointModal = ({
   onClose,
   onConfirm,
 }) => {
-  if (!open || !place) return null;
+  const canUsePortal = typeof document !== "undefined";
+
+  useEffect(() => {
+    if (!open || !canUsePortal) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose?.();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open, canUsePortal, onClose]);
+
+  if (!open || !place || !canUsePortal) return null;
 
   const prevHour = getPrevHour(hour);
   const nextHour = getNextHour(hour);
   const prevMinute = getPrevMinute(minute);
   const nextMinute = getNextMinute(minute);
 
-  return (
-    <div className="fix-point-overlay" onClick={onClose}>
+  return createPortal(
+    <div className="fix-point-portal">
+      <button
+        type="button"
+        className="fix-point-backdrop"
+        onClick={onClose}
+        aria-label="Fix Point 설정 닫기"
+      />
+
       <div
         className="fix-point-modal"
         role="dialog"
         aria-modal="true"
         aria-label="Fix Point 설정"
-        onClick={(event) => event.stopPropagation()}
       >
         <div className="fix-point-icon">
           <ClockIcon />
@@ -606,7 +635,8 @@ const FixPointModal = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -985,9 +1015,7 @@ const createPlaceItem = (place, orderIndex = 0) => {
       place.timeLabel ||
       DEFAULT_TIME_SLOTS[orderIndex % DEFAULT_TIME_SLOTS.length],
     isFixedTime:
-      typeof place.isFixedTime === "boolean"
-        ? place.isFixedTime
-        : orderIndex === 1,
+      typeof place.isFixedTime === "boolean" ? place.isFixedTime : false,
   };
 };
 
@@ -1501,7 +1529,7 @@ const RouteCreate = () => {
   const [fixPeriod, setFixPeriod] = useState("PM");
   const [fixHour, setFixHour] = useState(12);
   const [fixMinute, setFixMinute] = useState(30);
-  const [fixIsFixed, setFixIsFixed] = useState(true);
+  const [fixIsFixed, setFixIsFixed] = useState(false);
 
   const [isFavoriteModalOpen, setIsFavoriteModalOpen] = useState(false);
   const [favoriteModalDayIndex, setFavoriteModalDayIndex] = useState(0);
@@ -1968,12 +1996,15 @@ const RouteCreate = () => {
     setFixPeriod(parsedTime.period);
     setFixHour(parsedTime.hour);
     setFixMinute(parsedTime.minute);
-    setFixIsFixed(true);
+    setFixIsFixed(
+      typeof place.isFixedTime === "boolean" ? place.isFixedTime : false
+    );
   };
 
   const handleCloseFixModal = () => {
     setFixModalPlace(null);
     setFixModalDateKey("");
+    setFixIsFixed(false);
   };
 
   const handleConfirmFixModal = () => {

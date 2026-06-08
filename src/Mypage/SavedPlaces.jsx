@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import "./SavedPlaces.css";
 
-import folderOutlineIcon from "../img/파랑색 테두리 폴더.png";
 import folderFilledIcon from "../img/파랑색폴더.png";
 import editIcon from "../img/연필.png";
 import folderAddIcon from "../img/폴더추가.png";

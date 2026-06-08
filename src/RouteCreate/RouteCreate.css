@@ -128,7 +128,7 @@ body,
 .route-calendar-day {
   appearance: none;
   -webkit-appearance: none;
-  border: none !important;
+  border: none;
   outline: none;
   box-shadow: none;
   background: transparent;
@@ -222,11 +222,16 @@ body,
 /* 검색 영역 */
 .route-search-area {
   position: relative;
+  z-index: 120;
+  isolation: isolate;
   width: 100%;
   padding: 20px 14px 12px;
+  box-sizing: border-box;
 }
 
 .route-search-top-row {
+  position: relative;
+  z-index: 2;
   width: 100%;
   display: flex;
   align-items: stretch;
@@ -301,24 +306,42 @@ body,
   position: absolute;
   top: calc(100% + 8px);
   left: 14px;
-  right: 106px;
-  z-index: 20;
+  right: 14px;
+  z-index: 300;
 
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  max-height: min(520px, calc(100dvh - 170px));
+  overflow-y: auto;
+  padding: 12px;
+  box-sizing: border-box;
+
+  border: 1px solid #e8eef5;
+  border-radius: 28px;
+  background: #ffffff;
+  box-shadow: 0 18px 44px rgba(21, 33, 61, 0.14);
+  scrollbar-width: none;
+}
+
+.route-search-result-list::-webkit-scrollbar {
+  display: none;
 }
 
 .route-search-result-card {
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 14px 16px;
   border: 1px solid #edf2f7;
-  border-radius: 16px;
+  border-radius: 22px;
   background: #ffffff;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 
 .route-search-result-text {
@@ -364,10 +387,11 @@ body,
 
 .route-search-empty {
   padding: 18px 14px;
-  border-radius: 14px;
-  background: #f8fafc;
+  border-radius: 18px;
+  background: #ffffff;
   text-align: center;
   font-size: 14px;
+  font-weight: 700;
   color: #94a3b8;
 }
 
@@ -699,38 +723,74 @@ body,
   cursor: pointer;
 }
 
+.fix-point-portal,
 .fix-point-overlay {
   position: fixed;
   inset: 0;
   width: 100vw;
+  height: 100vh;
   height: 100dvh;
-  min-height: 100dvh;
-  z-index: 100000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
+  z-index: 2147483647;
+  display: grid;
+  place-items: center;
+  padding: 16px 12px;
   box-sizing: border-box;
+  isolation: isolate;
+}
+
+.fix-point-portal {
+  background: transparent;
+  pointer-events: none;
+}
+
+.fix-point-overlay {
   background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  pointer-events: auto;
+}
+
+.fix-point-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: default;
+  pointer-events: auto;
 }
 
 .fix-point-modal {
   position: relative;
-  z-index: 100001;
-  width: calc(100vw - 48px);
-  max-width: 360px;
+  z-index: 1;
+  display: block;
+  width: min(340px, calc(100vw - 32px));
+  max-width: 340px;
+  max-height: calc(100vh - 40px);
   max-height: calc(100dvh - 40px);
   box-sizing: border-box;
-  padding: 22px;
-  border-radius: 26px;
+  margin: 0 auto;
+  padding: 18px 18px 16px;
+  border-radius: 22px;
   background: #ffffff;
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.22);
+  box-shadow: 0 18px 54px rgba(15, 23, 42, 0.24);
   color: #172033;
   text-align: center;
   overflow-y: auto;
   scrollbar-width: none;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  filter: none;
+  pointer-events: auto;
 }
 
 .fix-point-modal::-webkit-scrollbar {
@@ -738,10 +798,10 @@ body,
 }
 
 .fix-point-icon {
-  width: 40px;
-  height: 40px;
-  margin: 0 auto 18px;
-  border-radius: 14px;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 12px;
+  border-radius: 12px;
   background: #e6f8ff;
   color: #1da7ed;
   display: flex;
@@ -750,26 +810,26 @@ body,
 }
 
 .fix-point-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 }
 
 .fix-point-title {
   margin: 0;
-  font-size: 21px;
+  font-size: 18px;
   font-weight: 800;
-  line-height: 1.25;
+  line-height: 1.22;
   letter-spacing: -0.04em;
   color: #172033;
 }
 
 .fix-point-place {
-  margin-top: 6px;
+  margin-top: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   line-height: 1.3;
   color: #7b88a3;
@@ -777,14 +837,14 @@ body,
 }
 
 .fix-point-place svg {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
 }
 
 .fix-point-period-tabs {
-  margin-top: 24px;
-  height: 44px;
-  padding: 4px;
+  margin-top: 16px;
+  height: 38px;
+  padding: 3px;
   border-radius: 999px;
   background: #eef3f9;
   display: grid;
@@ -796,7 +856,7 @@ body,
   border-radius: 999px;
   background: transparent;
   color: #6f7d98;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
   cursor: pointer;
 }
@@ -808,39 +868,39 @@ body,
 }
 
 .fix-point-time-picker {
-  margin-top: 22px;
+  margin-top: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 10px;
 }
 
 .fix-point-time-column {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .fix-point-time-muted {
-  width: 64px;
-  height: 22px;
+  width: 52px;
+  height: 18px;
   border: 0;
   background: transparent;
   color: #cfd7e4;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
 }
 
 .fix-point-time-selected {
-  width: 64px;
-  height: 76px;
+  width: 52px;
+  height: 58px;
   border: 2px solid #aee3ff;
-  border-radius: 16px;
+  border-radius: 14px;
   background: #e8f8ff;
   color: #1ea3ee;
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 900;
   line-height: 1;
   cursor: default;
@@ -848,22 +908,22 @@ body,
 
 .fix-point-time-colon {
   color: #d8e4ef;
-  font-size: 30px;
+  font-size: 24px;
   font-weight: 900;
   line-height: 1;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .fix-point-fixed-row {
-  margin-top: 22px;
-  min-height: 64px;
-  padding: 14px 16px;
-  border-radius: 18px;
+  margin-top: 16px;
+  min-height: 52px;
+  padding: 10px 12px;
+  border-radius: 15px;
   background: #f5f7fb;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   cursor: pointer;
 }
 
@@ -876,19 +936,19 @@ body,
 }
 
 .fix-point-fixed-text strong {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 900;
   color: #172033;
   letter-spacing: -0.03em;
 }
 
 .fix-point-fixed-text small {
-  margin-top: 3px;
-  font-size: 11px;
+  margin-top: 2px;
+  font-size: 10px;
   font-weight: 600;
   color: #7d8aa3;
   letter-spacing: -0.03em;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .fix-point-fixed-row input {
@@ -899,9 +959,9 @@ body,
 
 .fix-point-switch {
   position: relative;
-  flex: 0 0 46px;
-  width: 46px;
-  height: 26px;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 24px;
   border-radius: 999px;
   background: #c7d2e2;
   transition: background-color 0.15s ease;
@@ -912,8 +972,8 @@ body,
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #ffffff;
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16);
@@ -925,21 +985,21 @@ body,
 }
 
 .fix-point-fixed-row input:checked + .fix-point-switch::after {
-  transform: translateX(20px);
+  transform: translateX(18px);
 }
 
 .fix-point-actions {
-  margin-top: 20px;
+  margin-top: 15px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 
 .fix-point-actions button {
-  height: 52px;
+  height: 44px;
   border: 0;
-  border-radius: 16px;
-  font-size: 16px;
+  border-radius: 14px;
+  font-size: 14px;
   font-weight: 900;
   letter-spacing: -0.03em;
   cursor: pointer;
@@ -1283,49 +1343,54 @@ body,
   }
 
   .route-search-result-list {
-    right: 103px;
+    left: 14px;
+    right: 14px;
   }
 
+  .fix-point-portal,
   .fix-point-overlay {
-    padding: 14px;
+    padding: 14px 10px;
   }
 
   .fix-point-modal {
-    width: calc(100vw - 28px);
-    padding: 20px;
-    border-radius: 24px;
+    width: min(330px, calc(100vw - 28px));
+    max-width: 330px;
+    max-height: calc(100vh - 28px);
+    max-height: calc(100dvh - 28px);
+    padding: 18px 16px 16px;
+    border-radius: 22px;
   }
 
   .fix-point-title {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .fix-point-period-tabs {
-    margin-top: 22px;
+    margin-top: 16px;
   }
 
   .fix-point-time-picker {
-    gap: 14px;
+    gap: 10px;
   }
 
   .fix-point-time-selected {
-    width: 60px;
-    height: 72px;
-    font-size: 30px;
+    width: 52px;
+    height: 58px;
+    font-size: 26px;
   }
 
   .fix-point-time-muted {
-    width: 60px;
-    font-size: 17px;
+    width: 52px;
+    font-size: 15px;
   }
 
   .fix-point-time-colon {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .fix-point-actions button {
-    height: 50px;
-    font-size: 15px;
+    height: 44px;
+    font-size: 14px;
   }
 
   .favorite-place-overlay {
@@ -1393,7 +1458,24 @@ body,
   }
 
   .route-search-result-list {
-    right: 96px;
+    left: 12px;
+    right: 12px;
+  }
+
+  .fix-point-modal {
+    width: calc(100vw - 24px);
+    max-width: 320px;
+    padding: 16px 14px;
+  }
+
+  .fix-point-time-selected {
+    width: 48px;
+    height: 54px;
+    font-size: 24px;
+  }
+
+  .fix-point-time-muted {
+    width: 48px;
   }
 
   .favorite-place-overlay {
