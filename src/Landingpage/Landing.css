@@ -142,12 +142,52 @@
   text-align: left;
 }
 
-/* 푸터 */
-.footer {
-  margin-top: 30px;
+/* 랜딩 푸터 */
+.landing-footer {
+  width: 100%;
+  margin-top: 56px;
+  min-height: 205px;
+  padding: 50px 16px 35px;
+  box-sizing: border-box;
+  background: #f3f8fe;
   text-align: center;
-  font-size: 12px;
-  color: #999;
+}
+
+.landing-footer-brand,
+.landing-footer-copyright {
+  margin: 0;
+}
+
+.landing-footer-brand {
+  color: #16a5f2;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.7px;
+}
+
+.landing-footer-copyright {
+  margin-top: 9px;
+  color: #687b95;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: -0.4px;
+}
+
+.landing-footer-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 27px;
+  margin-top: 27px;
+}
+
+.landing-footer-icons img {
+  display: block;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 /* ================================
@@ -172,10 +212,10 @@ body {
 /* 전체 화면을 모바일 앱 시안처럼 중앙 고정 */
 .landing {
   width: 100%;
-  max-width: 360px !important;
+  max-width: var(--page-max-width, 430px) !important;
   min-height: 100vh;
   margin: 0 auto !important;
-  padding: 16px 0 40px !important;
+  padding: 16px 0 0 !important;
   box-sizing: border-box;
   background: #f8fbfd;
 }
@@ -239,7 +279,7 @@ body {
 /* 작은 모바일 대응 */
 @media (max-width: 360px) {
   .landing {
-    max-width: 100% !important;
+    max-width: var(--page-max-width, 430px) !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
   }
@@ -250,5 +290,26 @@ body {
 
   .landing-content p {
     font-size: 15px;
+  }
+}
+
+/*
+ * Desktop widths previously showed two different page backgrounds: the app
+ * column used #f8fbfd while the surrounding document used #f2f4f7.  Keep the
+ * landing page as one continuous white canvas without changing other routes.
+ */
+html:has(.landing),
+body:has(.landing),
+#root:has(.landing),
+.app:has(.landing),
+.app-content:has(.landing),
+.route-transition:has(.landing),
+.landing {
+  background: #ffffff;
+}
+
+@media (min-width: 768px) {
+  .app:has(.landing) {
+    box-shadow: none;
   }
 }

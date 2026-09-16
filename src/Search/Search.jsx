@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import "./Search.css";
 
 import hotMainImg from "../img/도쿄.png";
 import hotSubImg1 from "../img/교토.png";
 import hotSubImg2 from "../img/서비스 소개 .png";
+
+const RECOMMEND_PAGE_PATH = "/recommend";
 
 const SearchIcon = () => (
   <svg viewBox="0 0 24 24" className="svg-icon" aria-hidden="true">
@@ -305,7 +307,8 @@ const travelSearchPlaces = [
 
 function Search() {
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const keywordFromUrl = searchParams.get("keyword") || "";
   const locationState = location.state || {};
@@ -392,12 +395,15 @@ function Search() {
 
     setQuery(trimmedKeyword);
     setSearchedKeyword(trimmedKeyword);
-    setSearchParams({ keyword: trimmedKeyword });
 
     setRecentKeywords((prev) => {
       const filtered = prev.filter((item) => item !== trimmedKeyword);
       return [trimmedKeyword, ...filtered].slice(0, 5);
     });
+
+    navigate(
+      `${RECOMMEND_PAGE_PATH}?keyword=${encodeURIComponent(trimmedKeyword)}`
+    );
   };
 
   const handleSearchSubmit = (e) => {

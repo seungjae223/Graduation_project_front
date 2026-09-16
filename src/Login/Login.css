@@ -188,12 +188,11 @@
 }
 
 .kakao,
-.naver {
+.google {
   flex: 1;
   min-width: 0;
   height: clamp(42px, 12vw, 48px);
 
-  border: none;
   border-radius: 10px;
 
   display: flex;
@@ -209,16 +208,22 @@
 .kakao {
   background: #fee500;
   color: #111827;
+  border: none;
 }
 
-.naver {
-  background: #03c75a;
-  color: white;
+.google {
+  background: #ffffff;
+  color: #202124;
+  border: 1px solid #dadce0;
+}
+
+.google:hover {
+  background: #f8fafd;
 }
 
 /* 소셜 버튼 아이콘 */
 .kakao img,
-.naver img {
+.google img {
   width: clamp(16px, 4.5vw, 18px);
   height: clamp(16px, 4.5vw, 18px);
   object-fit: contain;
@@ -258,7 +263,7 @@
   }
 
   .kakao,
-  .naver {
+  .google {
     font-size: 12px;
   }
 }

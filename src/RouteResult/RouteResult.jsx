@@ -1,36 +1,109 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  closestCenter,
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { getSavedRouteById } from "../utils/routeStorage";
-import api from "../api/api"; // ✅ API 통신을 위해 추가
+import api from "../api/api";
 import "./RouteResult.css";
 
 let mapsConfigured = false;
 let kakaoMapsLoadingPromise = null;
 const runtimeCoordinateCache = new Map();
 const TIMELINE_ITEM_BUTTON_STYLE = { cursor: "pointer" };
-const ROUTE_STORAGE_KEY = "mock_saved_route_results";
-const ROUTE_STORAGE_EVENT = "mock-routes-updated";
 const DELETE_ROUTE_EVENT = "route-result-delete-schedule";
+const ROUTE_FIXED_TIME_STORAGE_PREFIX = "route_fixed_time_map";
+const DEFAULT_ROUTE_START_TIME = "09:00";
 
-const deleteSavedRouteById = (routeId) => {
-  if (!routeId || typeof window === "undefined") {
-    return false;
+const getApiErrorMessage = (error, fallbackMessage) => {
+  const data = error?.response?.data;
+
+  if (typeof data === "string" && data.trim()) {
+    return data;
   }
-  try {
-    const raw = window.localStorage.getItem(ROUTE_STORAGE_KEY);
-    const prev = raw ? JSON.parse(raw) : [];
-    if (!Array.isArray(prev)) {
-      return false;
-    }
-    const next = prev.filter((route) => String(route.id) !== String(routeId));
-    window.localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(next));
-    window.dispatchEvent(new CustomEvent(ROUTE_STORAGE_EVENT));
-    return prev.length !== next.length;
-  } catch (error) {
-    console.error("일정 삭제 실패:", error);
-    return false;
+
+  return data?.message || data?.error || error?.message || fallbackMessage;
+};
+
+const deleteTripById = async (tripId) => {
+  if (!tripId) {
+    throw new Error("삭제할 일정 정보를 찾지 못했어요.");
   }
+
+  await api.delete(`/api/trips/${tripId}`);
+  return true;
+};
+
+const getDeleteEventDetail = (event) => {
+  if (!event || typeof event !== "object") {
+    return {};
+  }
+
+  return event.detail && typeof event.detail === "object" ? event.detail : {};
+};
+
+const getTripPlaceTargetFromDeleteDetail = (detail = {}) => {
+  const place =
+    detail.place ||
+    detail.item ||
+    detail.targetPlace ||
+    detail.selectedPlace ||
+    detail.tripPlace ||
+    {};
+
+  return {
+    tripPlaceId:
+      detail.tripPlaceId ??
+      detail.tripPlace?.id ??
+      place.tripPlaceId ??
+      place.id ??
+      "",
+    placeId:
+      detail.placeId ??
+      detail.place?.id ??
+      place.placeId ??
+      "",
+    day:
+      detail.day ??
+      detail.dayNumber ??
+      place.day ??
+      place.dayNumber ??
+      "",
+  };
+};
+
+const isPlaceDeleteDetail = (detail = {}) => {
+  const target = getTripPlaceTargetFromDeleteDetail(detail);
+
+  return Boolean(
+    detail.type === "place" ||
+      detail.deleteType === "place" ||
+      detail.mode === "place" ||
+      detail.place ||
+      detail.item ||
+      detail.targetPlace ||
+      detail.selectedPlace ||
+      target.tripPlaceId ||
+      target.placeId,
+  );
+};
+
+
+const deleteTripPlaceById = async () => {
+  throw new Error(
+    "현재 백엔드 Swagger에는 여행 장소 개별 삭제 API가 없습니다. 일정 전체 삭제만 가능합니다."
+  );
 };
 
 const ClockIcon = () => (
@@ -71,65 +144,6 @@ const PinIcon = () => (
       fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
-    />{" "}
-  </svg>
-);
-const BusIcon = () => (
-  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-    {" "}
-    <rect
-      x="5"
-      y="4.5"
-      width="14"
-      height="11"
-      rx="2"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    />{" "}
-    <path
-      d="M8 8.2H16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />{" "}
-    <path
-      d="M8.5 18.5V16M15.5 18.5V16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />{" "}
-    <circle cx="8.5" cy="14.5" r="1" fill="currentColor" />{" "}
-    <circle cx="15.5" cy="14.5" r="1" fill="currentColor" />{" "}
-  </svg>
-);
-const WalkIcon = () => (
-  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-    {" "}
-    <circle cx="14.5" cy="5.5" r="2" fill="currentColor" />{" "}
-    <path
-      d="M8 12L11.5 9.8L13.5 12.5L16.5 11"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />{" "}
-    <path
-      d="M11 12.5L9.3 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />{" "}
-    <path
-      d="M13.5 12.5L16.3 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
     />{" "}
   </svg>
 );
@@ -318,8 +332,8 @@ const DEFAULT_RESULT_DAYS = [
         title: "서울역 (출발)",
         desc: "",
         badge: "지하철/KTX",
-        move: "버스 15분 이동 (2.1km)",
-        moveType: "bus",
+        move: "직선거리 2.1km",
+        moveType: "distance",
       },
     ],
   },
@@ -337,8 +351,8 @@ const DEFAULT_OVERSEAS_RESULT_DAYS = [
         title: "교토역",
         desc: "숙소 출발",
         badge: "출발",
-        move: "지하철 12분 이동 (3.1km)",
-        moveType: "bus",
+        move: "직선거리 3.1km",
+        moveType: "distance",
       },
     ],
   },
@@ -346,15 +360,35 @@ const DEFAULT_OVERSEAS_RESULT_DAYS = [
 
 const normalizeTitle = (title = "") =>
   title.replace(/\s*\([^)]*\)/g, "").trim();
-const getMemoKey = (dayIndex, itemIndex, itemTitle = "") =>
+const getMemoKey = (dayIndex, itemIndex, itemTitle = "", item = {}) => {
+  const stableId =
+    item.tripPlaceId ?? item.id ?? item.placeId ?? item.sourceId ?? "";
+  const title = normalizeTitle(
+    itemTitle || item.title || item.placeName || item.name || ""
+  );
+
+  if (stableId) {
+    return `${dayIndex}:id:${stableId}`;
+  }
+
+  return `${dayIndex}:title:${title || itemIndex}`;
+};
+const getLegacyMemoKey = (dayIndex, itemIndex, itemTitle = "") =>
   `${dayIndex}:${itemIndex}:${normalizeTitle(itemTitle)}`;
 const getInitialMemoValue = (item = {}) =>
   String(item.memo || item.memoText || item.note || item.notes || "").trim();
 const getItemMemoValue = (memoValues = {}, dayIndex, itemIndex, item = {}) => {
-  const key = getMemoKey(dayIndex, itemIndex, item.title);
+  const key = getMemoKey(dayIndex, itemIndex, item.title, item);
+  const legacyKey = getLegacyMemoKey(dayIndex, itemIndex, item.title);
+
   if (Object.prototype.hasOwnProperty.call(memoValues, key)) {
     return memoValues[key];
   }
+
+  if (Object.prototype.hasOwnProperty.call(memoValues, legacyKey)) {
+    return memoValues[legacyKey];
+  }
+
   return getInitialMemoValue(item);
 };
 const getMemoDisplayTitle = (memo = "") =>
@@ -416,10 +450,15 @@ const normalizeMapProvider = (value = "") => {
   return "";
 };
 const getSourceItemsForDay = (day, dayIndex) => {
+  if (day && Array.isArray(day.items)) {
+    return day.items;
+  }
+
   const fallbackDay =
     DEFAULT_RESULT_DAYS[dayIndex % DEFAULT_RESULT_DAYS.length] ||
     DEFAULT_RESULT_DAYS[0];
-  return day?.items?.length > 0 ? day.items : fallbackDay.items;
+
+  return fallbackDay.items;
 };
 const getRuntimeCoordinateCacheKey = (provider, title) =>
   `${provider}:${normalizeTitle(title)}`;
@@ -1062,20 +1101,600 @@ const buildStaticMapUrl = (mapData) => {
   });
   return `https://maps.googleapis.com/maps/api/staticmap?${params.toString()}`;
 };
-const makeMockMove = (index) => {
-  const busTexts = [
-    "버스 15분 이동 (2.1km)",
-    "버스 12분 이동 (1.8km)",
-    "버스 18분 이동 (2.4km)",
+const padTimeValue = (value) => String(value).padStart(2, "0");
+
+const formatServerTimeValue = (timeValue) => {
+  if (!timeValue) return "";
+
+  if (typeof timeValue === "string") {
+    const trimmed = timeValue.trim();
+    if (!trimmed) return "";
+
+    const hhmmMatch = trimmed.match(/^(\d{1,2}):(\d{2})/);
+    if (hhmmMatch) {
+      return `${padTimeValue(hhmmMatch[1])}:${hhmmMatch[2]}`;
+    }
+
+    return trimmed;
+  }
+
+  const hour = Number(timeValue.hour);
+  const minute = Number(timeValue.minute);
+
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) {
+    return "";
+  }
+
+  return `${padTimeValue(hour)}:${padTimeValue(minute)}`;
+};
+
+const getDistanceKm = (from = {}, to = {}) => {
+  const fromCoord = getCoordFromItem(from);
+  const toCoord = getCoordFromItem(to);
+
+  if (!fromCoord || !toCoord) {
+    return null;
+  }
+
+  const toRad = (value) => (Number(value) * Math.PI) / 180;
+  const earthRadiusKm = 6371;
+  const dLat = toRad(toCoord.lat - fromCoord.lat);
+  const dLng = toRad(toCoord.lng - fromCoord.lng);
+  const lat1 = toRad(fromCoord.lat);
+  const lat2 = toRad(toCoord.lat);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const formatStraightDistance = (distanceKm) => {
+  const value = Number(distanceKm);
+
+  if (!Number.isFinite(value)) {
+    return "";
+  }
+
+  if (value < 1) {
+    return `직선거리 ${Math.round(value * 1000)}m`;
+  }
+
+  return `직선거리 ${value.toFixed(1)}km`;
+};
+
+const getStraightDistanceText = (from, to) => {
+  return formatStraightDistance(getDistanceKm(from, to));
+};
+
+const getTotalStraightDistanceKm = (items = []) => {
+  return items.reduce((sum, item, index) => {
+    if (index >= items.length - 1) return sum;
+
+    const distance = getDistanceKm(item, items[index + 1]);
+    return Number.isFinite(distance) ? sum + distance : sum;
+  }, 0);
+};
+
+const normalizeFixedTimeMap = (map = {}) => {
+  return map && typeof map === "object" && !Array.isArray(map) ? map : {};
+};
+
+const readFixedTimeMap = (routeId) => {
+  if (!routeId || typeof window === "undefined") {
+    return {};
+  }
+
+  try {
+    const raw = window.localStorage.getItem(
+      `${ROUTE_FIXED_TIME_STORAGE_PREFIX}:${routeId}`
+    );
+
+    return raw ? normalizeFixedTimeMap(JSON.parse(raw)) : {};
+  } catch (error) {
+    console.error("고정 시간 정보 불러오기 실패:", error);
+    return {};
+  }
+};
+
+const getFirstFormattedTimeValue = (...values) => {
+  for (const value of values) {
+    if (value === null || value === undefined || value === "") {
+      continue;
+    }
+
+    const formatted = formatServerTimeValue(value);
+
+    if (formatted) {
+      return formatted;
+    }
+  }
+
+  return "";
+};
+
+const isRealFixedTimeEntry = (entry) => {
+  if (entry === null || entry === undefined || entry === "") {
+    return false;
+  }
+
+  if (typeof entry === "string" || typeof entry === "number") {
+    return Boolean(getFirstFormattedTimeValue(entry));
+  }
+
+  if (typeof entry !== "object") {
+    return false;
+  }
+
+  if (
+    entry.isFixedTime === false ||
+    entry.isFixed === false ||
+    entry.fixed === false
+  ) {
+    return false;
+  }
+
+  if (
+    entry.isFixedTime === true ||
+    entry.isFixed === true ||
+    entry.fixed === true
+  ) {
+    return true;
+  }
+
+  // flag 없이 저장된 경우에는 fixedTime 계열 필드만 고정 시간으로 인정합니다.
+  return Boolean(
+    getFirstFormattedTimeValue(entry.fixedTimeLabel, entry.fixedTime)
+  );
+};
+
+const getFixedTimeValue = (entry) => {
+  if (!isRealFixedTimeEntry(entry)) {
+    return "";
+  }
+
+  if (typeof entry === "string" || typeof entry === "number") {
+    return getFirstFormattedTimeValue(entry);
+  }
+
+  return getFirstFormattedTimeValue(
+    entry.timeLabel,
+    entry.fixedTimeLabel,
+    entry.time,
+    entry.fixedTime,
+    entry.arrivalTime,
+    entry.departureTime,
+    entry.startTime,
+  );
+};
+
+const getFixedTimeValueFromPlace = (place = {}, fixedEntry = null) => {
+  const fixedEntryTime = getFixedTimeValue(fixedEntry);
+  if (fixedEntryTime) {
+    return fixedEntryTime;
+  }
+
+  const explicitFixedTime = getFirstFormattedTimeValue(
+    place.fixedTimeLabel,
+    place.fixedTime,
+    place.fixedArrivalTime,
+    place.fixedDepartureTime,
+  );
+
+  if (explicitFixedTime) {
+    return explicitFixedTime;
+  }
+
+  // time/timeLabel은 일반 일정에도 들어올 수 있으므로 isFixedTime이 명확할 때만 사용합니다.
+  // 기본 출발 시간 09:00이 여러 장소에 복사되는 문제도 여기서 막습니다.
+  if (place.isFixedTime === true) {
+    const flaggedTime = getFirstFormattedTimeValue(
+      place.timeLabel,
+      place.time,
+      place.arrivalTime,
+      place.departureTime,
+      place.startTime,
+    );
+
+    if (flaggedTime && flaggedTime !== DEFAULT_ROUTE_START_TIME) {
+      return flaggedTime;
+    }
+  }
+
+  return "";
+};
+
+const isFixedTimePlace = (place = {}, fixedEntry = null) =>
+  Boolean(getFixedTimeValueFromPlace(place, fixedEntry));
+
+const getNormalizedCompareText = (value = "") => {
+  return String(value || "").trim().toLowerCase().replace(/\s+/g, "");
+};
+
+const cloneFixedTimeEntryWithMeta = (
+  entry,
+  mapKey = "",
+  matchType = "",
+  mapOrder = 0,
+) => {
+  if (entry === null || entry === undefined || entry === "") {
+    return null;
+  }
+
+  const meta = {
+    _fixedTimeMapKey: mapKey,
+    _fixedTimeMatchType: matchType,
+    _fixedTimeMapOrder: mapOrder,
+  };
+
+  if (typeof entry === "object") {
+    return { ...entry, ...meta };
+  }
+
+  return {
+    ...meta,
+    isFixedTime: true,
+    time: entry,
+  };
+};
+
+const getFixedTimeEntry = (fixedTimeMap = {}, day, place = {}) => {
+  const normalizedMap = normalizeFixedTimeMap(fixedTimeMap);
+  const entries = Object.entries(normalizedMap);
+
+  if (!entries.length) {
+    return null;
+  }
+
+  const name =
+    place.placeName ||
+    place.name ||
+    place.title ||
+    place.destinationName ||
+    "";
+
+  const address = place.address || place.desc || place.roadAddress || "";
+  const normalizedName = getNormalizedCompareText(name);
+  const normalizedAddress = getNormalizedCompareText(address);
+  const normalizedDay = getNumberValue(day);
+  const dayKeyValues = Array.from(
+    new Set(
+      [day, normalizedDay, Number.isFinite(normalizedDay) ? normalizedDay - 1 : ""]
+        .filter((value) => value !== null && value !== undefined && value !== "")
+        .map((value) => String(value))
+    )
+  );
+
+  const entryOrderByKey = new Map(
+    entries.map(([key], index) => [key, index + 1])
+  );
+
+  const idCandidateValues = [
+    ["tripPlaceId", place.tripPlaceId],
+    ["tripPlaceId", place.serverTripPlaceId],
+    ["tripPlaceId", place.id],
+    ["placeId", place.placeId],
+    ["placeId", place.originalId],
+    ["sourceId", place.sourceId],
+  ].filter(([, value]) => value !== null && value !== undefined && value !== "");
+
+  const stableCandidateKeys = dayKeyValues
+    .flatMap((dayKey) => [
+      ...idCandidateValues.map(([type, value]) => `${dayKey}:${type}:${value}`),
+      normalizedName ? `${dayKey}:name:${normalizedName}` : "",
+      normalizedAddress ? `${dayKey}:address:${normalizedAddress}` : "",
+    ])
+    .filter(Boolean);
+
+  const findByKeys = (keys = []) => {
+    for (const key of keys) {
+      const entry = normalizedMap[key];
+
+      if (isRealFixedTimeEntry(entry)) {
+        return cloneFixedTimeEntryWithMeta(
+          entry,
+          key,
+          "stable-key",
+          entryOrderByKey.get(key) || 0,
+        );
+      }
+    }
+
+    return null;
+  };
+
+  const stableEntry = findByKeys(stableCandidateKeys);
+  if (stableEntry) {
+    return stableEntry;
+  }
+
+  for (const [key, entry] of entries) {
+    if (!isRealFixedTimeEntry(entry) || typeof entry !== "object") {
+      continue;
+    }
+
+    const entryPlace =
+      entry.place ||
+      entry.item ||
+      entry.targetPlace ||
+      entry.selectedPlace ||
+      entry.tripPlace ||
+      {};
+
+    const entryDay = getNumberValue(
+      entry.day,
+      entry.dayNumber,
+      entryPlace.day,
+      entryPlace.dayNumber,
+    );
+    if (
+      Number.isFinite(normalizedDay) &&
+      Number.isFinite(entryDay) &&
+      entryDay !== normalizedDay &&
+      entryDay !== normalizedDay - 1
+    ) {
+      continue;
+    }
+
+    const entryIds = [
+      entry.tripPlaceId,
+      entry.serverTripPlaceId,
+      entry.placeId,
+      entry.originalId,
+      entry.sourceId,
+      entry.id,
+      entryPlace.tripPlaceId,
+      entryPlace.serverTripPlaceId,
+      entryPlace.placeId,
+      entryPlace.originalId,
+      entryPlace.sourceId,
+      entryPlace.id,
+    ].map((value) => String(value || ""));
+
+    if (
+      idCandidateValues.some(([, value]) =>
+        entryIds.includes(String(value || ""))
+      )
+    ) {
+      return cloneFixedTimeEntryWithMeta(
+        entry,
+        key,
+        "entry-id",
+        entryOrderByKey.get(key) || 0,
+      );
+    }
+
+    const entryName = getNormalizedCompareText(
+      entry.placeName ||
+        entry.name ||
+        entry.title ||
+        entry.destinationName ||
+        entryPlace.placeName ||
+        entryPlace.name ||
+        entryPlace.title ||
+        entryPlace.destinationName ||
+        ""
+    );
+    const entryAddress = getNormalizedCompareText(
+      entry.address ||
+        entry.desc ||
+        entry.roadAddress ||
+        entryPlace.address ||
+        entryPlace.desc ||
+        entryPlace.roadAddress ||
+        ""
+    );
+
+    if (normalizedName && entryName && normalizedName === entryName) {
+      return cloneFixedTimeEntryWithMeta(
+        entry,
+        key,
+        "entry-name",
+        entryOrderByKey.get(key) || 0,
+      );
+    }
+
+    if (normalizedAddress && entryAddress && normalizedAddress === entryAddress) {
+      return cloneFixedTimeEntryWithMeta(
+        entry,
+        key,
+        "entry-address",
+        entryOrderByKey.get(key) || 0,
+      );
+    }
+
+    const normalizedKey = getNormalizedCompareText(key);
+    if (
+      normalizedName &&
+      normalizedKey.includes(normalizedName) &&
+      dayKeyValues.some((dayKey) => normalizedKey.includes(String(dayKey)))
+    ) {
+      return cloneFixedTimeEntryWithMeta(
+        entry,
+        key,
+        "key-name",
+        entryOrderByKey.get(key) || 0,
+      );
+    }
+  }
+
+  // 순서/인덱스 기반 키는 드래그 후 다른 장소에 시간이 붙을 수 있어서 사용하지 않습니다.
+  return null;
+};
+
+const getFixedTimeAssignmentScore = (item = {}) => {
+  const matchType = String(
+    item.fixedTimeEntry?._fixedTimeMatchType || item.fixedTimeMatchType || ""
+  );
+
+  if (
+    matchType.includes("stable") ||
+    matchType.includes("id") ||
+    matchType.includes("name") ||
+    matchType.includes("address")
+  ) {
+    return 100;
+  }
+
+  if (item.fixedTimeEntry) {
+    return 90;
+  }
+
+  if (
+    getFirstFormattedTimeValue(
+      item.fixedTimeLabel,
+      item.fixedTime,
+      item.fixedArrivalTime,
+      item.fixedDepartureTime,
+    )
+  ) {
+    return 80;
+  }
+
+  if (item.isFixedTime === true) {
+    return 60;
+  }
+
+  return 0;
+};
+
+const getFixedTimeAssignmentOrder = (item = {}) => {
+  const numericOrder = getNumberValue(
+    item.fixedTimeEntry?._fixedTimeMapOrder,
+    item.fixedTimeMapOrder,
+    item.fixedTimeOrder,
+  );
+
+  if (Number.isFinite(numericOrder)) {
+    return numericOrder;
+  }
+
+  const dateCandidates = [
+    item.fixedTimeEntry?.updatedAt,
+    item.fixedTimeEntry?.createdAt,
+    item.fixedTimeUpdatedAt,
+    item.fixedTimeCreatedAt,
   ];
-  const walkTexts = [
-    "도보 12분 이동 (800m)",
-    "도보 9분 이동 (650m)",
-    "도보 14분 이동 (1.1km)",
-  ];
-  return index % 2 === 0
-    ? { move: busTexts[index % busTexts.length], moveType: "bus" }
-    : { move: walkTexts[index % walkTexts.length], moveType: "walk" };
+
+  for (const candidate of dateCandidates) {
+    const parsed = Date.parse(candidate);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+
+  return 0;
+};
+
+const getItemFixedTimeValueForNormalization = (item = {}) => {
+  const explicitFixedTime = getFirstFormattedTimeValue(
+    item.fixedTimeLabel,
+    item.fixedTime,
+    item.fixedArrivalTime,
+    item.fixedDepartureTime,
+  );
+
+  if (explicitFixedTime) {
+    return explicitFixedTime;
+  }
+
+  if (item.isFixedTime === true) {
+    return getFirstFormattedTimeValue(item.timeLabel, item.time);
+  }
+
+  return "";
+};
+
+const normalizeFixedScheduleItems = (items = []) => {
+  const groups = new Map();
+
+  items.forEach((item, index) => {
+    if (index === 0) return;
+
+    const fixedTimeValue = getItemFixedTimeValueForNormalization(item);
+    if (!fixedTimeValue) return;
+
+    const group = groups.get(fixedTimeValue) || [];
+    group.push({
+      index,
+      score: getFixedTimeAssignmentScore(item),
+      order: getFixedTimeAssignmentOrder(item),
+    });
+    groups.set(fixedTimeValue, group);
+  });
+
+  const keepIndexes = new Set();
+
+  for (const group of groups.values()) {
+    if (group.length === 1) {
+      keepIndexes.add(group[0].index);
+      continue;
+    }
+
+    const [best] = [...group].sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.order !== a.order) return b.order - a.order;
+      return b.index - a.index;
+    });
+
+    keepIndexes.add(best.index);
+  }
+
+  return items.map((item, index) => {
+    const fixedTimeValue = getItemFixedTimeValueForNormalization(item);
+
+    if (index === 0) {
+      return {
+        ...item,
+        time: DEFAULT_ROUTE_START_TIME,
+        badge: "출발",
+        isStartPoint: true,
+      };
+    }
+
+    if (fixedTimeValue && keepIndexes.has(index)) {
+      return {
+        ...item,
+        time: fixedTimeValue,
+        timeLabel: fixedTimeValue,
+        fixedTime: fixedTimeValue,
+        badge: "고정 일정",
+        isFixed: true,
+        isFixedTime: true,
+      };
+    }
+
+    const previousBadge = String(item.badge || "").trim();
+
+    return {
+      ...item,
+      time: "",
+      timeLabel: "",
+      fixedTime: "",
+      fixedTimeLabel: "",
+      fixedArrivalTime: "",
+      fixedDepartureTime: "",
+      fixedTimeEntry: null,
+      fixedTimeMatchType: "",
+      fixedTimeMapOrder: null,
+      badge:
+        previousBadge === "출발" || previousBadge === "고정 일정"
+          ? item.placeType || ""
+          : previousBadge,
+      isStartPoint: false,
+      isFixed: false,
+      isFixedTime: false,
+    };
+  });
+};
+
+const getDisplayTimeForPlace = ({ fixedEntry, index, place = {} }) => {
+  if (index === 0) {
+    return DEFAULT_ROUTE_START_TIME;
+  }
+
+  return getFixedTimeValueFromPlace(place, fixedEntry);
 };
 
 // ✅ 서버에서 받아온 데이터를 화면용 포맷으로 변환해주는 함수
@@ -1179,6 +1798,10 @@ const normalizeServerTripPlace = (place = {}, fallbackDay = 1) => {
     day: normalizedDay,
     visitOrder: normalizedVisitOrder,
     isStartPoint: Boolean(place.isStartPoint || place.startPoint),
+    arrivalTime: place.arrivalTime || "",
+    departureTime: place.departureTime || "",
+    stayDuration: place.stayDuration ?? place.stayMinutes ?? 0,
+    isFixed: Boolean(place.isFixed || place.fixed),
     memo: place.memo || place.memoText || place.note || place.notes || "",
     mapProvider: normalizeMapProvider(place.mapProvider || place.provider || place.mapType),
     countryCode: normalizeCountryCode(place.countryCode || place.country || place.nationCode),
@@ -1186,12 +1809,15 @@ const normalizeServerTripPlace = (place = {}, fallbackDay = 1) => {
 };
 
 // ✅ 서버에서 받아온 여행/장소 데이터를 지도와 상세 일정에서 바로 쓸 수 있는 포맷으로 변환합니다.
-const buildDaysFromServerData = (trip, places = []) => {
+const buildDaysFromServerData = (trip, places = [], fixedTimeMap = {}) => {
   if (!trip) return [];
 
   const normalizedTrip = normalizeServerTrip(trip);
   const daysCount = getTripDaysCount(normalizedTrip);
-  const normalizedPlaces = places.map((place) => normalizeServerTripPlace(place));
+  const normalizedPlaces = places.map((place, index) => ({
+    ...normalizeServerTripPlace(place),
+    __sourceIndex: index,
+  }));
   const tripMapProvider = normalizeMapProvider(normalizedTrip.mapType);
 
   const days = [];
@@ -1199,12 +1825,23 @@ const buildDaysFromServerData = (trip, places = []) => {
   for (let i = 1; i <= daysCount; i += 1) {
     const dayPlaces = normalizedPlaces
       .filter((place) => Number(place.day || 1) === i)
-      .sort((a, b) => Number(a.visitOrder || 0) - Number(b.visitOrder || 0));
+      .sort((a, b) => {
+        if (a.isStartPoint !== b.isStartPoint) {
+          return a.isStartPoint ? -1 : 1;
+        }
+
+        const aOrder = Number(a.visitOrder);
+        const bOrder = Number(b.visitOrder);
+        const safeAOrder = aOrder > 0 ? aOrder : Number(a.__sourceIndex || 0) + 1;
+        const safeBOrder = bOrder > 0 ? bOrder : Number(b.__sourceIndex || 0) + 1;
+
+        return safeAOrder - safeBOrder;
+      });
 
     if (dayPlaces.length === 0) {
       days.push({
         label: `${i}일차`,
-        totalDuration: "0시간 0분",
+        totalDuration: DEFAULT_ROUTE_START_TIME,
         totalDistance: "0km",
         sectionDistance: "일정이 없습니다.",
         routeUrl: normalizedTrip.routeUrl || "",
@@ -1213,16 +1850,25 @@ const buildDaysFromServerData = (trip, places = []) => {
       continue;
     }
 
-    const items = dayPlaces.map((place, index) => {
+    const items = normalizeFixedScheduleItems(dayPlaces.map((place, index) => {
       const isLast = index === dayPlaces.length - 1;
-      const mockMove = makeMockMove(index);
+      const nextPlace = dayPlaces[index + 1];
+      const fixedEntry = getFixedTimeEntry(fixedTimeMap, i, place, index);
+      const fixedTimeValue = getFixedTimeValueFromPlace(place, fixedEntry);
+      const displayTime = index === 0 ? DEFAULT_ROUTE_START_TIME : fixedTimeValue;
+      const isFixedSchedule = index !== 0 && Boolean(fixedTimeValue);
+
       const hasCoordinate =
-        Number.isFinite(Number(place.latitude)) && Number.isFinite(Number(place.longitude));
+        Number.isFinite(Number(place.latitude)) &&
+        Number.isFinite(Number(place.longitude));
+
       const placeCoordinate = hasCoordinate
         ? { lat: place.latitude, lng: place.longitude }
         : null;
+
       const coordinateProvider = getMapProviderByCoordinate(placeCoordinate);
       const coordinateCountryCode = getCountryCodeByCoordinate(placeCoordinate);
+
       const placeProvider =
         coordinateProvider ||
         place.mapProvider ||
@@ -1233,16 +1879,23 @@ const buildDaysFromServerData = (trip, places = []) => {
         id: place.id,
         tripPlaceId: place.tripPlaceId,
         placeId: place.placeId,
-        time:
-          place.time ||
-          place.timeLabel ||
-          ["10:00 AM", "11:30 AM", "01:00 PM", "03:00 PM", "05:00 PM", "07:00 PM"][index % 6] ||
-          "10:00 AM",
+        time: displayTime,
+        fixedTime: fixedTimeValue,
+        timeLabel: fixedTimeValue,
+        fixedTimeEntry: fixedEntry || null,
+        fixedTimeMatchType: fixedEntry?._fixedTimeMatchType || "",
+        fixedTimeMapOrder: fixedEntry?._fixedTimeMapOrder ?? null,
+        departureTime: formatServerTimeValue(place.departureTime),
         title: place.placeName || "이름 없는 장소",
         desc: place.address || "",
-        badge: place.isStartPoint ? "출발" : place.placeType || "",
-        move: isLast ? "" : place.move || place.moveText || mockMove.move,
-        moveType: isLast ? "walk" : place.moveType || place.moveTypeToNext || mockMove.moveType,
+        badge:
+          index === 0
+            ? "출발"
+            : isFixedSchedule
+              ? "고정 일정"
+              : place.placeType || "",
+        move: isLast ? "" : getStraightDistanceText(place, nextPlace),
+        moveType: "distance",
         lat: place.latitude,
         lng: place.longitude,
         latitude: place.latitude,
@@ -1251,24 +1904,28 @@ const buildDaysFromServerData = (trip, places = []) => {
         placeType: place.placeType || "",
         day: place.day,
         visitOrder: place.visitOrder,
-        isStartPoint: place.isStartPoint,
+        isStartPoint: index === 0,
+        isFixed: isFixedSchedule,
+        isFixedTime: Boolean(fixedTimeValue),
+        stayDuration: place.stayDuration,
         countryCode: coordinateCountryCode || place.countryCode,
         mapProvider: placeProvider,
         memo: place.memo || "",
       };
-    });
+    }));
 
-    const totalMinutes = items.length * 90 + 60;
-    const hour = Math.floor(totalMinutes / 60);
-    const minute = totalMinutes % 60;
-    const totalDistanceNumber = (items.length * 2.4 + 3.2).toFixed(1);
-    const sectionDistanceNumber = (items.length * 1.2 + 0.9).toFixed(1);
+    const totalStraightDistance = getTotalStraightDistanceKm(items);
+    const totalDistanceText = Number.isFinite(totalStraightDistance)
+      ? formatStraightDistance(totalStraightDistance).replace("직선거리 ", "")
+      : "0km";
 
     days.push({
       label: `${i}일차`,
-      totalDuration: `${hour}시간 ${minute}분`,
-      totalDistance: `${totalDistanceNumber}km`,
-      sectionDistance: `총 ${sectionDistanceNumber}km 이동`,
+      totalDuration: DEFAULT_ROUTE_START_TIME,
+      totalDistance: totalDistanceText || "0km",
+      sectionDistance: totalDistanceText
+        ? `총 직선거리 ${totalDistanceText}`
+        : "직선거리 정보 없음",
       routeUrl: normalizedTrip.routeUrl || "",
       items,
     });
@@ -1284,48 +1941,57 @@ const formatDateKey = (date) => {
   const day = String(d.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
-const buildDaysFromState = (selectedDates = [], placesByDate = {}) => {
+const buildDaysFromState = (selectedDates = [], placesByDate = {}, fixedTimeMap = {}) => {
   if (!selectedDates.length) return DEFAULT_RESULT_DAYS;
+
   return selectedDates.map((date, dayIndex) => {
     const dateKey = formatDateKey(date);
     const places = placesByDate?.[dateKey] || [];
-    const fallbackDay =
-      DEFAULT_RESULT_DAYS[dayIndex % DEFAULT_RESULT_DAYS.length] ||
-      DEFAULT_RESULT_DAYS[0];
+
     if (!places.length) {
-      return { ...fallbackDay, label: `${dayIndex + 1}일차` };
-    }
-    const items = places.map((place, index) => {
-      const mockMove = makeMockMove(index);
-      const isLast = index === places.length - 1;
-      const placeName = place.name || place.title || place.placeName || "";
       return {
-        time:
-          place.timeLabel ||
-          ["10:00 AM", "11:30 AM", "01:00 PM", "03:00 PM"][index] ||
-          "10:00 AM",
+        label: `${dayIndex + 1}일차`,
+        totalDuration: DEFAULT_ROUTE_START_TIME,
+        totalDistance: "0km",
+        sectionDistance: "일정이 없습니다.",
+        items: [],
+      };
+    }
+
+    const items = normalizeFixedScheduleItems(places.map((place, index) => {
+      const isLast = index === places.length - 1;
+      const nextPlace = places[index + 1];
+      const placeName = place.name || place.title || place.placeName || "";
+      const fixedEntry = getFixedTimeEntry(fixedTimeMap, dayIndex + 1, place, index);
+      const fixedTimeValue = getFixedTimeValueFromPlace(place, fixedEntry);
+      const displayTime = index === 0 ? DEFAULT_ROUTE_START_TIME : fixedTimeValue;
+      const isFixedSchedule = index !== 0 && Boolean(fixedTimeValue);
+
+      const item = {
+        ...place,
         title:
           index === 0 && !placeName.includes("(출발)")
             ? `${placeName}${placeName.includes("역") ? " (출발)" : ""}`
             : placeName,
+        time: displayTime,
+        fixedTime: fixedTimeValue,
+        timeLabel: fixedTimeValue,
+        fixedTimeEntry: fixedEntry || null,
+        fixedTimeMatchType: fixedEntry?._fixedTimeMatchType || "",
+        fixedTimeMapOrder: fixedEntry?._fixedTimeMapOrder ?? null,
+        isStartPoint: index === 0,
+        isFixed: isFixedSchedule,
+        isFixedTime: Boolean(fixedTimeValue),
         desc:
           index === 0
             ? place.desc || "여행 시작 지점입니다."
             : place.desc || "추천 일정으로 배치된 장소입니다.",
         badge:
           index === 0
-            ? placeName.includes("역")
-              ? "지하철/KTX"
-              : "출발"
-            : place.isFixedTime
+            ? "출발"
+            : isFixedSchedule
               ? "고정 일정"
-              : "",
-        move: isLast
-          ? ""
-          : place.moveTextToNext || place.moveText || mockMove.move,
-        moveType: isLast
-          ? "walk"
-          : place.moveTypeToNext || place.moveType || mockMove.moveType,
+              : place.placeType || "",
         lat:
           place.lat ||
           place.latitude ||
@@ -1368,21 +2034,30 @@ const buildDaysFromState = (selectedDates = [], placesByDate = {}) => {
         ),
         memo: place.memo || place.memoText || place.note || place.notes || "",
       };
-    });
-    const totalMinutes = items.length * 90 + 60;
-    const hour = Math.floor(totalMinutes / 60);
-    const minute = totalMinutes % 60;
-    const totalDistanceNumber = (items.length * 2.4 + 3.2).toFixed(1);
-    const sectionDistanceNumber = (items.length * 1.2 + 0.9).toFixed(1);
+
+      item.move = isLast ? "" : getStraightDistanceText(item, nextPlace);
+      item.moveType = "distance";
+
+      return item;
+    }));
+
+    const totalStraightDistance = getTotalStraightDistanceKm(items);
+    const totalDistanceText = Number.isFinite(totalStraightDistance)
+      ? formatStraightDistance(totalStraightDistance).replace("직선거리 ", "")
+      : "0km";
+
     return {
       label: `${dayIndex + 1}일차`,
-      totalDuration: `${hour}시간 ${minute}분`,
-      totalDistance: `${totalDistanceNumber}km`,
-      sectionDistance: `총 ${sectionDistanceNumber}km 이동`,
+      totalDuration: DEFAULT_ROUTE_START_TIME,
+      totalDistance: totalDistanceText || "0km",
+      sectionDistance: totalDistanceText
+        ? `총 직선거리 ${totalDistanceText}`
+        : "직선거리 정보 없음",
       items,
     };
   });
 };
+
 const RouteTabs = ({ resultDays, activeIndex, onChange, isStatic = false }) => {
   return (
     <div
@@ -1424,7 +2099,8 @@ const SummaryCard = ({ day }) => (
       </div>{" "}
       <div className="route-result-summary-text">
         {" "}
-        <span>총 소요 시간:</span> <strong>{day.totalDuration}</strong>{" "}
+        <span>출발 시간:</span>{" "}
+        <strong>{day.startTime || day.items?.[0]?.time || DEFAULT_ROUTE_START_TIME}</strong>{" "}
       </div>{" "}
     </div>{" "}
     <div className="route-result-summary-divider" />{" "}
@@ -1545,135 +2221,323 @@ const MemoModal = ({ isOpen, value, onChange, onCancel, onSave }) => {
     </div>
   );
 };
+const getSortablePlaceId = (item = {}, index) => {
+  const explicitId =
+    item.tripPlaceId ?? item.id ?? item.placeId ?? item.sourceId ?? "";
+
+  if (explicitId) {
+    return String(explicitId);
+  }
+
+  const title = normalizeTitle(item.title || item.placeName || item.name || "");
+  const lat = item.lat ?? item.latitude ?? "";
+  const lng = item.lng ?? item.longitude ?? item.lon ?? "";
+
+  return `${title}-${lat}-${lng}-${index}`;
+};
+
+const rebuildDayWithItems = (day, nextItems = []) => {
+  const items = normalizeFixedScheduleItems(nextItems.map((item, index) => {
+    const isLast = index === nextItems.length - 1;
+    const nextPlace = nextItems[index + 1];
+    const previousBadge = String(item.badge || "").trim();
+    const fixedEntry = item.fixedTimeEntry || null;
+    const fixedTimeValue = getFixedTimeValueFromPlace(item, fixedEntry);
+    const displayTime = index === 0 ? DEFAULT_ROUTE_START_TIME : fixedTimeValue;
+    const isFixedSchedule = index !== 0 && Boolean(fixedTimeValue);
+    const nextBadge =
+      index === 0
+        ? "출발"
+        : isFixedSchedule
+          ? "고정 일정"
+          : previousBadge === "출발" || previousBadge === "고정 일정"
+            ? item.placeType || ""
+            : previousBadge;
+
+    return {
+      ...item,
+      time: displayTime,
+      badge: nextBadge,
+      move: isLast ? "" : getStraightDistanceText(item, nextPlace),
+      moveType: "distance",
+      visitOrder: index + 1,
+      isStartPoint: index === 0,
+      isFixed: isFixedSchedule,
+      isFixedTime: Boolean(fixedTimeValue),
+      fixedTime: fixedTimeValue,
+      timeLabel: fixedTimeValue,
+    };
+  }));
+
+  const totalStraightDistance = getTotalStraightDistanceKm(items);
+  const totalDistanceText = Number.isFinite(totalStraightDistance)
+    ? formatStraightDistance(totalStraightDistance).replace("직선거리 ", "")
+    : "0km";
+
+  return {
+    ...day,
+    items,
+    routeUrl: "",
+    isCustomOrder: true,
+    totalDistance: totalDistanceText || "0km",
+    sectionDistance: totalDistanceText
+      ? `총 직선거리 ${totalDistanceText}`
+      : "직선거리 정보 없음",
+  };
+};
+
+const SortableTimelineItem = ({
+  id,
+  children,
+  isClickable,
+  onClick,
+  onKeyDown,
+  ariaLabel,
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`route-result-timeline-item is-sortable ${
+        isDragging ? "is-dragging" : ""
+      }`}
+      role={isClickable ? "button" : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={onKeyDown}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        ...(isClickable ? TIMELINE_ITEM_BUTTON_STYLE : undefined),
+      }}
+      aria-label={ariaLabel}
+    >
+      <button
+        type="button"
+        className="route-result-drag-handle"
+        aria-label="일정 순서 변경"
+        title="드래그해서 순서 변경"
+        onClick={(event) => event.stopPropagation()}
+        onKeyDown={(event) => event.stopPropagation()}
+        {...attributes}
+        {...listeners}
+      >
+        ⋮⋮
+      </button>
+
+      {children}
+    </div>
+  );
+};
+
 const DetailSection = ({
   day,
   dayIndex,
   memoValues = {},
   onOpenMemo,
   onOpenPlaceMap,
+  onReorderItems,
   mapProvider = "google",
 }) => {
   const providerLabel = mapProvider === "kakao" ? "카카오맵" : "구글맵";
   const isClickable = typeof onOpenPlaceMap === "function";
   const isMemoEditable = typeof onOpenMemo === "function";
-  const handleOpen = (title) => {
+  const isReorderable =
+    typeof onReorderItems === "function" && (day?.items || []).length > 1;
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+
+  const sortableIds = useMemo(
+    () => (day?.items || []).map((item, index) => getSortablePlaceId(item, index)),
+    [day?.items]
+  );
+
+  const handleOpen = (item) => {
     if (typeof onOpenPlaceMap === "function") {
-      onOpenPlaceMap(title);
+      onOpenPlaceMap(item.title, item);
     }
   };
-  const handleKeyDown = (event, title) => {
+
+  const handleKeyDown = (event, item) => {
     if (!isClickable) return;
+
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      handleOpen(title);
+      handleOpen(item);
     }
   };
+
   const handleMenuClick = (event, itemIndex) => {
     event.stopPropagation();
+
     if (isMemoEditable) {
       onOpenMemo(dayIndex, itemIndex);
     }
   };
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = sortableIds.indexOf(active.id);
+    const newIndex = sortableIds.indexOf(over.id);
+
+    if (oldIndex < 0 || newIndex < 0) {
+      return;
+    }
+
+    const nextItems = arrayMove(day.items, oldIndex, newIndex);
+    onReorderItems(dayIndex, nextItems);
+  };
+
+  const renderTimelineItemContent = (item, index) => {
+    const memo = getItemMemoValue(memoValues, dayIndex, index, item);
+
+    return (
+      <>
+        <div className="route-result-marker-column">
+          <div className="route-result-step-circle">{index + 1}</div>
+          {index !== day.items.length - 1 && (
+            <div className="route-result-step-line" />
+          )}
+        </div>
+
+        <div className="route-result-item-body">
+          {item.time ? (
+            <div className="route-result-item-time">{item.time}</div>
+          ) : null}
+
+          <div className="route-result-item-title-row">
+            <h3>{item.title}</h3>
+            {item.badge ? (
+              <span className="route-result-item-badge">{item.badge}</span>
+            ) : isMemoEditable && index === 1 ? (
+              <button
+                type="button"
+                className="route-result-item-menu"
+                aria-label="메모 메뉴 열기"
+                onClick={(event) => handleMenuClick(event, index)}
+                onKeyDown={(event) => event.stopPropagation()}
+              >
+                <MoreVerticalIcon />
+              </button>
+            ) : null}
+          </div>
+
+          {item.desc ? (
+            <p className="route-result-item-desc">{item.desc}</p>
+          ) : null}
+
+          <TimelineMemo
+            memo={memo}
+            onClick={
+              isMemoEditable ? () => onOpenMemo(dayIndex, index) : undefined
+            }
+          />
+
+          {item.move ? (
+            <div className="route-result-item-move">
+              <span className="route-result-item-move-icon">
+                <PinIcon />
+              </span>
+              <span>{item.move}</span>
+            </div>
+          ) : null}
+        </div>
+      </>
+    );
+  };
+
+  const renderTimelineItems = () =>
+    day.items.map((item, index) => {
+      const sortableId = sortableIds[index];
+      const ariaLabel = isClickable
+        ? `${normalizeTitle(item.title)} ${providerLabel}에서 열기`
+        : undefined;
+
+      if (!isReorderable) {
+        return (
+          <div
+            key={`${day.label}-${item.title}-${index}`}
+            className="route-result-timeline-item"
+            role={isClickable ? "button" : undefined}
+            tabIndex={isClickable ? 0 : undefined}
+            onClick={isClickable ? () => handleOpen(item) : undefined}
+            onKeyDown={
+              isClickable ? (event) => handleKeyDown(event, item) : undefined
+            }
+            style={isClickable ? TIMELINE_ITEM_BUTTON_STYLE : undefined}
+            aria-label={ariaLabel}
+          >
+            {renderTimelineItemContent(item, index)}
+          </div>
+        );
+      }
+
+      return (
+        <SortableTimelineItem
+          key={sortableId}
+          id={sortableId}
+          isClickable={isClickable}
+          onClick={isClickable ? () => handleOpen(item) : undefined}
+          onKeyDown={
+            isClickable ? (event) => handleKeyDown(event, item) : undefined
+          }
+          ariaLabel={ariaLabel}
+        >
+          {renderTimelineItemContent(item, index)}
+        </SortableTimelineItem>
+      );
+    });
+
   return (
     <section className="route-result-detail-section">
-      {" "}
       <div className="route-result-detail-header">
-        {" "}
-        <h2>상세 일정</h2>{" "}
+        <h2>상세 일정</h2>
         <span className="route-result-distance-pill">
-          {" "}
-          {day.sectionDistance}{" "}
-        </span>{" "}
-      </div>{" "}
+          {day.sectionDistance}
+        </span>
+      </div>
+
       <p className="route-result-detail-sub">
-        {" "}
-        가장 효율적인 동선으로 재구성되었습니다.{" "}
-      </p>{" "}
-      <div className="route-result-timeline">
-        {" "}
-        {day.items.map((item, index) => {
-          const memo = getItemMemoValue(memoValues, dayIndex, index, item);
-          return (
-            <div
-              key={`${day.label}-${item.title}-${index}`}
-              className="route-result-timeline-item"
-              role={isClickable ? "button" : undefined}
-              tabIndex={isClickable ? 0 : undefined}
-              onClick={isClickable ? () => handleOpen(item.title) : undefined}
-              onKeyDown={
-                isClickable
-                  ? (event) => handleKeyDown(event, item.title)
-                  : undefined
-              }
-              style={isClickable ? TIMELINE_ITEM_BUTTON_STYLE : undefined}
-              aria-label={
-                isClickable
-                  ? `${normalizeTitle(item.title)} ${providerLabel}에서 열기`
-                  : undefined
-              }
-            >
-              {" "}
-              <div className="route-result-marker-column">
-                {" "}
-                <div className="route-result-step-circle">{index + 1}</div>{" "}
-                {index !== day.items.length - 1 && (
-                  <div className="route-result-step-line" />
-                )}{" "}
-              </div>{" "}
-              <div className="route-result-item-body">
-                {" "}
-                <div className="route-result-item-time">{item.time}</div>{" "}
-                <div className="route-result-item-title-row">
-                  {" "}
-                  <h3>{item.title}</h3>{" "}
-                  {item.badge ? (
-                    <span className="route-result-item-badge">
-                      {" "}
-                      {item.badge}{" "}
-                    </span>
-                  ) : isMemoEditable && index === 1 ? (
-                    <button
-                      type="button"
-                      className="route-result-item-menu"
-                      aria-label="메모 메뉴 열기"
-                      onClick={(event) => handleMenuClick(event, index)}
-                      onKeyDown={(event) => event.stopPropagation()}
-                    >
-                      {" "}
-                      <MoreVerticalIcon />{" "}
-                    </button>
-                  ) : null}{" "}
-                </div>{" "}
-                {item.desc ? (
-                  <p className="route-result-item-desc">{item.desc}</p>
-                ) : null}{" "}
-                <TimelineMemo
-                  memo={memo}
-                  onClick={
-                    isMemoEditable
-                      ? () => onOpenMemo(dayIndex, index)
-                      : undefined
-                  }
-                />{" "}
-                {item.move ? (
-                  <div className="route-result-item-move">
-                    {" "}
-                    <span className="route-result-item-move-icon">
-                      {" "}
-                      {item.moveType === "bus" ? (
-                        <BusIcon />
-                      ) : (
-                        <WalkIcon />
-                      )}{" "}
-                    </span>{" "}
-                    <span>{item.move}</span>{" "}
-                  </div>
-                ) : null}{" "}
-              </div>{" "}
-            </div>
-          );
-        })}{" "}
-      </div>{" "}
+        {isReorderable
+          ? "카드를 드래그해서 방문 순서를 다시 조정할 수 있습니다."
+          : "가장 효율적인 동선으로 재구성되었습니다."}
+      </p>
+
+      {isReorderable ? (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={sortableIds}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="route-result-timeline">{renderTimelineItems()}</div>
+          </SortableContext>
+        </DndContext>
+      ) : (
+        <div className="route-result-timeline">{renderTimelineItems()}</div>
+      )}
     </section>
   );
 };
@@ -2065,6 +2929,7 @@ const RouteDayContent = ({
   onOpenRouteMap,
   onOpenPlaceMap,
   onOpenMemo,
+  onReorderItems,
 }) => {
   return (
     <div className="route-result-content">
@@ -2094,6 +2959,7 @@ const RouteDayContent = ({
         memoValues={memoValues}
         onOpenMemo={onOpenMemo}
         onOpenPlaceMap={onOpenPlaceMap}
+        onReorderItems={onReorderItems}
         mapProvider={mapProvider}
       />{" "}
     </div>
@@ -2110,10 +2976,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   const isOverseasMock = mockMode === "overseas";
   const savedRouteFromState = location.state?.savedRoute;
 
-  const savedRoute =
-    initialSavedRoute ||
-    savedRouteFromState ||
-    (routeId ? getSavedRouteById(routeId) : null);
+  const savedRoute = initialSavedRoute || savedRouteFromState || null;
 
   // ✅ 서버 데이터를 관리할 상태 추가
   const [serverTrip, setServerTrip] = useState(null);
@@ -2187,23 +3050,90 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
 
   useEffect(() => {
     if (isEmbedded) return undefined;
-    const handleDeleteSchedule = () => {
-      const targetRouteId = routeId || savedRoute?.id;
+
+    const handleDeleteSchedule = async (event) => {
+      const detail = getDeleteEventDetail(event);
+
+      const targetRouteId =
+        detail.tripId ||
+        detail.routeId ||
+        detail.scheduleId ||
+        routeId ||
+        serverTrip?.id ||
+        savedRoute?.id;
+
       if (!targetRouteId) {
         alert("삭제할 일정 정보를 찾지 못했어요.");
         return;
       }
-      const deleted = deleteSavedRouteById(targetRouteId);
-      if (!deleted) {
-        console.log("삭제할 일정이 localStorage에 없어요:", targetRouteId);
+
+      const shouldDeletePlace = isPlaceDeleteDetail(detail);
+      const { tripPlaceId, placeId, day } =
+        getTripPlaceTargetFromDeleteDetail(detail);
+
+      try {
+        if (shouldDeletePlace) {
+          await deleteTripPlaceById({
+            tripId: targetRouteId,
+            tripPlaceId,
+            placeId,
+            day,
+          });
+
+          setServerTripPlaces((prevPlaces) =>
+            prevPlaces.filter((place) => {
+              const placeKeys = [
+                place.id,
+                place.tripPlaceId,
+                place.placeId,
+              ].map((value) => String(value || ""));
+
+              return (
+                !placeKeys.includes(String(tripPlaceId || "")) &&
+                !placeKeys.includes(String(placeId || ""))
+              );
+            }),
+          );
+
+          return;
+        }
+
+        await deleteTripById(targetRouteId);
+
+        navigate("/my-schedule", { replace: true });
+      } catch (error) {
+        console.error("삭제 실패:", error);
+
+        alert(
+          getApiErrorMessage(
+            error,
+            shouldDeletePlace
+              ? "장소 삭제에 실패했습니다."
+              : "일정 삭제에 실패했습니다.",
+          ),
+        );
       }
-      navigate("/my-schedule", { replace: true });
     };
+
     window.addEventListener(DELETE_ROUTE_EVENT, handleDeleteSchedule);
+
     return () => {
       window.removeEventListener(DELETE_ROUTE_EVENT, handleDeleteSchedule);
     };
-  }, [routeId, savedRoute?.id, navigate, isEmbedded]);
+  }, [
+    routeId,
+    savedRoute?.id,
+    serverTrip?.id,
+    navigate,
+    isEmbedded,
+  ]);
+
+  const fixedTimeMap = useMemo(() => {
+    return {
+      ...readFixedTimeMap(routeId || serverTrip?.id || savedRoute?.id),
+      ...normalizeFixedTimeMap(savedRoute?.fixedTimeMap),
+    };
+  }, [routeId, serverTrip?.id, savedRoute?.id, savedRoute?.fixedTimeMap]);
 
   const resultDays = useMemo(() => {
     if (isOverseasMock) {
@@ -2215,7 +3145,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
 
     // ✅ 1. 서버에서 조회한 데이터가 있다면 최우선으로 화면에 그려줍니다.
     if (serverTrip) {
-      const serverDays = buildDaysFromServerData(serverTrip, serverTripPlaces);
+      const serverDays = buildDaysFromServerData(serverTrip, serverTripPlaces, fixedTimeMap);
       return serverDays.length > 0 ? serverDays : DEFAULT_RESULT_DAYS;
     }
 
@@ -2226,7 +3156,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
       savedRoute?.placesByDate || location.state?.placesByDate;
     if (rawSelectedDates && rawSelectedDates.length) {
       const parsedDates = rawSelectedDates.map((date) => new Date(date));
-      return buildDaysFromState(parsedDates, rawPlacesByDate);
+      return buildDaysFromState(parsedDates, rawPlacesByDate, fixedTimeMap);
     }
 
     // 3. 다 없으면 기본 목업 표시
@@ -2238,17 +3168,28 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     isDomesticMock,
     isOverseasMock,
     serverTrip,
-    serverTripPlaces
+    serverTripPlaces,
+    fixedTimeMap,
   ]);
+
+  const [customResultDays, setCustomResultDays] = useState([]);
+
+  useEffect(() => {
+    setCustomResultDays(resultDays);
+  }, [resultDays]);
+
+  const displayResultDays = customResultDays.length
+    ? customResultDays
+    : resultDays;
 
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   useEffect(() => {
-    if (activeDayIndex > resultDays.length - 1) {
+    if (activeDayIndex > displayResultDays.length - 1) {
       setActiveDayIndex(0);
     }
-  }, [activeDayIndex, resultDays.length]);
+  }, [activeDayIndex, displayResultDays.length]);
 
-  const activeDay = resultDays[activeDayIndex] || resultDays[0];
+  const activeDay = displayResultDays[activeDayIndex] || displayResultDays[0];
   const [memoValues, setMemoValues] = useState({});
   const [memoModal, setMemoModal] = useState({
     isOpen: false,
@@ -2261,7 +3202,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     setMemoModal({ isOpen: false, dayIndex: null, itemIndex: null, value: "" });
   };
   const handleOpenMemo = (dayIndex, itemIndex) => {
-    const targetDay = resultDays[dayIndex];
+    const targetDay = displayResultDays[dayIndex];
     const targetItem = targetDay?.items?.[itemIndex];
     if (!targetItem) return;
     setMemoModal({
@@ -2275,7 +3216,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     setMemoModal((prev) => ({ ...prev, value }));
   };
   const handleSaveMemo = () => {
-    const targetDay = resultDays[memoModal.dayIndex];
+    const targetDay = displayResultDays[memoModal.dayIndex];
     const targetItem = targetDay?.items?.[memoModal.itemIndex];
     if (!targetItem) {
       closeMemoModal();
@@ -2285,10 +3226,23 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
       memoModal.dayIndex,
       memoModal.itemIndex,
       targetItem.title,
+      targetItem,
     );
     const nextValue = memoModal.value.trim();
     setMemoValues((prev) => ({ ...prev, [key]: nextValue }));
     closeMemoModal();
+  };
+
+  const handleReorderItems = (dayIndex, nextItems) => {
+    setCustomResultDays((prevDays) => {
+      const baseDays = prevDays.length ? prevDays : resultDays;
+
+      return baseDays.map((day, index) => {
+        if (index !== dayIndex) return day;
+
+        return rebuildDayWithItems(day, nextItems);
+      });
+    });
   };
 
   const tripLevelMapProvider = useMemo(() => {
@@ -2318,7 +3272,9 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   };
 
   const handleOpenRouteMap = () => {
-    const serverRouteUrl = activeDay?.routeUrl || serverTrip?.routeUrl;
+    const serverRouteUrl = activeDay?.isCustomOrder
+      ? ""
+      : activeDay?.routeUrl || serverTrip?.routeUrl;
     const matchedServerRouteUrl = isMapUrlForProvider(serverRouteUrl, activeMapProvider)
       ? serverRouteUrl
       : "";
@@ -2338,10 +3294,10 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     openInNewTab(url);
   };
 
-  const handleOpenPlaceMap = (title) => {
-    const currentDayItem = activeDay?.items?.find(
-      (item) => item.title === title,
-    );
+  const handleOpenPlaceMap = (title, selectedItem = null) => {
+    const currentDayItem =
+      selectedItem ||
+      activeDay?.items?.find((item) => item.title === title);
 
     const itemLevelProvider = normalizeMapProvider(
       currentDayItem?.mapProvider || currentDayItem?.provider,
@@ -2394,7 +3350,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
       <div className="route-result-screen">
         {" "}
         <RouteTabs
-          resultDays={resultDays}
+          resultDays={displayResultDays}
           activeIndex={activeDayIndex}
           onChange={setActiveDayIndex}
         />{" "}
@@ -2407,6 +3363,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
           onOpenRouteMap={handleOpenRouteMap}
           onOpenPlaceMap={handleOpenPlaceMap}
           onOpenMemo={handleOpenMemo}
+          onReorderItems={handleReorderItems}
         />{" "}
       </div>{" "}
       <MemoModal
@@ -2419,14 +3376,14 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
       {!isEmbedded && (
         <div className="route-result-pdf-root" aria-hidden="true">
           {" "}
-          {resultDays.map((day, index) => (
+          {displayResultDays.map((day, index) => (
             <section
               key={`${day.label}-${index}`}
               className="route-result-pdf-day"
             >
               {" "}
               <RouteTabs
-                resultDays={resultDays}
+                resultDays={displayResultDays}
                 activeIndex={index}
                 isStatic={true}
               />{" "}

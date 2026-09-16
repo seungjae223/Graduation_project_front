@@ -16,7 +16,7 @@ body,
 }
 
 html {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 html::-webkit-scrollbar,
@@ -30,7 +30,7 @@ body::-webkit-scrollbar,
 body {
   min-height: 100vh;
   background: #f8fbfd;
-  overflow-x: hidden;
+  overflow-x: clip;
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -65,7 +65,13 @@ svg {
   padding: 0;
   background: #f8fbfd;
   position: relative;
-  overflow-x: hidden;
+  /*
+   * `overflow-x: hidden` turns the flex item into a vertical scroll
+   * container in mobile browsers.  That traps content below the viewport.
+   * Clip only the horizontal axis while letting the document grow vertically.
+   */
+  overflow-x: clip;
+  overflow-y: visible;
   display: flex;
   flex-direction: column;
   scrollbar-width: none;
@@ -81,8 +87,9 @@ svg {
 .app-content {
   width: 100%;
   min-width: 0;
-  flex: 1;
-  overflow-x: hidden;
+  flex: 1 0 auto;
+  overflow-x: clip;
+  overflow-y: visible;
   background: #f8fbfd;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -102,7 +109,8 @@ svg {
   width: 100%;
   min-width: 0;
   min-height: auto;
-  overflow-x: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
   background: #f8fbfd;
   animation: pageFadeUp 0.32s ease both;
   scrollbar-width: none;

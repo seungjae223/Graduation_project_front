@@ -9,14 +9,13 @@ body,
 
 body {
   background: #f5f6f8;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 #root {
   min-height: 100vh;
   min-height: 100dvh;
-  display: flex;
-  justify-content: center;
+  display: block;
 }
 
 /* 앱 전체 감싸는 박스 */

@@ -23,16 +23,26 @@ const getInquiryArray = (data) => {
   if (Array.isArray(data?.content)) return data.content;
   if (Array.isArray(data?.inquiries)) return data.inquiries;
   if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.result)) return data.result;
+  if (Array.isArray(data?.response)) return data.response;
 
   return [];
 };
 
 const normalizeInquiry = (inquiry) => {
   const rawStatus = String(inquiry.status || "").toLowerCase();
-  const hasAnswer = Boolean(inquiry.answer || inquiry.reply || inquiry.answerContent);
+
+  const answer =
+    inquiry.answer ||
+    inquiry.reply ||
+    inquiry.answerContent ||
+    inquiry.answerText ||
+    "";
 
   const isAnswered =
-    hasAnswer ||
+    inquiry.answered === true ||
+    inquiry.isAnswered === true ||
+    Boolean(answer) ||
     rawStatus === "answered" ||
     rawStatus === "complete" ||
     rawStatus === "completed" ||
@@ -40,14 +50,24 @@ const normalizeInquiry = (inquiry) => {
     rawStatus === "답변완료";
 
   return {
-    id: inquiry.id || inquiry.inquiryId || inquiry.questionId,
+    id: inquiry.id ?? inquiry.inquiryId ?? inquiry.questionId,
     title: inquiry.title || inquiry.subject || "제목 없음",
     content: inquiry.content || inquiry.question || inquiry.body || "",
-    answer: inquiry.answer || inquiry.reply || inquiry.answerContent || "",
-    date: formatDate(inquiry.createdAt || inquiry.date || inquiry.createdDate),
+    userEmail: inquiry.userEmail || inquiry.email || "",
+    answer,
+    date: formatDate(
+      inquiry.createdAt ||
+        inquiry.createdDate ||
+        inquiry.date ||
+        inquiry.updatedAt ||
+        ""
+    ),
+    answered: isAnswered,
     status: isAnswered ? "answered" : "waiting",
     statusText:
-      inquiry.statusText || inquiry.statusName || (isAnswered ? "답변 완료" : "답변 대기"),
+      inquiry.statusText ||
+      inquiry.statusName ||
+      (isAnswered ? "답변 완료" : "답변 대기"),
     originalData: inquiry,
   };
 };
@@ -55,7 +75,7 @@ const normalizeInquiry = (inquiry) => {
 const getErrorMessage = (error, fallbackMessage) => {
   const data = error.response?.data;
 
-  if (typeof data === "string") {
+  if (typeof data === "string" && data.trim()) {
     return data;
   }
 
@@ -86,6 +106,13 @@ const Inquiry = () => {
 
         if (error.message.includes("Network Error")) {
           setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+          return;
+        }
+
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          setErrorMessage(
+            "로그인 정보가 만료되었거나 권한이 없습니다. 다시 로그인해주세요."
+          );
           return;
         }
 
@@ -181,8 +208,7 @@ const Inquiry = () => {
             {!isLoading &&
               !errorMessage &&
               currentInquiries.map((inquiry) => {
-                const isAnswered =
-                  inquiry.status === "answered" && Boolean(inquiry.answer);
+                const isAnswered = inquiry.answered === true;
 
                 return (
                   <article
@@ -205,10 +231,12 @@ const Inquiry = () => {
                           isAnswered ? "is-done" : "is-waiting"
                         }`}
                       >
-                        {inquiry.statusText}
+                        {isAnswered ? "답변 완료" : "답변 대기"}
                       </span>
 
-                      <time className="inquiry-date">{inquiry.date}</time>
+                      {inquiry.date && (
+                        <time className="inquiry-date">{inquiry.date}</time>
+                      )}
                     </div>
 
                     <h2 className="inquiry-card-title">{inquiry.title}</h2>

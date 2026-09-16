@@ -1,0 +1,218 @@
+/*
+ * Responsive application shell
+ *
+ * The original screens were drawn around a 390px-wide device.  Keep that
+ * visual density on phones while allowing the layout to use the available
+ * width on Plus/Pro Max phones and tablets without introducing horizontal
+ * overflow.
+ */
+:root {
+  /* Figma's source frames use a 390px mobile artboard. */
+  --app-width: 390px;
+  --page-max-width: 390px;
+  --page-gutter: clamp(12px, 4vw, 24px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Keep one document-level vertical scroller on every route. */
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  background: #f2f4f7;
+}
+
+body {
+  /* A nested body scroller can stop touch scrolling in mobile emulation. */
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+
+#root {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Prevent intrinsic media sizes and long form controls from widening a page. */
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+input,
+textarea,
+select,
+button {
+  max-width: 100%;
+}
+
+/* 16px keeps iOS Safari from zooming into a form field on focus. */
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}
+
+/*
+ * Every route shares one fluid content column.  The explicit class list is
+ * intentional: component cards and dialogs retain their designed max width.
+ */
+.app,
+.header,
+.page-wrap,
+.home,
+.popular-all-page,
+.recommend-page,
+.total-page,
+.detail-page,
+.search-page,
+.schedule-empty-page,
+.calendar-page,
+.route-create-screen,
+.route-result-page,
+.my-schedule-page,
+.mypage-page,
+.saved-places-page,
+.recent-places-page,
+.inquiry-screen,
+.inquiry-write-screen,
+.inquiry-detail-page,
+.login,
+.find-password-page,
+.signup-page,
+.signup-container,
+.verify-code-page,
+.landing,
+.admin-page,
+.admin-inquiry-page,
+.admin-inquiry-write-page {
+  width: min(100%, var(--page-max-width)) !important;
+  max-width: var(--page-max-width) !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.header {
+  padding-top: max(18px, calc(18px + var(--safe-top)));
+}
+
+/* Fixed bottom controls stay aligned with the app column, not the viewport. */
+.detail-bottom-actions {
+  width: min(100%, var(--page-max-width)) !important;
+  max-width: var(--page-max-width) !important;
+}
+
+/* Preserve image/card proportions as the available page width changes. */
+.place-image,
+.hot-main-card img {
+  height: auto !important;
+  aspect-ratio: 1.7 / 1 !important;
+}
+
+.hot-sub-card img {
+  height: auto !important;
+  aspect-ratio: 1.33 / 1 !important;
+}
+
+.popular-grid-card {
+  height: auto !important;
+  aspect-ratio: 0.77 / 1 !important;
+}
+
+.route-map-mock,
+.route-map-static-preview,
+.route-map-static-fallback {
+  height: auto !important;
+  aspect-ratio: 4 / 3 !important;
+}
+
+/* Onboarding must fit short phones without the next action dropping below the fold. */
+.onboarding {
+  min-height: calc(100dvh - 60px) !important;
+  height: auto !important;
+  padding: clamp(16px, 6vw, 24px) !important;
+}
+
+.image-wrapper {
+  height: min(400px, 48dvh) !important;
+  min-height: 220px !important;
+}
+
+@media (max-width: 374px) {
+  :root {
+    --page-gutter: 12px;
+  }
+
+  .header {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .popular-grid,
+  .hot-sub-grid,
+  .theme-grid {
+    gap: 10px;
+  }
+
+  .popular-grid-text {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .popular-grid-text h3 {
+    font-size: clamp(18px, 6vw, 22px);
+  }
+}
+
+@media (max-height: 700px) and (max-width: 767px) {
+  .onboarding .text-area {
+    margin-top: 24px;
+  }
+
+  .onboarding .indicator {
+    margin-top: 32px;
+  }
+
+  .image-wrapper {
+    height: min(320px, 42dvh) !important;
+    min-height: 190px !important;
+    border-radius: 28px !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  /* Desktop keeps the existing phone-app presentation centered on the page. */
+  :root {
+    --app-width: 390px;
+    --page-max-width: 390px;
+  }
+}
+
+/* 앱보다 큰 데스크톱 영역도 한 가지 캔버스 색으로 유지한다. */
+@media (min-width: 768px) {
+  html,
+  body,
+  #root {
+    background: #f2f4f7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}

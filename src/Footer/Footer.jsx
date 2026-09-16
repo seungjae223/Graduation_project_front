@@ -2,16 +2,13 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Footer.css";
 
-// 아이콘
-import homeOff from "../img/검정색 홈.png";
-import searchOff from "../img/검정색 검색.png";
-import recommendOff from "../img/검정색 추천.png";
-import calendarOff from "../img/검정색 일정.png";
-import mypageOff from "../img/마이페이지회색.png";
-
-import homeOn from "../img/파랑색 홈.png";
-import recommendOn from "../img/파랑색 추천.png";
-import calendarOn from "../img/파랑색 일정.png";
+// Figma에서 내보낸 벡터 아이콘: 확대되어도 흐려지지 않음
+import homeIcon from "../img/nav-home.svg";
+import searchIcon from "../img/nav-search.svg";
+import recommendIcon from "../img/nav-recommend.svg";
+import scheduleIcon from "../img/nav-schedule.svg";
+import mypageIcon from "../img/nav-mypage.svg";
+import mypageActiveIcon from "../img/nav-mypage-active.svg";
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -51,36 +48,36 @@ const Footer = () => {
       key: "home",
       label: "홈",
       path: "/home",
-      off: homeOff,
-      on: homeOn,
+      off: homeIcon,
+      on: homeIcon,
     },
     {
       key: "search",
       label: "검색",
       path: "/search",
-      off: searchOff,
-      on: searchOff,
+      off: searchIcon,
+      on: searchIcon,
     },
     {
       key: "recommend",
       label: "추천",
       path: "/recommend",
-      off: recommendOff,
-      on: recommendOn,
+      off: recommendIcon,
+      on: recommendIcon,
     },
     {
       key: "calendar",
       label: "일정",
       path: "/schedule",
-      off: calendarOff,
-      on: calendarOn,
+      off: scheduleIcon,
+      on: scheduleIcon,
     },
     {
       key: "mypage",
       label: "마이페이지",
       path: "/mypage",
-      off: mypageOff,
-      on: mypageOff,
+      off: mypageIcon,
+      on: mypageActiveIcon,
     },
   ];
 

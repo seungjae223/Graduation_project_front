@@ -8,10 +8,7 @@ import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import { saveRecentPlace } from "../utils/recentPlaces";
 import html2pdf from "html2pdf.js";
 import ShareModal from "../ShareModal/ShareModal";
-import FolderSelectModal, {
-  removePlaceFolderLink,
-  savePlaceFolderLink,
-} from "../FolderSelectModal/FolderSelectModal";
+import FolderSelectModal from "../FolderSelectModal/FolderSelectModal";
 import "./Detail.css";
 import api from "../api/api";
 
@@ -20,7 +17,7 @@ import museumImg from "../img/교토.png";
 import beachImg from "../img/서비스 소개 .png";
 
 const PLACES_API = "/api/places";
-const SAVED_PLACES_API = "/api/saved-places";
+const FOLDERS_API = "/api/folders";
 const RECENT_PLACES_API = "/api/recent-places";
 
 const BackIcon = () => (
@@ -478,12 +475,14 @@ const getArrayData = (data) => {
   if (Array.isArray(data?.data)) return data.data;
   if (Array.isArray(data?.content)) return data.content;
   if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.folders)) return data.folders;
   if (Array.isArray(data?.places)) return data.places;
   if (Array.isArray(data?.savedPlaces)) return data.savedPlaces;
   if (Array.isArray(data?.recommendations)) return data.recommendations;
   if (Array.isArray(data?.result)) return data.result;
   if (Array.isArray(data?.results)) return data.results;
 
+  if (Array.isArray(data?.data?.folders)) return data.data.folders;
   if (Array.isArray(data?.data?.content)) return data.data.content;
   if (Array.isArray(data?.data?.items)) return data.data.items;
   if (Array.isArray(data?.data?.places)) return data.data.places;
@@ -493,6 +492,59 @@ const getArrayData = (data) => {
   }
 
   return [];
+};
+
+const getFolderId = (folder) => {
+  return folder?.id ?? folder?.folderId ?? folder?.folder_id ?? null;
+};
+
+const getSavedPlaceId = (savedPlace) => {
+  const placeData = savedPlace?.place || savedPlace?.destination || savedPlace;
+
+  return (
+    placeData?.id ??
+    placeData?.placeId ??
+    savedPlace?.placeId ??
+    savedPlace?.destinationId ??
+    savedPlace?.id ??
+    null
+  );
+};
+
+const getFolderPlacesUrl = (folderId) => {
+  return `${FOLDERS_API}/${encodeURIComponent(folderId)}/places`;
+};
+
+const getFolderPlaceDeleteUrl = (folderId, placeId) => {
+  return `${FOLDERS_API}/${encodeURIComponent(
+    folderId
+  )}/places/${encodeURIComponent(placeId)}`;
+};
+
+const registerPlace = async (place) => {
+  const numericPlaceId = Number(place.id);
+
+  const placePayload = {
+    id: Number.isFinite(numericPlaceId) ? numericPlaceId : 0,
+    name: place.title || place.name,
+    latitude: place.latitude || 0,
+    longitude: place.longitude || 0,
+    address: place.address,
+    placeType: place.placeType,
+  };
+
+  try {
+    const response = await api.post(PLACES_API, placePayload);
+    const responseData = getResponseData(response.data);
+
+    return responseData?.id ?? responseData?.placeId ?? place.id;
+  } catch (error) {
+    if ([400, 409, 422].includes(error.response?.status)) {
+      return place.id;
+    }
+
+    throw error;
+  }
 };
 
 const normalizeTags = (tags) => {
@@ -693,6 +745,7 @@ function Detail() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingPlace, setIsSavingPlace] = useState(false);
   const [serverSaved, setServerSaved] = useState(false);
+  const [serverSavedFolderInfo, setServerSavedFolderInfo] = useState(null);
   const [folderModalOpen, setFolderModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
@@ -735,24 +788,45 @@ function Detail() {
       if (!detailPlace?.id) return;
 
       try {
-        const response = await api.get(SAVED_PLACES_API);
-        const savedPlaces = getArrayData(response.data);
+        const folderResponse = await api.get(FOLDERS_API);
+        const folderList = getArrayData(folderResponse.data).filter(
+          (folder) => getFolderId(folder) !== null && getFolderId(folder) !== undefined
+        );
 
-        const exists = savedPlaces.some((savedPlace) => {
-          const placeData = savedPlace.place || savedPlace;
-          const savedId =
-            placeData.id ??
-            placeData.placeId ??
-            savedPlace.placeId ??
-            savedPlace.savedPlaceId ??
-            savedPlace.bookmarkId;
+        const placeResponses = await Promise.allSettled(
+          folderList.map((folder) => api.get(getFolderPlacesUrl(getFolderId(folder))))
+        );
 
-          return String(savedId) === String(detailPlace.id);
+        let nextSavedInfo = null;
+
+        placeResponses.some((result, index) => {
+          if (result.status !== "fulfilled") return false;
+
+          const folderId = getFolderId(folderList[index]);
+          const savedPlaces = getArrayData(result.value.data);
+
+          const matchedPlace = savedPlaces.find((savedPlace) => {
+            const savedId = getSavedPlaceId(savedPlace);
+
+            return String(savedId) === String(detailPlace.id);
+          });
+
+          if (!matchedPlace) return false;
+
+          nextSavedInfo = {
+            folderId: String(folderId),
+            placeId: String(getSavedPlaceId(matchedPlace) ?? detailPlace.id),
+          };
+
+          return true;
         });
 
-        setServerSaved(exists);
+        setServerSaved(Boolean(nextSavedInfo));
+        setServerSavedFolderInfo(nextSavedInfo);
       } catch (error) {
         console.error("관심 장소 상태 조회 실패:", error);
+        setServerSaved(false);
+        setServerSavedFolderInfo(null);
       }
     };
 
@@ -838,24 +912,10 @@ function Detail() {
     setFolderModalOpen(false);
   };
 
-  const postSavedPlaceWithFolder = async (placeId, folder) => {
-    const payload = {
+  const postFolderPlace = async (folder, placeId) => {
+    return api.post(getFolderPlacesUrl(folder.id), {
       placeId,
-      folderId: folder.id,
-      folderName: folder.name,
-    };
-
-    try {
-      return await api.post(SAVED_PLACES_API, payload);
-    } catch (error) {
-      if (error.response?.status === 400 || error.response?.status === 422) {
-        return api.post(SAVED_PLACES_API, {
-          placeId,
-        });
-      }
-
-      throw error;
-    }
+    });
   };
 
   const removeSavedPlace = async () => {
@@ -864,10 +924,17 @@ function Detail() {
     try {
       setIsSavingPlace(true);
 
-      await api.delete(`${SAVED_PLACES_API}/${detailPlace.id}`);
+      if (serverSavedFolderInfo?.folderId) {
+        await api.delete(
+          getFolderPlaceDeleteUrl(
+            serverSavedFolderInfo.folderId,
+            serverSavedFolderInfo.placeId || detailPlace.id
+          )
+        );
+      }
 
-      removePlaceFolderLink(detailPlace.id);
       setServerSaved(false);
+      setServerSavedFolderInfo(null);
 
       if (contextSaved) {
         toggleSavedPlace(savedPlacePayload);
@@ -897,10 +964,15 @@ function Detail() {
     try {
       setIsSavingPlace(true);
 
-      await postSavedPlaceWithFolder(detailPlace.id, folder);
+      const registeredPlaceId = await registerPlace(detailPlace);
 
-      savePlaceFolderLink(detailPlace.id, folder);
+      await postFolderPlace(folder, registeredPlaceId);
+
       setServerSaved(true);
+      setServerSavedFolderInfo({
+        folderId: String(folder.id),
+        placeId: String(registeredPlaceId),
+      });
 
       if (!contextSaved) {
         toggleSavedPlace(savedPlacePayload);

@@ -1,89 +1,141 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import api from "../api/api";
 import "./FolderSelectModal.css";
 
-const DEFAULT_FOLDERS = [
-  { id: "all", name: "전체 저장됨", description: "" },
-  { id: "solo", name: "나홀로 여행", description: "" },
-  { id: "family", name: "가족과 함께", description: "" },
-  { id: "food", name: "맛집 탐방", description: "" },
-];
+const FOLDERS_API = "/api/folders";
 
-const FOLDER_STORAGE_KEY = "travel_saved_folders";
-const SAVED_PLACE_FOLDER_STORAGE_KEY = "travel_saved_place_folder_map";
+const getArrayData = (data) => {
+  if (Array.isArray(data)) return data;
 
-const safeParseJson = (value, fallbackValue) => {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return fallbackValue;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.folders)) return data.folders;
+  if (Array.isArray(data?.result)) return data.result;
+  if (Array.isArray(data?.results)) return data.results;
+
+  if (Array.isArray(data?.data?.content)) return data.data.content;
+  if (Array.isArray(data?.data?.items)) return data.data.items;
+  if (Array.isArray(data?.data?.folders)) return data.data.folders;
+  if (Array.isArray(data?.result?.content)) return data.result.content;
+
+  return [];
+};
+
+const getObjectData = (data) => {
+  if (!data || Array.isArray(data)) return data;
+
+  if (data.data && !Array.isArray(data.data)) {
+    return getObjectData(data.data);
   }
+
+  if (data.result && !Array.isArray(data.result)) {
+    return getObjectData(data.result);
+  }
+
+  if (data.folder && !Array.isArray(data.folder)) {
+    return getObjectData(data.folder);
+  }
+
+  return data;
 };
 
-const readStorage = (key, fallbackValue) => {
-  if (typeof window === "undefined") return fallbackValue;
+const getTextValue = (...values) => {
+  for (const value of values) {
+    if (value === null || value === undefined) continue;
 
-  const savedValue = window.localStorage.getItem(key);
-  if (!savedValue) return fallbackValue;
+    const text = String(value).trim();
 
-  return safeParseJson(savedValue, fallbackValue);
-};
+    if (text) return text;
+  }
 
-const writeStorage = (key, value) => {
-  if (typeof window === "undefined") return;
-
-  window.localStorage.setItem(key, JSON.stringify(value));
+  return "";
 };
 
 const normalizeFolder = (folder) => {
-  const id = folder?.id || folder?.folderId || folder?.name || folder?.folderName;
-  const name = folder?.name || folder?.folderName || folder?.title;
+  const rawFolder = getObjectData(folder);
 
-  if (!id || !name) return null;
+  const id =
+    rawFolder?.id ??
+    rawFolder?.folderId ??
+    rawFolder?.folder_id ??
+    rawFolder?.uuid;
+
+  const name = getTextValue(
+    rawFolder?.name,
+    rawFolder?.folderName,
+    rawFolder?.folder_name,
+    rawFolder?.title
+  );
+
+  if (id === null || id === undefined || !name) return null;
 
   return {
+    ...rawFolder,
     id: String(id),
-    name: String(name),
-    description: String(folder?.description || folder?.desc || ""),
+    name,
+    title: name,
+    description: getTextValue(
+      rawFolder?.description,
+      rawFolder?.desc,
+      rawFolder?.memo
+    ),
   };
 };
 
-export const loadSavedFolders = () => {
-  const savedFolders = readStorage(FOLDER_STORAGE_KEY, []);
-  const defaultFolderIds = new Set(DEFAULT_FOLDERS.map((folder) => folder.id));
-
-  const customFolders = Array.isArray(savedFolders)
-    ? savedFolders
-        .map(normalizeFolder)
-        .filter(Boolean)
-        .filter((folder) => !defaultFolderIds.has(folder.id))
-    : [];
-
-  return [...DEFAULT_FOLDERS, ...customFolders];
+const normalizeFolderList = (data) => {
+  return getArrayData(data).map(normalizeFolder).filter(Boolean);
 };
 
-export const savePlaceFolderLink = (placeId, folder) => {
-  if (!placeId || !folder) return;
+const mergeFolder = (folderList, folder) => {
+  if (!folder) return folderList;
 
-  const savedPlaceFolderMap = readStorage(SAVED_PLACE_FOLDER_STORAGE_KEY, {});
+  const hasFolder = folderList.some(
+    (item) => String(item.id) === String(folder.id)
+  );
 
-  savedPlaceFolderMap[String(placeId)] = {
-    id: folder.id,
-    name: folder.name,
-    description: folder.description || "",
-    savedAt: new Date().toISOString(),
-  };
+  if (hasFolder) {
+    return folderList.map((item) =>
+      String(item.id) === String(folder.id) ? folder : item
+    );
+  }
 
-  writeStorage(SAVED_PLACE_FOLDER_STORAGE_KEY, savedPlaceFolderMap);
+  return [...folderList, folder];
 };
 
-export const removePlaceFolderLink = (placeId) => {
-  if (!placeId) return;
+export const loadSavedFolders = async () => {
+  const response = await api.get(FOLDERS_API);
 
-  const savedPlaceFolderMap = readStorage(SAVED_PLACE_FOLDER_STORAGE_KEY, {});
-  delete savedPlaceFolderMap[String(placeId)];
+  return normalizeFolderList(response.data);
+};
 
-  writeStorage(SAVED_PLACE_FOLDER_STORAGE_KEY, savedPlaceFolderMap);
+export const savePlaceFolderLink = async (placeId, folder) => {
+  if (!placeId || !folder?.id) return null;
+
+  const response = await api.post(
+    `${FOLDERS_API}/${encodeURIComponent(folder.id)}/places`,
+    {
+      placeId,
+    }
+  );
+
+  return response.data;
+};
+
+export const removePlaceFolderLink = async (placeId, folderId) => {
+  if (!placeId || !folderId) {
+    console.warn("removePlaceFolderLink에는 placeId와 folderId가 모두 필요합니다.");
+    return null;
+  }
+
+  const response = await api.delete(
+    `${FOLDERS_API}/${encodeURIComponent(folderId)}/places/${encodeURIComponent(
+      placeId
+    )}`
+  );
+
+  return response.data;
 };
 
 const FolderIcon = ({ width = 30, height = 24 }) => (
@@ -130,37 +182,90 @@ function FolderSelectModal({
   onClose,
   onSave,
   isSaving = false,
-  defaultSelectedFolderId = "solo",
+  defaultSelectedFolderId = "",
+  folders: foldersProp,
+  onCreateFolder,
 }) {
-  const [folders, setFolders] = useState(DEFAULT_FOLDERS);
-  const [selectedFolderId, setSelectedFolderId] = useState(
-    defaultSelectedFolderId
-  );
+  const [folders, setFolders] = useState([]);
+  const [selectedFolderId, setSelectedFolderId] = useState("");
+  const [isLoadingFolders, setIsLoadingFolders] = useState(false);
+  const [folderLoadError, setFolderLoadError] = useState("");
+
   const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [newFolderDescription, setNewFolderDescription] = useState("");
   const [createFolderError, setCreateFolderError] = useState("");
+
   const selectedFolderButtonRef = useRef(null);
+
+  const getInitialFolderId = useCallback(
+    (nextFolders) => {
+      const defaultId =
+        defaultSelectedFolderId === null ||
+        defaultSelectedFolderId === undefined
+          ? ""
+          : String(defaultSelectedFolderId);
+
+      if (defaultId) {
+        const matchedFolder = nextFolders.find(
+          (folder) => String(folder.id) === defaultId
+        );
+
+        if (matchedFolder) return matchedFolder.id;
+      }
+
+      return nextFolders[0]?.id || "";
+    },
+    [defaultSelectedFolderId]
+  );
+
+  const applyFolders = useCallback(
+    (nextFolders) => {
+      setFolders(nextFolders);
+      setSelectedFolderId(getInitialFolderId(nextFolders));
+    },
+    [getInitialFolderId]
+  );
+
+  const fetchFolders = useCallback(async () => {
+    setFolderLoadError("");
+
+    if (Array.isArray(foldersProp)) {
+      const nextFolders = normalizeFolderList(foldersProp);
+      applyFolders(nextFolders);
+      return nextFolders;
+    }
+
+    try {
+      setIsLoadingFolders(true);
+
+      const nextFolders = await loadSavedFolders();
+      applyFolders(nextFolders);
+
+      return nextFolders;
+    } catch (error) {
+      console.error("폴더 목록 조회 실패:", error);
+
+      setFolders([]);
+      setSelectedFolderId("");
+      setFolderLoadError("폴더를 불러오지 못했습니다.");
+
+      return [];
+    } finally {
+      setIsLoadingFolders(false);
+    }
+  }, [applyFolders, foldersProp]);
 
   useEffect(() => {
     if (!open) return;
 
-    const nextFolders = loadSavedFolders();
-    const hasDefaultFolder = nextFolders.some(
-      (folder) => folder.id === defaultSelectedFolderId
-    );
-
-    setFolders(nextFolders);
-    setSelectedFolderId(
-      hasDefaultFolder
-        ? defaultSelectedFolderId
-        : nextFolders[0]?.id || DEFAULT_FOLDERS[0].id
-    );
+    fetchFolders();
     setIsCreateFolderOpen(false);
     setNewFolderName("");
     setNewFolderDescription("");
     setCreateFolderError("");
-  }, [defaultSelectedFolderId, open]);
+  }, [fetchFolders, open]);
 
   useEffect(() => {
     if (!open || typeof document === "undefined") return undefined;
@@ -181,11 +286,28 @@ function FolderSelectModal({
     });
   }, [folders.length, isCreateFolderOpen, open, selectedFolderId]);
 
-  const selectedFolder = useMemo(
-    () =>
-      folders.find((folder) => folder.id === selectedFolderId) || folders[0],
-    [folders, selectedFolderId]
-  );
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape" && !isSaving && !isCreatingFolder) {
+        onClose?.();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isCreatingFolder, isSaving, onClose, open]);
+
+  const selectedFolder = useMemo(() => {
+    return (
+      folders.find((folder) => String(folder.id) === String(selectedFolderId)) ||
+      null
+    );
+  }, [folders, selectedFolderId]);
 
   const resetCreateFolderForm = () => {
     setNewFolderName("");
@@ -194,28 +316,28 @@ function FolderSelectModal({
   };
 
   const handleBackdropClick = () => {
-    if (isSaving) return;
+    if (isSaving || isCreatingFolder) return;
     onClose?.();
   };
 
   const handleOpenCreateFolder = () => {
-    if (isSaving) return;
+    if (isSaving || isCreatingFolder || isLoadingFolders) return;
 
     resetCreateFolderForm();
     setIsCreateFolderOpen(true);
   };
 
   const handleCancelCreateFolder = () => {
-    if (isSaving) return;
+    if (isSaving || isCreatingFolder) return;
 
     resetCreateFolderForm();
     setIsCreateFolderOpen(false);
   };
 
-  const handleCreateFolder = (event) => {
+  const handleCreateFolder = async (event) => {
     event.preventDefault();
 
-    if (isSaving) return;
+    if (isSaving || isCreatingFolder) return;
 
     const trimmedFolderName = newFolderName.trim();
     const trimmedFolderDescription = newFolderDescription.trim();
@@ -235,28 +357,75 @@ function FolderSelectModal({
       return;
     }
 
-    const nextFolder = {
-      id: `custom-${Date.now()}`,
-      name: trimmedFolderName,
-      description: trimmedFolderDescription,
-    };
+    try {
+      setIsCreatingFolder(true);
+      setCreateFolderError("");
 
-    const nextFolders = [...folders, nextFolder];
-    const defaultFolderIds = new Set(DEFAULT_FOLDERS.map((folder) => folder.id));
-    const customFolders = nextFolders
-      .filter((folder) => !defaultFolderIds.has(folder.id))
-      .map(normalizeFolder)
-      .filter(Boolean);
+      let createdFolder = null;
 
-    writeStorage(FOLDER_STORAGE_KEY, customFolders);
-    setFolders(nextFolders);
-    setSelectedFolderId(nextFolder.id);
-    resetCreateFolderForm();
-    setIsCreateFolderOpen(false);
+      if (onCreateFolder) {
+        const result = await onCreateFolder({
+          name: trimmedFolderName,
+          description: trimmedFolderDescription,
+        });
+
+        createdFolder = normalizeFolder(result);
+      } else {
+        const response = await api.post(FOLDERS_API, {
+          name: trimmedFolderName,
+          description: trimmedFolderDescription,
+        });
+
+        createdFolder = normalizeFolder(response.data);
+      }
+
+      let latestFolders = folders;
+
+      try {
+        if (Array.isArray(foldersProp)) {
+          latestFolders = normalizeFolderList(foldersProp);
+        } else {
+          latestFolders = await loadSavedFolders();
+        }
+      } catch (reloadError) {
+        console.error("폴더 생성 후 목록 재조회 실패:", reloadError);
+      }
+
+      if (!createdFolder) {
+        createdFolder =
+          latestFolders.find(
+            (folder) =>
+              folder.name.trim().toLowerCase() ===
+              trimmedFolderName.toLowerCase()
+          ) || null;
+      }
+
+      if (!createdFolder) {
+        setCreateFolderError(
+          "폴더는 생성됐지만 폴더 정보를 확인하지 못했습니다. 다시 열어주세요."
+        );
+        return;
+      }
+
+      const nextFolders = mergeFolder(latestFolders, createdFolder);
+
+      setFolders(nextFolders);
+      setSelectedFolderId(createdFolder.id);
+      resetCreateFolderForm();
+      setIsCreateFolderOpen(false);
+    } catch (error) {
+      console.error("새 폴더 생성 실패:", error);
+      setCreateFolderError("새 폴더 생성에 실패했습니다.");
+    } finally {
+      setIsCreatingFolder(false);
+    }
   };
 
   const handleSaveClick = () => {
-    if (!selectedFolder || isSaving) return;
+    if (!selectedFolder || isSaving || isCreatingFolder || isLoadingFolders) {
+      return;
+    }
+
     onSave?.(selectedFolder);
   };
 
@@ -283,7 +452,7 @@ function FolderSelectModal({
               type="button"
               className="folder-create-close-btn"
               onClick={onClose}
-              disabled={isSaving}
+              disabled={isSaving || isCreatingFolder}
               aria-label="새 폴더 만들기 닫기"
             >
               ×
@@ -317,6 +486,7 @@ function FolderSelectModal({
                   maxLength={30}
                   autoComplete="off"
                   autoFocus
+                  disabled={isSaving || isCreatingFolder}
                 />
               </div>
 
@@ -345,6 +515,7 @@ function FolderSelectModal({
                   placeholder="설명을 입력하세요 (선택)"
                   rows={3}
                   maxLength={80}
+                  disabled={isSaving || isCreatingFolder}
                 />
               </div>
             </div>
@@ -354,7 +525,7 @@ function FolderSelectModal({
                 type="button"
                 className="folder-create-cancel-btn"
                 onClick={handleCancelCreateFolder}
-                disabled={isSaving}
+                disabled={isSaving || isCreatingFolder}
               >
                 취소
               </button>
@@ -362,9 +533,11 @@ function FolderSelectModal({
               <button
                 type="submit"
                 className="folder-create-submit-btn"
-                disabled={isSaving || !newFolderName.trim()}
+                disabled={
+                  isSaving || isCreatingFolder || !newFolderName.trim()
+                }
               >
-                + 만들기
+                {isCreatingFolder ? "만드는 중..." : "+ 만들기"}
               </button>
             </footer>
           </form>
@@ -384,7 +557,7 @@ function FolderSelectModal({
               type="button"
               className="folder-select-close-btn"
               onClick={onClose}
-              disabled={isSaving}
+              disabled={isSaving || isCreatingFolder}
               aria-label="폴더 선택 닫기"
             >
               ×
@@ -393,41 +566,57 @@ function FolderSelectModal({
 
           <div className="folder-select-body">
             <div className="folder-select-list">
-              {folders.map((folder) => {
-                const selected = selectedFolderId === folder.id;
+              {isLoadingFolders ? (
+                <p className="folder-select-empty-text">
+                  폴더를 불러오는 중입니다...
+                </p>
+              ) : folderLoadError ? (
+                <p className="folder-select-empty-text">{folderLoadError}</p>
+              ) : folders.length === 0 ? (
+                <p className="folder-select-empty-text">
+                  생성된 폴더가 없습니다.
+                </p>
+              ) : (
+                folders.map((folder) => {
+                  const selected =
+                    String(selectedFolderId) === String(folder.id);
 
-                return (
-                  <button
-                    key={folder.id}
-                    ref={selected ? selectedFolderButtonRef : null}
-                    type="button"
-                    className={`folder-select-option ${
-                      selected ? "selected" : ""
-                    }`}
-                    onClick={() => setSelectedFolderId(folder.id)}
-                    aria-pressed={selected}
-                  >
-                    <span className="folder-select-icon-circle">
-                      <FolderIcon />
-                    </span>
+                  return (
+                    <button
+                      key={folder.id}
+                      ref={selected ? selectedFolderButtonRef : null}
+                      type="button"
+                      className={`folder-select-option ${
+                        selected ? "selected" : ""
+                      }`}
+                      onClick={() => setSelectedFolderId(folder.id)}
+                      aria-pressed={selected}
+                      disabled={isSaving || isCreatingFolder}
+                    >
+                      <span className="folder-select-icon-circle">
+                        <FolderIcon />
+                      </span>
 
-                    <span className="folder-select-option-name">
-                      {folder.name}
-                    </span>
+                      <span className="folder-select-option-name">
+                        {folder.name}
+                      </span>
 
-                    <span className="folder-select-radio" aria-hidden="true">
-                      {selected && <span className="folder-select-radio-dot" />}
-                    </span>
-                  </button>
-                );
-              })}
+                      <span className="folder-select-radio" aria-hidden="true">
+                        {selected && (
+                          <span className="folder-select-radio-dot" />
+                        )}
+                      </span>
+                    </button>
+                  );
+                })
+              )}
             </div>
 
             <button
               type="button"
               className="folder-select-create-btn"
               onClick={handleOpenCreateFolder}
-              disabled={isSaving}
+              disabled={isSaving || isCreatingFolder || isLoadingFolders}
             >
               + 새 폴더 만들기
             </button>
@@ -438,7 +627,7 @@ function FolderSelectModal({
               type="button"
               className="folder-select-cancel-btn"
               onClick={onClose}
-              disabled={isSaving}
+              disabled={isSaving || isCreatingFolder}
             >
               취소
             </button>
@@ -447,7 +636,12 @@ function FolderSelectModal({
               type="button"
               className="folder-select-save-btn"
               onClick={handleSaveClick}
-              disabled={isSaving}
+              disabled={
+                isSaving ||
+                isCreatingFolder ||
+                isLoadingFolders ||
+                !selectedFolder
+              }
             >
               {isSaving ? "저장 중..." : "저장"}
             </button>

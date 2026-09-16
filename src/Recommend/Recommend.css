@@ -60,9 +60,29 @@
   justify-content: center;
 }
 
+.theme-icon {
+  display: block;
+  max-width: 22px;
+  max-height: 22px;
+  object-fit: contain;
+}
+
+.theme-icon--light {
+  filter: brightness(0) saturate(100%) invert(29%) sepia(17%) saturate(1215%)
+    hue-rotate(177deg) brightness(93%) contrast(90%);
+}
+
 .theme-card.active .theme-icon-wrap {
   background: #18a0f5;
   color: #ffffff;
+}
+
+.theme-card.active .theme-icon {
+  filter: brightness(0) invert(1);
+}
+
+.theme-card.active .theme-icon--light {
+  filter: none;
 }
 
 .theme-label {

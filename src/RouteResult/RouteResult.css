@@ -379,19 +379,21 @@
 
 .route-result-detail-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .route-result-detail-header h2 {
+  flex: 0 0 auto;
   margin: 0;
   color: #111827;
-  font-size: 30px;
+  font-size: 24px;
   font-weight: 900;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: -0.04em;
+  white-space: nowrap;
 }
 
 .route-result-distance-pill {
@@ -399,12 +401,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
-  padding: 0 18px;
+  min-height: 34px;
+  padding: 0 14px;
   border-radius: 999px;
   background: #edfaff;
   color: #1da7f2;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 900;
   line-height: 1;
   white-space: nowrap;
@@ -489,10 +491,10 @@
 .route-result-item-title-row h3 {
   margin: 0;
   color: #101828;
-  font-size: 25px;
+  font-size: 20px;
   font-weight: 900;
-  line-height: 1.18;
-  letter-spacing: -0.05em;
+  line-height: 1.22;
+  letter-spacing: -0.04em;
 }
 
 .route-result-item-badge {
@@ -500,12 +502,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 37px;
-  padding: 0 15px;
-  border-radius: 9px;
+  min-width: 0;
+  min-height: 31px;
+  padding: 0 11px;
+  border-radius: 8px;
   background: #f3f7fb;
   color: #6f7f91;
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -755,13 +758,13 @@ button.route-result-memo-card:hover {
   }
 
   .route-result-detail-header h2 {
-    font-size: 28px;
+    font-size: 22px;
   }
 
   .route-result-distance-pill {
-    min-height: 36px;
-    padding: 0 14px;
-    font-size: 18px;
+    min-height: 32px;
+    padding: 0 12px;
+    font-size: 15px;
   }
 
   .route-result-detail-sub {
@@ -773,7 +776,14 @@ button.route-result-memo-card:hover {
   }
 
   .route-result-item-title-row h3 {
-    font-size: 23px;
+    font-size: 19px;
+    line-height: 1.2;
+  }
+
+  .route-result-item-badge {
+    min-height: 29px;
+    padding: 0 9px;
+    font-size: 12px;
   }
 
   .route-result-item-desc,
@@ -819,5 +829,86 @@ button.route-result-memo-card:hover {
 @media (max-width: 480px) {
   .route-result-content {
     padding: 20px 16px 40px;
+  }
+}
+
+/* ================================
+   상세 일정 드래그앤드롭 정렬
+================================ */
+
+.route-result-timeline-item {
+  position: relative;
+}
+
+.route-result-timeline-item.is-sortable {
+  touch-action: none;
+}
+
+.route-result-timeline-item.is-dragging {
+  z-index: 30;
+  opacity: 0.78;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+}
+
+.route-result-timeline-item.is-sortable .route-result-item-body {
+  padding-right: 42px;
+}
+
+.route-result-drag-handle {
+  position: absolute;
+  top: -7px;
+  right: 0;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e4edf6;
+  border-radius: 11px;
+  background: #f8fbff;
+  color: #94a3b8;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: grab;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  touch-action: none;
+  user-select: none;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.route-result-drag-handle:hover {
+  border-color: #cbe7ff;
+  background: #f4fbff;
+  color: #1da7f2;
+}
+
+.route-result-drag-handle:active {
+  cursor: grabbing;
+}
+
+.route-result-drag-handle:focus-visible {
+  outline: 3px solid rgba(29, 167, 242, 0.22);
+  outline-offset: 2px;
+}
+
+.route-result-page.is-exporting .route-result-drag-handle,
+.route-result-pdf-root .route-result-drag-handle {
+  display: none;
+}
+
+@media (max-width: 420px) {
+  .route-result-timeline-item.is-sortable .route-result-item-body {
+    padding-right: 38px;
+  }
+
+  .route-result-drag-handle {
+    top: -5px;
+    width: 31px;
+    height: 31px;
+    border-radius: 10px;
+    font-size: 16px;
   }
 }

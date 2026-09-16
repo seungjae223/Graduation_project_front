@@ -2,15 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import AnimatedHeart from "../AnimatedHeart/AnimatedHeart";
-import FolderSelectModal, {
-  removePlaceFolderLink,
-  savePlaceFolderLink,
-} from "../FolderSelectModal/FolderSelectModal";
+import FolderSelectModal from "../FolderSelectModal/FolderSelectModal";
 import "./Total.css";
 import api from "../api/api";
 
 const RECOMMENDATIONS_API = "/api/recommendations";
-const SAVED_PLACES_API = "/api/saved-places";
+const FOLDERS_API = "/api/folders";
 const PLACES_API = "/api/places";
 
 const getPlaceArray = (data) => {
@@ -103,35 +100,78 @@ const normalizePlace = (place) => {
   };
 };
 
-const getSavedPlaceArray = (data) => {
+const getFolderArray = (data) => {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.data)) return data.data;
   if (Array.isArray(data?.content)) return data.content;
   if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.places)) return data.places;
-  if (Array.isArray(data?.savedPlaces)) return data.savedPlaces;
-  if (Array.isArray(data?.data?.savedPlaces)) return data.data.savedPlaces;
-  if (Array.isArray(data?.data?.places)) return data.data.places;
+  if (Array.isArray(data?.folders)) return data.folders;
+  if (Array.isArray(data?.result)) return data.result;
+  if (Array.isArray(data?.results)) return data.results;
+  if (Array.isArray(data?.data?.folders)) return data.data.folders;
+  if (Array.isArray(data?.data?.content)) return data.data.content;
+  if (Array.isArray(data?.data?.items)) return data.data.items;
 
   return [];
 };
 
+const getFolderId = (folder) => {
+  return folder?.id ?? folder?.folderId ?? folder?.folder_id ?? null;
+};
+
 const getSavedPlaceId = (savedPlace) => {
-  const placeData = savedPlace.place || savedPlace.destination || savedPlace;
+  const placeData = savedPlace?.place || savedPlace?.destination || savedPlace;
 
   return (
-    placeData.placeId ||
-    placeData.id ||
-    savedPlace.placeId ||
-    savedPlace.destinationId ||
-    savedPlace.savedPlaceId ||
-    savedPlace.bookmarkId ||
-    savedPlace.id
+    placeData?.placeId ??
+    placeData?.id ??
+    savedPlace?.placeId ??
+    savedPlace?.destinationId ??
+    savedPlace?.id ??
+    null
   );
 };
 
-const getSavedRecordId = (savedPlace) => {
-  return savedPlace.savedPlaceId || savedPlace.bookmarkId || savedPlace.id;
+const getFolderPlacesUrl = (folderId) => {
+  return `${FOLDERS_API}/${encodeURIComponent(folderId)}/places`;
+};
+
+const getFolderPlaceDeleteUrl = (folderId, placeId) => {
+  return `${FOLDERS_API}/${encodeURIComponent(
+    folderId
+  )}/places/${encodeURIComponent(placeId)}`;
+};
+
+const getResponseData = (data) => {
+  if (data?.data) return data.data;
+  if (data?.place) return data.place;
+  if (data?.result) return data.result;
+  return data;
+};
+
+const registerPlace = async (place) => {
+  const numericPlaceId = Number(place.id);
+  const placePayload = {
+    id: Number.isFinite(numericPlaceId) ? numericPlaceId : 0,
+    name: place.title,
+    latitude: place.latitude || 0,
+    longitude: place.longitude || 0,
+    address: place.address,
+    placeType: place.placeType,
+  };
+
+  try {
+    const response = await api.post(PLACES_API, placePayload);
+    const responseData = getResponseData(response.data);
+
+    return responseData?.id ?? responseData?.placeId ?? place.id;
+  } catch (error) {
+    if ([400, 409, 422].includes(error.response?.status)) {
+      return place.id;
+    }
+
+    throw error;
+  }
 };
 
 const getErrorMessage = (error, fallbackMessage) => {
@@ -152,7 +192,7 @@ function Total() {
   const [sortBy, setSortBy] = useState("인기순");
   const [places, setPlaces] = useState([]);
   const [serverSavedIds, setServerSavedIds] = useState([]);
-  const [serverSavedRecordMap, setServerSavedRecordMap] = useState({});
+  const [serverSavedFolderMap, setServerSavedFolderMap] = useState({});
   const [introText, setIntroText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingId, setIsSavingId] = useState(null);
@@ -212,31 +252,44 @@ function Total() {
   useEffect(() => {
     const fetchSavedPlaces = async () => {
       try {
-        const response = await api.get(SAVED_PLACES_API);
-        const savedPlaces = getSavedPlaceArray(response.data);
-        const savedIds = [];
-        const savedRecordMap = {};
+        const folderResponse = await api.get(FOLDERS_API);
+        const folderList = getFolderArray(folderResponse.data).filter(
+          (folder) => getFolderId(folder) !== null && getFolderId(folder) !== undefined
+        );
 
-        savedPlaces.forEach((savedPlace) => {
-          const placeId = getSavedPlaceId(savedPlace);
-          const savedRecordId = getSavedRecordId(savedPlace);
+        const placeResponses = await Promise.allSettled(
+          folderList.map((folder) => api.get(getFolderPlacesUrl(getFolderId(folder))))
+        );
 
-          if (!placeId) return;
+        const savedIds = new Set();
+        const savedFolderMap = {};
 
-          const placeIdText = String(placeId);
-          savedIds.push(placeIdText);
+        placeResponses.forEach((result, index) => {
+          if (result.status !== "fulfilled") return;
 
-          if (savedRecordId) {
-            savedRecordMap[placeIdText] = savedRecordId;
-          }
+          const folderId = getFolderId(folderList[index]);
+          const savedPlaces = getPlaceArray(result.value.data);
+
+          savedPlaces.forEach((savedPlace) => {
+            const placeId = getSavedPlaceId(savedPlace);
+
+            if (placeId === null || placeId === undefined) return;
+
+            const placeIdText = String(placeId);
+            savedIds.add(placeIdText);
+            savedFolderMap[placeIdText] = {
+              folderId: String(folderId),
+              placeId: placeIdText,
+            };
+          });
         });
 
-        setServerSavedIds([...new Set(savedIds)]);
-        setServerSavedRecordMap(savedRecordMap);
+        setServerSavedIds([...savedIds]);
+        setServerSavedFolderMap(savedFolderMap);
       } catch (error) {
         console.error("저장 장소 상태 조회 실패:", error);
         setServerSavedIds([]);
-        setServerSavedRecordMap({});
+        setServerSavedFolderMap({});
       }
     };
 
@@ -270,24 +323,10 @@ function Total() {
     setFolderTargetPlace(null);
   };
 
-  const postSavedPlaceWithFolder = async (placeId, folder) => {
-    const payload = {
+  const postFolderPlace = async (folder, placeId) => {
+    return api.post(getFolderPlacesUrl(folder.id), {
       placeId,
-      folderId: folder.id,
-      folderName: folder.name,
-    };
-
-    try {
-      return await api.post(SAVED_PLACES_API, payload);
-    } catch (error) {
-      if (error.response?.status === 400 || error.response?.status === 422) {
-        return api.post(SAVED_PLACES_API, {
-          placeId,
-        });
-      }
-
-      throw error;
-    }
+    });
   };
 
   const showSaveError = (error) => {
@@ -315,19 +354,33 @@ function Total() {
     try {
       setIsSavingId(place.id);
 
-      const deleteId = serverSavedRecordMap[String(place.id)] || place.id;
+      const savedInfo = serverSavedFolderMap[String(place.id)];
 
-      await api.delete(`${SAVED_PLACES_API}/${deleteId}`);
-
-      removePlaceFolderLink(place.id);
+      if (savedInfo?.folderId) {
+        await api.delete(
+          getFolderPlaceDeleteUrl(
+            savedInfo.folderId,
+            savedInfo.placeId || place.id
+          )
+        );
+      }
 
       setServerSavedIds((prev) =>
-        prev.filter((savedId) => savedId !== String(place.id))
+        prev.filter(
+          (savedId) =>
+            savedId !== String(place.id) &&
+            savedId !== String(savedInfo?.placeId || "")
+        )
       );
 
-      setServerSavedRecordMap((prev) => {
+      setServerSavedFolderMap((prev) => {
         const next = { ...prev };
         delete next[String(place.id)];
+
+        if (savedInfo?.placeId) {
+          delete next[String(savedInfo.placeId)];
+        }
+
         return next;
       });
 
@@ -345,22 +398,14 @@ function Total() {
     try {
       setIsSavingId(place.id);
 
-      const numericPlaceId = Number(place.id);
-      const placePayload = {
-        id: Number.isFinite(numericPlaceId) ? numericPlaceId : 0,
-        name: place.title,
-        latitude: place.latitude || 0,
-        longitude: place.longitude || 0,
-        address: place.address,
-        placeType: place.placeType,
+      const registeredPlaceId = await registerPlace(place);
+
+      await postFolderPlace(folder, registeredPlaceId);
+
+      const savedInfo = {
+        folderId: String(folder.id),
+        placeId: String(registeredPlaceId),
       };
-
-      const placeResponse = await api.post(PLACES_API, placePayload);
-      const registeredPlaceId = placeResponse.data?.id ?? place.id;
-      const response = await postSavedPlaceWithFolder(registeredPlaceId, folder);
-
-      const savedData = response.data?.data || response.data;
-      const savedRecordId = getSavedRecordId(savedData);
 
       setServerSavedIds((prev) => {
         const nextIds = new Set(prev);
@@ -369,16 +414,11 @@ function Total() {
         return [...nextIds];
       });
 
-      if (savedRecordId) {
-        setServerSavedRecordMap((prev) => ({
-          ...prev,
-          [String(place.id)]: savedRecordId,
-          [String(registeredPlaceId)]: savedRecordId,
-        }));
-      }
-
-      savePlaceFolderLink(place.id, folder);
-      savePlaceFolderLink(registeredPlaceId, folder);
+      setServerSavedFolderMap((prev) => ({
+        ...prev,
+        [String(place.id)]: savedInfo,
+        [String(registeredPlaceId)]: savedInfo,
+      }));
 
       if (!isSaved(place.id)) {
         toggleSavedPlace({ ...place, folder });

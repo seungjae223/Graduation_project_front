@@ -160,9 +160,26 @@
   font-weight: 600;
 }
 
+.my-schedule-location span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .my-schedule-chevron {
   color: #c3ceda;
   flex-shrink: 0;
+}
+
+.my-schedule-empty {
+  padding: 18px 0;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.my-schedule-empty p {
+  margin: 0;
 }
 
 .my-schedule-recommend-card {

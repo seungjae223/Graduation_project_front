@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
-import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import "./MyPage.css";
 import api, { getAccessToken } from "../api/api";
 
@@ -12,6 +11,12 @@ import compassIcon from "../img/나침반.png";
 import routeIcon from "../img/동선.png";
 
 const DEFAULT_USER_NAME = "여행자";
+
+const DEFAULT_MYPAGE_STATS = {
+  visitedPlacesCount: 0,
+  savedPlacesCount: 0,
+  reviewsCount: 0,
+};
 
 const ArrowIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -588,6 +593,16 @@ const normalizeUserData = (data) => {
   };
 };
 
+const normalizeMypageStats = (data) => {
+  const statsData = data?.data || data?.result || data || {};
+
+  return {
+    visitedPlacesCount: Number(statsData.visitedPlacesCount ?? 0),
+    savedPlacesCount: Number(statsData.savedPlacesCount ?? 0),
+    reviewsCount: Number(statsData.reviewsCount ?? 0),
+  };
+};
+
 const getFallbackUser = () => {
   return normalizeUserData(null);
 };
@@ -635,9 +650,9 @@ const saveUserToStorage = (user) => {
 
 const MyPage = () => {
   const navigate = useNavigate();
-  const { savedPlaces } = useSavedPlaces();
 
   const [currentUser, setCurrentUser] = useState(getInitialUser());
+  const [mypageStats, setMypageStats] = useState(DEFAULT_MYPAGE_STATS);
   const [isUserLoading, setIsUserLoading] = useState(false);
   const [locationAllowed, setLocationAllowed] = useState(false);
   const [isLocationPermissionOpen, setIsLocationPermissionOpen] =
@@ -703,6 +718,40 @@ const MyPage = () => {
       isMounted = false;
     };
   }, [navigate]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchMypageStats = async () => {
+      const token = getStoredAccessToken();
+
+      if (!token) {
+        return;
+      }
+
+      try {
+        const response = await api.get("/api/mypage/stats");
+
+        console.log("마이페이지 통계 응답:", response.data);
+
+        if (!isMounted) return;
+
+        setMypageStats(normalizeMypageStats(response.data));
+      } catch (error) {
+        console.error("마이페이지 통계 조회 실패:", error);
+
+        if (isMounted) {
+          setMypageStats(DEFAULT_MYPAGE_STATS);
+        }
+      }
+    };
+
+    fetchMypageStats();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const saveLocationAllowed = useCallback((isAllowed) => {
     setLocationAllowed(isAllowed);
@@ -845,25 +894,15 @@ const MyPage = () => {
   const stats = [
     {
       label: "다녀온 곳",
-      value:
-        currentUser?.visitedPlaceCount ??
-        currentUser?.visitedCount ??
-        currentUser?.tripCount ??
-        0,
+      value: mypageStats.visitedPlacesCount,
     },
     {
       label: "저장한 곳",
-      value:
-        currentUser?.savedPlaceCount ??
-        currentUser?.bookmarkCount ??
-        savedPlaces.length,
+      value: mypageStats.savedPlacesCount,
     },
     {
       label: "작성한 리뷰",
-      value:
-        currentUser?.reviewCount ??
-        currentUser?.writtenReviewCount ??
-        0,
+      value: mypageStats.reviewsCount,
     },
   ];
 

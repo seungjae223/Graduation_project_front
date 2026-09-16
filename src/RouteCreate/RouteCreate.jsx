@@ -10,15 +10,13 @@ import blueFolderIcon from "../img/파랑색폴더.png";
 import darkFolderIcon from "../img/검정색폴더.png";
 
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
-import { saveRoute as saveRouteUtil } from "../utils/routeStorage";
 import StartPlaceModal from "./StartPlaceModal";
 import api from "../api/api";
 
-const STORAGE_KEY = "mock_saved_route_results";
-const ROUTE_STORAGE_EVENT = "mock-routes-updated";
 const ROUTE_SELECTED_PLACE_KEY = "routeSelectedPlace";
 const ROUTE_DRAFT_PLACES_KEY = "routeDraftPlaces";
 const RECENT_PLACES_KEY = "recentPlaces";
+const ROUTE_FIXED_TIME_STORAGE_PREFIX = "route_fixed_time_map";
 const PLACE_SEARCH_API = "/api/places";
 const TRIPS_API = "/api/trips";
 
@@ -26,6 +24,308 @@ const DEFAULT_COORDS = {
   latitude: 37.5665,
   longitude: 126.978,
 };
+
+const toNumberOrNull = (...values) => {
+  for (const value of values) {
+    if (value === null || value === undefined || value === "") {
+      continue;
+    }
+
+    const numberValue = Number(value);
+
+    if (Number.isFinite(numberValue)) {
+      return numberValue;
+    }
+  }
+
+  return null;
+};
+
+const PLACE_COORDS_BY_SOURCE_ID = {
+  "seoul-gyeongbokgung": { latitude: 37.5796, longitude: 126.977 },
+  "seoul-bukchon": { latitude: 37.5826, longitude: 126.9831 },
+  "seoul-ikseondong": { latitude: 37.5743, longitude: 126.9895 },
+  "seoul-starfield-library": { latitude: 37.5126, longitude: 127.0598 },
+  "seoul-namsan-tower": { latitude: 37.5512, longitude: 126.9882 },
+
+  "tokyo-skytree": { latitude: 35.7101, longitude: 139.8107 },
+  "tokyo-sensoji": { latitude: 35.7148, longitude: 139.7967 },
+  "tokyo-shibuya-scramble": { latitude: 35.6584, longitude: 139.7016 },
+
+  "busan-haeundae": { latitude: 35.1587, longitude: 129.1604 },
+  "busan-gwangalli": { latitude: 35.1532, longitude: 129.1187 },
+  "busan-gamcheon": { latitude: 35.0975, longitude: 129.0106 },
+
+  "paris-eiffel-tower": { latitude: 48.8584, longitude: 2.2945 },
+  "paris-louvre": { latitude: 48.8606, longitude: 2.3376 },
+  "paris-montmartre": { latitude: 48.8867, longitude: 2.3431 },
+
+  "jeju-seongsan": { latitude: 33.4589, longitude: 126.9425 },
+  "jeju-hyeopjae": { latitude: 33.3945, longitude: 126.2395 },
+  "jeju-aewol-cafe-street": { latitude: 33.4621, longitude: 126.3097 },
+
+  "newyork-times-square": { latitude: 40.758, longitude: -73.9855 },
+  "newyork-central-park": { latitude: 40.7812, longitude: -73.9665 },
+  "newyork-met-museum": { latitude: 40.7794, longitude: -73.9632 },
+
+  "gyeongju-donggung": { latitude: 35.8346, longitude: 129.2266 },
+  "gyeongju-hwangridan": { latitude: 35.8382, longitude: 129.2109 },
+
+  "bangkok-wat-arun": { latitude: 13.7437, longitude: 100.4889 },
+  "bangkok-iconsiam": { latitude: 13.7266, longitude: 100.5103 },
+  "bangkok-chatuchak": { latitude: 13.7996, longitude: 100.5501 },
+
+  "osaka-dotonbori": { latitude: 34.6687, longitude: 135.5013 },
+  "osaka-usj": { latitude: 34.6654, longitude: 135.4323 },
+
+  "singapore-marina-bay-sands": { latitude: 1.2834, longitude: 103.8607 },
+  "singapore-gardens-by-the-bay": { latitude: 1.2816, longitude: 103.8636 },
+  "singapore-merlion-park": { latitude: 1.2868, longitude: 103.8545 },
+};
+
+const PLACE_COORDS_BY_NAME = {
+  경복궁: PLACE_COORDS_BY_SOURCE_ID["seoul-gyeongbokgung"],
+  북촌한옥마을: PLACE_COORDS_BY_SOURCE_ID["seoul-bukchon"],
+  "익선동 카페거리": PLACE_COORDS_BY_SOURCE_ID["seoul-ikseondong"],
+  별마당도서관: PLACE_COORDS_BY_SOURCE_ID["seoul-starfield-library"],
+  "N서울타워": PLACE_COORDS_BY_SOURCE_ID["seoul-namsan-tower"],
+  "도쿄 스카이트리": PLACE_COORDS_BY_SOURCE_ID["tokyo-skytree"],
+  센소지: PLACE_COORDS_BY_SOURCE_ID["tokyo-sensoji"],
+  "시부야 스크램블 스퀘어": PLACE_COORDS_BY_SOURCE_ID["tokyo-shibuya-scramble"],
+  "해운대 해수욕장": PLACE_COORDS_BY_SOURCE_ID["busan-haeundae"],
+  "광안리 해수욕장": PLACE_COORDS_BY_SOURCE_ID["busan-gwangalli"],
+  감천문화마을: PLACE_COORDS_BY_SOURCE_ID["busan-gamcheon"],
+  에펠탑: PLACE_COORDS_BY_SOURCE_ID["paris-eiffel-tower"],
+  "루브르 박물관": PLACE_COORDS_BY_SOURCE_ID["paris-louvre"],
+  몽마르트르: PLACE_COORDS_BY_SOURCE_ID["paris-montmartre"],
+  성산일출봉: PLACE_COORDS_BY_SOURCE_ID["jeju-seongsan"],
+  "성산 일출봉": PLACE_COORDS_BY_SOURCE_ID["jeju-seongsan"],
+  협재해수욕장: PLACE_COORDS_BY_SOURCE_ID["jeju-hyeopjae"],
+  애월카페거리: PLACE_COORDS_BY_SOURCE_ID["jeju-aewol-cafe-street"],
+  "애월 카페거리": PLACE_COORDS_BY_SOURCE_ID["jeju-aewol-cafe-street"],
+  "타임스 스퀘어": PLACE_COORDS_BY_SOURCE_ID["newyork-times-square"],
+  "센트럴 파크": PLACE_COORDS_BY_SOURCE_ID["newyork-central-park"],
+  "메트로폴리탄 미술관": PLACE_COORDS_BY_SOURCE_ID["newyork-met-museum"],
+  "동궁과 월지": PLACE_COORDS_BY_SOURCE_ID["gyeongju-donggung"],
+  황리단길: PLACE_COORDS_BY_SOURCE_ID["gyeongju-hwangridan"],
+  "왓 아룬": PLACE_COORDS_BY_SOURCE_ID["bangkok-wat-arun"],
+  아이콘시암: PLACE_COORDS_BY_SOURCE_ID["bangkok-iconsiam"],
+  "짜뚜짝 시장": PLACE_COORDS_BY_SOURCE_ID["bangkok-chatuchak"],
+  도톤보리: PLACE_COORDS_BY_SOURCE_ID["osaka-dotonbori"],
+  "유니버설 스튜디오 재팬": PLACE_COORDS_BY_SOURCE_ID["osaka-usj"],
+  "마리나 베이 샌즈": PLACE_COORDS_BY_SOURCE_ID["singapore-marina-bay-sands"],
+  "가든스 바이 더 베이": PLACE_COORDS_BY_SOURCE_ID["singapore-gardens-by-the-bay"],
+  "멀라이언 파크": PLACE_COORDS_BY_SOURCE_ID["singapore-merlion-park"],
+};
+
+const PLACE_COORDS_BY_CITY = {
+  서울: { latitude: 37.5665, longitude: 126.978 },
+  부산: { latitude: 35.1796, longitude: 129.0756 },
+  제주: { latitude: 33.4996, longitude: 126.5312 },
+  경주: { latitude: 35.8562, longitude: 129.2247 },
+  도쿄: { latitude: 35.6762, longitude: 139.6503 },
+  오사카: { latitude: 34.6937, longitude: 135.5023 },
+  파리: { latitude: 48.8566, longitude: 2.3522 },
+  뉴욕: { latitude: 40.7128, longitude: -74.006 },
+  방콕: { latitude: 13.7563, longitude: 100.5018 },
+  싱가포르: { latitude: 1.3521, longitude: 103.8198 },
+};
+
+const normalizeLowerText = (value = "") =>
+  String(value || "")
+    .trim()
+    .toLowerCase();
+
+const isKoreaText = (value = "") => {
+  const text = normalizeLowerText(value);
+
+  return (
+    text.includes("대한민국") ||
+    text.includes("한국") ||
+    text.includes("korea") ||
+    text.includes("seoul") ||
+    text.includes("busan") ||
+    text.includes("jeju") ||
+    text.includes("gyeongju") ||
+    text.includes("서울") ||
+    text.includes("부산") ||
+    text.includes("제주") ||
+    text.includes("경주")
+  );
+};
+
+const isOverseasText = (value = "") => {
+  const text = normalizeLowerText(value);
+
+  return (
+    text.includes("일본") ||
+    text.includes("japan") ||
+    text.includes("도쿄") ||
+    text.includes("tokyo") ||
+    text.includes("오사카") ||
+    text.includes("osaka") ||
+    text.includes("프랑스") ||
+    text.includes("france") ||
+    text.includes("파리") ||
+    text.includes("paris") ||
+    text.includes("미국") ||
+    text.includes("usa") ||
+    text.includes("new york") ||
+    text.includes("뉴욕") ||
+    text.includes("태국") ||
+    text.includes("thailand") ||
+    text.includes("방콕") ||
+    text.includes("bangkok") ||
+    text.includes("싱가포르") ||
+    text.includes("singapore")
+  );
+};
+
+const isCoordinateInKorea = ({ latitude, longitude } = {}) => {
+  const lat = Number(latitude);
+  const lng = Number(longitude);
+
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= 32.5 &&
+    lat <= 39.5 &&
+    lng >= 124 &&
+    lng <= 132
+  );
+};
+
+const getPlaceCoordinate = (place = {}) => {
+  const latitude = toNumberOrNull(
+    place.latitude,
+    place.lat,
+    place.y,
+    place.placeLatitude,
+    place.placeLat,
+    place.mapY
+  );
+
+  const longitude = toNumberOrNull(
+    place.longitude,
+    place.lng,
+    place.lon,
+    place.x,
+    place.placeLongitude,
+    place.placeLng,
+    place.placeLon,
+    place.mapX
+  );
+
+  if (latitude !== null && longitude !== null) {
+    return { latitude, longitude };
+  }
+
+  const sourceKey = normalizeLowerText(place.sourceId || place.id || place.placeId);
+  const sourceCoordinate = PLACE_COORDS_BY_SOURCE_ID[sourceKey];
+
+  if (sourceCoordinate) {
+    return sourceCoordinate;
+  }
+
+  const name = String(
+    place.name || place.title || place.placeName || place.destinationName || ""
+  ).trim();
+
+  if (PLACE_COORDS_BY_NAME[name]) {
+    return PLACE_COORDS_BY_NAME[name];
+  }
+
+  const matchedNameKey = Object.keys(PLACE_COORDS_BY_NAME).find((key) => {
+    return name.includes(key) || key.includes(name);
+  });
+
+  if (matchedNameKey) {
+    return PLACE_COORDS_BY_NAME[matchedNameKey];
+  }
+
+  const city = String(place.city || place.region || place.destination || "").trim();
+
+  if (PLACE_COORDS_BY_CITY[city]) {
+    return PLACE_COORDS_BY_CITY[city];
+  }
+
+  const matchedCityKey = Object.keys(PLACE_COORDS_BY_CITY).find((key) => {
+    return city.includes(key) || key.includes(city);
+  });
+
+  if (matchedCityKey) {
+    return PLACE_COORDS_BY_CITY[matchedCityKey];
+  }
+
+  const textForCountry = [
+    place.country,
+    place.countryName,
+    place.city,
+    place.region,
+    place.destination,
+    place.address,
+    place.desc,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  if (isOverseasText(textForCountry)) {
+    if (textForCountry.includes("도쿄") || /tokyo/i.test(textForCountry)) {
+      return PLACE_COORDS_BY_CITY["도쿄"];
+    }
+
+    if (textForCountry.includes("오사카") || /osaka/i.test(textForCountry)) {
+      return PLACE_COORDS_BY_CITY["오사카"];
+    }
+
+    if (textForCountry.includes("파리") || /paris|france/i.test(textForCountry)) {
+      return PLACE_COORDS_BY_CITY["파리"];
+    }
+
+    if (textForCountry.includes("뉴욕") || /new york|usa|미국/i.test(textForCountry)) {
+      return PLACE_COORDS_BY_CITY["뉴욕"];
+    }
+
+    if (textForCountry.includes("방콕") || /bangkok|thailand|태국/i.test(textForCountry)) {
+      return PLACE_COORDS_BY_CITY["방콕"];
+    }
+
+    if (textForCountry.includes("싱가포르") || /singapore/i.test(textForCountry)) {
+      return PLACE_COORDS_BY_CITY["싱가포르"];
+    }
+  }
+
+  return DEFAULT_COORDS;
+};
+
+const getMapProviderByPlace = (place = {}, coordinate = null) => {
+  const explicitProvider = normalizeLowerText(
+    place.mapProvider || place.provider || place.mapType
+  );
+
+  if (explicitProvider.includes("kakao")) return "kakao";
+  if (explicitProvider.includes("google")) return "google";
+
+  const textForCountry = [
+    place.country,
+    place.countryName,
+    place.city,
+    place.region,
+    place.destination,
+    place.address,
+    place.desc,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  if (isOverseasText(textForCountry)) return "google";
+  if (isKoreaText(textForCountry)) return "kakao";
+
+  const safeCoordinate = coordinate || getPlaceCoordinate(place);
+
+  return isCoordinateInKorea(safeCoordinate) ? "kakao" : "google";
+};
+
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -38,29 +338,6 @@ const DEFAULT_TIME_SLOTS = [
 ];
 
 const getThumb = (seed) => `https://picsum.photos/seed/${seed}/200/200`;
-
-const persistRouteSafely = (route) => {
-  try {
-    if (typeof saveRouteUtil === "function") {
-      saveRouteUtil(route);
-    }
-  } catch (error) {
-    console.error("routeStorage 저장 실패:", error);
-  }
-
-  try {
-    if (typeof window === "undefined") return;
-
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    const prev = raw ? JSON.parse(raw) : [];
-    const next = [route, ...prev.filter((item) => item.id !== route.id)];
-
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    window.dispatchEvent(new CustomEvent(ROUTE_STORAGE_EVENT));
-  } catch (error) {
-    console.error("localStorage 직접 저장 실패:", error);
-  }
-};
 
 const MOCK_PLACE_RESULTS = [
   {
@@ -992,25 +1269,31 @@ const getVisibleWeeks = (weeks) => {
 };
 
 const createPlaceItem = (place, orderIndex = 0) => {
+  const sourceId = normalizeSourceId(
+    place.sourceId || place.id || place.placeId || place.name || place.title
+  );
+  const coordinate = getPlaceCoordinate({ ...place, sourceId });
+  const mapProvider = getMapProviderByPlace({ ...place, sourceId }, coordinate);
+
   return {
-    id: `${place.sourceId}-${Date.now()}-${Math.random()
+    id: `${sourceId}-${Date.now()}-${Math.random()
       .toString(36)
       .slice(2, 7)}`,
-    sourceId: place.sourceId,
+    sourceId,
     originalId: place.originalId || place.id || place.placeId || null,
     placeId: place.placeId || place.id || place.originalId || null,
     destinationId: place.destinationId || null,
-    name: place.name,
-    desc: place.desc,
-    city: place.city,
-    country: place.country,
-    mapProvider: place.mapProvider,
-    thumb: place.thumb || getThumb(place.sourceId || place.name),
+    name: place.name || place.title || place.placeName || "이름 없는 장소",
+    desc: place.desc || place.address || place.roadAddress || "주소 정보 없음",
+    city: place.city || place.region || "",
+    country: place.country || "",
+    mapProvider,
+    thumb: place.thumb || getThumb(sourceId || place.name),
     rating: place.rating || null,
     tags: place.tags || [],
-    latitude: place.latitude || null,
-    longitude: place.longitude || null,
-    placeType: place.placeType || "",
+    latitude: coordinate.latitude,
+    longitude: coordinate.longitude,
+    placeType: place.placeType || place.type || "",
     timeLabel:
       place.timeLabel ||
       DEFAULT_TIME_SLOTS[orderIndex % DEFAULT_TIME_SLOTS.length],
@@ -1057,6 +1340,118 @@ const normalizeSourceId = (value) => {
     .replace(/\s+/g, "-")
     .replace(/[^\w가-힣-]/g, "")
     .toLowerCase();
+};
+
+
+const normalizeTimeMapText = (value = "") =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "");
+
+const addRouteTimeMapEntry = (timeMap, key, value) => {
+  if (!key || !value?.timeLabel) return;
+
+  timeMap[key] = value;
+};
+
+const buildRouteTimeMap = (route = {}) => {
+  const timeMap = {};
+  const selectedDates = Array.isArray(route.selectedDates)
+    ? route.selectedDates
+    : [];
+  const placesByDate = route.placesByDate || {};
+  const dateKeys =
+    selectedDates.length > 0
+      ? selectedDates.map(formatDateKey).filter(Boolean)
+      : Object.keys(placesByDate);
+
+  dateKeys.forEach((dateKey, dayIndex) => {
+    const day = dayIndex + 1;
+    const dayPlaces = Array.isArray(placesByDate[dateKey])
+      ? placesByDate[dateKey]
+      : [];
+
+    dayPlaces.forEach((place, placeIndex) => {
+      const timeLabel = place?.timeLabel || place?.time || "";
+
+      if (!timeLabel) return;
+
+      const name =
+        place.name ||
+        place.title ||
+        place.placeName ||
+        place.destinationName ||
+        "";
+      const address =
+        place.desc || place.address || place.roadAddress || place.addr || "";
+      const visitOrder = place.visitOrder || placeIndex + 1;
+      const entry = {
+        id: place.id,
+        localId: place.id,
+        tripPlaceId: place.tripPlaceId,
+        serverTripPlaceId: place.serverTripPlaceId,
+        placeId: place.placeId,
+        originalId: place.originalId,
+        destinationId: place.destinationId,
+        sourceId: place.sourceId,
+        name,
+        title: name,
+        placeName: name,
+        address,
+        desc: address,
+        day,
+        dateKey,
+        visitOrder,
+        localOrder: visitOrder,
+        timeLabel,
+        time: timeLabel,
+        isFixedTime: Boolean(place.isFixedTime),
+      };
+
+      addRouteTimeMapEntry(timeMap, `${day}:index:${visitOrder}`, entry);
+      addRouteTimeMapEntry(timeMap, `${day}:localId:${place.id}`, entry);
+      addRouteTimeMapEntry(timeMap, `${day}:tripPlaceId:${place.tripPlaceId}`, entry);
+      addRouteTimeMapEntry(
+        timeMap,
+        `${day}:tripPlaceId:${place.serverTripPlaceId}`,
+        entry
+      );
+      addRouteTimeMapEntry(timeMap, `${day}:placeId:${place.placeId}`, entry);
+      addRouteTimeMapEntry(timeMap, `${day}:placeId:${place.originalId}`, entry);
+      addRouteTimeMapEntry(
+        timeMap,
+        `${day}:placeId:${place.destinationId}`,
+        entry
+      );
+      addRouteTimeMapEntry(timeMap, `${day}:sourceId:${place.sourceId}`, entry);
+      addRouteTimeMapEntry(
+        timeMap,
+        `${day}:name:${normalizeTimeMapText(name)}`,
+        entry
+      );
+      addRouteTimeMapEntry(
+        timeMap,
+        `${day}:address:${normalizeTimeMapText(address)}`,
+        entry
+      );
+    });
+  });
+
+  return timeMap;
+};
+
+const persistRouteTimeMap = (routeId, timeMap = {}) => {
+  if (!routeId || typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(
+      `${ROUTE_FIXED_TIME_STORAGE_PREFIX}:${routeId}`,
+      JSON.stringify(timeMap)
+    );
+  } catch (error) {
+    console.error("고정 시간 저장 실패:", error);
+  }
 };
 
 const normalizeIncomingRoutePlace = (place) => {
@@ -1194,9 +1589,13 @@ const getArrayData = (data) => {
   if (Array.isArray(data?.content)) return data.content;
   if (Array.isArray(data?.items)) return data.items;
   if (Array.isArray(data?.places)) return data.places;
+  if (Array.isArray(data?.tripPlaces)) return data.tripPlaces;
+  if (Array.isArray(data?.result)) return data.result;
+  if (Array.isArray(data?.results)) return data.results;
   if (Array.isArray(data?.data?.content)) return data.data.content;
   if (Array.isArray(data?.data?.items)) return data.data.items;
   if (Array.isArray(data?.data?.places)) return data.data.places;
+  if (Array.isArray(data?.data?.tripPlaces)) return data.data.tripPlaces;
 
   return [];
 };
@@ -1230,7 +1629,7 @@ const normalizeSearchPlace = (place) => {
       "주소 정보 없음",
     city: place.city || place.region || "",
     country: place.country || "대한민국",
-    mapProvider: place.mapProvider || place.provider || "server",
+    mapProvider: place.mapProvider || place.provider || place.mapType || "server",
     thumb:
       place.thumb ||
       place.image ||
@@ -1258,7 +1657,7 @@ const getErrorMessage = (error, fallbackMessage) => {
 };
 
 const getResponseData = (data) => {
-  return data?.data || data?.trip || data?.tripPlace || data;
+  return data?.data || data?.trip || data?.tripPlace || data?.result || data?.response || data;
 };
 
 const getAllRoutePlaces = (savedRoute) => {
@@ -1291,7 +1690,6 @@ const getNumericPlaceId = (place) => {
   return null;
 };
 
-
 const buildPlaceRegistrationPayload = (place) => {
   const name =
     place?.name ||
@@ -1300,18 +1698,26 @@ const buildPlaceRegistrationPayload = (place) => {
     place?.destinationName ||
     "이름 없는 장소";
 
+  const address =
+    place?.desc ||
+    place?.address ||
+    place?.roadAddress ||
+    place?.addr ||
+    "주소 정보 없음";
+
+  const coordinate = getPlaceCoordinate(place);
+
   return {
     name,
-    latitude: toNumberOrDefault(place?.latitude, DEFAULT_COORDS.latitude),
-    longitude: toNumberOrDefault(place?.longitude, DEFAULT_COORDS.longitude),
-    address:
-      place?.desc ||
-      place?.address ||
-      place?.roadAddress ||
-      place?.addr ||
-      "주소 정보 없음",
+    latitude: toNumberOrDefault(coordinate.latitude, DEFAULT_COORDS.latitude),
+    longitude: toNumberOrDefault(coordinate.longitude, DEFAULT_COORDS.longitude),
+    address,
     placeType:
-      place?.placeType || place?.tabType || place?.category || "PLACE",
+      place?.placeType ||
+      place?.type ||
+      place?.tabType ||
+      place?.category ||
+      "PLACE",
   };
 };
 
@@ -1347,6 +1753,7 @@ const ensureServerPlaceId = async (place) => {
 const buildTripPayload = (savedRoute) => {
   const allPlaces = getAllRoutePlaces(savedRoute);
   const firstPlace = allPlaces[0];
+  const coordinate = getPlaceCoordinate(firstPlace || {});
 
   const startDate = formatDateKey(savedRoute.selectedDates[0]);
   const endDate = formatDateKey(
@@ -1363,9 +1770,9 @@ const buildTripPayload = (savedRoute) => {
       "서울",
     startDate,
     endDate,
-    latitude: toNumberOrDefault(firstPlace?.latitude, DEFAULT_COORDS.latitude),
+    latitude: toNumberOrDefault(coordinate.latitude, DEFAULT_COORDS.latitude),
     longitude: toNumberOrDefault(
-      firstPlace?.longitude,
+      coordinate.longitude,
       DEFAULT_COORDS.longitude
     ),
   };
@@ -1389,10 +1796,20 @@ const mergeTripResponseWithSavedRoute = (savedRoute, tripData, tripPayload) => {
   };
 };
 
+const getTripPlaceId = (tripPlace) => {
+  const value = tripPlace?.id ?? tripPlace?.tripPlaceId;
+  const numberValue = Number(value);
+
+  return Number.isInteger(numberValue) && numberValue > 0
+    ? numberValue
+    : null;
+};
+
 const addPlacesToTrip = async (tripId, savedRoute) => {
   const tripPlaceMap = {};
   const addedCountByDay = {};
   const serverPlaceIdByLocalId = {};
+  const serverTripPlaceIdByLocalId = {};
 
   for (let dayIndex = 0; dayIndex < savedRoute.selectedDates.length; dayIndex++) {
     const day = dayIndex + 1;
@@ -1415,11 +1832,22 @@ const addPlacesToTrip = async (tripId, savedRoute) => {
       );
 
       const tripPlaceData = getResponseData(response.data);
+      const tripPlaceId = getTripPlaceId(tripPlaceData);
+
+      if (!tripPlaceId) {
+        throw new Error(
+          `${place?.name || "장소"} 추가 응답에서 TripPlace ID를 찾지 못했습니다.`
+        );
+      }
+
       const localPlaceKey = place.id || `${dateKey}-${placeIndex}`;
 
       tripPlaceMap[localPlaceKey] = tripPlaceData;
-      tripPlaceMap[String(placeId)] = tripPlaceData;
+      tripPlaceMap[`tripPlace:${tripPlaceId}`] = tripPlaceData;
+      tripPlaceMap[`place:${placeId}`] = tripPlaceData;
+
       serverPlaceIdByLocalId[localPlaceKey] = placeId;
+      serverTripPlaceIdByLocalId[localPlaceKey] = tripPlaceId;
 
       addedCountByDay[day] = (addedCountByDay[day] || 0) + 1;
     }
@@ -1429,6 +1857,7 @@ const addPlacesToTrip = async (tripId, savedRoute) => {
     tripPlaceMap,
     addedCountByDay,
     serverPlaceIdByLocalId,
+    serverTripPlaceIdByLocalId,
   };
 };
 
@@ -1450,25 +1879,31 @@ const setStartPointsToServer = async ({
       selectedStartPlaces?.[dateKey] || dayPlaces[0]?.id;
 
     const selectedPlace =
-      dayPlaces.find((place) => place.id === selectedLocalPlaceId) ||
-      dayPlaces[0];
+      dayPlaces.find(
+        (place) => String(place.id) === String(selectedLocalPlaceId)
+      ) || dayPlaces[0];
 
     if (!selectedPlace) continue;
 
-    const numericPlaceId = getNumericPlaceId(selectedPlace);
+    const localPlaceKey = selectedPlace.id || selectedLocalPlaceId;
+    const tripPlaceData = tripPlaceMap[localPlaceKey];
+    const tripPlaceId = getTripPlaceId(tripPlaceData);
 
-    const tripPlaceData =
-      tripPlaceMap[selectedLocalPlaceId] ||
-      tripPlaceMap[String(numericPlaceId)];
-
-    const tripPlaceId = tripPlaceData?.id || tripPlaceData?.tripPlaceId;
-
-    if (!tripPlaceId) continue;
+    if (!tripPlaceId) {
+      throw new Error(
+        `${selectedPlace?.name || "출발 장소"}의 TripPlace ID를 찾지 못했습니다.`
+      );
+    }
 
     await api.post(
       `${TRIPS_API}/${tripId}/days/${day}/places/${tripPlaceId}/start`
     );
   }
+};
+
+const getOptimizedPlacesByDay = async (tripId, day) => {
+  const response = await api.get(`${TRIPS_API}/${tripId}/days/${day}/places`);
+  return getArrayData(response.data);
 };
 
 const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}) => {
@@ -1479,9 +1914,16 @@ const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}) => {
 
     if (!addedCountByDay[day]) continue;
 
-    const response = await api.post(`${TRIPS_API}/${tripId}/days/${day}/optimize`);
+    const optimizeResponse = await api.post(
+      `${TRIPS_API}/${tripId}/days/${day}/optimize`
+    );
 
-    optimizedByDay[day] = getArrayData(response.data);
+    const optimizedPlaces = getArrayData(optimizeResponse.data);
+
+    optimizedByDay[day] =
+      optimizedPlaces.length > 0
+        ? optimizedPlaces
+        : await getOptimizedPlacesByDay(tripId, day);
   }
 
   return optimizedByDay;
@@ -1490,7 +1932,8 @@ const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}) => {
 const mapOptimizedPlacesToSavedRoute = (
   savedRoute,
   optimizedByDay,
-  serverPlaceIdByLocalId = {}
+  serverPlaceIdByLocalId = {},
+  serverTripPlaceIdByLocalId = {}
 ) => {
   const nextPlacesByDate = JSON.parse(
     JSON.stringify(savedRoute.placesByDate || {})
@@ -1511,15 +1954,20 @@ const mapOptimizedPlacesToSavedRoute = (
       .slice()
       .sort((a, b) => Number(a.visitOrder || 0) - Number(b.visitOrder || 0))
       .map((tripPlace, index) => {
+        const tripPlaceId = getTripPlaceId(tripPlace);
+        const tripPlacePlaceId = Number(tripPlace.placeId);
+
         const matchedPlace =
           existingPlaces.find((place) => {
             const localKey = place.id;
+            const localTripPlaceId = serverTripPlaceIdByLocalId[localKey];
             const localPlaceId =
               serverPlaceIdByLocalId[localKey] || getNumericPlaceId(place);
 
             return (
-              localPlaceId &&
-              Number(localPlaceId) === Number(tripPlace.placeId)
+              (tripPlaceId &&
+                Number(localTripPlaceId) === Number(tripPlaceId)) ||
+              (localPlaceId && Number(localPlaceId) === tripPlacePlaceId)
             );
           }) ||
           existingPlaces[index] ||
@@ -1527,13 +1975,14 @@ const mapOptimizedPlacesToSavedRoute = (
 
         return {
           ...matchedPlace,
-          id: matchedPlace.id || `trip-place-${tripPlace.id}`,
+          id: matchedPlace.id || `trip-place-${tripPlaceId || tripPlace.id}`,
           sourceId:
             matchedPlace.sourceId ||
             String(tripPlace.placeId || tripPlace.placeName),
           originalId: tripPlace.placeId || matchedPlace.originalId,
           placeId: tripPlace.placeId || matchedPlace.placeId,
-          serverTripPlaceId: tripPlace.id,
+          serverTripPlaceId: tripPlaceId,
+          tripPlaceId,
           name: tripPlace.placeName || matchedPlace.name || "장소명 없음",
           desc: tripPlace.address || matchedPlace.desc || "주소 정보 없음",
           latitude: tripPlace.latitude ?? matchedPlace.latitude ?? null,
@@ -1548,6 +1997,83 @@ const mapOptimizedPlacesToSavedRoute = (
   return {
     ...savedRoute,
     placesByDate: nextPlacesByDate,
+  };
+};
+
+const saveRouteToServer = async (savedRoute, startPlaceMap = {}) => {
+  const tripPayload = buildTripPayload(savedRoute);
+
+  const tripResponse = await api.post(TRIPS_API, tripPayload);
+  const tripData = getResponseData(tripResponse.data);
+
+  let serverSavedRoute = mergeTripResponseWithSavedRoute(
+    savedRoute,
+    tripData,
+    tripPayload
+  );
+
+  const tripId = Number(tripData?.id || tripData?.tripId || serverSavedRoute.id);
+
+  if (!Number.isInteger(tripId) || tripId <= 0) {
+    return serverSavedRoute;
+  }
+
+  const {
+    tripPlaceMap,
+    addedCountByDay,
+    serverPlaceIdByLocalId,
+    serverTripPlaceIdByLocalId,
+  } = await addPlacesToTrip(tripId, savedRoute);
+
+  await setStartPointsToServer({
+    tripId,
+    savedRoute,
+    selectedStartPlaces: startPlaceMap,
+    tripPlaceMap,
+    addedCountByDay,
+  });
+
+  const optimizedByDay = await optimizeTripDays(
+    tripId,
+    savedRoute,
+    addedCountByDay
+  );
+
+  serverSavedRoute = mapOptimizedPlacesToSavedRoute(
+    serverSavedRoute,
+    optimizedByDay,
+    serverPlaceIdByLocalId,
+    serverTripPlaceIdByLocalId
+  );
+
+  const fixedTimeMap = buildRouteTimeMap(serverSavedRoute);
+  persistRouteTimeMap(tripId, fixedTimeMap);
+
+  const optimizedTripPlaces = Object.values(optimizedByDay).flatMap((places) =>
+    Array.isArray(places) ? places : []
+  );
+
+  const uniqueTripPlaces = Array.from(
+    new Map(
+      [...Object.values(tripPlaceMap), ...optimizedTripPlaces]
+        .filter(Boolean)
+        .map((tripPlace) => [
+          getTripPlaceId(tripPlace) ||
+            tripPlace.tripPlaceId ||
+            JSON.stringify(tripPlace),
+          tripPlace,
+        ])
+    ).values()
+  );
+
+  return {
+    ...serverSavedRoute,
+    fixedTimeMap,
+    serverData: {
+      trip: tripData,
+      tripPlaces: uniqueTripPlaces,
+      optimizedByDay,
+    },
   };
 };
 
@@ -2119,6 +2645,50 @@ const RouteCreate = () => {
     setSelectedStartPlaces((prev) => ({ ...prev, [dateKey]: placeId }));
   };
 
+  const buildRouteDraft = (placesSnapshot = placesByDate) => {
+    const firstDate = selectedDates[0];
+    const lastDate = selectedDates[selectedDates.length - 1];
+
+    const totalPlaces = selectedDates.reduce((sum, date) => {
+      const dateKey = formatDateKey(date);
+      return sum + (placesSnapshot[dateKey] || []).length;
+    }, 0);
+
+    const firstDateKey = firstDate ? formatDateKey(firstDate) : "";
+
+    const firstPlace = firstDateKey
+      ? (placesSnapshot[firstDateKey] || [])[0]
+      : null;
+
+    const routeSelectedDates = selectedDates.map((date) =>
+      new Date(date).toISOString()
+    );
+    const routePlacesByDate = JSON.parse(JSON.stringify(placesSnapshot));
+
+    return {
+      id: `route-${Date.now()}`,
+      title: firstPlace
+        ? `${firstPlace.name} 여행 일정`
+        : `${selectedDates.length}일 여행 일정`,
+      createdAt: new Date().toISOString(),
+      selectedDates: routeSelectedDates,
+      placesByDate: routePlacesByDate,
+      fixedTimeMap: buildRouteTimeMap({
+        selectedDates: routeSelectedDates,
+        placesByDate: routePlacesByDate,
+      }),
+      thumbnail: firstPlace?.thumb || "",
+      summary: {
+        daysCount: selectedDates.length,
+        totalPlaces,
+        dateRangeText:
+          firstDate && lastDate
+            ? `${formatTabDate(firstDate)} ~ ${formatTabDate(lastDate)}`
+            : "",
+      },
+    };
+  };
+
   const handleConfirmStartPlaces = async () => {
     const reorderedPlacesByDate = selectedDates.reduce(
       (acc, date) => {
@@ -2133,7 +2703,7 @@ const RouteCreate = () => {
       { ...placesByDate }
     );
 
-    const savedRoute = buildSavedRouteMock(reorderedPlacesByDate);
+    const savedRoute = buildRouteDraft(reorderedPlacesByDate);
 
     try {
       setIsGeneratingRoute(true);
@@ -2145,7 +2715,6 @@ const RouteCreate = () => {
         selectedStartPlaces
       );
 
-      persistRouteSafely(serverSavedRoute);
       setGeneratedRoute(serverSavedRoute);
 
       if (serverSavedRoute.placesByDate) {
@@ -2190,106 +2759,8 @@ const RouteCreate = () => {
     setIsCompleteModalOpen(false);
   };
 
-  const buildSavedRouteMock = (placesSnapshot = placesByDate) => {
-    const firstDate = selectedDates[0];
-    const lastDate = selectedDates[selectedDates.length - 1];
-
-    const totalPlaces = selectedDates.reduce((sum, date) => {
-      const dateKey = formatDateKey(date);
-      return sum + (placesSnapshot[dateKey] || []).length;
-    }, 0);
-
-    const firstDateKey = firstDate ? formatDateKey(firstDate) : "";
-
-    const firstPlace = firstDateKey
-      ? (placesSnapshot[firstDateKey] || [])[0]
-      : null;
-
-    return {
-      id: `route-${Date.now()}`,
-      title: firstPlace
-        ? `${firstPlace.name} 여행 일정`
-        : `${selectedDates.length}일 여행 일정`,
-      createdAt: new Date().toISOString(),
-      selectedDates: selectedDates.map((date) => new Date(date).toISOString()),
-      placesByDate: JSON.parse(JSON.stringify(placesSnapshot)),
-      thumbnail: firstPlace?.thumb || "",
-      summary: {
-        daysCount: selectedDates.length,
-        totalPlaces,
-        dateRangeText:
-          firstDate && lastDate
-            ? `${formatTabDate(firstDate)} ~ ${formatTabDate(lastDate)}`
-            : "",
-      },
-    };
-  };
-
-  const saveRouteToServer = async (savedRoute, startPlaceMap = selectedStartPlaces) => {
-    const tripPayload = buildTripPayload(savedRoute);
-
-    const tripResponse = await api.post(TRIPS_API, tripPayload);
-    const tripData = getResponseData(tripResponse.data);
-
-    let serverSavedRoute = mergeTripResponseWithSavedRoute(
-      savedRoute,
-      tripData,
-      tripPayload
-    );
-
-    const tripId = Number(tripData?.id || tripData?.tripId || serverSavedRoute.id);
-
-    if (!Number.isInteger(tripId) || tripId <= 0) {
-      return serverSavedRoute;
-    }
-
-    const { tripPlaceMap, addedCountByDay, serverPlaceIdByLocalId } =
-      await addPlacesToTrip(tripId, savedRoute);
-
-    await setStartPointsToServer({
-      tripId,
-      savedRoute,
-      selectedStartPlaces: startPlaceMap,
-      tripPlaceMap,
-      addedCountByDay,
-    });
-
-    const optimizedByDay = await optimizeTripDays(
-      tripId,
-      savedRoute,
-      addedCountByDay
-    );
-
-    serverSavedRoute = mapOptimizedPlacesToSavedRoute(
-      serverSavedRoute,
-      optimizedByDay,
-      serverPlaceIdByLocalId
-    );
-
-    const uniqueTripPlaces = Array.from(
-      new Map(
-        Object.values(tripPlaceMap)
-          .filter(Boolean)
-          .map((tripPlace) => [
-            tripPlace.id || tripPlace.tripPlaceId || JSON.stringify(tripPlace),
-            tripPlace,
-          ])
-      ).values()
-    );
-
-    return {
-      ...serverSavedRoute,
-      serverData: {
-        trip: tripData,
-        tripPlaces: uniqueTripPlaces,
-        optimizedByDay,
-      },
-    };
-  };
-
   const handleConfirmRoute = async () => {
     if (generatedRoute) {
-      persistRouteSafely(generatedRoute);
       setIsCompleteModalOpen(false);
 
       navigate(`/route-result?id=${generatedRoute.id}`, {
@@ -2303,16 +2774,15 @@ const RouteCreate = () => {
       return;
     }
 
-    const savedRoute = buildSavedRouteMock();
+    const routeDraft = buildRouteDraft();
 
     try {
       setIsSavingRoute(true);
 
       const serverSavedRoute = await saveRouteToServer(
-        savedRoute,
+        routeDraft,
         selectedStartPlaces
       );
-      persistRouteSafely(serverSavedRoute);
 
       setIsCompleteModalOpen(false);
 
@@ -2328,23 +2798,19 @@ const RouteCreate = () => {
 
       if (error.message.includes("Network Error")) {
         alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
-      } else if (error.response?.status === 401 || error.response?.status === 403) {
+      } else if (
+        error.response?.status === 401 ||
+        error.response?.status === 403
+      ) {
         alert("로그인 정보가 만료되었거나 권한이 없습니다. 다시 로그인해주세요.");
       } else {
         alert(
           getErrorMessage(
             error,
-            "여행 생성에 실패했습니다. 로컬에 임시 저장 후 이동합니다."
+            "여행 생성에 실패했습니다. 잠시 후 다시 시도해주세요."
           )
         );
       }
-
-      persistRouteSafely(savedRoute);
-      setIsCompleteModalOpen(false);
-
-      navigate(`/route-result?id=${savedRoute.id}`, {
-        state: { savedRoute, selectedDates, placesByDate },
-      });
     } finally {
       setIsSavingRoute(false);
     }
@@ -2352,22 +2818,17 @@ const RouteCreate = () => {
 
   const handleSaveRouteLater = async () => {
     if (generatedRoute) {
-      persistRouteSafely(generatedRoute);
       setIsCompleteModalOpen(false);
       alert("일정이 저장되었습니다.");
       return;
     }
 
-    const savedRoute = buildSavedRouteMock();
+    const routeDraft = buildRouteDraft();
 
     try {
       setIsSavingRoute(true);
 
-      const serverSavedRoute = await saveRouteToServer(
-        savedRoute,
-        selectedStartPlaces
-      );
-      persistRouteSafely(serverSavedRoute);
+      await saveRouteToServer(routeDraft, selectedStartPlaces);
 
       setIsCompleteModalOpen(false);
       alert("일정이 저장되었습니다.");
@@ -2375,22 +2836,20 @@ const RouteCreate = () => {
       console.error("여행 저장 실패:", error);
 
       if (error.message.includes("Network Error")) {
-        alert(
-          "백엔드 서버 연결 또는 CORS 설정을 확인해주세요. 로컬에 임시 저장합니다."
-        );
-      } else if (error.response?.status === 401 || error.response?.status === 403) {
-        alert("로그인 정보가 만료되었거나 권한이 없습니다. 로컬에 임시 저장합니다.");
+        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+      } else if (
+        error.response?.status === 401 ||
+        error.response?.status === 403
+      ) {
+        alert("로그인 정보가 만료되었거나 권한이 없습니다. 다시 로그인해주세요.");
       } else {
         alert(
           getErrorMessage(
             error,
-            "여행 저장에 실패했습니다. 로컬에 임시 저장합니다."
+            "여행 저장에 실패했습니다. 잠시 후 다시 시도해주세요."
           )
         );
       }
-
-      persistRouteSafely(savedRoute);
-      setIsCompleteModalOpen(false);
     } finally {
       setIsSavingRoute(false);
     }

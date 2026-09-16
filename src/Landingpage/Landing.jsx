@@ -8,6 +8,9 @@ import bgImage from "../img/서비스 소개 .png";
 import compass from "../img/나침반.png";
 import route from "../img/동선.png";
 import map from "../img/랜딩지도.png";
+import footerShareIcon from "../img/landing-footer-share.svg";
+import footerHelpIcon from "../img/landing-footer-info.svg";
+import footerInfoIcon from "../img/landing-footer-help.svg";
 
 const Landing = () => {
   const [activeBtn, setActiveBtn] = useState(null);
@@ -104,10 +107,19 @@ const Landing = () => {
       </div>
 
       {/* 푸터 */}
-      <div className="landing-footer">
-        너만 오면 go
-        <br />© 2025 All rights reserved.
-      </div>
+      <footer className="landing-footer">
+        <p className="landing-footer-brand">
+          너만 오면 <span>go</span>
+        </p>
+        <p className="landing-footer-copyright">
+          © 2026 너만오면go. All rights reserved.
+        </p>
+        <div className="landing-footer-icons" aria-label="서비스 정보">
+          <img src={footerShareIcon} alt="공유" />
+          <img src={footerInfoIcon} alt="서비스 안내" />
+          <img src={footerHelpIcon} alt="도움말" />
+        </div>
+      </footer>
     </div>
   );
 };

@@ -2,39 +2,67 @@ import React, {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
 
 const SavedPlacesContext = createContext(null);
 
-export const SavedPlacesProvider = ({ children }) => {
-  const [savedPlaces, setSavedPlaces] = useState(() => {
-    const stored = localStorage.getItem("savedPlaces");
-    return stored ? JSON.parse(stored) : [];
-  });
+const getPlaceId = (place) => place?.id ?? place?.placeId;
 
-  useEffect(() => {
-    localStorage.setItem("savedPlaces", JSON.stringify(savedPlaces));
-  }, [savedPlaces]);
+export const SavedPlacesProvider = ({ children }) => {
+  const [savedPlaces, setSavedPlaces] = useState([]);
 
   const isSaved = useCallback(
-    (id) => savedPlaces.some((place) => place.id === id),
-    [savedPlaces]
+    (id) => {
+      if (id === null || id === undefined) return false;
+
+      return savedPlaces.some(
+        (place) => String(getPlaceId(place)) === String(id),
+      );
+    },
+    [savedPlaces],
   );
 
-  const toggleSavedPlace = useCallback((place) => {
-    setSavedPlaces((prev) => {
-      const exists = prev.some((item) => item.id === place.id);
+  const addSavedPlace = useCallback((place) => {
+    const placeId = getPlaceId(place);
 
-      if (exists) {
-        return prev.filter((item) => item.id !== place.id);
-      }
+    if (placeId === null || placeId === undefined) return;
+
+    setSavedPlaces((prev) => {
+      const exists = prev.some(
+        (item) => String(getPlaceId(item)) === String(placeId),
+      );
+
+      if (exists) return prev;
 
       return [...prev, place];
     });
   }, []);
+
+  const removeSavedPlace = useCallback((id) => {
+    if (id === null || id === undefined) return;
+
+    setSavedPlaces((prev) =>
+      prev.filter((place) => String(getPlaceId(place)) !== String(id)),
+    );
+  }, []);
+
+  const toggleSavedPlace = useCallback(
+    (place) => {
+      const placeId = getPlaceId(place);
+
+      if (placeId === null || placeId === undefined) return;
+
+      if (isSaved(placeId)) {
+        removeSavedPlace(placeId);
+        return;
+      }
+
+      addSavedPlace(place);
+    },
+    [isSaved, addSavedPlace, removeSavedPlace],
+  );
 
   const clearSavedPlaces = useCallback(() => {
     setSavedPlaces([]);
@@ -44,10 +72,19 @@ export const SavedPlacesProvider = ({ children }) => {
     () => ({
       savedPlaces,
       isSaved,
+      addSavedPlace,
+      removeSavedPlace,
       toggleSavedPlace,
       clearSavedPlaces,
     }),
-    [savedPlaces, isSaved, toggleSavedPlace, clearSavedPlaces]
+    [
+      savedPlaces,
+      isSaved,
+      addSavedPlace,
+      removeSavedPlace,
+      toggleSavedPlace,
+      clearSavedPlaces,
+    ],
   );
 
   return (

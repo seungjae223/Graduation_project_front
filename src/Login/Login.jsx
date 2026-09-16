@@ -6,7 +6,7 @@ import "./Login.css";
 import logoIcon from "../img/지구본.png";
 import eyeIcon from "../img/눈알.png";
 import kakaoIcon from "../img/카카오.png";
-import naverIcon from "../img/네이버.png";
+import googleIcon from "../img/google.png";
 
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
@@ -186,8 +186,9 @@ const Login = () => {
             <img src={kakaoIcon} alt="kakao" />
             카카오 로그인
           </button>
-          <button type="button" className="naver">
-            <img src={naverIcon} alt="naver" />
+
+          <button type="button" className="google">
+            <img src={googleIcon} alt="google" />
             구글 로그인
           </button>
         </div>
