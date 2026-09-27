@@ -81,3 +81,312 @@ line-height: 29.25px; /* 162.5% */
   margin-top: 24px;
   cursor: pointer;
 }
+
+/*
+ * 온보딩의 정지 상태는 그대로 두고, 라우트가 처음 마운트될 때만
+ * 중앙 콘텐츠가 순차적으로 등장하도록 한다.
+ */
+.route-transition.onboarding-route {
+  --onboarding-enter-x: 0px;
+  --onboarding-enter-rotate: -4deg;
+  animation: none;
+}
+
+.route-transition.onboarding-route--forward {
+  --onboarding-enter-x: 76px;
+  --onboarding-enter-rotate: -3deg;
+}
+
+.route-transition.onboarding-route--backward {
+  --onboarding-enter-x: -76px;
+  --onboarding-enter-rotate: 3deg;
+}
+
+.onboarding-route .image-wrapper {
+  animation: onboarding-graphic-in 780ms linear backwards;
+}
+
+.onboarding-route .text-area h2 {
+  animation: onboarding-title-in 450ms cubic-bezier(0.16, 1, 0.3, 1) 180ms backwards;
+}
+
+.onboarding-route .text-area p {
+  animation: onboarding-description-in 400ms cubic-bezier(0.16, 1, 0.3, 1) 280ms backwards;
+}
+
+.onboarding-route .dot {
+  animation: onboarding-dot-in 320ms cubic-bezier(0.2, 0.9, 0.3, 1.35) backwards;
+}
+
+.onboarding-route .dot:nth-child(1) {
+  animation-delay: 380ms;
+}
+
+.onboarding-route .dot:nth-child(2) {
+  animation-delay: 450ms;
+}
+
+.onboarding-route .dot:nth-child(3) {
+  animation-delay: 520ms;
+}
+
+@keyframes onboarding-graphic-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(var(--onboarding-enter-x), 60px, 0) scale(0.78)
+      rotate(var(--onboarding-enter-rotate));
+    animation-timing-function: cubic-bezier(0.16, 0.82, 0.26, 1);
+  }
+
+  58% {
+    opacity: 1;
+    transform: translate3d(0, -8px, 0) scale(1.06) rotate(1deg);
+    animation-timing-function: cubic-bezier(0.34, 1.3, 0.64, 1);
+  }
+
+  78% {
+    opacity: 1;
+    transform: translate3d(0, 3px, 0) scale(0.985) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes onboarding-title-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 32px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes onboarding-description-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes onboarding-dot-in {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.45);
+  }
+
+  72% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.18);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/*
+ * 지원 브라우저에서는 기존/신규 중앙 콘텐츠의 스냅샷을 겹쳐
+ * 퇴장과 진입이 끊기지 않게 연결한다. 헤더와 조작부는 이동시키지 않는다.
+ */
+html.onboarding-transitioning {
+  --onboarding-view-enter-x: 82px;
+  --onboarding-view-exit-x: -60px;
+  --onboarding-view-overshoot-x: -4px;
+  --onboarding-view-rotate: -2deg;
+}
+
+html.onboarding-transitioning[data-onboarding-direction="backward"] {
+  --onboarding-view-enter-x: -82px;
+  --onboarding-view-exit-x: 60px;
+  --onboarding-view-overshoot-x: 4px;
+  --onboarding-view-rotate: 2deg;
+}
+
+html.onboarding-transitioning .onboarding-route .image-wrapper {
+  view-transition-name: onboarding-graphic;
+}
+
+html.onboarding-transitioning .onboarding-route .text-area h2 {
+  view-transition-name: onboarding-title;
+}
+
+html.onboarding-transitioning .onboarding-route .text-area p {
+  view-transition-name: onboarding-description;
+}
+
+html.onboarding-transitioning .onboarding-route .image-wrapper,
+html.onboarding-transitioning .onboarding-route .text-area h2,
+html.onboarding-transitioning .onboarding-route .text-area p,
+html.onboarding-transitioning .onboarding-route .dot,
+html.onboarding-transitioning .onboarding-route .next-btn {
+  animation: none;
+}
+
+.onboarding-exit-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  pointer-events: none;
+}
+
+.onboarding-exit-snapshot {
+  position: fixed !important;
+  inset: auto !important;
+  left: var(--snapshot-left) !important;
+  top: var(--snapshot-top) !important;
+  width: var(--snapshot-width) !important;
+  height: var(--snapshot-height) !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+  transform-origin: center;
+  pointer-events: none;
+  animation: onboarding-view-exit 220ms cubic-bezier(0.55, 0, 1, 0.45) both !important;
+}
+
+.onboarding-exit-snapshot--title,
+.onboarding-exit-snapshot--description {
+  animation-duration: 200ms !important;
+}
+
+html.onboarding-transitioning.onboarding-transition-fallback
+  .onboarding-route
+  .image-wrapper {
+  animation: onboarding-view-graphic-enter 560ms linear both;
+}
+
+html.onboarding-transitioning.onboarding-transition-fallback
+  .onboarding-route
+  .text-area
+  h2 {
+  animation: onboarding-view-copy-enter 470ms cubic-bezier(0.16, 1, 0.3, 1)
+    70ms both;
+}
+
+html.onboarding-transitioning.onboarding-transition-fallback
+  .onboarding-route
+  .text-area
+  p {
+  animation: onboarding-view-copy-enter 420ms cubic-bezier(0.16, 1, 0.3, 1)
+    150ms both;
+}
+
+html.onboarding-transitioning::view-transition {
+  pointer-events: none;
+}
+
+html.onboarding-transitioning::view-transition-old(root) {
+  display: none;
+}
+
+html.onboarding-transitioning::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+html.onboarding-transitioning::view-transition-old(onboarding-graphic),
+html.onboarding-transitioning::view-transition-old(onboarding-title),
+html.onboarding-transitioning::view-transition-old(onboarding-description),
+html.onboarding-transitioning::view-transition-new(onboarding-graphic),
+html.onboarding-transitioning::view-transition-new(onboarding-title),
+html.onboarding-transitioning::view-transition-new(onboarding-description) {
+  mix-blend-mode: normal;
+}
+
+html.onboarding-transitioning::view-transition-old(onboarding-graphic) {
+  animation: onboarding-view-exit 220ms cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+
+html.onboarding-transitioning::view-transition-new(onboarding-graphic) {
+  animation: onboarding-view-graphic-enter 560ms linear both;
+}
+
+html.onboarding-transitioning::view-transition-old(onboarding-title),
+html.onboarding-transitioning::view-transition-old(onboarding-description) {
+  animation: onboarding-view-exit 200ms cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+
+html.onboarding-transitioning::view-transition-new(onboarding-title) {
+  animation: onboarding-view-copy-enter 470ms cubic-bezier(0.16, 1, 0.3, 1) 70ms both;
+}
+
+html.onboarding-transitioning::view-transition-new(onboarding-description) {
+  animation: onboarding-view-copy-enter 420ms cubic-bezier(0.16, 1, 0.3, 1) 150ms both;
+}
+
+@keyframes onboarding-view-exit {
+  to {
+    opacity: 0;
+    transform: translateX(var(--onboarding-view-exit-x)) scale(0.96);
+  }
+}
+
+@keyframes onboarding-view-graphic-enter {
+  0% {
+    opacity: 0;
+    transform: translateX(var(--onboarding-view-enter-x)) scale(0.9)
+      rotate(var(--onboarding-view-rotate));
+    animation-timing-function: cubic-bezier(0.16, 0.82, 0.26, 1);
+  }
+
+  66% {
+    opacity: 1;
+    transform: translateX(var(--onboarding-view-overshoot-x)) scale(1.03)
+      rotate(0.5deg);
+    animation-timing-function: cubic-bezier(0.34, 1.3, 0.64, 1);
+  }
+
+  84% {
+    opacity: 1;
+    transform: translateX(2px) scale(0.99) rotate(0deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes onboarding-view-copy-enter {
+  from {
+    opacity: 0;
+    transform: translateX(var(--onboarding-view-enter-x));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-route .image-wrapper,
+  .onboarding-route .text-area h2,
+  .onboarding-route .text-area p,
+  .onboarding-route .dot,
+  .onboarding-route .next-btn {
+    animation: none;
+  }
+
+  html.onboarding-transitioning::view-transition-old(onboarding-graphic),
+  html.onboarding-transitioning::view-transition-old(onboarding-title),
+  html.onboarding-transitioning::view-transition-old(onboarding-description),
+  html.onboarding-transitioning::view-transition-new(onboarding-graphic),
+  html.onboarding-transitioning::view-transition-new(onboarding-title),
+  html.onboarding-transitioning::view-transition-new(onboarding-description) {
+    animation: none;
+  }
+}

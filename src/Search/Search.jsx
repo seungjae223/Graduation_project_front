@@ -1,5 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  clearRecentSearchesApi,
+  deleteRecentSearchApi,
+  getRecentSearchesApi,
+} from "../api/placeApi";
 import "./Search.css";
 
 import hotMainImg from "../img/도쿄.png";
@@ -315,11 +320,7 @@ function Search() {
 
   const [query, setQuery] = useState(keywordFromUrl);
   const [searchedKeyword, setSearchedKeyword] = useState(keywordFromUrl);
-  const [recentKeywords, setRecentKeywords] = useState([
-    "제주도 벚꽃",
-    "부산 광안리",
-    "강릉 카페거리",
-  ]);
+  const [recentSearches, setRecentSearches] = useState([]);
 
   const searchableItems = useMemo(() => {
     const travelItems = travelSearchPlaces.map((place) => ({
@@ -386,6 +387,20 @@ function Search() {
     setSearchedKeyword(nextKeyword);
   }, [searchParams]);
 
+  useEffect(() => {
+    let mounted = true;
+
+    getRecentSearchesApi()
+      .then((items) => {
+        if (mounted) setRecentSearches(items.slice(0, 10));
+      })
+      .catch((error) => console.error("최근 검색어 조회 실패:", error));
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const runSearch = (keyword) => {
     const trimmedKeyword = keyword.trim();
 
@@ -395,11 +410,6 @@ function Search() {
 
     setQuery(trimmedKeyword);
     setSearchedKeyword(trimmedKeyword);
-
-    setRecentKeywords((prev) => {
-      const filtered = prev.filter((item) => item !== trimmedKeyword);
-      return [trimmedKeyword, ...filtered].slice(0, 5);
-    });
 
     navigate(
       `${RECOMMEND_PAGE_PATH}?keyword=${encodeURIComponent(trimmedKeyword)}`
@@ -411,14 +421,25 @@ function Search() {
     runSearch(query);
   };
 
-  const handleRemoveRecent = (e, keyword) => {
+  const handleRemoveRecent = async (e, recentSearch) => {
     e.stopPropagation();
-
-    setRecentKeywords((prev) => prev.filter((item) => item !== keyword));
+    try {
+      await deleteRecentSearchApi(recentSearch.id);
+      setRecentSearches((prev) =>
+        prev.filter((item) => String(item.id) !== String(recentSearch.id))
+      );
+    } catch (error) {
+      console.error("최근 검색어 삭제 실패:", error);
+    }
   };
 
-  const handleClearRecent = () => {
-    setRecentKeywords([]);
+  const handleClearRecent = async () => {
+    try {
+      await clearRecentSearchesApi();
+      setRecentSearches([]);
+    } catch (error) {
+      console.error("최근 검색어 전체 삭제 실패:", error);
+    }
   };
 
   const handleRegionClick = (name) => {
@@ -501,19 +522,19 @@ function Search() {
         </div>
 
         <div className="recent-tags">
-          {recentKeywords.length > 0 ? (
-            recentKeywords.map((keyword) => (
+          {recentSearches.length > 0 ? (
+            recentSearches.map((recentSearch) => (
               <button
                 type="button"
-                key={keyword}
+                key={recentSearch.id}
                 className="recent-tag"
-                onClick={() => runSearch(keyword)}
+                onClick={() => runSearch(recentSearch.keyword)}
               >
-                <span>{keyword}</span>
+                <span>{recentSearch.keyword}</span>
 
                 <span
                   className="tag-close"
-                  onClick={(e) => handleRemoveRecent(e, keyword)}
+                  onClick={(e) => handleRemoveRecent(e, recentSearch)}
                 >
                   ×
                 </span>

@@ -39,7 +39,9 @@ const Landing = () => {
 
         {/* 시작하기 */}
         <button
-          className={`btn ${activeBtn === "start" ? "active" : "inactive"}`}
+          className={`btn onboarding-motion-button onboarding-motion-button--landing-start ${
+            activeBtn === "start" ? "active" : "inactive"
+          }`}
           onClick={() => {
             setActiveBtn("start");
             navigate("/login");
@@ -50,7 +52,9 @@ const Landing = () => {
 
         {/* 둘러보기 */}
         <button
-          className={`btn ${activeBtn === "explore" ? "active" : "inactive"}`}
+          className={`btn onboarding-motion-button onboarding-motion-button--landing-explore ${
+            activeBtn === "explore" ? "active" : "inactive"
+          }`}
           onClick={() => {
             setActiveBtn("explore");
             navigate("/home");

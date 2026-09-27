@@ -305,6 +305,7 @@ export const normalizeTripPlace = (place = {}, fallbackDay = 1) => {
     departureTime,
     stayDuration: toNumber(place.stayDuration, place.stayMinutes, 0) || 0,
     isFixed: toBoolean(place.isFixed ?? place.fixed),
+    isNextDay: toBoolean(place.isNextDay ?? place.nextDay),
     memo: place.memo || place.memoText || place.note || place.notes || "",
   };
 };
@@ -316,6 +317,10 @@ export const normalizeTimelineItem = (item = {}) => {
     placeType: item.placeType || "",
     arrivalTime: item.arrivalTime || "",
     departureTime: item.departureTime || "",
+    arrivalDateTime: item.arrivalDateTime || "",
+    departureDateTime: item.departureDateTime || "",
+    arrivalDayOffset: Number(item.arrivalDayOffset || 0),
+    departureDayOffset: Number(item.departureDayOffset || 0),
     stayMinutes: item.stayMinutes ?? item.stayDuration ?? 0,
     travelMinutesFromPrevious: item.travelMinutesFromPrevious ?? 0,
   };
@@ -479,7 +484,70 @@ export const setTripStartPlaceApi = async ({ tripId, day, tripPlaceId }) => {
   return normalizeTripPlace(unwrapData(response.data), safeDay);
 };
 
-export const optimizeTripDayApi = async ({ tripId, day }) => {
+export const updateTripPlaceScheduleApi = async ({
+  tripId,
+  day,
+  tripPlaceId,
+  schedule,
+}) => {
+  const safeTripId = assertPositiveInteger(tripId, "여행 id가 필요합니다.");
+  const safeDay = assertPositiveInteger(day, "일차 day 값이 필요합니다.");
+  const safeTripPlaceId = assertPositiveInteger(
+    tripPlaceId,
+    "수정할 TripPlace id가 필요합니다."
+  );
+  const payload = {};
+
+  if (schedule?.fixed !== undefined) payload.fixed = Boolean(schedule.fixed);
+  if (schedule?.arrivalTime !== undefined) {
+    payload.arrivalTime = schedule.arrivalTime || null;
+  }
+  if (schedule?.stayDuration !== undefined) {
+    payload.stayDuration = Number(schedule.stayDuration);
+  }
+  if (schedule?.isNextDay !== undefined) {
+    payload.isNextDay = Boolean(schedule.isNextDay);
+  }
+
+  const response = await api.patch(
+    `${TRIP_BASE_URL}/${safeTripId}/days/${safeDay}/places/${safeTripPlaceId}/schedule`,
+    payload
+  );
+
+  return normalizeTripPlace(unwrapData(response.data), safeDay);
+};
+
+export const updateTripPlaceMemoApi = async ({
+  tripId,
+  day,
+  tripPlaceId,
+  memo,
+}) => {
+  const safeTripId = assertPositiveInteger(tripId, "여행 id가 필요합니다.");
+  const safeDay = assertPositiveInteger(day, "일차 day 값이 필요합니다.");
+  const safeTripPlaceId = assertPositiveInteger(
+    tripPlaceId,
+    "수정할 TripPlace id가 필요합니다."
+  );
+  const normalizedMemo = memo === null ? null : String(memo || "").trim();
+
+  if (normalizedMemo?.length > 500) {
+    throw new Error("메모는 500자 이하로 입력해주세요.");
+  }
+
+  const response = await api.patch(
+    `${TRIP_BASE_URL}/${safeTripId}/days/${safeDay}/places/${safeTripPlaceId}/memo`,
+    { memo: normalizedMemo }
+  );
+
+  return normalizeTripPlace(unwrapData(response.data), safeDay);
+};
+
+export const optimizeTripDayApi = async ({
+  tripId,
+  day,
+  startTime = "10:00",
+}) => {
   const safeTripId = assertPositiveInteger(tripId, "여행 id가 필요합니다.");
 
   const safeDay = assertPositiveInteger(
@@ -488,7 +556,9 @@ export const optimizeTripDayApi = async ({ tripId, day }) => {
   );
 
   const response = await api.post(
-    `${TRIP_BASE_URL}/${safeTripId}/days/${safeDay}/optimize`
+    `${TRIP_BASE_URL}/${safeTripId}/days/${safeDay}/optimize`,
+    null,
+    { params: { startTime } }
   );
 
   return normalizeList(response.data).map((place) =>

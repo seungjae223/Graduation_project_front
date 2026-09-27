@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import RouteResult from "../RouteResult/RouteResult";
 import {
   getSavedRoutes,
@@ -35,6 +36,9 @@ function Schedule() {
         <div className="schedule-empty-box">
           <h2>저장된 일정이 없어요</h2>
           <p>경로 생성 후 일정 탭에서 결과를 확인할 수 있어요.</p>
+          <Link className="schedule-empty-action" to="/route-create">
+            경로 만들기
+          </Link>
         </div>
       </div>
     );

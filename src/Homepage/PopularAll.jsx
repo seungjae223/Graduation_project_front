@@ -376,7 +376,7 @@ function PopularAll() {
       console.error("폴더에서 장소 삭제 실패:", error);
 
       if (error.message.includes("Network Error")) {
-        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
         return;
       }
 
@@ -437,7 +437,7 @@ function PopularAll() {
       console.error("폴더에 장소 저장 실패:", error);
 
       if (error.message.includes("Network Error")) {
-        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
         return;
       }
 
@@ -502,7 +502,9 @@ function PopularAll() {
               onClick={() => setSelectedFilter(filter)}
             >
               {filter}
-              {filter !== "전체" && <span>⌄</span>}
+              {filter !== "전체" && (
+                <span className="popular-filter-chevron" aria-hidden="true" />
+              )}
             </button>
           ))}
         </div>

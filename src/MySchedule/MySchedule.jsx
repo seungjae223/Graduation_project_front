@@ -343,37 +343,6 @@ const getStoredJSON = (storage, key) => {
   }
 };
 
-const getUserObject = (data) => {
-  const candidates = [
-    data?.data?.user,
-    data?.data?.member,
-    data?.data?.userInfo,
-    data?.data?.memberInfo,
-    data?.data?.profile,
-    data?.data,
-
-    data?.result?.user,
-    data?.result?.member,
-    data?.result?.userInfo,
-    data?.result?.memberInfo,
-    data?.result?.profile,
-    data?.result,
-
-    data?.user,
-    data?.member,
-    data?.userInfo,
-    data?.memberInfo,
-    data?.profile,
-    data,
-  ];
-
-  return (
-    candidates.find((item) => {
-      return item && typeof item === "object" && !Array.isArray(item);
-    }) || {}
-  );
-};
-
 const getUserEmailFromObject = (user = {}) => {
   const nestedUser =
     user.user ||
@@ -452,16 +421,6 @@ const getCurrentUserIdentity = async () => {
     payload?.memberId ||
     payload?.accountId ||
     "";
-
-  try {
-    const response = await api.get("/api/users/me");
-    const user = getUserObject(response.data);
-
-    email = getUserEmailFromObject(user) || email;
-    id = getUserIdFromObject(user) || id;
-  } catch (error) {
-    console.error("현재 로그인 사용자 정보 조회 실패:", error);
-  }
 
   return {
     email: normalizeCompareText(email),
@@ -622,7 +581,7 @@ function MySchedule() {
       setScheduleList([]);
 
       if (error.message?.includes("Network Error")) {
-        setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
         return;
       }
 

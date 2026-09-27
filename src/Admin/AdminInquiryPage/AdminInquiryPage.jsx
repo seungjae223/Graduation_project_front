@@ -126,7 +126,7 @@ const AdminInquiryPage = () => {
         console.error("관리자 문의 목록 조회 실패:", error);
 
         if (error.message.includes("Network Error")) {
-          setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+          setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
           return;
         }
 

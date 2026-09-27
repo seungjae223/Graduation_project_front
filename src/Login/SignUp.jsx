@@ -1,45 +1,58 @@
-import React, { useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import "./SignUp.css";
 import eyeIcon from "../img/눈알.png";
-import warningIcon from "../img/워닝.png";
-import successIcon from "../img/축하.png";
 import PrivacyPolicyModal from "./PrivacyPolicyModal";
-import api from "../api/api";
+import useModalFocus from "../utils/useModalFocus";
+import { getApiErrorMessage } from "../api/api";
+import {
+  sendEmailCodeApi,
+  signupApi,
+  verifyEmailCodeApi,
+} from "../api/authApi";
 
-const getErrorMessage = (error, fallbackMessage) => {
-  const data = error.response?.data;
+const getErrorMessage = getApiErrorMessage;
+const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&#~]).{10,}$/;
 
-  if (typeof data === "string" && data.trim()) {
-    return data;
-  }
+const SignUpTopAlert = ({ open, onConfirm }) => {
+  const dialogRef = useModalFocus({
+    open,
+    onClose: onConfirm,
+    lockScroll: true,
+  });
 
-  if (data?.message) {
-    return data.message;
-  }
-
-  if (data?.error) {
-    return data.error;
-  }
-
-  return fallbackMessage;
-};
-
-const SignUpTopAlert = ({ open, iconSrc, onConfirm }) => {
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="signup-alert-overlay">
       <div
+        ref={dialogRef}
         className="signup-alert-card"
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="signup-alert-title"
         aria-describedby="signup-alert-message"
+        tabIndex={-1}
       >
-        <div className="signup-alert-icon-wrap">
-          <img src={iconSrc} alt="" />
+        <div className="signup-alert-icon-wrap" aria-hidden="true">
+          <svg
+            className="signup-alert-icon"
+            viewBox="0 0 48 48"
+            fill="none"
+          >
+            <path
+              d="M21.1 7.2c1.3-2.3 4.5-2.3 5.8 0l16.2 28.1c1.3 2.2-.3 5-2.9 5H7.8c-2.6 0-4.2-2.8-2.9-5L21.1 7.2Z"
+              fill="currentColor"
+            />
+            <path
+              d="M24 17.2v10.9"
+              stroke="#fff"
+              strokeWidth="3.4"
+              strokeLinecap="round"
+            />
+            <circle cx="24" cy="34.1" r="2.1" fill="#fff" />
+          </svg>
         </div>
 
         <h2 id="signup-alert-title">이메일 형식 오류</h2>
@@ -54,43 +67,46 @@ const SignUpTopAlert = ({ open, iconSrc, onConfirm }) => {
           type="button"
           className="signup-alert-confirm-btn"
           onClick={onConfirm}
+          data-modal-initial-focus
         >
           확인
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
 const SignupCompleteModal = ({ open, onStart }) => {
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [open]);
+  const dialogRef = useModalFocus({
+    open,
+    onClose: onStart,
+    lockScroll: true,
+  });
 
   if (!open) return null;
 
   return createPortal(
     <div className="signup-complete-overlay">
       <section
+        ref={dialogRef}
         className="signup-complete-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="signup-complete-title"
+        aria-describedby="signup-complete-description"
+        tabIndex={-1}
       >
-        <div className="signup-complete-icon-circle">
-          <img src={successIcon} alt="회원가입 완료" />
+        <div className="signup-complete-icon-circle" aria-hidden="true">
+          <svg viewBox="0 0 40 40" className="signup-complete-icon">
+            <circle cx="20" cy="20" r="16" />
+            <path d="M12.5 20.5L17.5 25.5L28 15" />
+          </svg>
         </div>
 
         <div className="signup-complete-text">
           <h2 id="signup-complete-title">알림</h2>
-          <p>
+          <p id="signup-complete-description">
             회원가입이 완료되었습니다!
             <br />
             너만 오면 go와 함께 즐거운 여행을 시작해 보세요.
@@ -101,8 +117,9 @@ const SignupCompleteModal = ({ open, onStart }) => {
           type="button"
           className="signup-complete-button"
           onClick={onStart}
+          data-modal-initial-focus
         >
-          시작하기 <span>→</span>
+          로그인하러 가기 <span>→</span>
         </button>
       </section>
     </div>,
@@ -112,6 +129,7 @@ const SignupCompleteModal = ({ open, onStart }) => {
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const emailAlertReturnFocusRef = useRef(null);
 
   const [showPw, setShowPw] = useState(false);
   const [showPwConfirm, setShowPwConfirm] = useState(false);
@@ -168,18 +186,20 @@ const SignUp = () => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleEmailBlur = () => {
+  const handleEmailBlur = (event) => {
     if (!form.email.trim()) return;
 
     if (!isValidEmail(form.email)) {
+      emailAlertReturnFocusRef.current = event.currentTarget;
       setIsEmailAlertOpen(true);
     }
   };
 
-  const handleSendCode = async () => {
+  const handleSendCode = async (event) => {
     const normalizedEmail = form.email.trim().toLowerCase();
 
     if (!normalizedEmail || !isValidEmail(normalizedEmail)) {
+      emailAlertReturnFocusRef.current = event.currentTarget;
       setIsEmailAlertOpen(true);
       return;
     }
@@ -187,9 +207,7 @@ const SignUp = () => {
     try {
       setIsSendingCode(true);
 
-      await api.post("/api/email/send", {
-        email: normalizedEmail,
-      });
+      await sendEmailCodeApi(normalizedEmail);
 
       setForm((prev) => ({
         ...prev,
@@ -232,7 +250,7 @@ const SignUp = () => {
     try {
       setIsVerifyingCode(true);
 
-      await api.post("/api/email/verify", {
+      await verifyEmailCodeApi({
         email: normalizedEmail,
         code: verificationCode,
       });
@@ -257,6 +275,14 @@ const SignUp = () => {
 
   const handleOpenPrivacyModal = () => {
     setIsPrivacyModalOpen(true);
+  };
+
+  const handleCloseEmailAlert = () => {
+    setIsEmailAlertOpen(false);
+
+    window.requestAnimationFrame(() => {
+      emailAlertReturnFocusRef.current?.focus();
+    });
   };
 
   const handleAgreePrivacyPolicy = () => {
@@ -289,8 +315,10 @@ const SignUp = () => {
       return;
     }
 
-    if (form.password.length < 8) {
-      alert("비밀번호는 8자 이상 입력해주세요.");
+    if (!PASSWORD_PATTERN.test(form.password)) {
+      alert(
+        "비밀번호는 10자 이상이며 영문 대문자, 소문자, 특수문자(@$!%*?&#~)를 포함해야 합니다."
+      );
       return;
     }
 
@@ -307,7 +335,7 @@ const SignUp = () => {
     try {
       setIsSubmitting(true);
 
-      await api.post("/api/auth/signup", {
+      await signupApi({
         email: normalizedEmail,
         password: form.password,
         nickname: trimmedName,
@@ -340,7 +368,7 @@ const SignUp = () => {
       form.password.trim() &&
       form.passwordConfirm.trim() &&
       form.password === form.passwordConfirm &&
-      form.password.length >= 8 &&
+      PASSWORD_PATTERN.test(form.password) &&
       form.agreed
   );
 
@@ -357,8 +385,9 @@ const SignUp = () => {
 
           <form className="signup-form" onSubmit={handleSubmit}>
             <div className="signup-field">
-              <label className="signup-label">이름</label>
+              <label className="signup-label" htmlFor="signup-name">이름</label>
               <input
+                id="signup-name"
                 className="signup-input"
                 type="text"
                 placeholder="이름을 입력하세요"
@@ -368,9 +397,10 @@ const SignUp = () => {
             </div>
 
             <div className="signup-field">
-              <label className="signup-label">이메일 (아이디)</label>
+              <label className="signup-label" htmlFor="signup-email">이메일 (아이디)</label>
               <div className="signup-inline">
                 <input
+                  id="signup-email"
                   className="signup-input"
                   type="email"
                   placeholder="example@travel.com"
@@ -419,6 +449,8 @@ const SignUp = () => {
             <div className="signup-field signup-field--compact">
               <div className="signup-inline">
                 <input
+                  id="signup-code"
+                  aria-label="이메일 인증번호"
                   className="signup-input"
                   type="text"
                   inputMode="numeric"
@@ -440,12 +472,13 @@ const SignUp = () => {
             </div>
 
             <div className="signup-field">
-              <label className="signup-label">비밀번호</label>
+              <label className="signup-label" htmlFor="signup-password">비밀번호</label>
               <div className="signup-password-wrap">
                 <input
+                  id="signup-password"
                   className="signup-input signup-input--password"
                   type={showPw ? "text" : "password"}
-                  placeholder="8자 이상 입력하세요"
+                  placeholder="10자 이상, 대·소문자와 특수문자 포함"
                   value={form.password}
                   onChange={(e) => handleChange("password", e.target.value)}
                 />
@@ -454,16 +487,19 @@ const SignUp = () => {
                   type="button"
                   className="signup-eye-btn"
                   onClick={() => setShowPw(!showPw)}
+                  aria-label={showPw ? "비밀번호 숨기기" : "비밀번호 표시"}
+                  aria-pressed={showPw}
                 >
-                  <img src={eyeIcon} alt="비밀번호 보기" />
+                  <img src={eyeIcon} alt="" />
                 </button>
               </div>
             </div>
 
             <div className="signup-field">
-              <label className="signup-label">비밀번호 확인</label>
+              <label className="signup-label" htmlFor="signup-password-confirm">비밀번호 확인</label>
               <div className="signup-password-wrap">
                 <input
+                  id="signup-password-confirm"
                   className="signup-input signup-input--password"
                   type={showPwConfirm ? "text" : "password"}
                   placeholder="비밀번호를 다시 입력하세요"
@@ -477,8 +513,10 @@ const SignUp = () => {
                   type="button"
                   className="signup-eye-btn"
                   onClick={() => setShowPwConfirm(!showPwConfirm)}
+                  aria-label={showPwConfirm ? "비밀번호 확인 값 숨기기" : "비밀번호 확인 값 표시"}
+                  aria-pressed={showPwConfirm}
                 >
-                  <img src={eyeIcon} alt="비밀번호 보기" />
+                  <img src={eyeIcon} alt="" />
                 </button>
               </div>
             </div>
@@ -538,8 +576,7 @@ const SignUp = () => {
 
       <SignUpTopAlert
         open={isEmailAlertOpen}
-        iconSrc={warningIcon}
-        onConfirm={() => setIsEmailAlertOpen(false)}
+        onConfirm={handleCloseEmailAlert}
       />
 
       <PrivacyPolicyModal

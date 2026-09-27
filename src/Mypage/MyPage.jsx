@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
+import useModalFocus from "../utils/useModalFocus";
 import "./MyPage.css";
 import api, { getAccessToken } from "../api/api";
 
@@ -11,6 +12,12 @@ import compassIcon from "../img/나침반.png";
 import routeIcon from "../img/동선.png";
 
 const DEFAULT_USER_NAME = "여행자";
+const THEME_STORAGE_KEY = "site-theme";
+
+const getCurrentTheme = () => {
+  if (typeof document === "undefined") return "light";
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+};
 
 const DEFAULT_MYPAGE_STATS = {
   visitedPlacesCount: 0,
@@ -137,6 +144,12 @@ const LocationPermissionFeature = ({ icon, title, description, alt }) => (
 );
 
 const LocationPermissionModal = ({ onClose, onAllow }) => {
+  const dialogRef = useModalFocus({
+    open: true,
+    onClose,
+    lockScroll: true,
+  });
+
   if (typeof document === "undefined") return null;
 
   return createPortal(
@@ -153,10 +166,13 @@ const LocationPermissionModal = ({ onClose, onAllow }) => {
       }}
     >
       <div
+        ref={dialogRef}
         className="location-permission-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="location-permission-title"
+        aria-describedby="location-permission-message"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
         style={{
           position: "relative",
@@ -185,7 +201,10 @@ const LocationPermissionModal = ({ onClose, onAllow }) => {
           너만 오면 go
         </h2>
 
-        <p className="location-permission-message">
+        <p
+          id="location-permission-message"
+          className="location-permission-message"
+        >
           <span>정확한 경로 안내를 위해</span>
           <strong>위치 권한 허용이 필요합니다.</strong>
         </p>
@@ -210,6 +229,7 @@ const LocationPermissionModal = ({ onClose, onAllow }) => {
           type="button"
           className="location-permission-allow"
           onClick={onAllow}
+          data-modal-initial-focus
         >
           허용하기
         </button>
@@ -655,11 +675,23 @@ const MyPage = () => {
   const [mypageStats, setMypageStats] = useState(DEFAULT_MYPAGE_STATS);
   const [isUserLoading, setIsUserLoading] = useState(false);
   const [locationAllowed, setLocationAllowed] = useState(false);
+  const [theme, setTheme] = useState(getCurrentTheme);
   const [isLocationPermissionOpen, setIsLocationPermissionOpen] =
     useState(false);
 
   const currentRole = String(currentUser?.role || "").toUpperCase();
   const isAdmin = currentRole === "ADMIN" || currentRole === "ROLE_ADMIN";
+
+  const handleThemeChange = (nextTheme) => {
+    document.documentElement.dataset.theme = nextTheme;
+    document.documentElement.style.colorScheme = nextTheme;
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    } catch (error) {
+      console.error("테마 설정 저장 실패:", error);
+    }
+    setTheme(nextTheme);
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -679,36 +711,10 @@ const MyPage = () => {
         saveUserToStorage(fallbackUser);
       }
 
-      try {
-        setIsUserLoading(true);
+      setIsUserLoading(false);
 
-        const response = await api.get("/api/users/me");
-
-        console.log("내 정보 응답:", response.data);
-
-        const userData = normalizeUserData(response.data);
-
-        if (!userData) {
-          throw new Error("사용자 정보가 비어 있습니다.");
-        }
-
-        if (!isMounted) return;
-
-        setCurrentUser(userData);
-        saveUserToStorage(userData);
-      } catch (error) {
-        console.error("내 정보 조회 실패:", error);
-
-        const safeFallbackUser = getInitialUser();
-
-        if (safeFallbackUser && isMounted) {
-          setCurrentUser(safeFallbackUser);
-          saveUserToStorage(safeFallbackUser);
-        }
-      } finally {
-        if (isMounted) {
-          setIsUserLoading(false);
-        }
+      if (!fallbackUser && isMounted) {
+        setCurrentUser({ email: "", nickname: "여행자" });
       }
     };
 
@@ -767,19 +773,22 @@ const MyPage = () => {
   }, []);
 
   useEffect(() => {
-    try {
-      const savedLocationAllowed = localStorage.getItem(
-        "locationPermissionAllowed"
-      );
+    let savedLocationAllowed = false;
 
-      if (savedLocationAllowed !== null) {
-        setLocationAllowed(savedLocationAllowed === "true");
-      }
+    try {
+      savedLocationAllowed =
+        localStorage.getItem("locationPermissionAllowed") === "true";
     } catch (error) {
       console.error("저장된 위치 권한 상태 확인 실패:", error);
     }
 
+    if (!savedLocationAllowed) {
+      setLocationAllowed(false);
+      return undefined;
+    }
+
     if (typeof navigator === "undefined" || !navigator.permissions) {
+      saveLocationAllowed(false);
       return undefined;
     }
 
@@ -795,7 +804,9 @@ const MyPage = () => {
         saveLocationAllowed(status.state === "granted");
 
         status.onchange = () => {
-          saveLocationAllowed(status.state === "granted");
+          if (status.state !== "granted") {
+            saveLocationAllowed(false);
+          }
         };
       })
       .catch((error) => {
@@ -830,6 +841,7 @@ const MyPage = () => {
 
   const requestLocationPermission = useCallback(() => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
+      saveLocationAllowed(false);
       alert("현재 브라우저에서는 위치 정보를 지원하지 않습니다.");
       return;
     }
@@ -855,8 +867,9 @@ const MyPage = () => {
         alert("위치 권한이 허용되었습니다.");
       },
       (error) => {
+        saveLocationAllowed(false);
+
         if (error.code === error.PERMISSION_DENIED) {
-          saveLocationAllowed(false);
           alert(
             "위치 권한이 거부되었습니다. 브라우저 설정에서 다시 허용할 수 있습니다."
           );
@@ -874,6 +887,20 @@ const MyPage = () => {
   }, [saveLocationAllowed]);
 
   const handleLocationPermissionClick = () => {
+    if (locationAllowed) {
+      saveLocationAllowed(false);
+
+      try {
+        localStorage.removeItem("userLocation");
+        localStorage.removeItem("currentLocation");
+        localStorage.removeItem("currentLocationLabel");
+      } catch (error) {
+        console.error("저장된 위치 정보 삭제 실패:", error);
+      }
+
+      return;
+    }
+
     setIsLocationPermissionOpen(true);
   };
 
@@ -1065,6 +1092,47 @@ const MyPage = () => {
         </section>
 
         <section className="mypage-section">
+          <h2 className="mypage-section-title">화면 설정</h2>
+
+          <div className="mypage-settings-list">
+            <div className="mypage-theme-setting">
+              <span className="mypage-theme-label">테마</span>
+              <div className="mypage-theme-options" role="group" aria-label="화면 테마 선택">
+                {[["light", "라이트"], ["dark", "다크"]].map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`mypage-theme-option ${theme === value ? "active" : ""}`}
+                    aria-label={`${label} 모드로 전환`}
+                    aria-pressed={theme === value}
+                    onClick={() => handleThemeChange(value)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="mypage-menu-item mypage-location-setting"
+              onClick={handleLocationPermissionClick}
+              aria-label={`위치 사용 ${locationAllowed ? "끄기" : "켜기"}`}
+              aria-pressed={locationAllowed}
+            >
+              <div className="mypage-menu-left">
+                <div className="mypage-menu-icon-circle support">
+                  <LocationIcon />
+                </div>
+                <span>위치 사용</span>
+              </div>
+
+              <LocationPermissionSwitch active={locationAllowed} />
+            </button>
+          </div>
+        </section>
+
+        <section className="mypage-section">
           <h2 className="mypage-section-title">고객지원 & 정보</h2>
 
           <div className="mypage-menu-list">
@@ -1085,23 +1153,6 @@ const MyPage = () => {
                 <ArrowIcon />
               </button>
             ))}
-
-            <button
-              type="button"
-              className="mypage-menu-item"
-              onClick={handleLocationPermissionClick}
-              aria-label="위치 권한 허용"
-              aria-pressed={locationAllowed}
-            >
-              <div className="mypage-menu-left">
-                <div className="mypage-menu-icon-circle support">
-                  <LocationIcon />
-                </div>
-                <span>위치 권한 허용</span>
-              </div>
-
-              <LocationPermissionSwitch active={locationAllowed} />
-            </button>
           </div>
         </section>
       </div>

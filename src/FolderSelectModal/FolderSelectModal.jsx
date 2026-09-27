@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import api from "../api/api";
+import useModalFocus from "../utils/useModalFocus";
 import "./FolderSelectModal.css";
 
 const FOLDERS_API = "/api/folders";
@@ -114,10 +115,9 @@ export const savePlaceFolderLink = async (placeId, folder) => {
   if (!placeId || !folder?.id) return null;
 
   const response = await api.post(
-    `${FOLDERS_API}/${encodeURIComponent(folder.id)}/places`,
-    {
-      placeId,
-    }
+    `${FOLDERS_API}/${encodeURIComponent(folder.id)}/places/${encodeURIComponent(
+      placeId
+    )}`
   );
 
   return response.data;
@@ -198,6 +198,12 @@ function FolderSelectModal({
   const [createFolderError, setCreateFolderError] = useState("");
 
   const selectedFolderButtonRef = useRef(null);
+  const dialogRef = useModalFocus({
+    open,
+    onClose,
+    canClose: !isSaving && !isCreatingFolder,
+    lockScroll: true,
+  });
 
   const getInitialFolderId = useCallback(
     (nextFolders) => {
@@ -268,39 +274,12 @@ function FolderSelectModal({
   }, [fetchFolders, open]);
 
   useEffect(() => {
-    if (!open || typeof document === "undefined") return undefined;
-
-    const originalBodyOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = originalBodyOverflow;
-    };
-  }, [open]);
-
-  useEffect(() => {
     if (!open || isCreateFolderOpen) return;
 
     selectedFolderButtonRef.current?.scrollIntoView({
       block: "nearest",
     });
   }, [folders.length, isCreateFolderOpen, open, selectedFolderId]);
-
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape" && !isSaving && !isCreatingFolder) {
-        onClose?.();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isCreatingFolder, isSaving, onClose, open]);
 
   const selectedFolder = useMemo(() => {
     return (
@@ -373,7 +352,6 @@ function FolderSelectModal({
       } else {
         const response = await api.post(FOLDERS_API, {
           name: trimmedFolderName,
-          description: trimmedFolderDescription,
         });
 
         createdFolder = normalizeFolder(response.data);
@@ -439,10 +417,12 @@ function FolderSelectModal({
     >
       {isCreateFolderOpen ? (
         <section
+          ref={dialogRef}
           className="folder-create-modal"
           role="dialog"
           aria-modal="true"
           aria-labelledby="folder-create-title"
+          tabIndex={-1}
           onClick={(event) => event.stopPropagation()}
         >
           <header className="folder-create-header">
@@ -455,7 +435,9 @@ function FolderSelectModal({
               disabled={isSaving || isCreatingFolder}
               aria-label="새 폴더 만들기 닫기"
             >
-              ×
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 6L18 18M18 6L6 18" />
+              </svg>
             </button>
           </header>
 
@@ -544,10 +526,12 @@ function FolderSelectModal({
         </section>
       ) : (
         <section
+          ref={dialogRef}
           className="folder-select-modal"
           role="dialog"
           aria-modal="true"
           aria-labelledby="folder-select-title"
+          tabIndex={-1}
           onClick={(event) => event.stopPropagation()}
         >
           <header className="folder-select-header">
@@ -559,8 +543,11 @@ function FolderSelectModal({
               onClick={onClose}
               disabled={isSaving || isCreatingFolder}
               aria-label="폴더 선택 닫기"
+              data-modal-initial-focus
             >
-              ×
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 6L18 18M18 6L6 18" />
+              </svg>
             </button>
           </header>
 

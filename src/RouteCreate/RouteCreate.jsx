@@ -11,13 +11,14 @@ import darkFolderIcon from "../img/검정색폴더.png";
 
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import StartPlaceModal from "./StartPlaceModal";
+import useModalFocus from "../utils/useModalFocus";
 import api from "../api/api";
 
 const ROUTE_SELECTED_PLACE_KEY = "routeSelectedPlace";
 const ROUTE_DRAFT_PLACES_KEY = "routeDraftPlaces";
 const RECENT_PLACES_KEY = "recentPlaces";
 const ROUTE_FIXED_TIME_STORAGE_PREFIX = "route_fixed_time_map";
-const PLACE_SEARCH_API = "/api/places";
+const PLACE_SEARCH_API = "/api/places/search";
 const TRIPS_API = "/api/trips";
 
 const DEFAULT_COORDS = {
@@ -728,6 +729,12 @@ const formatTimeLabel = ({ period, hour, minute }) => {
   return `${padTime(hour)}:${padTime(minute)} ${period}`;
 };
 
+const toApiTime = (timeLabel) => {
+  const { period, hour, minute } = parseTimeLabel(timeLabel);
+  const hour24 = period === "AM" ? hour % 12 : (hour % 12) + 12;
+  return `${padTime(hour24)}:${padTime(minute)}`;
+};
+
 const getPrevHour = (hour) => {
   return hour <= 1 ? 12 : hour - 1;
 };
@@ -759,26 +766,11 @@ const FixPointModal = ({
   onConfirm,
 }) => {
   const canUsePortal = typeof document !== "undefined";
-
-  useEffect(() => {
-    if (!open || !canUsePortal) return undefined;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        onClose?.();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open, canUsePortal, onClose]);
+  const dialogRef = useModalFocus({
+    open,
+    onClose,
+    lockScroll: true,
+  });
 
   if (!open || !place || !canUsePortal) return null;
 
@@ -797,10 +789,12 @@ const FixPointModal = ({
       />
 
       <div
+        ref={dialogRef}
         className="fix-point-modal"
         role="dialog"
         aria-modal="true"
         aria-label="Fix Point 설정"
+        tabIndex={-1}
       >
         <div className="fix-point-icon">
           <ClockIcon />
@@ -899,6 +893,7 @@ const FixPointModal = ({
             type="button"
             className="fix-point-cancel-button"
             onClick={onClose}
+            data-modal-initial-focus
           >
             취소
           </button>
@@ -936,6 +931,11 @@ const FavoritePlacesModal = ({
   const dayDragStartXRef = useRef(0);
   const dayScrollStartLeftRef = useRef(0);
   const [isDayDragging, setIsDayDragging] = useState(false);
+  const dialogRef = useModalFocus({
+    open,
+    onClose,
+    lockScroll: true,
+  });
 
   if (!open) return null;
 
@@ -997,13 +997,15 @@ const FavoritePlacesModal = ({
     }, 0);
   };
 
-  return (
+  return createPortal(
     <div className="favorite-place-overlay" onClick={onClose}>
       <div
+        ref={dialogRef}
         className="favorite-place-modal"
         role="dialog"
         aria-modal="true"
         aria-label="관심장소에서 추가"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="favorite-place-header">
@@ -1014,8 +1016,11 @@ const FavoritePlacesModal = ({
             className="favorite-place-close"
             onClick={onClose}
             aria-label="닫기"
+            data-modal-initial-focus
           >
-            ×
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 6L18 18M18 6L6 18" />
+            </svg>
           </button>
         </div>
 
@@ -1154,7 +1159,8 @@ const FavoritePlacesModal = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -1690,37 +1696,6 @@ const getNumericPlaceId = (place) => {
   return null;
 };
 
-const buildPlaceRegistrationPayload = (place) => {
-  const name =
-    place?.name ||
-    place?.title ||
-    place?.placeName ||
-    place?.destinationName ||
-    "이름 없는 장소";
-
-  const address =
-    place?.desc ||
-    place?.address ||
-    place?.roadAddress ||
-    place?.addr ||
-    "주소 정보 없음";
-
-  const coordinate = getPlaceCoordinate(place);
-
-  return {
-    name,
-    latitude: toNumberOrDefault(coordinate.latitude, DEFAULT_COORDS.latitude),
-    longitude: toNumberOrDefault(coordinate.longitude, DEFAULT_COORDS.longitude),
-    address,
-    placeType:
-      place?.placeType ||
-      place?.type ||
-      place?.tabType ||
-      place?.category ||
-      "PLACE",
-  };
-};
-
 const ensureServerPlaceId = async (place) => {
   const existingPlaceId = getNumericPlaceId(place);
 
@@ -1728,26 +1703,9 @@ const ensureServerPlaceId = async (place) => {
     return existingPlaceId;
   }
 
-  const response = await api.post(
-    PLACE_SEARCH_API,
-    buildPlaceRegistrationPayload(place)
+  throw new Error(
+    `${place?.name || "장소"}의 서버 placeId가 없습니다. 서버 검색 결과에서 장소를 다시 선택해주세요.`
   );
-
-  const placeData = getResponseData(response.data);
-  const registeredPlaceIdValue =
-    typeof placeData === "number"
-      ? placeData
-      : placeData?.id ?? placeData?.placeId ?? placeData?.destinationId;
-
-  const registeredPlaceId = Number(registeredPlaceIdValue);
-
-  if (!Number.isInteger(registeredPlaceId) || registeredPlaceId <= 0) {
-    throw new Error(
-      `${place?.name || "장소"} 등록 응답에서 placeId를 찾지 못했습니다.`
-    );
-  }
-
-  return registeredPlaceId;
 };
 
 const buildTripPayload = (savedRoute) => {
@@ -1901,6 +1859,37 @@ const setStartPointsToServer = async ({
   }
 };
 
+const updateFixedSchedulesToServer = async ({
+  tripId,
+  savedRoute,
+  selectedStartPlaces,
+  tripPlaceMap,
+}) => {
+  for (let dayIndex = 0; dayIndex < savedRoute.selectedDates.length; dayIndex++) {
+    const day = dayIndex + 1;
+    const dateKey = formatDateKey(savedRoute.selectedDates[dayIndex]);
+    const dayPlaces = savedRoute.placesByDate[dateKey] || [];
+    const startLocalId = selectedStartPlaces?.[dateKey] || dayPlaces[0]?.id;
+
+    for (const place of dayPlaces) {
+      if (!place.isFixedTime || String(place.id) === String(startLocalId)) continue;
+
+      const tripPlaceId = getTripPlaceId(tripPlaceMap[place.id]);
+      if (!tripPlaceId) continue;
+
+      await api.patch(
+        `${TRIPS_API}/${tripId}/days/${day}/places/${tripPlaceId}/schedule`,
+        {
+          fixed: true,
+          arrivalTime: toApiTime(place.timeLabel),
+          stayDuration: Number(place.stayDuration) || 60,
+          isNextDay: Boolean(place.isNextDay),
+        }
+      );
+    }
+  }
+};
+
 const getOptimizedPlacesByDay = async (tripId, day) => {
   const response = await api.get(`${TRIPS_API}/${tripId}/days/${day}/places`);
   return getArrayData(response.data);
@@ -1915,7 +1904,9 @@ const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}) => {
     if (!addedCountByDay[day]) continue;
 
     const optimizeResponse = await api.post(
-      `${TRIPS_API}/${tripId}/days/${day}/optimize`
+      `${TRIPS_API}/${tripId}/days/${day}/optimize`,
+      null,
+      { params: { startTime: "10:00" } }
     );
 
     const optimizedPlaces = getArrayData(optimizeResponse.data);
@@ -2024,6 +2015,13 @@ const saveRouteToServer = async (savedRoute, startPlaceMap = {}) => {
     serverPlaceIdByLocalId,
     serverTripPlaceIdByLocalId,
   } = await addPlacesToTrip(tripId, savedRoute);
+
+  await updateFixedSchedulesToServer({
+    tripId,
+    savedRoute,
+    selectedStartPlaces: startPlaceMap,
+    tripPlaceMap,
+  });
 
   await setStartPointsToServer({
     tripId,
@@ -2277,28 +2275,13 @@ const RouteCreate = () => {
         setSearchErrorMessage("");
         setHasServerSearchCompleted(false);
 
-        const response = await api.get(PLACE_SEARCH_API);
-        const keywordLower = keyword.toLowerCase();
+        const response = await api.get(PLACE_SEARCH_API, {
+          params: { keyword },
+        });
 
         const places = getArrayData(response.data)
           .map(normalizeSearchPlace)
-          .filter(Boolean)
-          .filter((place) => {
-            if (!keywordLower) return true;
-
-            return [
-              place.name,
-              place.desc,
-              place.city,
-              place.country,
-              place.mapProvider,
-              place.placeType,
-            ]
-              .filter(Boolean)
-              .some((value) =>
-                String(value).toLowerCase().includes(keywordLower)
-              );
-          });
+          .filter(Boolean);
 
         setServerSearchResults(places.slice(0, 12));
         setHasServerSearchCompleted(true);
@@ -2308,7 +2291,7 @@ const RouteCreate = () => {
 
         if (error.message.includes("Network Error")) {
           setSearchErrorMessage(
-            "백엔드 서버 연결 또는 CORS 설정을 확인해주세요."
+            "네트워크 연결을 확인한 뒤 다시 시도해주세요."
           );
           return;
         }
@@ -2731,7 +2714,7 @@ const RouteCreate = () => {
 
       if (error.message.includes("Network Error")) {
         setStartPlaceErrorMessage(
-          "백엔드 서버 연결 또는 CORS 설정을 확인해주세요."
+          "네트워크 연결을 확인한 뒤 다시 시도해주세요."
         );
         return;
       }
@@ -2797,7 +2780,7 @@ const RouteCreate = () => {
       console.error("여행 생성 실패:", error);
 
       if (error.message.includes("Network Error")) {
-        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
       } else if (
         error.response?.status === 401 ||
         error.response?.status === 403
@@ -2836,7 +2819,7 @@ const RouteCreate = () => {
       console.error("여행 저장 실패:", error);
 
       if (error.message.includes("Network Error")) {
-        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
       } else if (
         error.response?.status === 401 ||
         error.response?.status === 403
@@ -2854,6 +2837,13 @@ const RouteCreate = () => {
       setIsSavingRoute(false);
     }
   };
+
+  const completeDialogRef = useModalFocus({
+    open: isCompleteModalOpen,
+    onClose: handleCloseCompleteModal,
+    canClose: !isSavingRoute && !isGeneratingRoute,
+    lockScroll: true,
+  });
 
   return (
     <div className="route-create-page">
@@ -3179,22 +3169,30 @@ const RouteCreate = () => {
         onConfirm={handleConfirmFavoritePlaces}
       />
 
-      {isCompleteModalOpen && (
+      {isCompleteModalOpen && createPortal(
         <div
           className="route-complete-overlay"
           onClick={handleCloseCompleteModal}
         >
           <div
+            ref={completeDialogRef}
             className="route-complete-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="route-complete-title"
+            aria-describedby="route-complete-description"
+            tabIndex={-1}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="route-complete-icon">
               <RouteCompleteIcon />
             </div>
 
-            <h3 className="route-complete-title">동선 제작 완료!</h3>
+            <h3 id="route-complete-title" className="route-complete-title">
+              동선 제작 완료!
+            </h3>
 
-            <p className="route-complete-desc">
+            <p id="route-complete-description" className="route-complete-desc">
               알고리즘이 분석한 최적의 경로가 <br />
               생성되었습니다. <br />
               지금 바로 확인해 보세요.
@@ -3205,6 +3203,7 @@ const RouteCreate = () => {
               className="route-complete-confirm-btn"
               onClick={handleConfirmRoute}
               disabled={isSavingRoute || isGeneratingRoute}
+              data-modal-initial-focus
             >
               {isSavingRoute ? "저장 중..." : "경로 확인하기 →"}
             </button>
@@ -3218,7 +3217,8 @@ const RouteCreate = () => {
               {isSavingRoute ? "저장 중..." : "나중에 보기"}
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

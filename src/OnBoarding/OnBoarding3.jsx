@@ -28,7 +28,10 @@ const OnBoarding3 = () => {
       </div>
 
       {/* 버튼 */}
-      <button className="next-btn" onClick={() => navigate("/landing")}>
+      <button
+        className="next-btn onboarding-motion-button onboarding-motion-button--onboarding-cta"
+        onClick={() => navigate("/landing")}
+      >
         지금 시작하기
       </button>
     </div>

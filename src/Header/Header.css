@@ -10,7 +10,7 @@
   padding: 18px 16px;
 
   box-sizing: border-box;
-  background-color: #ffffff;
+  background-color: var(--color-surface);
 
   /* 페이지랑 같이 움직이게 고정 제거 */
   position: static;
@@ -34,8 +34,8 @@
 }
 
 .icon-btn {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: none;
   background: transparent;
@@ -53,6 +53,18 @@
   height: 24px;
   object-fit: contain;
   display: block;
+}
+
+svg.header-icon,
+svg.back-icon,
+svg.my-icon,
+svg.menu-icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  shape-rendering: geometricPrecision;
 }
 
 .my-icon,
@@ -77,9 +89,25 @@
   display: block;
 }
 
+.brand-wordmark {
+  display: inline-block;
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.8px;
+  white-space: nowrap;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.brand-wordmark--blue {
+  color: #0da6f2;
+}
+
 .header-title {
   margin: 0;
-  color: #151a28;
+  color: var(--color-text);
   font-size: 18px;
   font-weight: 800;
   line-height: 1.2;
@@ -94,11 +122,13 @@
 .skip-btn {
   background: none;
   border: none;
-  padding: 0;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 7px;
 
   font-size: 16px;
   font-weight: 500;
-  color: #8e8e93;
+  color: var(--color-text-muted);
 
   cursor: pointer;
 }
@@ -138,5 +168,9 @@
 
   .logo-center {
     height: 26px;
+  }
+
+  .brand-wordmark {
+    font-size: 20px;
   }
 }

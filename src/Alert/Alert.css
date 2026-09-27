@@ -1,20 +1,22 @@
 .alert-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(15, 23, 42, 0.28);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(15, 23, 42, 0.38);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .alert-modal {
   width: 100%;
   max-width: 360px;
-  border-radius: 34px;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  border-radius: 26px;
   background: #ffffff;
   padding: 32px 22px 22px;
   text-align: center;
@@ -125,4 +127,17 @@
   width: 18px;
   height: 18px;
   object-fit: contain;
+}
+
+.alert-trash-icon {
+  fill: none;
+  stroke: #e5484d;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.alert-btn:focus-visible {
+  outline: 3px solid rgba(29, 161, 242, 0.3);
+  outline-offset: 3px;
 }

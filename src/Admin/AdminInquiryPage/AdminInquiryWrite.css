@@ -203,6 +203,14 @@
 }
 
 .admin-success-icon {
+  width: 30px;
+  height: 30px;
+  display: block;
+  fill: none;
+  stroke: #18a8ed;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -243,4 +251,9 @@
   font-weight: 900;
   cursor: pointer;
   box-shadow: 0 9px 18px rgba(25, 168, 244, 0.26);
+}
+
+.admin-success-confirm-button:focus-visible {
+  outline: 3px solid rgba(24, 168, 237, 0.3);
+  outline-offset: 3px;
 }

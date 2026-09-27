@@ -1,9 +1,9 @@
 import React from "react";
 import "./EarthLoader.css";
 
-const EarthLoader = ({ text = " Loading... " }) => {
+const EarthLoader = ({ text = "불러오는 중..." }) => {
   return (
-    <div className="earth-loading-screen">
+    <div className="earth-loading-screen" role="status" aria-live="polite">
       <div className="earth">
         <div className="earth-loader">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">

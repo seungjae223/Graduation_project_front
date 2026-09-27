@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
+import { createPortal } from "react-dom";
+import useModalFocus from "../utils/useModalFocus";
 import "./Alert.css";
-import redTrashIcon from "../img/쓰레기통.png";
 
 const ALERT_PRESETS = {
   logout: {
@@ -28,7 +29,6 @@ const ALERT_PRESETS = {
     title: "장소 삭제",
     description: "선택한 장소를 일정에서 삭제할까요?",
     iconTone: "red",
-    iconSrc: redTrashIcon,
     primaryText: "삭제하기",
     secondaryText: "취소",
     primaryVariant: "red",
@@ -74,26 +74,7 @@ function Alert({
         secondaryText !== undefined ? secondaryText : preset.secondaryText,
     };
   }, [type, iconSrc, title, description, primaryText, secondaryText]);
-
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
-        onClose?.();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open, onClose]);
+  const dialogRef = useModalFocus({ open, onClose, lockScroll: true });
 
   if (!open) return null;
 
@@ -115,19 +96,40 @@ function Alert({
     ? config.description.split("\n")
     : [];
 
-  return (
+  return createPortal(
     <div className="alert-overlay" onClick={handleBackdropClick}>
-      <div className="alert-modal" onClick={(e) => e.stopPropagation()}>
-        {config.iconSrc ? (
+      <div
+        ref={dialogRef}
+        className="alert-modal"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="common-alert-title"
+        aria-describedby={descriptionLines.length > 0 ? "common-alert-description" : undefined}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {config.iconSrc || type === "delete" ? (
           <div className={`alert-icon-wrap ${config.iconTone}`}>
-            <img src={config.iconSrc} alt="" className="alert-icon-image" />
+            {config.iconSrc ? (
+              <img src={config.iconSrc} alt="" className="alert-icon-image" />
+            ) : (
+              <svg
+                className="alert-icon-image alert-trash-icon"
+                viewBox="0 0 32 32"
+                aria-hidden="true"
+              >
+                <path d="M8 10h16M13 6h6l1.5 4h-9zM10 10l1.2 16h9.6L22 10M14 14v8M18 14v8" />
+              </svg>
+            )}
           </div>
         ) : null}
 
-        <h2 className="alert-title">{config.title}</h2>
+        <h2 id="common-alert-title" className="alert-title">
+          {config.title}
+        </h2>
 
         {descriptionLines.length > 0 && (
-          <p className="alert-description">
+          <p id="common-alert-description" className="alert-description">
             {descriptionLines.map((line, index) => (
               <React.Fragment key={`${line}-${index}`}>
                 {line}
@@ -144,6 +146,7 @@ function Alert({
                 type="button"
                 className={`alert-btn primary ${config.primaryVariant}`}
                 onClick={onPrimary}
+                data-modal-initial-focus
               >
                 {config.primaryText}
               </button>
@@ -165,6 +168,7 @@ function Alert({
               type="button"
               className={`alert-btn primary ${config.primaryVariant}`}
               onClick={onPrimary}
+              data-modal-initial-focus
             >
               {primaryButtonIconSrc ? (
                 <img
@@ -194,6 +198,7 @@ function Alert({
                 type="button"
                 className={`alert-btn primary ${config.primaryVariant}`}
                 onClick={onPrimary}
+                data-modal-initial-focus
               >
                 {config.primaryText}
               </button>
@@ -201,7 +206,8 @@ function Alert({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

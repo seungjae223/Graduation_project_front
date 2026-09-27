@@ -36,7 +36,7 @@ const FindPassword = () => {
     try {
       setIsSending(true);
 
-      await api.post("/api/email/verification-requests", {
+      await api.post("/api/email/send", {
         email: trimmedEmail,
       });
 
@@ -49,7 +49,7 @@ const FindPassword = () => {
       console.error("인증번호 발송 실패:", error);
 
       if (error.message.includes("Network Error")) {
-        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
         return;
       }
 

@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
+import useModalFocus from "../utils/useModalFocus";
 import "./SearchPop.css";
 import api from "../api/api";
 
 const RECOMMENDATIONS_API = "/api/recommendations";
+const PLACE_SEARCH_API = "/api/places/search";
 
 const THEME_KEYS = ["healing", "activity", "food", "photo"];
 
@@ -148,6 +150,11 @@ const fetchAllRecommendations = async () => {
 
 const SearchPop = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  const dialogRef = useModalFocus({
+    open: isOpen,
+    onClose,
+    lockScroll: true,
+  });
 
   const [keyword, setKeyword] = useState("");
   const [places, setPlaces] = useState([]);
@@ -182,13 +189,22 @@ const SearchPop = ({ isOpen, onClose }) => {
     if (!isOpen) return;
 
     let isMounted = true;
+    const normalizedKeyword = keyword.trim().replace(/\s+/g, " ");
 
     const fetchSearchPlaces = async () => {
       try {
         setIsLoading(true);
         setErrorMessage("");
 
-        const recommendationData = await fetchAllRecommendations();
+        const recommendationData = normalizedKeyword
+          ? getArrayData(
+              (
+                await api.get(PLACE_SEARCH_API, {
+                  params: { keyword: normalizedKeyword },
+                })
+              ).data
+            )
+          : await fetchAllRecommendations();
 
         if (!isMounted) return;
 
@@ -205,7 +221,7 @@ const SearchPop = ({ isOpen, onClose }) => {
         setPlaces([]);
 
         if (error.message?.includes("Network Error")) {
-          setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+          setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
           return;
         }
 
@@ -217,32 +233,16 @@ const SearchPop = ({ isOpen, onClose }) => {
       }
     };
 
-    fetchSearchPlaces();
+    const timer = window.setTimeout(
+      fetchSearchPlaces,
+      normalizedKeyword ? 250 : 0
+    );
 
     return () => {
       isMounted = false;
+      window.clearTimeout(timer);
     };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        onClose?.();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, onClose]);
+  }, [isOpen, keyword]);
 
   if (!isOpen) return null;
 
@@ -278,11 +278,15 @@ const SearchPop = ({ isOpen, onClose }) => {
     <div
       className="search-pop-overlay"
       onClick={handleBackdropClick}
-      role="dialog"
-      aria-modal="true"
-      aria-label="검색 팝업"
     >
-      <div className="search-pop-sheet">
+      <div
+        ref={dialogRef}
+        className="search-pop-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="search-pop-title"
+        tabIndex={-1}
+      >
         <div className="search-pop-inner">
           <div className="search-pop-search-box">
             <SearchIcon />
@@ -292,12 +296,13 @@ const SearchPop = ({ isOpen, onClose }) => {
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="검색어를 입력하세요"
-              autoFocus
+              aria-label="장소 검색어"
+              data-modal-initial-focus
             />
           </div>
 
           <div className="search-pop-result-header">
-            <h2>검색 결과</h2>
+            <h2 id="search-pop-title">검색 결과</h2>
             <span>{filteredPlaces.length}개 발견</span>
           </div>
 

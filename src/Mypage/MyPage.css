@@ -7,7 +7,7 @@
   width: 100%;
   margin: 0;
   padding: 18px 16px 120px;
-  background: #f7f9fc;
+  background: var(--color-page);
   min-height: calc(100vh - 82px);
 }
 
@@ -52,7 +52,7 @@
 
 .mypage-name-row h1 {
   margin: 0;
-  color: #182031;
+  color: var(--color-text);
   font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.4px;
@@ -67,7 +67,7 @@
   padding: 0;
   border: none;
   border-radius: 11px;
-  background: #f4f7fb;
+  background: var(--color-surface-muted);
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -102,7 +102,7 @@
   right: 0;
   width: 0;
   opacity: 0;
-  color: #6d7b90;
+  color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 800;
   line-height: 1;
@@ -136,7 +136,7 @@
 
 .mypage-user-info p {
   margin: 6px 0 0;
-  color: #6d7b90;
+  color: var(--color-text-muted);
   font-size: 14px;
   font-weight: 500;
 }
@@ -151,8 +151,8 @@
 .mypage-stat-card {
   min-height: 68px;
   border-radius: 14px;
-  border: 1px solid #e6edf4;
-  background: #ffffff;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
   display: flex;
   flex-direction: column;
@@ -169,7 +169,7 @@
 
 .mypage-stat-card span {
   margin-top: 8px;
-  color: #65748a;
+  color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 600;
 }
@@ -214,7 +214,7 @@
 
 .mypage-section-title {
   margin: 0 0 14px 6px;
-  color: #9aa7ba;
+  color: var(--color-text-muted);
   font-size: 13px;
   font-weight: 700;
 }
@@ -237,6 +237,13 @@
   cursor: pointer;
 }
 
+.mypage-menu-item:hover,
+.mypage-menu-item:focus-visible {
+  border-radius: 12px;
+  background: var(--color-hover);
+  outline: 2px solid transparent;
+}
+
 .mypage-menu-left {
   display: flex;
   align-items: center;
@@ -244,7 +251,7 @@
 }
 
 .mypage-menu-left span {
-  color: #1d2536;
+  color: var(--color-text);
   font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.3px;
@@ -1008,4 +1015,92 @@ body:has(.location-permission-overlay) {
     margin-top: 10px;
     font-size: 6.5px;
   }
+}
+
+.location-permission-modal button:focus-visible {
+  outline: 3px solid rgba(23, 159, 244, 0.3);
+  outline-offset: 3px;
+}
+
+.mypage-theme-setting {
+  min-height: 62px;
+  padding: 9px 10px 9px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mypage-settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mypage-location-setting {
+  padding: 8px 10px 8px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.mypage-theme-label {
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.mypage-theme-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+}
+
+.mypage-theme-option {
+  min-width: 66px;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mypage-theme-option:hover {
+  background: var(--color-hover);
+  color: var(--color-text);
+}
+
+.mypage-theme-option:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.mypage-theme-option.active {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: #129ff3;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+}
+
+html[data-theme="dark"] .location-permission-modal {
+  background: var(--color-surface) !important;
+}
+
+html[data-theme="dark"] .location-permission-feature,
+html[data-theme="dark"] .location-permission-feature-icon {
+  background: var(--color-surface-muted);
+  border-color: var(--color-border);
+}
+
+html[data-theme="dark"] .location-permission-overlay {
+  background: var(--color-backdrop);
 }

@@ -53,10 +53,15 @@ const RouteCreateMiniIcon = () => (
 const AdminMain = () => {
   return (
     <div className="admin-page">
-      <div className="admin-dashboard-badge">DASHBOARD</div>
+      <div className="admin-dashboard-labels">
+        <div className="admin-dashboard-badge">DASHBOARD</div>
+        <span className="admin-sample-badge">샘플 데이터</span>
+      </div>
 
       <h1 className="admin-page-title">시스템 통계</h1>
-      <p className="admin-page-subtitle">실시간 플랫폼 성능 개요</p>
+      <p className="admin-page-subtitle">
+        화면 구성을 확인하기 위한 예시 수치입니다.
+      </p>
 
       <section className="admin-stat-card large">
         <div className="admin-card-top">

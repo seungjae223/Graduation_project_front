@@ -1,15 +1,14 @@
 /*
  * Responsive application shell
  *
- * The original screens were drawn around a 390px-wide device.  Keep that
- * visual density on phones while allowing the layout to use the available
- * width on Plus/Pro Max phones and tablets without introducing horizontal
- * overflow.
+ * The original screens were drawn around a 390px-wide device. Keep that
+ * density on phones and let the same layout grow proportionally on wider
+ * screens without turning it into a separate desktop composition.
  */
 :root {
-  /* Figma's source frames use a 390px mobile artboard. */
+  /* Mobile remains edge-to-edge; desktop values are set at the breakpoint. */
   --app-width: 390px;
-  --page-max-width: 390px;
+  --page-max-width: 100%;
   --page-gutter: clamp(12px, 4vw, 24px);
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -176,6 +175,28 @@ button {
   }
 }
 
+@media (max-height: 900px) {
+  .onboarding .image-wrapper {
+    height: min(340px, 42dvh) !important;
+  }
+
+  .onboarding .text-area {
+    margin-top: 24px;
+  }
+
+  .onboarding .text-area h2 {
+    margin: 0;
+  }
+
+  .onboarding .text-area p {
+    margin: 8px 0 0;
+  }
+
+  .onboarding .indicator {
+    margin-top: 32px;
+  }
+}
+
 @media (max-height: 700px) and (max-width: 767px) {
   .onboarding .text-area {
     margin-top: 24px;
@@ -192,21 +213,293 @@ button {
   }
 }
 
-@media (min-width: 1200px) {
-  /* Desktop keeps the existing phone-app presentation centered on the page. */
-  :root {
-    --app-width: 390px;
-    --page-max-width: 390px;
-  }
-}
-
 /* 앱보다 큰 데스크톱 영역도 한 가지 캔버스 색으로 유지한다. */
 @media (min-width: 768px) {
+  :root {
+    /* Reference capture keeps the vertical app at roughly 27% of the screen. */
+    --app-width: clamp(390px, 27.25vw, 560px);
+    --page-max-width: var(--app-width);
+    --page-gutter: clamp(16px, 1.118vw, 23px);
+  }
+
   html,
   body,
   #root {
     background: #f2f4f7;
   }
+
+  .app,
+  .header,
+  .page-wrap,
+  .home,
+  .popular-all-page,
+  .recommend-page,
+  .total-page,
+  .detail-page,
+  .search-page,
+  .schedule-empty-page,
+  .calendar-page,
+  .route-create-screen,
+  .route-result-page,
+  .my-schedule-page,
+  .mypage-page,
+  .saved-places-page,
+  .recent-places-page,
+  .inquiry-screen,
+  .inquiry-write-screen,
+  .inquiry-detail-page,
+  .login,
+  .find-password-page,
+  .signup-page,
+  .verify-code-page,
+  .landing,
+  .admin-page,
+  .admin-inquiry-page,
+  .admin-inquiry-write-page {
+    width: 100% !important;
+    max-width: var(--page-max-width) !important;
+  }
+
+  .signup-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .header,
+  .home-header,
+  .search-page,
+  .recommend-page,
+  .total-page,
+  .mypage-page,
+  .saved-places-page,
+  .recent-places-page,
+  .my-schedule-page,
+  .inquiry-screen,
+  .inquiry-write-screen,
+  .inquiry-detail-page,
+  .admin-page,
+  .admin-inquiry-page,
+  .admin-inquiry-write-page {
+    padding-left: var(--page-gutter);
+    padding-right: var(--page-gutter);
+  }
+
+  .header {
+    min-height: clamp(82px, 5.729vw, 118px) !important;
+    padding-top: clamp(18px, 1.258vw, 26px) !important;
+    padding-bottom: clamp(18px, 1.258vw, 26px) !important;
+  }
+
+  .header-side {
+    width: clamp(48px, 3.354vw, 69px) !important;
+  }
+
+  .icon-btn {
+    width: clamp(40px, 2.795vw, 58px) !important;
+    height: clamp(40px, 2.795vw, 58px) !important;
+  }
+
+  .header-icon,
+  .back-icon {
+    width: clamp(24px, 1.677vw, 35px) !important;
+    height: clamp(24px, 1.677vw, 35px) !important;
+  }
+
+  .my-icon,
+  .menu-icon {
+    width: clamp(30px, 2.096vw, 43px) !important;
+    height: clamp(30px, 2.096vw, 43px) !important;
+  }
+
+  .logo,
+  .logo-center {
+    height: clamp(20px, 1.397vw, 29px) !important;
+  }
+
+  .brand-wordmark {
+    font-size: clamp(20px, 1.397vw, 29px) !important;
+  }
+
+  .header-title {
+    font-size: clamp(18px, 1.258vw, 26px) !important;
+  }
+
+  .footer-nav,
+  .admin-footer-inner {
+    width: 100%;
+    max-width: var(--page-max-width);
+    margin-inline: auto;
+  }
+
+  .footer-nav {
+    height: calc(clamp(70px, 4.891vw, 101px) + env(safe-area-inset-bottom)) !important;
+  }
+
+  .tab {
+    gap: clamp(4px, 0.28vw, 6px) !important;
+    font-size: clamp(12px, 0.838vw, 17px) !important;
+  }
+
+  .detail-bottom-actions {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .place-image,
+  .hot-main-card img {
+    max-height: 360px;
+  }
+
+  .home-header h1 {
+    font-size: 28px !important;
+  }
+
+  .home-header .subtitle {
+    font-size: 16px !important;
+  }
+
+  .home-header .search-box {
+    height: clamp(52px, 3.633vw, 75px) !important;
+  }
+
+  .quick-menu {
+    gap: clamp(12px, 0.838vw, 17px) !important;
+    padding-left: var(--page-gutter);
+    padding-right: var(--page-gutter);
+  }
+
+  .quick-menu .menu-card {
+    min-height: clamp(140px, 9.782vw, 202px) !important;
+  }
+
+  .travel-list {
+    gap: clamp(18px, 1.258vw, 26px) !important;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .travel-card {
+    flex-basis: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    border-radius: clamp(24px, 1.677vw, 35px) !important;
+  }
+
+  .travel-overlay span {
+    font-size: clamp(24px, 1.677vw, 35px) !important;
+  }
+
+  .theme-card {
+    height: auto;
+    min-height: clamp(120px, 8.384vw, 173px) !important;
+  }
+
+  .recommend-card-image-wrap,
+  .theme-total-image-wrap {
+    height: clamp(146px, 10.2vw, 210px) !important;
+  }
+
+  .popular-month-thumb,
+  .recent-place-thumb {
+    width: clamp(106px, 7.406vw, 153px) !important;
+    height: clamp(106px, 7.406vw, 153px) !important;
+  }
+
+  .route-map-mock,
+  .route-map-static-preview,
+  .route-map-static-fallback {
+    max-height: min(clamp(480px, 33.538vw, 690px), 68dvh) !important;
+  }
+}
+
+@media (max-height: 620px) and (max-width: 767px) {
+  .onboarding {
+    min-height: 0 !important;
+    height: calc(100dvh - 82px) !important;
+    padding: 10px 16px 12px !important;
+  }
+
+  .onboarding .image-wrapper {
+    height: clamp(170px, 33dvh, 205px) !important;
+    min-height: 170px !important;
+    border-radius: 26px !important;
+  }
+
+  .onboarding .text-area {
+    margin-top: 12px;
+  }
+
+  .onboarding .text-area h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 28px;
+  }
+
+  .onboarding .text-area p {
+    margin: 6px 0 0;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .onboarding .indicator {
+    margin-top: 12px;
+  }
+
+  .onboarding .next-btn {
+    height: 48px;
+    margin-top: 12px;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-height: 620px) and (max-width: 360px) {
+  .onboarding {
+    height: calc(100dvh - 74px) !important;
+  }
+}
+
+/* Fixed dialogs must remain operable when notebook height is limited. */
+:where(
+  .alert-modal,
+  .login-alert-modal,
+  .signup-alert-modal,
+  .privacy-modal,
+  .share-modal-sheet,
+  .folder-select-modal,
+  .folder-create-modal,
+  .start-place-modal,
+  .favorite-place-modal,
+  .fix-point-modal,
+  .route-result-memo-modal,
+  .location-permission-modal,
+  .inquiry-success-modal
+) {
+  max-width: min(92vw, 560px) !important;
+  max-height: calc(100dvh - 32px) !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+}
+
+:where(
+  .search-pop-overlay,
+  .share-modal-overlay,
+  .folder-select-overlay,
+  .folder-create-overlay,
+  .start-place-overlay,
+  .favorite-place-overlay,
+  .fix-point-portal,
+  .route-result-memo-backdrop,
+  .location-permission-overlay,
+  .privacy-modal-overlay
+) {
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+}
+
+.search-pop-sheet {
+  width: min(92vw, var(--page-max-width)) !important;
+  max-height: calc(100dvh - 84px);
+  overflow-y: auto !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -109,11 +109,34 @@
 
 .eye-icon {
   position: absolute;
-  right: 14px;
+  right: 2px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.eye-icon img {
   width: 18px;
   height: 18px;
-  cursor: pointer;
   object-fit: contain;
+}
+
+.login-field-error,
+.login-submit-error {
+  margin: 6px 2px 0;
+  color: #d92d20;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.login-submit-error {
+  margin: -6px 2px 14px;
+  text-align: center;
 }
 
 /* 옵션 */

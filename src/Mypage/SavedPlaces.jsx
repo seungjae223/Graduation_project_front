@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../api/api";
+import useModalFocus from "../utils/useModalFocus";
 import "./SavedPlaces.css";
 
 import folderFilledIcon from "../img/파랑색폴더.png";
@@ -9,7 +10,6 @@ import editIcon from "../img/연필.png";
 import folderAddIcon from "../img/폴더추가.png";
 import bluePencilIcon from "../img/파랑연필.png";
 import redTrashIcon from "../img/빨강쓰레기.png";
-import redWarningIcon from "../img/빨간워닝.png";
 
 import tokyoImg from "../img/도쿄.png";
 import kyotoImg from "../img/교토.png";
@@ -296,30 +296,19 @@ const FolderManageModal = ({
   onOpenDelete,
 }) => {
   useBodyScrollLock(isOpen);
-
-  useEffect(() => {
-    if (!isOpen) return undefined;
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") onClose();
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, onClose]);
+  const dialogRef = useModalFocus({ open: isOpen, onClose });
 
   if (!isOpen) return null;
 
   return createPortal(
     <div className="folder-modal-backdrop" onClick={onClose}>
       <div
+        ref={dialogRef}
         className="folder-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="folder-modal-title"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="folder-modal-header">
@@ -331,6 +320,7 @@ const FolderManageModal = ({
             type="button"
             className="folder-modal-menu-item"
             onClick={() => onOpenRename(folder)}
+            data-modal-initial-focus
           >
             <span className="folder-modal-icon-circle blue">
               <img src={bluePencilIcon} alt="" />
@@ -387,30 +377,19 @@ const FolderRenameModal = ({
   onSubmit,
 }) => {
   useBodyScrollLock(isOpen);
-
-  useEffect(() => {
-    if (!isOpen) return undefined;
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") onClose();
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, onClose]);
+  const dialogRef = useModalFocus({ open: isOpen, onClose });
 
   if (!isOpen) return null;
 
   return createPortal(
     <div className="folder-modal-backdrop" onClick={onClose}>
       <div
+        ref={dialogRef}
         className="folder-rename-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="folder-rename-title"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
         <h2 id="folder-rename-title">폴더 이름 변경</h2>
@@ -422,6 +401,7 @@ const FolderRenameModal = ({
               type="text"
               value={folderName}
               onChange={(event) => onChangeName(event.target.value)}
+              data-modal-initial-focus
             />
           </label>
 
@@ -460,41 +440,35 @@ const FolderRenameModal = ({
 
 const FolderDeleteModal = ({ isOpen, onClose, onSubmit }) => {
   useBodyScrollLock(isOpen);
-
-  useEffect(() => {
-    if (!isOpen) return undefined;
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") onClose();
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, onClose]);
+  const dialogRef = useModalFocus({ open: isOpen, onClose });
 
   if (!isOpen) return null;
 
   return createPortal(
     <div className="folder-modal-backdrop" onClick={onClose}>
       <div
+        ref={dialogRef}
         className="folder-delete-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="folder-delete-title"
+        aria-describedby="folder-delete-description"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="folder-delete-top">
-          <div className="folder-delete-warning-circle">
-            <img src={redWarningIcon} alt="" />
+          <div className="folder-delete-warning-circle" aria-hidden="true">
+            <svg viewBox="0 0 48 48" className="folder-delete-warning-icon">
+              <path d="M21.1 7.2c1.3-2.3 4.5-2.3 5.8 0l16.2 28.1c1.3 2.2-.3 5-2.9 5H7.8c-2.6 0-4.2-2.8-2.9-5L21.1 7.2Z" />
+              <path d="M24 17.2v10.9" className="folder-delete-warning-line" />
+              <circle cx="24" cy="34.1" r="2.1" className="folder-delete-warning-dot" />
+            </svg>
           </div>
         </div>
 
         <div className="folder-delete-content">
           <h2 id="folder-delete-title">폴더를 삭제하시겠습니까?</h2>
-          <p>
+          <p id="folder-delete-description">
             폴더를 삭제하면 그 안에 저장된 모든 장소 목록이 함께 사라집니다.
             이 작업은 되돌릴 수 없습니다.
           </p>
@@ -504,6 +478,7 @@ const FolderDeleteModal = ({ isOpen, onClose, onSubmit }) => {
               type="button"
               className="folder-delete-cancel"
               onClick={onClose}
+              data-modal-initial-focus
             >
               취소
             </button>

@@ -668,6 +668,12 @@ button.route-result-memo-card:hover {
   flex-direction: column;
 }
 
+.route-result-page .route-result-memo-modal button:focus-visible,
+.route-result-page .route-result-memo-modal textarea:focus-visible {
+  outline: 3px solid rgba(24, 168, 237, 0.3);
+  outline-offset: 3px;
+}
+
 .route-result-page .route-result-memo-modal h3 {
   margin: 0;
   padding: 18px 16px 16px;

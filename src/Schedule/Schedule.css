@@ -30,3 +30,19 @@
   color: #7b8a9d;
   line-height: 1.6;
 }
+
+.schedule-empty-action {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 22px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #0da6f2;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}

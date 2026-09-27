@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import useModalFocus from "../utils/useModalFocus";
 import "./StartPlaceModal.css";
 import locationIcon from "../img/파랑색 위치.png";
 import arrowIcon from "../img/위쪽 화살표.png";
@@ -42,6 +44,12 @@ const StartPlaceModal = ({
   submitError = "",
 }) => {
   const [isPlaceDropdownOpen, setIsPlaceDropdownOpen] = useState(false);
+  const dialogRef = useModalFocus({
+    open,
+    onClose,
+    canClose: !isSubmitting,
+    lockScroll: true,
+  });
 
   const dayScrollRef = useRef(null);
   const dayDragRef = useRef({
@@ -164,13 +172,15 @@ const StartPlaceModal = ({
     onChangeDay(index);
   };
 
-  return (
+  return createPortal(
     <div className="start-place-overlay" onClick={handleRequestClose}>
       <div
+        ref={dialogRef}
         className="start-place-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="start-place-modal-title"
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="start-place-header">
@@ -180,8 +190,11 @@ const StartPlaceModal = ({
             onClick={handleRequestClose}
             aria-label="출발 장소 설정 닫기"
             disabled={isSubmitting}
+            data-modal-initial-focus
           >
-            ←
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15 6L9 12L15 18" />
+            </svg>
           </button>
 
           <h2 id="start-place-modal-title">출발 장소 설정</h2>
@@ -237,6 +250,7 @@ const StartPlaceModal = ({
               className="start-place-list-card-header"
               onClick={() => setIsPlaceDropdownOpen((prev) => !prev)}
               aria-expanded={isPlaceDropdownOpen}
+              aria-controls="start-place-list"
               disabled={isSubmitting}
             >
               <img
@@ -257,7 +271,7 @@ const StartPlaceModal = ({
             </button>
 
             {isPlaceDropdownOpen && (
-              <div className="start-place-list">
+              <div id="start-place-list" className="start-place-list">
                 {currentPlaces.length > 0 ? (
                   currentPlaces.map((place) => {
                     const isSelected = place.id === activeSelectedId;
@@ -334,7 +348,8 @@ const StartPlaceModal = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

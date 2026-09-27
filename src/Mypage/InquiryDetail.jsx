@@ -105,6 +105,7 @@ const getAnswerData = (inquiry) => {
 };
 
 const getInquiryData = (data) => {
+  if (Array.isArray(data)) return data;
   if (data?.data) return data.data;
   if (data?.inquiry) return data.inquiry;
   if (data?.item) return data.item;
@@ -157,8 +158,18 @@ const InquiryDetail = () => {
         setIsLoading(true);
         setErrorMessage("");
 
-        const response = await api.get(`/api/inquiries/${id}`);
-        const inquiryData = getInquiryData(response.data);
+        const response = await api.get("/api/inquiries");
+        const inquiryList = getInquiryData(response.data);
+        const inquiryData = Array.isArray(inquiryList)
+          ? inquiryList.find(
+              (item) =>
+                String(item.id ?? item.inquiryId ?? item.questionId) === String(id)
+            )
+          : null;
+
+        if (!inquiryData) {
+          throw new Error("문의 내용을 찾을 수 없습니다.");
+        }
 
         setInquiry(inquiryData);
       } catch (error) {
@@ -170,7 +181,7 @@ const InquiryDetail = () => {
         }
 
         if (error.message.includes("Network Error")) {
-          setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+          setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
           return;
         }
 

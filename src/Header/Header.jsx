@@ -4,16 +4,44 @@ import { useLocation, useNavigate } from "react-router-dom";
 import html2pdf from "html2pdf.js";
 import ShareModal from "../ShareModal/ShareModal";
 import Alert from "../Alert/Alert";
-
-import logoBlue from "../img/너만 오면 go.png";
-import logoBlack from "../img/너만 오면 go 블랙.png";
-import backIcon from "../img/백.png";
-import searchIcon from "../img/검정 검색.png";
-import shareIcon from "../img/공유.png";
-import myIcon from "../img/마이페이지.png";
+import { navigateWithOnboardingTransition } from "../OnBoarding/onboardingTransition";
 
 const ROUTE_STORAGE_KEY = "mock_saved_route_results";
 const ROUTE_STORAGE_EVENT = "mock-routes-updated";
+
+const BrandWordmark = ({ tone = "default" }) => (
+  <span className={`brand-wordmark brand-wordmark--${tone}`}>너만 오면 go</span>
+);
+
+const BackIcon = () => (
+  <svg className="header-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M15 4 7 12l8 8" />
+  </svg>
+);
+
+const SearchIcon = () => (
+  <svg className="header-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="11" cy="11" r="6.5" />
+    <path d="m16 16 4 4" />
+  </svg>
+);
+
+const ShareIcon = () => (
+  <svg className="header-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="18" cy="5" r="2.25" />
+    <circle cx="6" cy="12" r="2.25" />
+    <circle cx="18" cy="19" r="2.25" />
+    <path d="m8 11 7.8-4.6M8 13l7.8 4.6" />
+  </svg>
+);
+
+const ProfileIcon = () => (
+  <svg className="my-icon" viewBox="0 0 32 32" aria-hidden="true">
+    <circle cx="16" cy="16" r="13" />
+    <circle cx="16" cy="12" r="4" />
+    <path d="M8.5 25c1.4-4.1 4-6.1 7.5-6.1s6.1 2 7.5 6.1" />
+  </svg>
+);
 
 const BlackTrashIcon = () => (
   <svg
@@ -173,6 +201,10 @@ const Header = ({ onSearchClick }) => {
     navigate(-1);
   };
 
+  const handleOnboardingBackClick = () => {
+    navigateWithOnboardingTransition(navigate, -1, "backward");
+  };
+
   const handleSearchClick = () => {
     if (typeof onSearchClick === "function") {
       onSearchClick();
@@ -283,7 +315,7 @@ const Header = ({ onSearchClick }) => {
           <div className="header-side" />
 
           <div className="header-center">
-            <img src={logoBlack} alt="logo" className="logo-center" />
+            <BrandWordmark />
           </div>
 
           <div className="header-side">
@@ -291,8 +323,9 @@ const Header = ({ onSearchClick }) => {
               type="button"
               className="icon-btn"
               onClick={() => navigate("/mypage")}
+              aria-label="마이페이지"
             >
-              <img src={myIcon} alt="mypage" className="my-icon" />
+              <ProfileIcon />
             </button>
           </div>
         </>
@@ -303,8 +336,8 @@ const Header = ({ onSearchClick }) => {
       return (
         <>
           <div className="header-side">
-            <button type="button" className="icon-btn" onClick={handleBackClick}>
-              <img src={backIcon} alt="back" className="header-icon" />
+            <button type="button" className="icon-btn" onClick={handleBackClick} aria-label="뒤로 가기">
+              <BackIcon />
             </button>
           </div>
 
@@ -317,8 +350,9 @@ const Header = ({ onSearchClick }) => {
               type="button"
               className="icon-btn"
               onClick={handleSearchClick}
+              aria-label="검색"
             >
-              <img src={searchIcon} alt="search" className="header-icon" />
+              <SearchIcon />
             </button>
           </div>
         </>
@@ -329,8 +363,8 @@ const Header = ({ onSearchClick }) => {
       return (
         <>
           <div className="header-side">
-            <button type="button" className="icon-btn" onClick={handleBackClick}>
-              <img src={backIcon} alt="back" className="header-icon" />
+            <button type="button" className="icon-btn" onClick={handleBackClick} aria-label="뒤로 가기">
+              <BackIcon />
             </button>
           </div>
 
@@ -347,8 +381,8 @@ const Header = ({ onSearchClick }) => {
       return (
         <>
           <div className="header-side">
-            <button type="button" className="icon-btn" onClick={handleBackClick}>
-              <img src={backIcon} alt="back" className="header-icon" />
+            <button type="button" className="icon-btn" onClick={handleBackClick} aria-label="뒤로 가기">
+              <BackIcon />
             </button>
           </div>
 
@@ -372,7 +406,7 @@ const Header = ({ onSearchClick }) => {
               onClick={handleShare}
               aria-label="일정 공유"
             >
-              <img src={shareIcon} alt="share" className="header-icon" />
+              <ShareIcon />
             </button>
           </div>
         </>
@@ -383,13 +417,18 @@ const Header = ({ onSearchClick }) => {
       return (
         <>
           <div className="header-side">
-            <button type="button" className="icon-btn" onClick={handleBackClick}>
-              <img src={backIcon} alt="back" className="header-icon" />
+            <button
+              type="button"
+              className="icon-btn onboarding-motion-button onboarding-motion-button--small onboarding-motion-button--header"
+              onClick={handleOnboardingBackClick}
+              aria-label="뒤로 가기"
+            >
+              <BackIcon />
             </button>
           </div>
 
           <div className="header-center">
-            <img src={logoBlack} alt="logo" className="logo-center" />
+            <BrandWordmark />
           </div>
 
           <div className="header-side" />
@@ -400,8 +439,11 @@ const Header = ({ onSearchClick }) => {
     if (path === "/" || path === "/onboarding" || path === "/onboarding2") {
       return (
         <>
-          <img src={logoBlue} alt="logo" className="logo" />
-          <button className="skip-btn" onClick={() => navigate("/")}>
+          <BrandWordmark tone="blue" />
+          <button
+            className="skip-btn onboarding-motion-button onboarding-motion-button--small onboarding-motion-button--header"
+            onClick={() => navigate("/")}
+          >
             Skip
           </button>
         </>
@@ -414,7 +456,7 @@ const Header = ({ onSearchClick }) => {
           <div className="header-side" />
 
           <div className="header-center">
-            <img src={logoBlack} alt="logo" className="logo-center" />
+            <BrandWordmark />
           </div>
 
           <div className="header-side" />
@@ -425,13 +467,22 @@ const Header = ({ onSearchClick }) => {
     return (
       <>
         <div className="header-side">
-          <button type="button" className="icon-btn" onClick={handleBackClick}>
-            <img src={backIcon} alt="back" className="header-icon" />
+          <button
+            type="button"
+            className={`icon-btn${
+              path === "/landing"
+                ? " onboarding-motion-button onboarding-motion-button--small onboarding-motion-button--header"
+                : ""
+            }`}
+            onClick={handleBackClick}
+            aria-label="뒤로 가기"
+          >
+            <BackIcon />
           </button>
         </div>
 
         <div className="header-center">
-          <img src={logoBlack} alt="logo" className="logo-center" />
+          <BrandWordmark />
         </div>
 
         <div className="header-side" />

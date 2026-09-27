@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getRecentPlaces } from "../utils/recentPlaces";
+import { getRecentPlacesApi } from "../api/placeApi";
 import "./RecentPlacesPage.css";
 
 function RecentPlacesPage() {
@@ -14,8 +15,28 @@ function RecentPlacesPage() {
     }
   });
 
+  const [serverRecentPlaces, setServerRecentPlaces] = useState([]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    getRecentPlacesApi()
+      .then((places) => {
+        if (mounted) setServerRecentPlaces(places);
+      })
+      .catch((error) => console.error("최근 본 장소 조회 실패:", error));
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const recentPlaces = useMemo(() => {
-    return getRecentPlaces()
+    const places = serverRecentPlaces.length > 0
+      ? serverRecentPlaces
+      : getRecentPlaces();
+
+    return places
       .map((place) => ({
         ...place,
 
@@ -32,7 +53,7 @@ function RecentPlacesPage() {
         viewedAt: place.viewedAt || new Date().toISOString(),
       }))
       .sort((a, b) => new Date(b.viewedAt) - new Date(a.viewedAt));
-  }, []);
+  }, [serverRecentPlaces]);
 
   const groupedPlaces = useMemo(() => {
     return groupPlacesByDate(recentPlaces);

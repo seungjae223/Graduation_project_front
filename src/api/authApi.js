@@ -113,7 +113,28 @@ const clearCurrentUserCache = () => {
   sessionStorage.removeItem("userName");
 };
 
-export const loginApi = async ({ email, password }) => {
+const saveToken = (token, { persistent = true } = {}) => {
+  const normalizedToken = String(token || "")
+    .replace(/^Bearer\s+/i, "")
+    .trim();
+
+  if (!normalizedToken) {
+    throw new Error("서버에서 로그인 토큰을 받지 못했습니다.");
+  }
+
+  const storage = persistent ? localStorage : sessionStorage;
+  const otherStorage = persistent ? sessionStorage : localStorage;
+
+  storage.setItem("accessToken", normalizedToken);
+  storage.setItem("token", normalizedToken);
+  storage.setItem("isLoggedIn", "true");
+  otherStorage.removeItem("accessToken");
+  otherStorage.removeItem("token");
+
+  return normalizedToken;
+};
+
+export const loginApi = async ({ email, password, keepLogin = true }) => {
   const normalizedEmail = normalizeEmail(email);
 
   const response = await api.post(
@@ -130,13 +151,10 @@ export const loginApi = async ({ email, password }) => {
   const token = extractToken(response);
   const cachedNickname = getCachedNickname(normalizedEmail);
 
-  localStorage.setItem("isLoggedIn", "true");
-  localStorage.setItem("userEmail", normalizedEmail);
-
-  if (token) {
-    localStorage.setItem("accessToken", token);
-    localStorage.setItem("token", token);
-  }
+  const storage = keepLogin ? localStorage : sessionStorage;
+  storage.setItem("userEmail", normalizedEmail);
+  saveToken(token, { persistent: keepLogin });
+  localStorage.setItem("keepLogin", String(keepLogin));
 
   // 같은 브라우저에서 회원가입했던 계정이면 저장해둔 nickname을 마이페이지에서 바로 사용
   if (cachedNickname) {
@@ -158,16 +176,6 @@ export const loginApi = async ({ email, password }) => {
       })
     );
   }
-
-  console.log("[authApi] 로그인 응답:", response.data);
-  console.log("[authApi] 저장 확인:", {
-    accessToken: localStorage.getItem("accessToken"),
-    token: localStorage.getItem("token"),
-    isLoggedIn: localStorage.getItem("isLoggedIn"),
-    userEmail: localStorage.getItem("userEmail"),
-    userNickname: localStorage.getItem("userNickname"),
-    currentUser: localStorage.getItem("currentUser"),
-  });
 
   return {
     token,
@@ -216,6 +224,43 @@ export const signupApi = async ({ email, password, nickname }) => {
   });
 
   return response.data;
+};
+
+export const getSocialAuthorizationApi = async (provider) => {
+  if (!['kakao', 'google'].includes(provider)) {
+    throw new Error("지원하지 않는 소셜 로그인입니다.");
+  }
+
+  const response = await api.get(`/api/auth/${provider}/authorize`);
+  const authorizationUrl = response.data?.authorizationUrl;
+  const state = response.data?.state;
+
+  if (!authorizationUrl || !state) {
+    throw new Error("소셜 로그인 인증 정보를 받지 못했습니다.");
+  }
+
+  return response.data;
+};
+
+export const completeSocialLoginApi = async ({ provider, code, state }) => {
+  if (!['kakao', 'google'].includes(provider)) {
+    throw new Error("지원하지 않는 소셜 로그인입니다.");
+  }
+
+  if (!code || !state) {
+    throw new Error("소셜 로그인 인증 정보가 없습니다.");
+  }
+
+  const response = await api.post(`/api/auth/${provider}/login`, {
+    code,
+    state,
+  });
+
+  const token = saveToken(response.data?.token, { persistent: true });
+  localStorage.setItem("tokenType", response.data?.tokenType || "Bearer");
+  localStorage.setItem("keepLogin", "true");
+
+  return { ...response.data, token };
 };
 
 export const sendEmailCodeApi = async (email) => {

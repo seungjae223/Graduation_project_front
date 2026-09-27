@@ -1,0 +1,108 @@
+.onboarding-motion-button {
+  --onboarding-button-delay: 0ms;
+  --onboarding-button-hover-y: -3px;
+  --onboarding-button-hover-scale: 1.02;
+  --onboarding-button-pressed-scale: 0.96;
+
+  animation: onboarding-button-enter 540ms linear
+    var(--onboarding-button-delay) backwards;
+  transform-origin: center;
+  transition: translate 190ms cubic-bezier(0.16, 1, 0.3, 1),
+    scale 110ms ease-out !important;
+}
+
+.onboarding-motion-button--onboarding-cta {
+  --onboarding-button-delay: 500ms;
+}
+
+.onboarding-motion-button--landing-start {
+  --onboarding-button-delay: 260ms;
+}
+
+.onboarding-motion-button--landing-explore {
+  --onboarding-button-delay: 360ms;
+}
+
+.onboarding-motion-button--small {
+  --onboarding-button-hover-y: -2px;
+  --onboarding-button-hover-scale: 1.015;
+  --onboarding-button-pressed-scale: 0.95;
+  animation-name: onboarding-small-button-enter;
+  animation-duration: 360ms;
+}
+
+.onboarding-motion-button--header {
+  --onboarding-button-delay: 100ms;
+}
+
+.onboarding-motion-button--settled {
+  animation: none;
+}
+
+.onboarding-motion-button:active:not(:disabled) {
+  translate: 0 0;
+  scale: var(--onboarding-button-pressed-scale);
+  transition-duration: 80ms !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .onboarding-motion-button:hover:not(:disabled) {
+    translate: 0 var(--onboarding-button-hover-y);
+    scale: var(--onboarding-button-hover-scale);
+  }
+
+  .onboarding-motion-button:hover:active:not(:disabled) {
+    translate: 0 0;
+    scale: var(--onboarding-button-pressed-scale);
+  }
+}
+
+@keyframes onboarding-button-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.94);
+    animation-timing-function: cubic-bezier(0.16, 0.82, 0.26, 1);
+  }
+
+  66% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.025);
+    animation-timing-function: cubic-bezier(0.34, 1.3, 0.64, 1);
+  }
+
+  84% {
+    opacity: 1;
+    transform: translateY(1px) scale(0.992);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes onboarding-small-button-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+
+  70% {
+    opacity: 1;
+    transform: translateY(-1px) scale(1.01);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-motion-button {
+    animation: none !important;
+    translate: none !important;
+    scale: 1 !important;
+    transition: none !important;
+  }
+}

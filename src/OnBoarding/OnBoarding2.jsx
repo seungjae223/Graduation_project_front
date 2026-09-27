@@ -2,6 +2,7 @@ import React from "react";
 import "./OnBoarding.css";
 import { useNavigate } from "react-router-dom";
 import mainImage from "../img/지도.png";
+import { navigateWithOnboardingTransition } from "./onboardingTransition";
 
 const OnBoarding2 = () => {
   const navigate = useNavigate();
@@ -32,7 +33,12 @@ const OnBoarding2 = () => {
       </div>
 
       {/* 버튼 */}
-      <button className="next-btn" onClick={() => navigate("/onboarding3")}>
+      <button
+        className="next-btn onboarding-motion-button onboarding-motion-button--onboarding-cta"
+        onClick={() =>
+          navigateWithOnboardingTransition(navigate, "/onboarding3", "forward")
+        }
+      >
         다음으로 →
       </button>
     </div>

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import "./AdminInquiryWrite.css";
 import api from "../../api/api";
+import useModalFocus from "../../utils/useModalFocus";
 
 const formatDateTime = (dateString) => {
   if (!dateString) return "날짜 없음";
@@ -94,6 +96,56 @@ const getErrorMessage = (error, fallbackMessage) => {
   return data?.message || data?.error || fallbackMessage;
 };
 
+const AdminSuccessModal = ({ open, onConfirm }) => {
+  const dialogRef = useModalFocus({
+    open,
+    onClose: onConfirm,
+    lockScroll: true,
+  });
+
+  if (!open) return null;
+
+  return createPortal(
+    <div className="admin-success-modal-overlay">
+      <div
+        ref={dialogRef}
+        className="admin-success-modal"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="admin-success-title"
+        aria-describedby="admin-success-description"
+        tabIndex={-1}
+      >
+        <div className="admin-success-icon-wrap" aria-hidden="true">
+          <svg className="admin-success-icon" viewBox="0 0 32 32">
+            <path d="M7 16.5L13 22L25 10" />
+          </svg>
+        </div>
+
+        <h2 id="admin-success-title" className="admin-success-title">
+          답변이 전송되었습니다
+        </h2>
+
+        <p id="admin-success-description" className="admin-success-message">
+          사용자에게 성공적으로
+          <br />
+          답변이 전달되었습니다.
+        </p>
+
+        <button
+          type="button"
+          className="admin-success-confirm-button"
+          onClick={onConfirm}
+          data-modal-initial-focus
+        >
+          확인
+        </button>
+      </div>
+    </div>,
+    document.body
+  );
+};
+
 const AdminInquiryWrite = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -145,7 +197,7 @@ const AdminInquiryWrite = () => {
         console.error("관리자 문의 상세 조회 실패:", error);
 
         if (error.message.includes("Network Error")) {
-          setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+          setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
           return;
         }
 
@@ -194,10 +246,10 @@ const AdminInquiryWrite = () => {
 
       await api.post(
         `/api/inquiries/admin/${id}/answer`,
-        JSON.stringify(trimmedAnswer),
+        trimmedAnswer,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "text/plain",
           },
         }
       );
@@ -215,7 +267,7 @@ const AdminInquiryWrite = () => {
       console.error("문의 답변 전송 실패:", error);
 
       if (error.message.includes("Network Error")) {
-        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
         return;
       }
 
@@ -386,31 +438,10 @@ const AdminInquiryWrite = () => {
         {isAnswered ? "답변 완료" : isSubmitting ? "전송 중..." : "답변 전송하기"}
       </button>
 
-      {isSuccessModalOpen && (
-        <div className="admin-success-modal-overlay">
-          <div className="admin-success-modal">
-            <div className="admin-success-icon-wrap">
-              <div className="admin-success-icon">✓</div>
-            </div>
-
-            <h2 className="admin-success-title">답변이 전송되었습니다</h2>
-
-            <p className="admin-success-message">
-              사용자에게 성공적으로
-              <br />
-              답변이 전달되었습니다.
-            </p>
-
-            <button
-              type="button"
-              className="admin-success-confirm-button"
-              onClick={handleSuccessConfirm}
-            >
-              확인
-            </button>
-          </div>
-        </div>
-      )}
+      <AdminSuccessModal
+        open={isSuccessModalOpen}
+        onConfirm={handleSuccessConfirm}
+      />
     </div>
   );
 };

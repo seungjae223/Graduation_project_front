@@ -1,4 +1,5 @@
 import axios from "axios";
+import { buildLoginPath, getCurrentReturnPath } from "../utils/authRedirect";
 
 // Login.jsx의 API_BASE_URL과 반드시 같아야 합니다.
 // 배포 서버를 쓸 거면 .env에 REACT_APP_API_BASE_URL=http://3.27.110.86:8080 로 넣는 걸 추천합니다.
@@ -15,8 +16,10 @@ const api = axios.create({
 const PUBLIC_API_PATHS = [
   "/api/auth/login",
   "/api/auth/signup",
-  "/api/email/verification-requests",
-  "/api/email/verifications",
+  "/api/auth/kakao/authorize",
+  "/api/auth/kakao/login",
+  "/api/auth/google/authorize",
+  "/api/auth/google/login",
   "/api/email/send",
   "/api/email/verify",
 ];
@@ -33,7 +36,7 @@ const getRequestPath = (config) => {
 const isPublicApiPath = (config) => {
   const pathname = getRequestPath(config);
 
-  return PUBLIC_API_PATHS.some((path) => pathname.startsWith(path));
+  return PUBLIC_API_PATHS.includes(pathname);
 };
 
 const normalizeToken = (value) => {
@@ -219,18 +222,41 @@ api.interceptors.response.use(
       clearAuthStorage();
 
       if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+        window.location.replace(buildLoginPath(getCurrentReturnPath()));
       }
     }
 
-    // 403은 권한 없음이므로 토큰을 지우지 않음
-    // 여기서 토큰을 지우면 마이페이지/관리자/권한 API에서 로그인 자체가 풀리는 문제가 생길 수 있음
+    // 이 백엔드는 토큰 누락/만료도 403을 반환합니다. 요청에 토큰이 없었던
+    // 경우만 로그인 만료로 처리하고, ADMIN 역할 부족 같은 정상적인 403은 보존합니다.
     if (status === 403 && !isPublicApi) {
       console.warn("접근 권한이 없습니다.");
+
+      const authorization = error.config?.headers?.Authorization;
+
+      if (!authorization) {
+        clearAuthStorage();
+
+        if (window.location.pathname !== "/login") {
+          window.location.replace(buildLoginPath(getCurrentReturnPath()));
+        }
+      }
     }
 
     return Promise.reject(error);
   }
 );
+
+export const getApiErrorMessage = (
+  error,
+  fallbackMessage = "요청을 처리하지 못했습니다."
+) => {
+  const data = error?.response?.data;
+
+  if (typeof data === "string" && data.trim()) {
+    return data.trim();
+  }
+
+  return data?.message || data?.error || error?.message || fallbackMessage;
+};
 
 export default api;

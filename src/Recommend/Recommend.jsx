@@ -281,21 +281,13 @@ function Recommend() {
 
         if (isSearchMode) {
           try {
-            response = await api.get(PLACES_API, {
+            response = await api.get(`${PLACES_API}/search`, {
               params: {
                 keyword: searchKeyword,
               },
             });
           } catch (placeSearchError) {
-            if (placeSearchError.message.includes("Network Error")) {
-              throw placeSearchError;
-            }
-
-            response = await api.get(RECOMMENDATIONS_API, {
-              params: {
-                keyword: searchKeyword,
-              },
-            });
+            throw placeSearchError;
           }
         } else {
           response = await api.get(RECOMMENDATIONS_API, {
@@ -320,7 +312,7 @@ function Recommend() {
         console.error("추천 장소 조회 실패:", error);
 
         if (error.message.includes("Network Error")) {
-          setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+          setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
           return;
         }
 
@@ -478,9 +470,9 @@ function Recommend() {
       throw new Error("폴더 ID가 없습니다.");
     }
 
-    return api.post(getFolderPlacesUrl(folder.id), {
-      placeId,
-    });
+    return api.post(
+      `${getFolderPlacesUrl(folder.id)}/${encodeURIComponent(placeId)}`
+    );
   };
 
   const removeSavedPlace = async (place) => {
@@ -529,7 +521,7 @@ function Recommend() {
       console.error("관심 장소 연동 실패:", error);
 
       if (error.message.includes("Network Error")) {
-        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
         return;
       }
 
@@ -548,19 +540,11 @@ function Recommend() {
     try {
       setIsSavingId(place.id);
 
-      const numericPlaceId = Number(place.id);
+      const registeredPlaceId = place.id;
 
-      const placePayload = {
-        id: Number.isFinite(numericPlaceId) ? numericPlaceId : 0,
-        name: place.title,
-        latitude: place.latitude || 0,
-        longitude: place.longitude || 0,
-        address: place.address,
-        placeType: place.placeType || place.tabType,
-      };
-
-      const placeResponse = await api.post(PLACES_API, placePayload);
-      const registeredPlaceId = placeResponse.data?.id ?? place.id;
+      if (!registeredPlaceId) {
+        throw new Error("저장할 장소의 서버 ID가 없습니다.");
+      }
 
       await postPlaceToFolder(registeredPlaceId, folder);
 
@@ -593,7 +577,7 @@ function Recommend() {
       console.error("관심 장소 연동 실패:", error);
 
       if (error.message.includes("Network Error")) {
-        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
         return;
       }
 

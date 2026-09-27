@@ -9,6 +9,7 @@ import { saveRecentPlace } from "../utils/recentPlaces";
 import html2pdf from "html2pdf.js";
 import ShareModal from "../ShareModal/ShareModal";
 import FolderSelectModal from "../FolderSelectModal/FolderSelectModal";
+import EarthLoader from "../Loading/EarthLoader";
 import "./Detail.css";
 import api from "../api/api";
 
@@ -523,28 +524,8 @@ const getFolderPlaceDeleteUrl = (folderId, placeId) => {
 
 const registerPlace = async (place) => {
   const numericPlaceId = Number(place.id);
-
-  const placePayload = {
-    id: Number.isFinite(numericPlaceId) ? numericPlaceId : 0,
-    name: place.title || place.name,
-    latitude: place.latitude || 0,
-    longitude: place.longitude || 0,
-    address: place.address,
-    placeType: place.placeType,
-  };
-
-  try {
-    const response = await api.post(PLACES_API, placePayload);
-    const responseData = getResponseData(response.data);
-
-    return responseData?.id ?? responseData?.placeId ?? place.id;
-  } catch (error) {
-    if ([400, 409, 422].includes(error.response?.status)) {
-      return place.id;
-    }
-
-    throw error;
-  }
+  if (Number.isInteger(numericPlaceId) && numericPlaceId > 0) return numericPlaceId;
+  throw new Error("저장할 장소의 서버 ID가 없습니다.");
 };
 
 const normalizeTags = (tags) => {
@@ -577,10 +558,12 @@ const normalizeReviews = (reviews, fallbackPlace) => {
 
   return reviews.map((review, index) => ({
     id: review.id ?? review.reviewId ?? index + 1,
-    name: review.name || review.nickname || review.userName || "여행자",
+    name:
+      review.name || review.nickname || review.userName || review.email || "여행자",
     badge: review.badge || review.level || review.role || "리뷰어",
     rating: review.rating || review.score || 5,
-    content: review.content || review.reviewContent || review.text || "",
+    content:
+      review.comment || review.content || review.reviewContent || review.text || "",
   }));
 };
 
@@ -725,6 +708,25 @@ const getErrorMessage = (error, fallbackMessage) => {
   return data?.message || data?.error || fallbackMessage;
 };
 
+const EMPTY_DETAIL_PLACE = {
+  id: "",
+  title: "",
+  name: "",
+  address: "",
+  region: "",
+  theme: "",
+  description: "",
+  intro: "",
+  latitude: 0,
+  longitude: 0,
+  placeType: "",
+  rating: 0,
+  reviewCount: 0,
+  image: "",
+  tags: [],
+  reviews: [],
+};
+
 function Detail() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -733,16 +735,28 @@ function Detail() {
 
   const idParam = Number(searchParams.get("id"));
 
-  const fallbackDetailPlace = useMemo(() => {
+  const normalizationFallback = useMemo(() => {
+    return PLACE_FALLBACK_BY_ID[idParam] || EMPTY_DETAIL_PLACE;
+  }, [idParam]);
+
+  const initialDetailPlace = useMemo(() => {
     const placeFromState = location.state?.place;
-    const fallbackPlace =
-      PLACE_FALLBACK_BY_ID[idParam] || PLACE_FALLBACK_BY_ID[201];
 
-    return normalizePlaceDetail(placeFromState || fallbackPlace, fallbackPlace);
-  }, [location.state, idParam]);
+    if (!placeFromState) return null;
 
-  const [detailPlace, setDetailPlace] = useState(fallbackDetailPlace);
-  const [isLoading, setIsLoading] = useState(false);
+    return normalizePlaceDetail(placeFromState, normalizationFallback);
+  }, [location.state, normalizationFallback]);
+
+  const [detailPlace, setDetailPlace] = useState(
+    initialDetailPlace || EMPTY_DETAIL_PLACE
+  );
+  const [hasResolvedDetail, setHasResolvedDetail] = useState(
+    Boolean(initialDetailPlace)
+  );
+  const [isLoading, setIsLoading] = useState(
+    !initialDetailPlace && Number.isInteger(idParam) && idParam > 0
+  );
+  const [loadError, setLoadError] = useState("");
   const [isSavingPlace, setIsSavingPlace] = useState(false);
   const [serverSaved, setServerSaved] = useState(false);
   const [serverSavedFolderInfo, setServerSavedFolderInfo] = useState(null);
@@ -750,38 +764,54 @@ function Detail() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
   useEffect(() => {
-    setDetailPlace(fallbackDetailPlace);
-  }, [fallbackDetailPlace]);
+    setDetailPlace(initialDetailPlace || EMPTY_DETAIL_PLACE);
+    setHasResolvedDetail(Boolean(initialDetailPlace));
+    setLoadError("");
+  }, [initialDetailPlace]);
 
   useEffect(() => {
     const fetchPlaceDetail = async () => {
-      if (!idParam) return;
+      if (!Number.isInteger(idParam) || idParam <= 0) {
+        setIsLoading(false);
+        setLoadError("장소 정보가 없거나 주소가 올바르지 않습니다.");
+        return;
+      }
 
       try {
         setIsLoading(true);
+        setLoadError("");
 
-        const response = await api.get(`${PLACES_API}/${idParam}`);
-        const placeData = getResponseData(response.data);
+        const [placeResponse, reviewResponse] = await Promise.all([
+          api.get(`${PLACES_API}/${idParam}`),
+          api.get(`${PLACES_API}/${idParam}/reviews`).catch((error) => {
+            console.error("리뷰 조회 실패:", error);
+            return { data: [] };
+          }),
+        ]);
+        const placeData = getResponseData(placeResponse.data);
+        const reviews = getArrayData(reviewResponse.data);
 
-        setDetailPlace(normalizePlaceDetail(placeData, fallbackDetailPlace));
+        setDetailPlace(
+          normalizePlaceDetail(
+            { ...placeData, reviews, reviewCount: reviews.length },
+            normalizationFallback
+          )
+        );
+        setHasResolvedDetail(true);
       } catch (error) {
         console.error("장소 상세 조회 실패:", error);
-
-        if (!error.message.includes("Network Error")) {
-          alert(
-            getErrorMessage(
-              error,
-              "장소 상세 정보를 불러오지 못했습니다. 기본 정보를 표시합니다."
-            )
-          );
-        }
+        setLoadError(
+          error.message?.includes("Network Error")
+            ? "네트워크 연결을 확인한 뒤 다시 시도해주세요."
+            : getErrorMessage(error, "장소 상세 정보를 불러오지 못했습니다.")
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchPlaceDetail();
-  }, [idParam, fallbackDetailPlace]);
+  }, [idParam, normalizationFallback]);
 
   useEffect(() => {
     const fetchSavedState = async () => {
@@ -913,9 +943,9 @@ function Detail() {
   };
 
   const postFolderPlace = async (folder, placeId) => {
-    return api.post(getFolderPlacesUrl(folder.id), {
-      placeId,
-    });
+    return api.post(
+      `${getFolderPlacesUrl(folder.id)}/${encodeURIComponent(placeId)}`
+    );
   };
 
   const removeSavedPlace = async () => {
@@ -943,7 +973,7 @@ function Detail() {
       console.error("관심 장소 변경 실패:", error);
 
       if (error.message.includes("Network Error")) {
-        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
         return;
       }
 
@@ -983,7 +1013,7 @@ function Detail() {
       console.error("관심 장소 변경 실패:", error);
 
       if (error.message.includes("Network Error")) {
-        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
         return;
       }
 
@@ -1067,6 +1097,30 @@ function Detail() {
       wrapper.remove();
     }
   };
+
+  if (!hasResolvedDetail) {
+    if (isLoading) {
+      return <EarthLoader text="장소 정보를 불러오는 중..." />;
+    }
+
+    return (
+      <div className="detail-page">
+        <section className="detail-sheet" role="alert">
+          <h1 className="detail-title">장소 정보를 표시할 수 없어요</h1>
+          <p className="detail-section-text">
+            {loadError || "잠시 후 다시 시도해주세요."}
+          </p>
+          <button
+            type="button"
+            className="detail-review-more-btn"
+            onClick={() => navigate(-1)}
+          >
+            이전 화면으로 돌아가기
+          </button>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <>

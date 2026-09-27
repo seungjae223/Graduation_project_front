@@ -25,7 +25,7 @@ const travelMockData = [
   { id: 6, title: "삿포로", image: kyoto },
 ];
 
-const VISIBLE_TRAVEL_COUNT = 4;
+const VISIBLE_TRAVEL_COUNT = 2;
 
 const loadKakaoMapsScript = () => {
   if (window.kakao?.maps?.services) {
@@ -237,7 +237,32 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    requestCurrentLocation();
+    let isMounted = true;
+    let locationEnabled = false;
+
+    try {
+      locationEnabled =
+        localStorage.getItem("locationPermissionAllowed") === "true";
+    } catch (error) {
+      console.log("위치 사용 설정 확인 실패:", error);
+    }
+
+    if (!locationEnabled || !navigator.permissions) return undefined;
+
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then((status) => {
+        if (isMounted && status.state === "granted") {
+          requestCurrentLocation();
+        }
+      })
+      .catch((error) => {
+        console.log("위치 권한 상태 확인 실패:", error);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [requestCurrentLocation]);
 
   const visibleTravelData = Array.from(
@@ -280,10 +305,40 @@ const Home = () => {
     });
   };
 
-  const handleNearbyClick = () => {
-    requestCurrentLocation({
-      shouldNavigate: true,
-    });
+  const handleNearbyClick = async () => {
+    let locationEnabled = false;
+
+    try {
+      locationEnabled =
+        localStorage.getItem("locationPermissionAllowed") === "true";
+    } catch (error) {
+      console.log("위치 사용 설정 확인 실패:", error);
+    }
+
+    if (!locationEnabled) {
+      alert("마이페이지 설정에서 위치 사용을 켜주세요.");
+      return;
+    }
+
+    if (!navigator.permissions) {
+      alert("브라우저의 위치 권한 상태를 확인할 수 없습니다.");
+      return;
+    }
+
+    try {
+      const status = await navigator.permissions.query({ name: "geolocation" });
+
+      if (status.state !== "granted") {
+        localStorage.setItem("locationPermissionAllowed", "false");
+        alert("마이페이지 설정에서 위치 사용을 다시 켜주세요.");
+        return;
+      }
+
+      requestCurrentLocation({ shouldNavigate: true });
+    } catch (error) {
+      console.log("위치 권한 상태 확인 실패:", error);
+      alert("위치 권한 상태를 확인하지 못했습니다.");
+    }
   };
 
   return (
@@ -296,12 +351,14 @@ const Home = () => {
         </p>
 
         <form className="search-box" onSubmit={handleSearchSubmit}>
-          <img
-            src={searchIcon}
-            alt="search"
-            onClick={handleSearchSubmit}
-            role="button"
-          />
+          <span className="search-icon-frame">
+            <img
+              src={searchIcon}
+              alt="search"
+              onClick={handleSearchSubmit}
+              role="button"
+            />
+          </span>
 
           <input
             type="text"

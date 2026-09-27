@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import useModalFocus from "../utils/useModalFocus";
 import "./PrivacyPolicyModal.css";
 
 const POLICY_SECTIONS = [
@@ -91,6 +92,11 @@ const POLICY_SECTIONS = [
 
 const PrivacyPolicyModal = ({ isOpen, onClose, onAgree }) => {
   const [openSectionId, setOpenSectionId] = useState(null);
+  const dialogRef = useModalFocus({
+    open: isOpen,
+    onClose,
+    lockScroll: true,
+  });
 
   const noticeDate = useMemo(() => {
     return new Intl.DateTimeFormat("ko-KR", {
@@ -99,17 +105,6 @@ const PrivacyPolicyModal = ({ isOpen, onClose, onAgree }) => {
       day: "numeric",
     }).format(new Date());
   }, []);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -125,19 +120,29 @@ const PrivacyPolicyModal = ({ isOpen, onClose, onAgree }) => {
 
   return createPortal(
     <div className="privacy-modal-overlay">
-      <div className="privacy-modal">
+      <div
+        ref={dialogRef}
+        className="privacy-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="privacy-policy-title"
+        tabIndex={-1}
+      >
         <button
           type="button"
           className="privacy-modal-close"
           onClick={onClose}
           aria-label="개인정보 처리방침 모달 닫기"
+          data-modal-initial-focus
         >
-          ×
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6L18 18M18 6L6 18" />
+          </svg>
         </button>
 
         <div className="privacy-modal-header">
           <p className="privacy-modal-brand">너만 오면 go</p>
-          <h2>개인정보 처리방침</h2>
+          <h2 id="privacy-policy-title">개인정보 처리방침</h2>
         </div>
 
         <div className="privacy-modal-content">
@@ -163,15 +168,36 @@ const PrivacyPolicyModal = ({ isOpen, onClose, onAgree }) => {
                     type="button"
                     className="privacy-section-button"
                     onClick={() => handleToggleSection(section.id)}
+                    aria-expanded={isOpenSection}
+                    aria-controls={`privacy-policy-section-${section.id}`}
                   >
-                    <span>{section.title}</span>
-                    <span className="privacy-section-arrow">
-                      {isOpenSection ? "⌃" : "⌄"}
-                    </span>
+                    <span className="privacy-section-point" aria-hidden="true" />
+                    <span className="privacy-section-title">{section.title}</span>
+                    <svg
+                      className={`privacy-section-arrow ${
+                        isOpenSection ? "privacy-section-arrow-open" : ""
+                      }`}
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M5 7.5L10 12.5L15 7.5"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   </button>
 
                   {isOpenSection && (
-                    <div className="privacy-card">
+                    <div
+                      id={`privacy-policy-section-${section.id}`}
+                      className="privacy-card"
+                    >
                       {section.content.split("\n").map((line, index) => (
                         <p key={index}>{line || "\u00A0"}</p>
                       ))}
@@ -185,7 +211,7 @@ const PrivacyPolicyModal = ({ isOpen, onClose, onAgree }) => {
 
         <div className="privacy-modal-bottom">
           <button type="button" onClick={onAgree}>
-            모든 약관에 동의하고 시작하기
+            확인하고 동의하기
           </button>
         </div>
       </div>

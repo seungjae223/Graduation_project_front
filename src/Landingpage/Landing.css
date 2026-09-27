@@ -116,11 +116,6 @@
   color: #ffffff;
 }
 
-/* 클릭 느낌 */
-.btn:active {
-  transform: scale(0.97);
-}
-
 .scroll {
   margin-top: 16px;
   font-size: 12px;

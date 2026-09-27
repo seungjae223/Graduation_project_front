@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   closestCenter,
   DndContext,
@@ -16,6 +17,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../api/api";
+import useModalFocus from "../utils/useModalFocus";
 import "./RouteResult.css";
 
 let mapsConfigured = false;
@@ -1305,9 +1307,6 @@ const getFixedTimeValueFromPlace = (place = {}, fixedEntry = null) => {
   return "";
 };
 
-const isFixedTimePlace = (place = {}, fixedEntry = null) =>
-  Boolean(getFixedTimeValueFromPlace(place, fixedEntry));
-
 const getNormalizedCompareText = (value = "") => {
   return String(value || "").trim().toLowerCase().replace(/\s+/g, "");
 };
@@ -1689,14 +1688,6 @@ const normalizeFixedScheduleItems = (items = []) => {
   });
 };
 
-const getDisplayTimeForPlace = ({ fixedEntry, index, place = {} }) => {
-  if (index === 0) {
-    return DEFAULT_ROUTE_START_TIME;
-  }
-
-  return getFixedTimeValueFromPlace(place, fixedEntry);
-};
-
 // ✅ 서버에서 받아온 데이터를 화면용 포맷으로 변환해주는 함수
 const getResponseData = (data) => {
   if (data?.data) return data.data;
@@ -1808,6 +1799,15 @@ const normalizeServerTripPlace = (place = {}, fallbackDay = 1) => {
   };
 };
 
+const formatTimelineTime = (time, dayOffset = 0) => {
+  const formattedTime = formatServerTimeValue(time);
+  const offset = Number(dayOffset || 0);
+
+  if (!formattedTime || offset <= 0) return formattedTime;
+  if (offset === 1) return `다음날 ${formattedTime}`;
+  return `+${offset}일 ${formattedTime}`;
+};
+
 // ✅ 서버에서 받아온 여행/장소 데이터를 지도와 상세 일정에서 바로 쓸 수 있는 포맷으로 변환합니다.
 const buildDaysFromServerData = (trip, places = [], fixedTimeMap = {}) => {
   if (!trip) return [];
@@ -1855,7 +1855,9 @@ const buildDaysFromServerData = (trip, places = [], fixedTimeMap = {}) => {
       const nextPlace = dayPlaces[index + 1];
       const fixedEntry = getFixedTimeEntry(fixedTimeMap, i, place, index);
       const fixedTimeValue = getFixedTimeValueFromPlace(place, fixedEntry);
-      const displayTime = index === 0 ? DEFAULT_ROUTE_START_TIME : fixedTimeValue;
+      const displayTime =
+        formatTimelineTime(place.arrivalTime, place.arrivalDayOffset) ||
+        (index === 0 ? DEFAULT_ROUTE_START_TIME : fixedTimeValue);
       const isFixedSchedule = index !== 0 && Boolean(fixedTimeValue);
 
       const hasCoordinate =
@@ -1885,7 +1887,10 @@ const buildDaysFromServerData = (trip, places = [], fixedTimeMap = {}) => {
         fixedTimeEntry: fixedEntry || null,
         fixedTimeMatchType: fixedEntry?._fixedTimeMatchType || "",
         fixedTimeMapOrder: fixedEntry?._fixedTimeMapOrder ?? null,
-        departureTime: formatServerTimeValue(place.departureTime),
+        departureTime: formatTimelineTime(
+          place.departureTime,
+          place.departureDayOffset,
+        ),
         title: place.placeName || "이름 없는 장소",
         desc: place.address || "",
         badge:
@@ -2155,48 +2160,34 @@ const TimelineMemo = ({ memo, onClick }) => {
   );
 };
 const MemoModal = ({ isOpen, value, onChange, onCancel, onSave }) => {
-  const textareaRef = useRef(null);
-  const onCancelRef = useRef(onCancel);
-  useEffect(() => {
-    onCancelRef.current = onCancel;
-  }, [onCancel]);
-  useEffect(() => {
-    if (!isOpen) return undefined;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.setTimeout(() => {
-      textareaRef.current?.focus();
-    }, 0);
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        onCancelRef.current?.();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen]);
+  const dialogRef = useModalFocus({
+    open: isOpen,
+    onClose: onCancel,
+    lockScroll: true,
+  });
   if (!isOpen) return null;
-  return (
-    <div className="route-result-memo-backdrop" onClick={onCancel}>
+  return createPortal(
+    <div className="route-result-page route-result-memo-portal">
+      <div className="route-result-memo-backdrop" onClick={onCancel}>
       {" "}
       <div
+        ref={dialogRef}
         className="route-result-memo-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="route-result-memo-title"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
         {" "}
         <h3 id="route-result-memo-title">메모 작성</h3>{" "}
         <textarea
-          ref={textareaRef}
           className="route-result-memo-textarea"
           value={value}
           placeholder="이 장소에 대한 메모를 남겨보세요."
+          maxLength={500}
           onChange={(event) => onChange(event.target.value)}
+          data-modal-initial-focus
         />{" "}
         <div className="route-result-memo-actions">
           {" "}
@@ -2217,8 +2208,10 @@ const MemoModal = ({ isOpen, value, onChange, onCancel, onSave }) => {
             저장{" "}
           </button>{" "}
         </div>{" "}
-      </div>{" "}
-    </div>
+        </div>{" "}
+      </div>
+    </div>,
+    document.body
   );
 };
 const getSortablePlaceId = (item = {}, index) => {
@@ -2885,6 +2878,8 @@ const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
         </button>
       </div>
     </div>
+    ,
+    document.body
   );
 };
 const PdfMapPreview = ({ dayData, dayIndex }) => {
@@ -3032,6 +3027,37 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
             ),
           );
         }
+
+        const timelineResponses = await Promise.all(
+          Array.from({ length: getTripDaysCount(nextTrip) }, (_, index) => {
+            const day = index + 1;
+            return api
+              .get(`/api/trips/${routeId}/days/${day}/timeline`, {
+                params: { startTime: "10:00" },
+              })
+              .then((response) => ({ day, timeline: getArrayData(response.data) }))
+              .catch((error) => {
+                console.error(`${day}일차 타임라인 조회 실패:`, error);
+                return { day, timeline: [] };
+              });
+          }),
+        );
+
+        const timelineByDayAndOrder = new Map();
+        timelineResponses.forEach(({ day, timeline }) => {
+          timeline.forEach((item) => {
+            timelineByDayAndOrder.set(`${day}:${item.visitOrder}`, item);
+          });
+        });
+
+        nextPlaces = nextPlaces.map((place) => ({
+          ...place,
+          ...(timelineByDayAndOrder.get(`${place.day}:${place.visitOrder}`) || {}),
+          id: place.id,
+          tripPlaceId: place.tripPlaceId,
+          placeId: place.placeId,
+          day: place.day,
+        }));
 
         console.log("서버 여행 정보:", nextTrip);
         console.log("서버 여행 장소 목록:", nextPlaces);
@@ -3215,7 +3241,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   const handleChangeMemo = (value) => {
     setMemoModal((prev) => ({ ...prev, value }));
   };
-  const handleSaveMemo = () => {
+  const handleSaveMemo = async () => {
     const targetDay = displayResultDays[memoModal.dayIndex];
     const targetItem = targetDay?.items?.[memoModal.itemIndex];
     if (!targetItem) {
@@ -3229,8 +3255,23 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
       targetItem,
     );
     const nextValue = memoModal.value.trim();
-    setMemoValues((prev) => ({ ...prev, [key]: nextValue }));
-    closeMemoModal();
+    const tripId = routeId || serverTrip?.id || savedRoute?.id;
+    const tripPlaceId = targetItem.tripPlaceId || targetItem.id;
+
+    try {
+      if (tripId && tripPlaceId) {
+        await api.patch(
+          `/api/trips/${tripId}/days/${memoModal.dayIndex + 1}/places/${tripPlaceId}/memo`,
+          { memo: nextValue }
+        );
+      }
+
+      setMemoValues((prev) => ({ ...prev, [key]: nextValue }));
+      closeMemoModal();
+    } catch (error) {
+      console.error("메모 저장 실패:", error);
+      alert(getApiErrorMessage(error, "메모를 저장하지 못했습니다."));
+    }
   };
 
   const handleReorderItems = (dayIndex, nextItems) => {

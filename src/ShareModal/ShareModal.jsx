@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import copyIcon from "../img/파랑색 공유.png";
-import pdfIcon from "../img/pdf.png";
+import { createPortal } from "react-dom";
+import useModalFocus from "../utils/useModalFocus";
 import "./ShareModal.css";
 
 const copyText = async (text) => {
@@ -45,6 +45,12 @@ function ShareModal({
 }) {
   const [copied, setCopied] = useState(false);
   const [isSavingPdf, setIsSavingPdf] = useState(false);
+  const dialogRef = useModalFocus({
+    open,
+    onClose,
+    canClose: !isSavingPdf,
+    lockScroll: true,
+  });
 
   const showPreviewCard = variant !== "schedule";
 
@@ -55,17 +61,6 @@ function ShareModal({
   const previewUrl = useMemo(() => {
     return displayUrl.toUpperCase();
   }, [displayUrl]);
-
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [open]);
 
   useEffect(() => {
     if (!copied) return undefined;
@@ -105,13 +100,15 @@ function ShareModal({
     }
   };
 
-  return (
+  return createPortal(
     <div className="share-modal-overlay" onClick={onClose}>
       <div
+        ref={dialogRef}
         className="share-modal-sheet"
         role="dialog"
         aria-modal="true"
         aria-label="공유하기"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="share-modal-header">
@@ -122,8 +119,11 @@ function ShareModal({
             className="share-modal-close"
             onClick={onClose}
             aria-label="닫기"
+            data-modal-initial-focus
           >
-            ×
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 6L18 18M18 6L6 18" />
+            </svg>
           </button>
         </div>
 
@@ -135,12 +135,14 @@ function ShareModal({
             aria-label="링크 복사"
           >
             <span className="share-modal-action-icon">
-              <img
+              <svg
                 className="share-modal-copy-icon"
-                src={copyIcon}
-                alt=""
+                viewBox="0 0 32 32"
                 aria-hidden="true"
-              />
+              >
+                <rect x="10" y="6" width="15" height="18" rx="3" />
+                <path d="M21 24v1a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V12a3 3 0 0 1 3-3h2" />
+              </svg>
             </span>
 
             <span className="share-modal-action-label">
@@ -156,12 +158,15 @@ function ShareModal({
             aria-label="PDF로 저장하기"
           >
             <span className="share-modal-action-icon">
-              <img
+              <svg
                 className="share-modal-pdf-icon"
-                src={pdfIcon}
-                alt=""
+                viewBox="0 0 32 32"
                 aria-hidden="true"
-              />
+              >
+                <path d="M8 3h11l6 6v20H8z" />
+                <path d="M19 3v7h6" />
+                <path d="M11 21h3.5a2.5 2.5 0 0 0 0-5H11v9M18 16h2.2a3 3 0 0 1 0 6H18zM26 16h-3v9M23 20h2.5" />
+              </svg>
             </span>
 
             <span className="share-modal-action-label">
@@ -200,7 +205,8 @@ function ShareModal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

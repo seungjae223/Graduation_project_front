@@ -5,20 +5,12 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import "./VerifyCode.css";
-import api from "../api/api";
+import { getApiErrorMessage } from "../api/api";
+import { sendEmailCodeApi, verifyEmailCodeApi } from "../api/authApi";
 
 const CODE_LENGTH = 6;
-const TIMER_SECONDS = 180;
-
-const getErrorMessage = (error, fallbackMessage) => {
-  const data = error.response?.data;
-
-  if (typeof data === "string") {
-    return data;
-  }
-
-  return data?.message || data?.error || fallbackMessage;
-};
+const TIMER_SECONDS = 300;
+const getErrorMessage = getApiErrorMessage;
 
 const VerifyCode = () => {
   const navigate = useNavigate();
@@ -122,9 +114,7 @@ const VerifyCode = () => {
     try {
       setIsResending(true);
 
-      await api.post("/api/email/verification-requests", {
-        email,
-      });
+      await sendEmailCodeApi(email);
 
       setCode(Array(CODE_LENGTH).fill(""));
       setTimeLeft(TIMER_SECONDS);
@@ -135,7 +125,7 @@ const VerifyCode = () => {
       console.error("인증번호 재발송 실패:", error);
 
       if (error.message.includes("Network Error")) {
-        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
         return;
       }
 
@@ -168,15 +158,13 @@ const VerifyCode = () => {
     try {
       setIsVerifying(true);
 
-      const response = await api.post("/api/email/verifications", {
+      const response = await verifyEmailCodeApi({
         email,
         code: verificationCode,
       });
 
       const successMessage =
-        typeof response.data === "string"
-          ? response.data
-          : response.data?.message;
+        typeof response === "string" ? response : response?.message;
 
       alert(successMessage || "인증이 완료되었습니다.");
 
@@ -186,7 +174,7 @@ const VerifyCode = () => {
       console.error("인증번호 확인 실패:", error);
 
       if (error.message.includes("Network Error")) {
-        alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
         return;
       }
 

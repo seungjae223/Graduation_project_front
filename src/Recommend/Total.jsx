@@ -8,7 +8,6 @@ import api from "../api/api";
 
 const RECOMMENDATIONS_API = "/api/recommendations";
 const FOLDERS_API = "/api/folders";
-const PLACES_API = "/api/places";
 
 const getPlaceArray = (data) => {
   if (Array.isArray(data)) return data;
@@ -142,36 +141,10 @@ const getFolderPlaceDeleteUrl = (folderId, placeId) => {
   )}/places/${encodeURIComponent(placeId)}`;
 };
 
-const getResponseData = (data) => {
-  if (data?.data) return data.data;
-  if (data?.place) return data.place;
-  if (data?.result) return data.result;
-  return data;
-};
-
 const registerPlace = async (place) => {
   const numericPlaceId = Number(place.id);
-  const placePayload = {
-    id: Number.isFinite(numericPlaceId) ? numericPlaceId : 0,
-    name: place.title,
-    latitude: place.latitude || 0,
-    longitude: place.longitude || 0,
-    address: place.address,
-    placeType: place.placeType,
-  };
-
-  try {
-    const response = await api.post(PLACES_API, placePayload);
-    const responseData = getResponseData(response.data);
-
-    return responseData?.id ?? responseData?.placeId ?? place.id;
-  } catch (error) {
-    if ([400, 409, 422].includes(error.response?.status)) {
-      return place.id;
-    }
-
-    throw error;
-  }
+  if (Number.isInteger(numericPlaceId) && numericPlaceId > 0) return numericPlaceId;
+  throw new Error("저장할 장소의 서버 ID가 없습니다.");
 };
 
 const getErrorMessage = (error, fallbackMessage) => {
@@ -226,7 +199,7 @@ function Total() {
         setIntroText("");
 
         if (error.message.includes("Network Error")) {
-          setErrorMessage("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+          setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
           return;
         }
 
@@ -324,16 +297,16 @@ function Total() {
   };
 
   const postFolderPlace = async (folder, placeId) => {
-    return api.post(getFolderPlacesUrl(folder.id), {
-      placeId,
-    });
+    return api.post(
+      `${getFolderPlacesUrl(folder.id)}/${encodeURIComponent(placeId)}`
+    );
   };
 
   const showSaveError = (error) => {
     console.error("관심 장소 변경 실패:", error);
 
     if (error.message.includes("Network Error")) {
-      alert("백엔드 서버 연결 또는 CORS 설정을 확인해주세요.");
+      alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
       return;
     }
 

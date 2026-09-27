@@ -45,6 +45,26 @@
   color: #ffffff;
 }
 
+.popular-filter-chevron {
+  width: 10px;
+  height: 12px;
+  flex: 0 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.popular-filter-chevron::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 1.4px solid currentColor;
+  border-bottom: 1.4px solid currentColor;
+  transform: translateY(-1px) rotate(45deg);
+  transform-origin: center;
+}
+
 .popular-grid {
   margin-top: 18px;
   display: grid;

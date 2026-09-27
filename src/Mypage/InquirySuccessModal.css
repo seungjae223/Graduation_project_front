@@ -39,8 +39,12 @@
 .inquiry-success-modal-check-icon {
   width: 28px;
   height: 28px;
-  object-fit: contain;
   display: block;
+  fill: none;
+  stroke: #18a8ed;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .inquiry-success-modal-box h2 {
@@ -97,4 +101,9 @@
   .inquiry-success-modal-confirm-button {
     height: 48px;
   }
+}
+
+.inquiry-success-modal-confirm-button:focus-visible {
+  outline: 3px solid rgba(24, 168, 237, 0.3);
+  outline-offset: 3px;
 }
