@@ -11,6 +11,9 @@
 # production
 /build
 
+# Local nested clone (not an application dependency)
+/Graduation_project_front/
+
 # misc
 .DS_Store
 .env.local
