@@ -2,13 +2,12 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Footer.css";
 
-// Figma에서 내보낸 벡터 아이콘: 확대되어도 흐려지지 않음
-import homeIcon from "../img/nav-home.svg";
-import searchIcon from "../img/nav-search.svg";
-import recommendIcon from "../img/nav-recommend.svg";
-import scheduleIcon from "../img/nav-schedule.svg";
-import mypageIcon from "../img/nav-mypage.svg";
-import mypageActiveIcon from "../img/nav-mypage-active.svg";
+// Figma에서 내보낸 동일한 SVG의 색상만 active 상태에서 변경한다.
+import { ReactComponent as HomeIcon } from "../img/nav-home.svg";
+import { ReactComponent as SearchIcon } from "../img/nav-search.svg";
+import { ReactComponent as RecommendIcon } from "../img/nav-recommend.svg";
+import { ReactComponent as ScheduleIcon } from "../img/nav-schedule.svg";
+import { ReactComponent as MypageIcon } from "../img/nav-mypage.svg";
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -48,36 +47,31 @@ const Footer = () => {
       key: "home",
       label: "홈",
       path: "/home",
-      off: homeIcon,
-      on: homeIcon,
+      icon: HomeIcon,
     },
     {
       key: "search",
       label: "검색",
       path: "/search",
-      off: searchIcon,
-      on: searchIcon,
+      icon: SearchIcon,
     },
     {
       key: "recommend",
       label: "추천",
       path: "/recommend",
-      off: recommendIcon,
-      on: recommendIcon,
+      icon: RecommendIcon,
     },
     {
       key: "calendar",
       label: "일정",
       path: "/schedule",
-      off: scheduleIcon,
-      on: scheduleIcon,
+      icon: ScheduleIcon,
     },
     {
       key: "mypage",
       label: "마이페이지",
       path: "/mypage",
-      off: mypageIcon,
-      on: mypageActiveIcon,
+      icon: MypageIcon,
     },
   ];
 
@@ -86,6 +80,7 @@ const Footer = () => {
       <nav className="footer-nav" aria-label="하단 메뉴">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
+          const Icon = tab.icon;
 
           return (
             <button
@@ -96,11 +91,10 @@ const Footer = () => {
               aria-pressed={isActive}
             >
               <div className="tab-icon-wrap">
-                <img
-                  src={isActive ? tab.on : tab.off}
-                  alt=""
+                <Icon
                   className="tab-icon"
                   aria-hidden="true"
+                  focusable="false"
                 />
               </div>
 

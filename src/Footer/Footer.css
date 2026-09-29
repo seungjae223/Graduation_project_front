@@ -120,14 +120,23 @@ body,
 .tab-icon-wrap {
   position: relative;
   z-index: 1;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .tab-icon {
+  color: #94a3b8;
+  fill: currentColor;
   object-fit: contain;
   display: block;
+}
+
+.tab-icon path {
+  fill: currentColor;
 }
 
 /* Figma 원본의 아이콘 프레임 크기를 유지한다. */
@@ -166,10 +175,10 @@ body,
   color: #0da6f2;
 }
 
-/*
- * Keep the exported icon assets and their original dimensions untouched.
- * The active-tab feedback is drawn only with the label and an indicator.
- */
+.tab.active .tab-icon {
+  color: #0da6f2;
+}
+
 .tab::after {
   content: "";
   position: absolute;
