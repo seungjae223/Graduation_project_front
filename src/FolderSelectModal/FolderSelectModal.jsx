@@ -1,3 +1,4 @@
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import api from "../api/api";
@@ -125,7 +126,7 @@ export const savePlaceFolderLink = async (placeId, folder) => {
 
 export const removePlaceFolderLink = async (placeId, folderId) => {
   if (!placeId || !folderId) {
-    console.warn("removePlaceFolderLink에는 placeId와 folderId가 모두 필요합니다.");
+    logSafeApiError(undefined, "FolderSelectModal.jsx");
     return null;
   }
 
@@ -251,7 +252,7 @@ function FolderSelectModal({
 
       return nextFolders;
     } catch (error) {
-      console.error("폴더 목록 조회 실패:", error);
+      logSafeApiError(error, "FolderSelectModal.jsx");
 
       setFolders([]);
       setSelectedFolderId("");
@@ -366,7 +367,7 @@ function FolderSelectModal({
           latestFolders = await loadSavedFolders();
         }
       } catch (reloadError) {
-        console.error("폴더 생성 후 목록 재조회 실패:", reloadError);
+        logSafeApiError(reloadError, "FolderSelectModal.jsx");
       }
 
       if (!createdFolder) {
@@ -392,7 +393,7 @@ function FolderSelectModal({
       resetCreateFolderForm();
       setIsCreateFolderOpen(false);
     } catch (error) {
-      console.error("새 폴더 생성 실패:", error);
+      logSafeApiError(error, "FolderSelectModal.jsx");
       setCreateFolderError("새 폴더 생성에 실패했습니다.");
     } finally {
       setIsCreatingFolder(false);

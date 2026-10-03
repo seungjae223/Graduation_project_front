@@ -1,3 +1,5 @@
+import { getApiErrorMessage as safeApiErrorMessage } from "../../api/api";
+import { logSafeApiError } from "../../utils/safeLog";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "./AdminInquiryPage.css";
@@ -88,15 +90,7 @@ const normalizeInquiry = (inquiry) => {
   };
 };
 
-const getErrorMessage = (error, fallbackMessage) => {
-  const data = error.response?.data;
-
-  if (typeof data === "string" && data.trim()) {
-    return data;
-  }
-
-  return data?.message || data?.error || fallbackMessage;
-};
+const getErrorMessage = safeApiErrorMessage;
 
 const AdminInquiryPage = () => {
   const navigate = useNavigate();
@@ -123,7 +117,7 @@ const AdminInquiryPage = () => {
 
         setInquiries(inquiryArray.map(normalizeInquiry));
       } catch (error) {
-        console.error("관리자 문의 목록 조회 실패:", error);
+        logSafeApiError(error, "AdminInquiryPage.jsx");
 
         if (error.message.includes("Network Error")) {
           setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");

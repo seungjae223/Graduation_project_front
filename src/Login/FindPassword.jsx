@@ -1,3 +1,5 @@
+import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./FindPassword.css";
@@ -7,15 +9,7 @@ import arrowIcon from "../img/화살표.png";
 import warningIcon from "../img/주의.png";
 import api from "../api/api";
 
-const getErrorMessage = (error, fallbackMessage) => {
-  const data = error.response?.data;
-
-  if (typeof data === "string") {
-    return data;
-  }
-
-  return data?.message || data?.error || fallbackMessage;
-};
+const getErrorMessage = safeApiErrorMessage;
 
 const FindPassword = () => {
   const navigate = useNavigate();
@@ -46,7 +40,7 @@ const FindPassword = () => {
         },
       });
     } catch (error) {
-      console.error("인증번호 발송 실패:", error);
+      logSafeApiError(error, "FindPassword.jsx");
 
       if (error.message.includes("Network Error")) {
         alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
@@ -88,6 +82,7 @@ const FindPassword = () => {
               type="email"
               placeholder="이메일 주소 입력"
               value={email}
+              maxLength={255}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>

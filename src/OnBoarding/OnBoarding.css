@@ -20,6 +20,13 @@ background-position: center;
   border-radius: 40px;
 }
 
+.image-wrapper.image-wrapper--ai-route {
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+}
+
 /* 텍스트 */
 .text-area {
   text-align: center;

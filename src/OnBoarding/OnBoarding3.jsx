@@ -1,7 +1,7 @@
 import React from "react";
 import "./OnBoarding.css";
 import { useNavigate } from "react-router-dom";
-import mainImage from "../img/OnBoarding3.png";
+import mainImage from "../img/group-travel.png";
 
 const OnBoarding3 = () => {
   const navigate = useNavigate();

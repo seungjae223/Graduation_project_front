@@ -43,6 +43,7 @@
 
 .verify-code-desc span {
   color: #6f8199;
+  overflow-wrap: anywhere;
 }
 
 .verify-code-inputs {
@@ -120,6 +121,7 @@
 
 .verify-code-bottom {
   margin-top: auto;
+  padding-top: 24px;
 }
 
 .verify-code-submit {

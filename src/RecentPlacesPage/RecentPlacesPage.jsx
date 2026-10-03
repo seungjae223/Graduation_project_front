@@ -1,3 +1,4 @@
+import { logSafeApiError } from "../utils/safeLog";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getRecentPlaces } from "../utils/recentPlaces";
@@ -24,7 +25,7 @@ function RecentPlacesPage() {
       .then((places) => {
         if (mounted) setServerRecentPlaces(places);
       })
-      .catch((error) => console.error("최근 본 장소 조회 실패:", error));
+      .catch((error) => logSafeApiError(error, "RecentPlacesPage.jsx"));
 
     return () => {
       mounted = false;

@@ -1,10 +1,11 @@
 import axios from "axios";
+import { clearAuthenticatedUserStorage, tokenCandidates } from "../utils/authStorage";
+import { logSafeApiError } from "../utils/safeLog";
 import { buildLoginPath, getCurrentReturnPath } from "../utils/authRedirect";
 
-// Login.jsx의 API_BASE_URL과 반드시 같아야 합니다.
-// 배포 서버를 쓸 거면 .env에 REACT_APP_API_BASE_URL=http://3.27.110.86:8080 로 넣는 걸 추천합니다.
 const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+  process.env.REACT_APP_API_BASE_URL ||
+  (process.env.NODE_ENV === "production" ? undefined : "http://localhost:8080");
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -107,83 +108,10 @@ const isExpiredToken = (token) => {
   return Date.now() >= payload.exp * 1000;
 };
 
-export const clearAuthStorage = () => {
-  localStorage.removeItem("petapp_session_v1");
-  localStorage.removeItem("jakdang_access_token");
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("token");
-  localStorage.removeItem("tokenType");
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("isLoggedIn");
-  localStorage.removeItem("keepLogin");
-  localStorage.removeItem("currentUser");
-  localStorage.removeItem("userEmail");
-  localStorage.removeItem("userNickname");
+export const clearAuthStorage = clearAuthenticatedUserStorage;
 
-  sessionStorage.removeItem("petapp_session_v1");
-  sessionStorage.removeItem("jakdang_access_token");
-  sessionStorage.removeItem("accessToken");
-  sessionStorage.removeItem("token");
-  sessionStorage.removeItem("currentUser");
-};
-
-export const getAccessToken = () => {
-  const candidates = [];
-
-  // 마이페이지가 accessToken을 기준으로 보기 때문에 accessToken을 최우선으로 사용
-  candidates.push(
-    localStorage.getItem("accessToken"),
-    sessionStorage.getItem("accessToken"),
-    localStorage.getItem("token"),
-    sessionStorage.getItem("token"),
-    localStorage.getItem("jakdang_access_token"),
-    sessionStorage.getItem("jakdang_access_token")
-  );
-
-  try {
-    const localSessionRaw = localStorage.getItem("petapp_session_v1");
-
-    if (localSessionRaw) {
-      const session = JSON.parse(localSessionRaw);
-
-      if (session?.token) {
-        candidates.push(session.token);
-      }
-
-      if (session?.accessToken) {
-        candidates.push(session.accessToken);
-      }
-    }
-  } catch {
-    localStorage.removeItem("petapp_session_v1");
-  }
-
-  try {
-    const sessionRaw = sessionStorage.getItem("petapp_session_v1");
-
-    if (sessionRaw) {
-      const session = JSON.parse(sessionRaw);
-
-      if (session?.token) {
-        candidates.push(session.token);
-      }
-
-      if (session?.accessToken) {
-        candidates.push(session.accessToken);
-      }
-    }
-  } catch {
-    sessionStorage.removeItem("petapp_session_v1");
-  }
-
-  const validToken = candidates
-    .map(normalizeToken)
-    .find((token) => {
-      return typeof token === "string" && token.trim() && !isExpiredToken(token);
-    });
-
-  return validToken || null;
-};
+export const getAccessToken = () => tokenCandidates().map(normalizeToken)
+  .find((token) => typeof token === "string" && token.trim() && !isExpiredToken(token)) || null;
 
 api.interceptors.request.use(
   (config) => {
@@ -191,8 +119,17 @@ api.interceptors.request.use(
 
     config.headers = config.headers || {};
 
-    // 이전 요청에서 남은 Authorization 제거
-    delete config.headers.Authorization;
+    // Clear every casing, including caller-supplied public-request headers.
+    Object.keys(config.headers).forEach((key) => {
+      if (key.toLowerCase() === "authorization") delete config.headers[key];
+    });
+
+    // Never send this application's credentials to an arbitrary URL/baseURL.
+    const trustedOrigin = new URL(API_BASE_URL).origin;
+    const requestOrigin = new URL(config.url || "", config.baseURL || API_BASE_URL).origin;
+    if (requestOrigin !== trustedOrigin) {
+      throw new Error("Untrusted API origin");
+    }
 
     if (!isPublicApi) {
       const token = getAccessToken();
@@ -213,12 +150,10 @@ api.interceptors.response.use(
     const status = error.response?.status;
     const isPublicApi = error.config ? isPublicApiPath(error.config) : false;
 
-    console.error("API 요청 실패:", error.response || error);
+    logSafeApiError(error, "api");
 
     // 401은 로그인 만료로 처리
     if (status === 401 && !isPublicApi) {
-      console.warn("로그인이 만료되었거나 인증에 실패했습니다.");
-
       clearAuthStorage();
 
       if (window.location.pathname !== "/login") {
@@ -229,8 +164,6 @@ api.interceptors.response.use(
     // 이 백엔드는 토큰 누락/만료도 403을 반환합니다. 요청에 토큰이 없었던
     // 경우만 로그인 만료로 처리하고, ADMIN 역할 부족 같은 정상적인 403은 보존합니다.
     if (status === 403 && !isPublicApi) {
-      console.warn("접근 권한이 없습니다.");
-
       const authorization = error.config?.headers?.Authorization;
 
       if (!authorization) {
@@ -250,13 +183,20 @@ export const getApiErrorMessage = (
   error,
   fallbackMessage = "요청을 처리하지 못했습니다."
 ) => {
-  const data = error?.response?.data;
-
-  if (typeof data === "string" && data.trim()) {
-    return data.trim();
-  }
-
-  return data?.message || data?.error || error?.message || fallbackMessage;
+  const messages = {
+    400: "입력 정보를 확인해주세요.",
+    401: "인증에 실패했습니다. 다시 로그인해주세요.",
+    403: "요청을 처리할 권한이 없습니다.",
+    404: "요청한 정보를 찾을 수 없습니다.",
+    409: "요청이 현재 상태와 충돌합니다. 입력 정보를 확인해주세요.",
+    413: "입력한 내용이 너무 깁니다.",
+    429: "요청이 많습니다. 잠시 후 다시 시도해주세요.",
+  };
+  const status = Number(error?.response?.status);
+  if (messages[status]) return messages[status];
+  if (status >= 500) return "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+  if (error?.request && !error?.response) return "네트워크 연결을 확인해주세요.";
+  return fallbackMessage;
 };
 
 export default api;

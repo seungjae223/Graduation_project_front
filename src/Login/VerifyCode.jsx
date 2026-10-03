@@ -1,3 +1,4 @@
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useRef, useState } from "react";
 import {
   useLocation,
@@ -122,7 +123,7 @@ const VerifyCode = () => {
 
       alert("인증번호를 다시 발송했습니다.");
     } catch (error) {
-      console.error("인증번호 재발송 실패:", error);
+      logSafeApiError(error, "VerifyCode.jsx");
 
       if (error.message.includes("Network Error")) {
         alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
@@ -171,7 +172,7 @@ const VerifyCode = () => {
       // 비밀번호 재설정 페이지가 생기면 여기 경로만 바꾸면 됨
       navigate("/login", { replace: true });
     } catch (error) {
-      console.error("인증번호 확인 실패:", error);
+      logSafeApiError(error, "VerifyCode.jsx");
 
       if (error.message.includes("Network Error")) {
         alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { logSafeApiError } from "../utils/safeLog";
+import { consumeOAuthState, readAndClearOAuthQuery } from "../utils/oauthSecurity";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { getApiErrorMessage } from "../api/api";
 import { completeSocialLoginApi } from "../api/authApi";
@@ -20,16 +22,15 @@ function OAuthCallback() {
     if (startedRef.current) return;
     startedRef.current = true;
 
-    const code = searchParams.get("code");
-    const state = searchParams.get("state");
-    const oauthError = searchParams.get("error");
+    const { code, state, error: oauthError } = readAndClearOAuthQuery(searchParams);
+    const validState = consumeOAuthState(provider, state);
 
     if (oauthError) {
       setErrorMessage("소셜 로그인이 취소되었거나 승인되지 않았습니다.");
       return;
     }
 
-    if (!["kakao", "google"].includes(provider) || !code || !state) {
+    if (!["kakao", "google"].includes(provider) || !code || !validState) {
       setErrorMessage("올바르지 않은 소셜 로그인 접근입니다. 다시 로그인해주세요.");
       return;
     }
@@ -39,7 +40,7 @@ function OAuthCallback() {
         navigate(getSocialLoginReturnPath({ consume: true }), { replace: true });
       })
       .catch((error) => {
-        console.error("소셜 로그인 완료 실패:", error);
+        logSafeApiError(error, "oauth-complete");
         setErrorMessage(
           getApiErrorMessage(error, "소셜 로그인을 완료하지 못했습니다.")
         );

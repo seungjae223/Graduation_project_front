@@ -1,3 +1,5 @@
+import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./InquiryWrite.css";
@@ -5,15 +7,7 @@ import mailIcon from "../img/메일.png";
 import InquirySuccessModal from "./InquirySuccessModal";
 import api from "../api/api";
 
-const getErrorMessage = (error, fallbackMessage) => {
-  const data = error.response?.data;
-
-  if (typeof data === "string") {
-    return data;
-  }
-
-  return data?.message || data?.error || fallbackMessage;
-};
+const getErrorMessage = safeApiErrorMessage;
 
 const InquiryWrite = () => {
   const navigate = useNavigate();
@@ -51,7 +45,7 @@ const InquiryWrite = () => {
 
       setIsSuccessModalOpen(true);
     } catch (error) {
-      console.error("문의사항 등록 실패:", error);
+      logSafeApiError(error, "InquiryWrite.jsx");
 
       if (error.message.includes("Network Error")) {
         setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
@@ -89,6 +83,7 @@ const InquiryWrite = () => {
             <input
               type="text"
               value={title}
+              maxLength={255}
               placeholder="제목을 입력해주세요"
               onChange={(event) => {
                 setTitle(event.target.value);
@@ -102,6 +97,7 @@ const InquiryWrite = () => {
 
             <textarea
               value={content}
+              maxLength={255}
               placeholder="궁금한 점이나 불편한 사항을 자유롭게 적어주세요."
               onChange={(event) => {
                 setContent(event.target.value);

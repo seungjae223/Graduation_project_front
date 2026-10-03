@@ -1,3 +1,4 @@
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -400,6 +401,7 @@ const FolderRenameModal = ({
             <input
               type="text"
               value={folderName}
+              maxLength={30}
               onChange={(event) => onChangeName(event.target.value)}
               data-modal-initial-focus
             />
@@ -410,6 +412,7 @@ const FolderRenameModal = ({
             <input
               type="text"
               value={folderDescription}
+              maxLength={80}
               onChange={(event) => onChangeDescription(event.target.value)}
             />
           </label>
@@ -537,7 +540,7 @@ function SavedPlaces() {
             const places = await loadFolderPlaces(folder.id);
             return [String(folder.id), places.length];
           } catch (error) {
-            console.error(`${folder.title} 장소 개수 조회 실패:`, error);
+            logSafeApiError(error, "SavedPlaces.jsx");
             return [String(folder.id), 0];
           }
         })
@@ -552,7 +555,7 @@ function SavedPlaces() {
         }))
       );
     } catch (error) {
-      console.error("폴더 목록 조회 실패:", error);
+      logSafeApiError(error, "SavedPlaces.jsx");
       setFolders([]);
     } finally {
       setIsLoadingFolders(false);
@@ -591,7 +594,7 @@ function SavedPlaces() {
         const places = await loadFolderPlaces(folder.id);
         setOpenedFolderPlaces(places);
       } catch (error) {
-        console.error("폴더 장소 조회 실패:", error);
+        logSafeApiError(error, "SavedPlaces.jsx");
         setOpenedFolderPlaces([]);
       } finally {
         setIsLoadingPlaces(false);
@@ -683,7 +686,7 @@ function SavedPlaces() {
 
       await loadFolders();
     } catch (error) {
-      console.error("새 폴더 생성 실패:", error);
+      logSafeApiError(error, "SavedPlaces.jsx");
       alert("새 폴더 생성에 실패했습니다.");
     }
   };
@@ -716,7 +719,7 @@ function SavedPlaces() {
 
       await loadFolders();
     } catch (error) {
-      console.error("폴더 장소 삭제 실패:", error);
+      logSafeApiError(error, "SavedPlaces.jsx");
       alert("폴더에서 장소를 삭제하지 못했습니다.");
     }
   };

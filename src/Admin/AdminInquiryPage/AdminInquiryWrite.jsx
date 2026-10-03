@@ -1,3 +1,5 @@
+import { getApiErrorMessage as safeApiErrorMessage } from "../../api/api";
+import { logSafeApiError } from "../../utils/safeLog";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -86,15 +88,7 @@ const normalizeInquiry = (inquiry) => {
   };
 };
 
-const getErrorMessage = (error, fallbackMessage) => {
-  const data = error.response?.data;
-
-  if (typeof data === "string" && data.trim()) {
-    return data;
-  }
-
-  return data?.message || data?.error || fallbackMessage;
-};
+const getErrorMessage = safeApiErrorMessage;
 
 const AdminSuccessModal = ({ open, onConfirm }) => {
   const dialogRef = useModalFocus({
@@ -194,7 +188,7 @@ const AdminInquiryWrite = () => {
         setInquiry(normalizedInquiry);
         setAnswer(normalizedInquiry.answer || "");
       } catch (error) {
-        console.error("관리자 문의 상세 조회 실패:", error);
+        logSafeApiError(error, "AdminInquiryWrite.jsx");
 
         if (error.message.includes("Network Error")) {
           setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
@@ -264,7 +258,7 @@ const AdminInquiryWrite = () => {
       setAnswer(trimmedAnswer);
       setIsSuccessModalOpen(true);
     } catch (error) {
-      console.error("문의 답변 전송 실패:", error);
+      logSafeApiError(error, "AdminInquiryWrite.jsx");
 
       if (error.message.includes("Network Error")) {
         alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
@@ -418,6 +412,7 @@ const AdminInquiryWrite = () => {
           className="admin-answer-textarea"
           placeholder="문의 사항에 대한 답변을 입력해주세요."
           value={answer}
+          maxLength={255}
           onChange={(e) => setAnswer(e.target.value)}
           readOnly={isAnswered || isSubmitting}
         />

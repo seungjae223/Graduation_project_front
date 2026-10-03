@@ -1,3 +1,4 @@
+import { logSafeApiError } from "./safeLog";
 const STORAGE_KEY = "mock_saved_route_results";
 export const ROUTE_STORAGE_EVENT = "mock-routes-updated";
 
@@ -10,7 +11,7 @@ export const getSavedRoutes = () => {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch (error) {
-    console.error("저장된 일정 불러오기 실패:", error);
+    logSafeApiError(error, "routeStorage.js");
     return [];
   }
 };
@@ -25,7 +26,7 @@ export const saveRoute = (route) => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     window.dispatchEvent(new CustomEvent(ROUTE_STORAGE_EVENT));
   } catch (error) {
-    console.error("일정 저장 실패:", error);
+    logSafeApiError(error, "routeStorage.js");
   }
 };
 
@@ -41,6 +42,6 @@ export const removeSavedRoute = (routeId) => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
     window.dispatchEvent(new CustomEvent(ROUTE_STORAGE_EVENT));
   } catch (error) {
-    console.error("일정 삭제 실패:", error);
+    logSafeApiError(error, "routeStorage.js");
   }
 };

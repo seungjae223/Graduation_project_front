@@ -1,3 +1,5 @@
+import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "./InquiryDetail.css";
@@ -113,15 +115,7 @@ const getInquiryData = (data) => {
   return data;
 };
 
-const getErrorMessage = (error, fallbackMessage) => {
-  const data = error.response?.data;
-
-  if (typeof data === "string") {
-    return data;
-  }
-
-  return data?.message || data?.error || fallbackMessage;
-};
+const getErrorMessage = safeApiErrorMessage;
 
 const UserIcon = () => (
   <svg
@@ -173,7 +167,7 @@ const InquiryDetail = () => {
 
         setInquiry(inquiryData);
       } catch (error) {
-        console.error("문의 상세 조회 실패:", error);
+        logSafeApiError(error, "InquiryDetail.jsx");
 
         if (location.state?.inquiry) {
           setInquiry(location.state.inquiry);

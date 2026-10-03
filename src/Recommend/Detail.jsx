@@ -1,3 +1,5 @@
+import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   useLocation,
@@ -698,15 +700,7 @@ const normalizePlaceDetail = (place, fallbackPlace) => {
   };
 };
 
-const getErrorMessage = (error, fallbackMessage) => {
-  const data = error.response?.data;
-
-  if (typeof data === "string") {
-    return data;
-  }
-
-  return data?.message || data?.error || fallbackMessage;
-};
+const getErrorMessage = safeApiErrorMessage;
 
 const EMPTY_DETAIL_PLACE = {
   id: "",
@@ -784,7 +778,7 @@ function Detail() {
         const [placeResponse, reviewResponse] = await Promise.all([
           api.get(`${PLACES_API}/${idParam}`),
           api.get(`${PLACES_API}/${idParam}/reviews`).catch((error) => {
-            console.error("리뷰 조회 실패:", error);
+            logSafeApiError(error, "Detail.jsx");
             return { data: [] };
           }),
         ]);
@@ -799,7 +793,7 @@ function Detail() {
         );
         setHasResolvedDetail(true);
       } catch (error) {
-        console.error("장소 상세 조회 실패:", error);
+        logSafeApiError(error, "Detail.jsx");
         setLoadError(
           error.message?.includes("Network Error")
             ? "네트워크 연결을 확인한 뒤 다시 시도해주세요."
@@ -854,7 +848,7 @@ function Detail() {
         setServerSaved(Boolean(nextSavedInfo));
         setServerSavedFolderInfo(nextSavedInfo);
       } catch (error) {
-        console.error("관심 장소 상태 조회 실패:", error);
+        logSafeApiError(error, "Detail.jsx");
         setServerSaved(false);
         setServerSavedFolderInfo(null);
       }
@@ -892,7 +886,7 @@ function Detail() {
         placeId: detailPlace.id,
       })
       .catch((error) => {
-        console.error("최근 본 장소 서버 저장 실패:", error);
+        logSafeApiError(error, "Detail.jsx");
       });
   }, [
     detailPlace.id,
@@ -970,7 +964,7 @@ function Detail() {
         toggleSavedPlace(savedPlacePayload);
       }
     } catch (error) {
-      console.error("관심 장소 변경 실패:", error);
+      logSafeApiError(error, "Detail.jsx");
 
       if (error.message.includes("Network Error")) {
         alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
@@ -1010,7 +1004,7 @@ function Detail() {
 
       setFolderModalOpen(false);
     } catch (error) {
-      console.error("관심 장소 변경 실패:", error);
+      logSafeApiError(error, "Detail.jsx");
 
       if (error.message.includes("Network Error")) {
         alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
@@ -1091,7 +1085,6 @@ function Detail() {
 
       await html2pdf().from(clone).set(options).save();
     } catch (error) {
-      console.log("PDF 저장 실패:", error);
       alert("PDF 저장에 실패했어요.");
     } finally {
       wrapper.remove();

@@ -135,7 +135,6 @@ const getAddressLabelFromKakaoMap = async (latitude, longitude) => {
       });
     });
   } catch (error) {
-    console.log("카카오 주소 변환 실패:", error);
     return "주소 확인 실패";
   }
 };
@@ -209,7 +208,6 @@ const Home = () => {
           }
         },
         (error) => {
-          console.log("위치 권한 오류:", error);
 
           const errorMessage = getLocationErrorMessage(error);
 
@@ -244,7 +242,6 @@ const Home = () => {
       locationEnabled =
         localStorage.getItem("locationPermissionAllowed") === "true";
     } catch (error) {
-      console.log("위치 사용 설정 확인 실패:", error);
     }
 
     if (!locationEnabled || !navigator.permissions) return undefined;
@@ -257,7 +254,6 @@ const Home = () => {
         }
       })
       .catch((error) => {
-        console.log("위치 권한 상태 확인 실패:", error);
       });
 
     return () => {
@@ -312,7 +308,6 @@ const Home = () => {
       locationEnabled =
         localStorage.getItem("locationPermissionAllowed") === "true";
     } catch (error) {
-      console.log("위치 사용 설정 확인 실패:", error);
     }
 
     if (!locationEnabled) {
@@ -336,7 +331,6 @@ const Home = () => {
 
       requestCurrentLocation({ shouldNavigate: true });
     } catch (error) {
-      console.log("위치 권한 상태 확인 실패:", error);
       alert("위치 권한 상태를 확인하지 못했습니다.");
     }
   };
@@ -364,6 +358,7 @@ const Home = () => {
             type="text"
             placeholder="목적지 또는 테마를 검색하세요"
             value={keyword}
+            maxLength={100}
             onChange={(e) => setKeyword(e.target.value)}
           />
         </form>

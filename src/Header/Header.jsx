@@ -1,3 +1,4 @@
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useMemo, useState } from "react";
 import "./Header.css";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -108,7 +109,7 @@ const deleteSavedRouteById = (routeId) => {
 
     return prev.length !== next.length;
   } catch (error) {
-    console.error("일정 삭제 실패:", error);
+    logSafeApiError(error, "Header.jsx");
     return false;
   }
 };
@@ -253,7 +254,6 @@ const Header = ({ onSearchClick }) => {
       await html2pdf().from(target).set(options).save();
       setIsShareOpen(false);
     } catch (error) {
-      console.log("PDF 저장 실패:", error);
       alert("PDF 저장에 실패했어요.");
     } finally {
       target.classList.remove("is-exporting");

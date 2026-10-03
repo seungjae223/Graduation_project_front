@@ -1,3 +1,5 @@
+import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AnimatedHeart from "../AnimatedHeart/AnimatedHeart";
@@ -205,15 +207,7 @@ const isMatchedFilter = (place, selectedFilter) => {
   return matcher.test(text);
 };
 
-const getErrorMessage = (error, fallbackMessage) => {
-  const data = error?.response?.data;
-
-  if (typeof data === "string" && data.trim()) {
-    return data;
-  }
-
-  return data?.message || data?.error || error?.message || fallbackMessage;
-};
+const getErrorMessage = safeApiErrorMessage;
 
 function PopularAll() {
   const navigate = useNavigate();
@@ -248,7 +242,7 @@ function PopularAll() {
               nextFolderMap[placeId] = folder;
             });
           } catch (error) {
-            console.error(`폴더 장소 조회 실패: ${folder.id}`, error);
+            logSafeApiError(error, "PopularAll.jsx");
           }
         })
       );
@@ -256,7 +250,7 @@ function PopularAll() {
       setServerSavedIds([...placeIdSet]);
       setSavedFolderMap(nextFolderMap);
     } catch (error) {
-      console.error("폴더 저장 장소 상태 조회 실패:", error);
+      logSafeApiError(error, "PopularAll.jsx");
     }
   };
 
@@ -272,7 +266,7 @@ function PopularAll() {
 
         setPlaces(data.map((place, index) => normalizePlace(place, index)));
       } catch (error) {
-        console.error("장소 목록 조회 실패:", error);
+        logSafeApiError(error, "PopularAll.jsx");
 
         if (!mounted) return;
 
@@ -373,7 +367,7 @@ function PopularAll() {
         return nextMap;
       });
     } catch (error) {
-      console.error("폴더에서 장소 삭제 실패:", error);
+      logSafeApiError(error, "PopularAll.jsx");
 
       if (error.message.includes("Network Error")) {
         alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
@@ -434,7 +428,7 @@ function PopularAll() {
       setIsFolderModalOpen(false);
       setFolderTargetPlace(null);
     } catch (error) {
-      console.error("폴더에 장소 저장 실패:", error);
+      logSafeApiError(error, "PopularAll.jsx");
 
       if (error.message.includes("Network Error")) {
         alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");

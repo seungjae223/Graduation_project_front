@@ -248,8 +248,12 @@ body,
   position: absolute;
   left: 16px;
   top: 50%;
-  width: 18px;
+  /* The 30x18 asset includes transparent right padding; do not squash it. */
+  width: auto;
   height: 18px;
+  max-width: none;
+  object-fit: contain;
+  display: block;
   transform: translateY(-50%);
   opacity: 0.45;
 }

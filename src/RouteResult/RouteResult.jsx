@@ -1,3 +1,6 @@
+import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
+import { logSafeApiError } from "../utils/safeLog";
+import { isMapUrlForProvider } from "../utils/mapUrl";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -28,15 +31,7 @@ const DELETE_ROUTE_EVENT = "route-result-delete-schedule";
 const ROUTE_FIXED_TIME_STORAGE_PREFIX = "route_fixed_time_map";
 const DEFAULT_ROUTE_START_TIME = "09:00";
 
-const getApiErrorMessage = (error, fallbackMessage) => {
-  const data = error?.response?.data;
-
-  if (typeof data === "string" && data.trim()) {
-    return data;
-  }
-
-  return data?.message || data?.error || error?.message || fallbackMessage;
-};
+const getApiErrorMessage = safeApiErrorMessage;
 
 const deleteTripById = async (tripId) => {
   if (!tripId) {
@@ -806,21 +801,6 @@ const buildKakaoMapsRouteUrl = (day) => {
   );
   return `https://map.kakao.com/link/by/${movementType}/${segments.join("/")}`;
 };
-const isMapUrlForProvider = (url = "", provider = "") => {
-  const normalizedUrl = String(url || "").toLowerCase();
-
-  if (!normalizedUrl) return false;
-  if (provider === "kakao") return normalizedUrl.includes("kakao.com");
-  if (provider === "google") {
-    return (
-      normalizedUrl.includes("google.") ||
-      normalizedUrl.includes("goo.gl/maps") ||
-      normalizedUrl.includes("maps.app.goo.gl")
-    );
-  }
-
-  return true;
-};
 const buildMapDataFromResolvedPoints = (sourceItems, resolvedPoints) => {
   const filteredPoints = filterResolvedPointsForMap(resolvedPoints);
   if (!filteredPoints.length) {
@@ -1195,7 +1175,7 @@ const readFixedTimeMap = (routeId) => {
 
     return raw ? normalizeFixedTimeMap(JSON.parse(raw)) : {};
   } catch (error) {
-    console.error("고정 시간 정보 불러오기 실패:", error);
+    logSafeApiError(error, "RouteResult.jsx");
     return {};
   }
 };
@@ -2589,9 +2569,6 @@ const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
             ? resolvedMapData
             : fallbackMapData;
 
-        console.log("구글 지도 데이터:", mapData);
-        console.log("구글 마커 개수:", mapData.markers.length);
-        console.log("구글 선 개수:", mapData.lines.length);
         map = new Map(mapRef.current, {
           center: mapData.center,
           zoom: 11,
@@ -2645,7 +2622,7 @@ const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
         }
         setMapError("");
       } catch (error) {
-        console.error("Google Maps 로드 실패:", error);
+        logSafeApiError(error, "RouteResult.jsx");
         setMapError(
           "지도를 불러오지 못했어요. API 키 또는 Google Cloud 설정을 확인해 주세요.",
         );
@@ -2724,9 +2701,6 @@ const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
             ? resolvedMapData
             : fallbackMapData;
 
-        console.log("카카오 지도 데이터:", mapData);
-        console.log("카카오 마커 개수:", mapData.markers.length);
-        console.log("카카오 선 개수:", mapData.lines.length);
 
         map = new kakao.maps.Map(mapRef.current, {
           center: new kakao.maps.LatLng(
@@ -2834,7 +2808,7 @@ const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
         setMapError("");
       })
       .catch((error) => {
-        console.error("Kakao Maps 로드 실패:", error);
+        logSafeApiError(error, "RouteResult.jsx");
         setMapError(
           "카카오 지도를 불러오지 못했어요. JS 키 또는 JavaScript SDK 도메인을 확인해 주세요."
         );
@@ -3015,7 +2989,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
                 .get(`/api/trips/${routeId}/days/${day}/places`)
                 .then((response) => ({ day, data: response.data }))
                 .catch((error) => {
-                  console.error(`${day}일차 장소 조회 실패:`, error);
+                  logSafeApiError(error, "RouteResult.jsx");
                   return { day, data: [] };
                 });
             }),
@@ -3037,7 +3011,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
               })
               .then((response) => ({ day, timeline: getArrayData(response.data) }))
               .catch((error) => {
-                console.error(`${day}일차 타임라인 조회 실패:`, error);
+                logSafeApiError(error, "RouteResult.jsx");
                 return { day, timeline: [] };
               });
           }),
@@ -3059,13 +3033,11 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
           day: place.day,
         }));
 
-        console.log("서버 여행 정보:", nextTrip);
-        console.log("서버 여행 장소 목록:", nextPlaces);
 
         setServerTrip(nextTrip);
         setServerTripPlaces(nextPlaces);
       } catch (error) {
-        console.error("여행 정보 조회 실패:", error);
+        logSafeApiError(error, "RouteResult.jsx");
       } finally {
         setIsLoading(false);
       }
@@ -3128,7 +3100,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
 
         navigate("/my-schedule", { replace: true });
       } catch (error) {
-        console.error("삭제 실패:", error);
+        logSafeApiError(error, "RouteResult.jsx");
 
         alert(
           getApiErrorMessage(
@@ -3269,7 +3241,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
       setMemoValues((prev) => ({ ...prev, [key]: nextValue }));
       closeMemoModal();
     } catch (error) {
-      console.error("메모 저장 실패:", error);
+      logSafeApiError(error, "RouteResult.jsx");
       alert(getApiErrorMessage(error, "메모를 저장하지 못했습니다."));
     }
   };
@@ -3308,7 +3280,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   );
 
   const openInNewTab = (url) => {
-    if (!url) return;
+    if (!isMapUrlForProvider(url, "google") && !isMapUrlForProvider(url, "kakao")) return;
     window.open(url, "_blank", "noopener,noreferrer");
   };
 

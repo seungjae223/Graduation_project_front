@@ -1,9 +1,11 @@
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import useModalFocus from "../utils/useModalFocus";
 import "./MyPage.css";
 import api, { getAccessToken } from "../api/api";
+import { clearAuthenticatedUserStorage } from "../utils/authStorage";
 
 import adminMenuIcon from "../img/관리자.png";
 import locationPinIcon from "../img/파랑색 위치.png";
@@ -461,26 +463,7 @@ const getNestedUserData = (user) => {
   return {};
 };
 
-const getStoredAccessToken = () => {
-  try {
-    return (
-      getAccessToken() ||
-      localStorage.getItem("accessToken") ||
-      localStorage.getItem("token") ||
-      sessionStorage.getItem("accessToken") ||
-      sessionStorage.getItem("token") ||
-      ""
-    );
-  } catch {
-    return (
-      localStorage.getItem("accessToken") ||
-      localStorage.getItem("token") ||
-      sessionStorage.getItem("accessToken") ||
-      sessionStorage.getItem("token") ||
-      ""
-    );
-  }
-};
+const getStoredAccessToken = () => getAccessToken() || "";
 
 const normalizeUserData = (data) => {
   const user = getUserData(data);
@@ -664,7 +647,7 @@ const saveUserToStorage = (user) => {
       }
     }
   } catch (storageError) {
-    console.error("사용자 정보 저장 실패:", storageError);
+    logSafeApiError(storageError, "MyPage.jsx");
   }
 };
 
@@ -688,7 +671,7 @@ const MyPage = () => {
     try {
       localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
     } catch (error) {
-      console.error("테마 설정 저장 실패:", error);
+      logSafeApiError(error, "MyPage.jsx");
     }
     setTheme(nextTheme);
   };
@@ -738,13 +721,12 @@ const MyPage = () => {
       try {
         const response = await api.get("/api/mypage/stats");
 
-        console.log("마이페이지 통계 응답:", response.data);
 
         if (!isMounted) return;
 
         setMypageStats(normalizeMypageStats(response.data));
       } catch (error) {
-        console.error("마이페이지 통계 조회 실패:", error);
+        logSafeApiError(error, "MyPage.jsx");
 
         if (isMounted) {
           setMypageStats(DEFAULT_MYPAGE_STATS);
@@ -768,7 +750,7 @@ const MyPage = () => {
         isAllowed ? "true" : "false"
       );
     } catch (error) {
-      console.error("위치 권한 상태 저장 실패:", error);
+      logSafeApiError(error, "MyPage.jsx");
     }
   }, []);
 
@@ -779,7 +761,7 @@ const MyPage = () => {
       savedLocationAllowed =
         localStorage.getItem("locationPermissionAllowed") === "true";
     } catch (error) {
-      console.error("저장된 위치 권한 상태 확인 실패:", error);
+      logSafeApiError(error, "MyPage.jsx");
     }
 
     if (!savedLocationAllowed) {
@@ -810,7 +792,7 @@ const MyPage = () => {
         };
       })
       .catch((error) => {
-        console.error("위치 권한 상태 확인 실패:", error);
+        logSafeApiError(error, "MyPage.jsx");
       });
 
     return () => {
@@ -860,7 +842,7 @@ const MyPage = () => {
             })
           );
         } catch (error) {
-          console.error("사용자 위치 저장 실패:", error);
+          logSafeApiError(error, "MyPage.jsx");
         }
 
         saveLocationAllowed(true);
@@ -895,7 +877,7 @@ const MyPage = () => {
         localStorage.removeItem("currentLocation");
         localStorage.removeItem("currentLocationLabel");
       } catch (error) {
-        console.error("저장된 위치 정보 삭제 실패:", error);
+        logSafeApiError(error, "MyPage.jsx");
       }
 
       return;
@@ -911,7 +893,7 @@ const MyPage = () => {
         new Date().toISOString()
       );
     } catch (error) {
-      console.error("위치 권한 요청 시간 저장 실패:", error);
+      logSafeApiError(error, "MyPage.jsx");
     }
 
     setIsLocationPermissionOpen(false);
@@ -980,34 +962,7 @@ const MyPage = () => {
   ];
 
   const handleLogout = () => {
-    try {
-      localStorage.removeItem("petapp_session_v1");
-      localStorage.removeItem("jakdang_access_token");
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("token");
-      localStorage.removeItem("tokenType");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("keepLogin");
-      localStorage.removeItem("userEmail");
-      localStorage.removeItem("userName");
-      localStorage.removeItem("userNickname");
-      localStorage.removeItem("currentUser");
-      localStorage.removeItem("mock_current_user");
-
-      sessionStorage.removeItem("petapp_session_v1");
-      sessionStorage.removeItem("jakdang_access_token");
-      sessionStorage.removeItem("accessToken");
-      sessionStorage.removeItem("token");
-      sessionStorage.removeItem("userEmail");
-      sessionStorage.removeItem("userName");
-      sessionStorage.removeItem("userNickname");
-      sessionStorage.removeItem("currentUser");
-      sessionStorage.removeItem("mock_current_user");
-    } catch (error) {
-      console.error("로그아웃 실패:", error);
-    }
-
+    clearAuthenticatedUserStorage();
     navigate("/login", { replace: true });
   };
 
@@ -1059,7 +1014,7 @@ const MyPage = () => {
         <button
           type="button"
           className="mypage-invite-banner"
-          onClick={() => console.log("친구 초대")}
+          onClick={() => void 0}
         >
           <div className="mypage-invite-text">
             <strong>친구 초대하고 포인트 받기!</strong>

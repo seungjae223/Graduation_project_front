@@ -1,3 +1,5 @@
+import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -1326,7 +1328,7 @@ const readLocalStorageJSON = (key, fallbackValue) => {
     const raw = window.localStorage.getItem(key);
     return raw ? JSON.parse(raw) : fallbackValue;
   } catch (error) {
-    console.error(`${key} 불러오기 실패:`, error);
+    logSafeApiError(error, "RouteCreate.jsx");
     return fallbackValue;
   }
 };
@@ -1456,7 +1458,7 @@ const persistRouteTimeMap = (routeId, timeMap = {}) => {
       JSON.stringify(timeMap)
     );
   } catch (error) {
-    console.error("고정 시간 저장 실패:", error);
+    logSafeApiError(error, "RouteCreate.jsx");
   }
 };
 
@@ -1652,15 +1654,7 @@ const normalizeSearchPlace = (place) => {
   };
 };
 
-const getErrorMessage = (error, fallbackMessage) => {
-  const data = error.response?.data;
-
-  if (typeof data === "string" && data.trim()) {
-    return data;
-  }
-
-  return data?.message || data?.error || fallbackMessage;
-};
+const getErrorMessage = safeApiErrorMessage;
 
 const getResponseData = (data) => {
   return data?.data || data?.trip || data?.tripPlace || data?.result || data?.response || data;
@@ -2286,7 +2280,7 @@ const RouteCreate = () => {
         setServerSearchResults(places.slice(0, 12));
         setHasServerSearchCompleted(true);
       } catch (error) {
-        console.error("장소 검색 실패:", error);
+        logSafeApiError(error, "RouteCreate.jsx");
         setHasServerSearchCompleted(true);
 
         if (error.message.includes("Network Error")) {
@@ -2710,7 +2704,7 @@ const RouteCreate = () => {
         setIsCompleteModalOpen(true);
       }, 50);
     } catch (error) {
-      console.error("최적 경로 생성 실패:", error);
+      logSafeApiError(error, "RouteCreate.jsx");
 
       if (error.message.includes("Network Error")) {
         setStartPlaceErrorMessage(
@@ -2777,7 +2771,7 @@ const RouteCreate = () => {
         },
       });
     } catch (error) {
-      console.error("여행 생성 실패:", error);
+      logSafeApiError(error, "RouteCreate.jsx");
 
       if (error.message.includes("Network Error")) {
         alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
@@ -2816,7 +2810,7 @@ const RouteCreate = () => {
       setIsCompleteModalOpen(false);
       alert("일정이 저장되었습니다.");
     } catch (error) {
-      console.error("여행 저장 실패:", error);
+      logSafeApiError(error, "RouteCreate.jsx");
 
       if (error.message.includes("Network Error")) {
         alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
@@ -2947,6 +2941,7 @@ const RouteCreate = () => {
                 type="text"
                 placeholder="장소 검색 및 추가"
                 value={searchKeyword}
+                maxLength={100}
                 onFocus={() => setIsSearchOpen(true)}
                 onChange={(e) => {
                   setSearchKeyword(e.target.value);

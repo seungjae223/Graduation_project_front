@@ -1,3 +1,5 @@
+import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MySchedule.css";
@@ -532,13 +534,7 @@ const convertScheduleToCard = (schedule, source = "server") => {
   };
 };
 
-const getErrorMessage = (error, fallbackMessage) => {
-  const data = error.response?.data;
-
-  if (typeof data === "string" && data.trim()) return data;
-
-  return data?.message || data?.error || fallbackMessage;
-};
+const getErrorMessage = safeApiErrorMessage;
 
 function MySchedule() {
   const navigate = useNavigate();
@@ -577,7 +573,7 @@ function MySchedule() {
         [...scheduleMap.values()].sort((a, b) => b.startTime - a.startTime),
       );
     } catch (error) {
-      console.error("내 일정 목록 조회 실패:", error);
+      logSafeApiError(error, "MySchedule.jsx");
       setScheduleList([]);
 
       if (error.message?.includes("Network Error")) {

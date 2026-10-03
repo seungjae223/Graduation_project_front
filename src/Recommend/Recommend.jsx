@@ -1,3 +1,5 @@
+import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
@@ -238,15 +240,7 @@ const getUniqueTextArray = (values) => {
   return [...new Set(values.filter(Boolean).map((value) => String(value)))];
 };
 
-const getErrorMessage = (error, fallbackMessage) => {
-  const data = error.response?.data;
-
-  if (typeof data === "string") {
-    return data;
-  }
-
-  return data?.message || data?.error || fallbackMessage;
-};
+const getErrorMessage = safeApiErrorMessage;
 
 function Recommend() {
   const navigate = useNavigate();
@@ -309,7 +303,7 @@ function Recommend() {
 
         setRecommendedPlaces(places);
       } catch (error) {
-        console.error("추천 장소 조회 실패:", error);
+        logSafeApiError(error, "Recommend.jsx");
 
         if (error.message.includes("Network Error")) {
           setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
@@ -383,7 +377,7 @@ function Recommend() {
         savedFolderMap,
       };
     } catch (error) {
-      console.error("저장 장소 상태 조회 실패:", error);
+      logSafeApiError(error, "Recommend.jsx");
       setServerSavedIds([]);
       setServerSavedFolderMap({});
 
@@ -518,7 +512,7 @@ function Recommend() {
         toggleSavedPlace(place);
       }
     } catch (error) {
-      console.error("관심 장소 연동 실패:", error);
+      logSafeApiError(error, "Recommend.jsx");
 
       if (error.message.includes("Network Error")) {
         alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
@@ -574,7 +568,7 @@ function Recommend() {
       setIsFolderModalOpen(false);
       setFolderTargetPlace(null);
     } catch (error) {
-      console.error("관심 장소 연동 실패:", error);
+      logSafeApiError(error, "Recommend.jsx");
 
       if (error.message.includes("Network Error")) {
         alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");

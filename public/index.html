@@ -8,19 +8,7 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <meta name="theme-color" content="#18a0f5" />
-    <script>
-      (function () {
-        var saved = null;
-        try { saved = localStorage.getItem("site-theme"); } catch (error) {
-          // 저장소 접근이 차단된 환경에서는 시스템 설정을 따른다.
-        }
-        var theme = saved === "light" || saved === "dark"
-          ? saved
-          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-        document.documentElement.dataset.theme = theme;
-        document.documentElement.style.colorScheme = theme;
-      })();
-    </script>
+    <script src="%PUBLIC_URL%/theme-init.js"></script>
     <meta
       name="description"
       content="일본 여행을 위한 맞춤 장소 추천과 일정 플래너"

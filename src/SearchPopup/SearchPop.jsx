@@ -1,3 +1,4 @@
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
@@ -136,7 +137,7 @@ const fetchAllRecommendations = async () => {
           },
         })
         .catch((error) => {
-          console.error(`${theme} 검색 데이터 조회 실패:`, error);
+          logSafeApiError(error, "SearchPop.jsx");
           return null;
         })
     )
@@ -214,7 +215,7 @@ const SearchPop = ({ isOpen, onClose }) => {
 
         setPlaces(nextPlaces);
       } catch (error) {
-        console.error("검색 장소 조회 실패:", error);
+        logSafeApiError(error, "SearchPop.jsx");
 
         if (!isMounted) return;
 
@@ -294,6 +295,7 @@ const SearchPop = ({ isOpen, onClose }) => {
               type="text"
               className="search-pop-input"
               value={keyword}
+              maxLength={100}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="검색어를 입력하세요"
               aria-label="장소 검색어"

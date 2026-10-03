@@ -1,7 +1,7 @@
 import React from "react";
 import "./OnBoarding.css";
 import { useNavigate } from "react-router-dom";
-import mainImage from "../img/지도.png";
+import mainImage from "../img/ai-route-optimization.png";
 import { navigateWithOnboardingTransition } from "./onboardingTransition";
 
 const OnBoarding2 = () => {
@@ -11,7 +11,7 @@ const OnBoarding2 = () => {
     <div className="onboarding">
       {/* 이미지 */}
       <div
-        className="image-wrapper"
+        className="image-wrapper image-wrapper--ai-route"
         style={{ backgroundImage: `url(${mainImage})` }}
       />
 

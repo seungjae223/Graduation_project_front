@@ -1,3 +1,4 @@
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -394,7 +395,7 @@ function Search() {
       .then((items) => {
         if (mounted) setRecentSearches(items.slice(0, 10));
       })
-      .catch((error) => console.error("최근 검색어 조회 실패:", error));
+      .catch((error) => logSafeApiError(error, "Search.jsx"));
 
     return () => {
       mounted = false;
@@ -429,7 +430,7 @@ function Search() {
         prev.filter((item) => String(item.id) !== String(recentSearch.id))
       );
     } catch (error) {
-      console.error("최근 검색어 삭제 실패:", error);
+      logSafeApiError(error, "Search.jsx");
     }
   };
 
@@ -438,7 +439,7 @@ function Search() {
       await clearRecentSearchesApi();
       setRecentSearches([]);
     } catch (error) {
-      console.error("최근 검색어 전체 삭제 실패:", error);
+      logSafeApiError(error, "Search.jsx");
     }
   };
 
@@ -469,6 +470,7 @@ function Search() {
           <input
             type="text"
             value={query}
+            maxLength={100}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="장소, 도시 또는 테마 검색"
           />

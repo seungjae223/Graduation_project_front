@@ -1,3 +1,4 @@
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import useModalFocus from "../utils/useModalFocus";
@@ -79,7 +80,7 @@ function ShareModal({
       await copyText(shareUrl);
       setCopied(true);
     } catch (error) {
-      console.error(error);
+      logSafeApiError(error, "ShareModal.jsx");
       alert("링크 복사에 실패했어요.");
     }
   };
@@ -94,7 +95,7 @@ function ShareModal({
       setIsSavingPdf(true);
       await onSavePdf();
     } catch (error) {
-      console.error(error);
+      logSafeApiError(error, "ShareModal.jsx");
     } finally {
       setIsSavingPdf(false);
     }

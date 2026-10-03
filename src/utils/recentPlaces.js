@@ -1,3 +1,4 @@
+import { logSafeApiError } from "./safeLog";
 const RECENT_PLACES_KEY = "recentPlaces";
 const MAX_RECENT_PLACES = 10;
 
@@ -12,7 +13,7 @@ export const getRecentPlaces = () => {
 
     return JSON.parse(savedPlaces);
   } catch (error) {
-    console.error("최근 본 장소를 불러오는 중 오류 발생:", error);
+    logSafeApiError(error, "recentPlaces.js");
     return [];
   }
 };
@@ -42,7 +43,7 @@ export const saveRecentPlace = (place) => {
 
     localStorage.setItem(RECENT_PLACES_KEY, JSON.stringify(updatedPlaces));
   } catch (error) {
-    console.error("최근 본 장소를 저장하는 중 오류 발생:", error);
+    logSafeApiError(error, "recentPlaces.js");
   }
 };
 
@@ -57,7 +58,7 @@ export const removeRecentPlace = (placeId) => {
 
     localStorage.setItem(RECENT_PLACES_KEY, JSON.stringify(updatedPlaces));
   } catch (error) {
-    console.error("최근 본 장소를 삭제하는 중 오류 발생:", error);
+    logSafeApiError(error, "recentPlaces.js");
   }
 };
 
@@ -66,6 +67,6 @@ export const clearRecentPlaces = () => {
   try {
     localStorage.removeItem(RECENT_PLACES_KEY);
   } catch (error) {
-    console.error("최근 본 장소 전체 삭제 중 오류 발생:", error);
+    logSafeApiError(error, "recentPlaces.js");
   }
 };

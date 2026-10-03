@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./Landing.css";
 import { useNavigate } from "react-router-dom";
 
-import bgImage from "../img/서비스 소개 .png";
+import bgImage from "../img/travel-service-intro-web.png";
 
 // 아이콘
 import compass from "../img/나침반.png";
@@ -20,7 +20,12 @@ const Landing = () => {
     <div className="landing">
       {/* 상단 이미지 */}
       <div className="landing-hero">
-        <img src={bgImage} alt="hero" />
+        <img
+          src={bgImage}
+          width={1032}
+          height={1277}
+          alt="함께라서 더 좋은 여행, 계획은 더 가볍게. 친구들과의 여행도 테마 추천부터 함께 만드는 여행 계획, 최적의 동선까지."
+        />
       </div>
 
       {/* 콘텐츠 */}

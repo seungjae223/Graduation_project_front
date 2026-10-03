@@ -1,3 +1,4 @@
+import { logSafeApiError } from "../utils/safeLog";
 export const MOCK_INQUIRY_STORAGE_KEY = "mock_user_inquiries";
 
 export const MOCK_INQUIRIES = [
@@ -96,7 +97,7 @@ const readSavedInquiries = () => {
       ...inquiry,
     }));
   } catch (error) {
-    console.error("목업 문의사항 불러오기 실패:", error);
+    logSafeApiError(error, "inquiryMockData.js");
     return [];
   }
 };

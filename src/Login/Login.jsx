@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { logSafeApiError } from "../utils/safeLog";
+import { beginOAuth } from "../utils/oauthSecurity";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getApiErrorMessage } from "../api/api";
 import { getSocialAuthorizationApi, loginApi } from "../api/authApi";
@@ -70,7 +72,7 @@ const Login = () => {
 
       navigate(returnPath, { replace: true });
     } catch (error) {
-      console.error("로그인 실패:", error);
+      logSafeApiError(error, "login");
 
       setLoginError(
         error.message?.includes("Failed to fetch") ||
@@ -87,10 +89,10 @@ const Login = () => {
     try {
       setIsLoading(true);
       saveSocialLoginReturnPath(returnPath);
-      const { authorizationUrl } = await getSocialAuthorizationApi(provider);
-      window.location.assign(authorizationUrl);
+      const { authorizationUrl, state } = await getSocialAuthorizationApi(provider);
+      window.location.assign(beginOAuth(provider, authorizationUrl, state));
     } catch (error) {
-      console.error(`${provider} 로그인 시작 실패:`, error);
+      logSafeApiError(error, "oauth-start");
       alert(getApiErrorMessage(error, "소셜 로그인을 시작하지 못했습니다."));
       setIsLoading(false);
     }
@@ -116,6 +118,7 @@ const Login = () => {
               autoComplete="email"
               placeholder="이메일을 입력해주세요"
               value={loginForm.email}
+              maxLength={255}
               onChange={(e) => handleChange("email", e.target.value)}
               aria-invalid={Boolean(fieldErrors.email)}
               aria-describedby={fieldErrors.email ? "login-email-error" : undefined}

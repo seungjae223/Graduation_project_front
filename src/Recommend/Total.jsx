@@ -1,3 +1,5 @@
+import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSavedPlaces } from "../Context/SavedPlacesContext";
@@ -147,15 +149,7 @@ const registerPlace = async (place) => {
   throw new Error("저장할 장소의 서버 ID가 없습니다.");
 };
 
-const getErrorMessage = (error, fallbackMessage) => {
-  const data = error.response?.data;
-
-  if (typeof data === "string" && data.trim()) {
-    return data;
-  }
-
-  return data?.message || data?.error || fallbackMessage;
-};
+const getErrorMessage = safeApiErrorMessage;
 
 function Total() {
   const navigate = useNavigate();
@@ -194,7 +188,7 @@ function Total() {
         setPlaces(nextPlaces);
         setIntroText(getIntroText(response.data));
       } catch (error) {
-        console.error("전체 추천 장소 조회 실패:", error);
+        logSafeApiError(error, "Total.jsx");
         setPlaces([]);
         setIntroText("");
 
@@ -260,7 +254,7 @@ function Total() {
         setServerSavedIds([...savedIds]);
         setServerSavedFolderMap(savedFolderMap);
       } catch (error) {
-        console.error("저장 장소 상태 조회 실패:", error);
+        logSafeApiError(error, "Total.jsx");
         setServerSavedIds([]);
         setServerSavedFolderMap({});
       }
@@ -303,7 +297,7 @@ function Total() {
   };
 
   const showSaveError = (error) => {
-    console.error("관심 장소 변경 실패:", error);
+    logSafeApiError(error, "Total.jsx");
 
     if (error.message.includes("Network Error")) {
       alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");

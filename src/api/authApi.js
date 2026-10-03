@@ -1,4 +1,5 @@
 import api from "./api";
+import { ACCESS_TOKEN_KEY, clearAuthenticatedUserStorage } from "../utils/authStorage";
 
 const extractToken = (response) => {
   const headers = response.headers || {};
@@ -125,11 +126,15 @@ const saveToken = (token, { persistent = true } = {}) => {
   const storage = persistent ? localStorage : sessionStorage;
   const otherStorage = persistent ? sessionStorage : localStorage;
 
-  storage.setItem("accessToken", normalizedToken);
-  storage.setItem("token", normalizedToken);
+  storage.setItem(ACCESS_TOKEN_KEY, normalizedToken);
+  storage.removeItem("token");
+  storage.removeItem("jakdang_access_token");
+  storage.removeItem("petapp_session_v1");
   storage.setItem("isLoggedIn", "true");
   otherStorage.removeItem("accessToken");
   otherStorage.removeItem("token");
+  otherStorage.removeItem("jakdang_access_token");
+  otherStorage.removeItem("petapp_session_v1");
 
   return normalizedToken;
 };
@@ -185,27 +190,7 @@ export const loginApi = async ({ email, password, keepLogin = true }) => {
   };
 };
 
-export const logoutApi = () => {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("token");
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("isLoggedIn");
-  localStorage.removeItem("keepLogin");
-  localStorage.removeItem("userEmail");
-  localStorage.removeItem("userNickname");
-  localStorage.removeItem("userName");
-  localStorage.removeItem("currentUser");
-
-  sessionStorage.removeItem("accessToken");
-  sessionStorage.removeItem("token");
-  sessionStorage.removeItem("userEmail");
-  sessionStorage.removeItem("userNickname");
-  sessionStorage.removeItem("userName");
-  sessionStorage.removeItem("currentUser");
-
-  // nickname:${email} 캐시는 일부러 지우지 않음.
-  // /api/users/me가 403일 때 같은 브라우저에서 닉네임을 다시 보여주기 위함.
-};
+export const logoutApi = clearAuthenticatedUserStorage;
 
 export const signupApi = async ({ email, password, nickname }) => {
   const normalizedEmail = normalizeEmail(email);

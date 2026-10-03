@@ -1,3 +1,4 @@
+import { logSafeApiError } from "../utils/safeLog";
 import React, { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
@@ -220,7 +221,7 @@ const SignUp = () => {
 
       alert("인증번호가 발송되었습니다. 이메일을 확인해주세요.");
     } catch (error) {
-      console.error("인증번호 발송 실패:", error);
+      logSafeApiError(error, "SignUp.jsx");
 
       alert(
         getErrorMessage(
@@ -258,7 +259,7 @@ const SignUp = () => {
       setIsCodeVerified(true);
       alert("이메일 인증이 완료되었습니다.");
     } catch (error) {
-      console.error("이메일 인증 실패:", error);
+      logSafeApiError(error, "SignUp.jsx");
 
       setIsCodeVerified(false);
 
@@ -343,7 +344,7 @@ const SignUp = () => {
 
       setIsCompleteModalOpen(true);
     } catch (error) {
-      console.error("회원가입 실패:", error);
+      logSafeApiError(error, "SignUp.jsx");
 
       alert(
         getErrorMessage(
@@ -392,6 +393,7 @@ const SignUp = () => {
                 type="text"
                 placeholder="이름을 입력하세요"
                 value={form.name}
+                maxLength={20}
                 onChange={(e) => handleChange("name", e.target.value)}
               />
             </div>
@@ -405,6 +407,7 @@ const SignUp = () => {
                   type="email"
                   placeholder="example@travel.com"
                   value={form.email}
+                  maxLength={255}
                   onChange={(e) => handleChange("email", e.target.value)}
                   onBlur={handleEmailBlur}
                 />
@@ -480,6 +483,7 @@ const SignUp = () => {
                   type={showPw ? "text" : "password"}
                   placeholder="10자 이상, 대·소문자와 특수문자 포함"
                   value={form.password}
+                  maxLength={72}
                   onChange={(e) => handleChange("password", e.target.value)}
                 />
 
@@ -504,6 +508,7 @@ const SignUp = () => {
                   type={showPwConfirm ? "text" : "password"}
                   placeholder="비밀번호를 다시 입력하세요"
                   value={form.passwordConfirm}
+                  maxLength={72}
                   onChange={(e) =>
                     handleChange("passwordConfirm", e.target.value)
                   }

@@ -46,6 +46,7 @@
 
 .search-pop-input {
   flex: 1;
+  min-width: 0;
   height: 100%;
   border: none;
   outline: none;
@@ -53,6 +54,10 @@
   font-size: 18px;
   font-weight: 700;
   color: #18253d;
+}
+
+.search-pop-search-box > svg {
+  flex-shrink: 0;
 }
 
 .search-pop-input::placeholder {
