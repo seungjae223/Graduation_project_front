@@ -298,3 +298,4 @@
   justify-content: center;
   cursor: pointer;
 }
+.search-result-address { display: block; font-size: 12px; overflow-wrap: anywhere; color: inherit; opacity: .75; }

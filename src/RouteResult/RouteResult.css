@@ -918,3 +918,21 @@ button.route-result-memo-card:hover {
     font-size: 16px;
   }
 }
+
+.route-query-status {
+  padding: 24px;
+  color: var(--text-color, #6b7788);
+  overflow-wrap: anywhere;
+}
+.route-query-status button {
+  margin: 8px 8px 0 0;
+  padding: 10px 16px;
+  border: 1px solid currentColor;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.route-query-status button:disabled { opacity: 0.5; cursor: wait; }
+
+.route-order-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }.route-order-buttons button { min-height: 44px; padding: 8px 12px; border: 1px solid #d9eaf7; border-radius: 10px; background: #eef7ff; color: #1689d9; font: inherit; }.route-order-buttons button:disabled { opacity: .45; }.route-order-buttons button:focus-visible { outline: 2px solid #1689d9; outline-offset: 2px; }

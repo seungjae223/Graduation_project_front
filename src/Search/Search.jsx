@@ -1,5 +1,5 @@
 import { logSafeApiError } from "../utils/safeLog";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   clearRecentSearchesApi,
@@ -7,12 +7,13 @@ import {
   getRecentSearchesApi,
 } from "../api/placeApi";
 import "./Search.css";
+import useServerSearch from "./useServerSearch";
 
 import hotMainImg from "../img/도쿄.png";
 import hotSubImg1 from "../img/교토.png";
 import hotSubImg2 from "../img/서비스 소개 .png";
 
-const RECOMMEND_PAGE_PATH = "/recommend";
+
 
 const SearchIcon = () => (
   <svg viewBox="0 0 24 24" className="svg-icon" aria-hidden="true">
@@ -272,45 +273,6 @@ const hotPlaces = [
   },
 ];
 
-const travelSearchPlaces = [
-  {
-    id: "tokyo",
-    title: "도쿄",
-    subtitle: "인기 급상승 여행지",
-    image: hotMainImg,
-  },
-  {
-    id: "kyoto",
-    title: "교토",
-    subtitle: "감성 여행 추천지",
-    image: hotSubImg1,
-  },
-  {
-    id: "osaka",
-    title: "오사카",
-    subtitle: "맛집과 쇼핑 여행지",
-    image: hotMainImg,
-  },
-  {
-    id: "nara",
-    title: "나라",
-    subtitle: "조용한 산책 여행지",
-    image: hotSubImg1,
-  },
-  {
-    id: "fukuoka",
-    title: "후쿠오카",
-    subtitle: "가볍게 떠나기 좋은 여행지",
-    image: hotMainImg,
-  },
-  {
-    id: "sapporo",
-    title: "삿포로",
-    subtitle: "겨울 감성 여행지",
-    image: hotSubImg1,
-  },
-];
-
 function Search() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -320,74 +282,10 @@ function Search() {
   const locationState = location.state || {};
 
   const [query, setQuery] = useState(keywordFromUrl);
-  const [searchedKeyword, setSearchedKeyword] = useState(keywordFromUrl);
   const [recentSearches, setRecentSearches] = useState([]);
-
-  const searchableItems = useMemo(() => {
-    const travelItems = travelSearchPlaces.map((place) => ({
-      id: `travel-${place.id}`,
-      title: place.title,
-      subtitle: place.subtitle,
-      category: "여행지",
-      image: place.image,
-    }));
-
-    const popularItems = popularKeywords.map((keyword, index) => ({
-      id: `popular-${index}`,
-      title: keyword,
-      subtitle: "인기 검색어",
-      category: "인기",
-      image: null,
-    }));
-
-    const regionSearchItems = regionItems
-      .filter((item) => item.name !== "더보기")
-      .map((item) => ({
-        id: `region-${item.id}`,
-        title: item.name,
-        subtitle: `${item.name} 지역 추천 여행지`,
-        category: "지역",
-        image: null,
-      }));
-
-    const hotItems = hotPlaces.map((place) => ({
-      id: `hot-${place.id}`,
-      title: place.title,
-      subtitle: place.subtitle || "지금 가장 핫한 곳",
-      category: "핫플",
-      image: place.image,
-    }));
-
-    return [...travelItems, ...popularItems, ...regionSearchItems, ...hotItems];
-  }, []);
-
-  const searchResults = useMemo(() => {
-    const trimmedKeyword = searchedKeyword.trim().toLowerCase();
-
-    if (!trimmedKeyword) {
-      return [];
-    }
-
-    return searchableItems.filter((item) => {
-      const title = item.title.toLowerCase();
-      const subtitle = item.subtitle.toLowerCase();
-      const category = item.category.toLowerCase();
-
-      return (
-        title.includes(trimmedKeyword) ||
-        subtitle.includes(trimmedKeyword) ||
-        category.includes(trimmedKeyword)
-      );
-    });
-  }, [searchedKeyword, searchableItems]);
-
-  useEffect(() => {
-    const nextKeyword = searchParams.get("keyword") || "";
-
-    setQuery(nextKeyword);
-    setSearchedKeyword(nextKeyword);
-  }, [searchParams]);
-
+  const search = useServerSearch();
+  const searchedKeyword = search.keyword;
+  useEffect(() => { setQuery(searchParams.get("keyword") || ""); }, [searchParams]);
   useEffect(() => {
     let mounted = true;
 
@@ -403,20 +301,9 @@ function Search() {
   }, []);
 
   const runSearch = (keyword) => {
-    const trimmedKeyword = keyword.trim();
-
-    if (!trimmedKeyword) {
-      return;
-    }
-
-    setQuery(trimmedKeyword);
-    setSearchedKeyword(trimmedKeyword);
-
-    navigate(
-      `${RECOMMEND_PAGE_PATH}?keyword=${encodeURIComponent(trimmedKeyword)}`
-    );
+    setQuery(keyword);
+    void search.submit(keyword);
   };
-
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     runSearch(query);
@@ -451,8 +338,11 @@ function Search() {
     runSearch(name);
   };
 
-  const handleResultClick = (title) => {
-    runSearch(title);
+  const handleResultClick = (place) => {
+    navigate(`/detail?id=${encodeURIComponent(place.id)}&source=server-search`, {
+      state: { place: { ...place, placeId: place.id, originalId: place.id,
+        title: place.name, desc: place.address, image: null, thumb: null }, source: "server-search" },
+    });
   };
 
   const isNearbyMode = locationState.mode === "nearby";
@@ -463,7 +353,7 @@ function Search() {
         <h1 className="search-title">어디로 떠나볼까요?</h1>
 
         <form className="search-input-wrap" onSubmit={handleSearchSubmit}>
-          <button type="submit" className="search-icon-submit" aria-label="검색">
+          <button type="submit" className="search-icon-submit" aria-label="검색" disabled={search.status === "loading" && query.trim() === searchedKeyword}>
             <SearchIcon />
           </button>
 
@@ -486,30 +376,27 @@ function Search() {
         </section>
       )}
 
-      {searchedKeyword && (
-        <section className="search-section">
-          <h2>"{searchedKeyword}" 검색 결과</h2>
-
-          {searchResults.length > 0 ? (
+      {search.status !== "idle" && (
+        <section className="search-section" aria-live="polite">
+          <h2>{searchedKeyword ? `"${searchedKeyword}" 검색 결과` : "장소 검색"}</h2>
+          {search.status === "loading" && <p className="empty-text" role="status">장소를 검색하는 중입니다...</p>}
+          {search.status === "error" && <div className="empty-text" role="alert">
+            <p>{search.error}</p>
+            <button type="button" className="clear-btn" onClick={() => runSearch(query)}>다시 검색</button>
+          </div>}
+          {search.status === "success" && (search.items.length ? (
             <div className="popular-grid">
-              {searchResults.map((item) => (
-                <button
-                  type="button"
-                  key={item.id}
-                  className="popular-card"
-                  onClick={() => handleResultClick(item.title)}
-                >
-                  <span className="popular-rank">{item.category}</span>
-                  <span className="popular-text">{item.title}</span>
+              {search.items.map(place => (
+                <button type="button" key={place.id} className="popular-card" onClick={() => handleResultClick(place)}>
+                  <span className="popular-rank">{place.region || place.placeType || "장소"}</span>
+                  <span className="popular-text">{place.name}</span>
+                  <span className="search-result-address">{place.address || "주소 정보 없음"}</span>
                 </button>
               ))}
             </div>
-          ) : (
-            <p className="empty-text">검색 결과가 없어요.</p>
-          )}
+          ) : <p className="empty-text">검색 결과가 없어요.</p>)}
         </section>
       )}
-
       <section className="search-section">
         <div className="section-top">
           <h2>최근 검색어</h2>

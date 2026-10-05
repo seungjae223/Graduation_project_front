@@ -1,4 +1,5 @@
 import api from "./api";
+import { requireList } from "./responseContract";
 
 const list = (data) => {
   if (Array.isArray(data)) return data;
@@ -16,16 +17,21 @@ export const getPlaceApi = async (placeId) =>
 export const deletePlaceApi = async (placeId) =>
   (await api.delete(`/api/places/${encodeURIComponent(placeId)}`)).data;
 
-export const searchPlacesApi = async (keyword) => {
+export const searchPlacesApi = async (keyword, options = {}) => {
   const normalizedKeyword = String(keyword || "").trim().replace(/\s+/g, " ");
   if (!normalizedKeyword) throw new Error("검색어를 입력해주세요.");
   if (normalizedKeyword.length > 100) {
     throw new Error("검색어는 100자 이하로 입력해주세요.");
   }
   const response = await api.get("/api/places/search", {
+    ...options,
     params: { keyword: normalizedKeyword },
   });
-  return list(response.data);
+  const places = requireList(response.data);
+  if (places.some(place => !Number.isSafeInteger(Number(place?.id)) || Number(place.id) <= 0 || !place.name)) {
+    throw new Error("장소 검색 응답을 확인할 수 없습니다.");
+  }
+  return places;
 };
 
 export const getRecommendationsApi = async (params = {}) => {

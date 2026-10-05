@@ -1,8 +1,10 @@
+import { savePreparedPdf } from "../utils/pdfTask";
 import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useMemo, useState } from "react";
 import "./Header.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import html2pdf from "html2pdf.js";
+import { getAuthSnapshot } from "../utils/authState";
 import ShareModal from "../ShareModal/ShareModal";
 import Alert from "../Alert/Alert";
 import { navigateWithOnboardingTransition } from "../OnBoarding/onboardingTransition";
@@ -215,26 +217,31 @@ const Header = ({ onSearchClick }) => {
     navigate("/search");
   };
 
-  const handleSavePdfFromShare = async () => {
+  const handleSavePdfFromShare = async ({ isCurrent = () => true } = {}) => {
     const target = document.getElementById("route-result-pdf");
 
     if (!target) {
-      alert("PDF로 저장할 내용을 찾지 못했어요.");
-      return;
+      throw new Error("PDF로 저장할 내용을 찾지 못했어요.");
     }
 
-    target.classList.add("is-exporting");
+    if (target.dataset.exportReady !== "true") throw new Error("일정과 타임라인 조회를 완료한 뒤 출력해 주세요.");
+    const context = target.dataset.exportContext;
+    const account = getAuthSnapshot().accountKey;
+    const wrapper = document.createElement("div");
+    wrapper.style.cssText = "position:fixed;left:-100000px;top:0;width:" + (target.clientWidth || 390) + "px";
+    const clone = target.cloneNode(true); clone.classList.add("is-exporting");
+    wrapper.appendChild(clone); document.body.appendChild(wrapper);
 
     try {
       await waitForNextPaint();
-      await waitForPdfImages(target);
+      await waitForPdfImages(clone);
       await waitForNextPaint();
 
       const fileDate = buildPdfFileDate();
 
       const options = {
         margin: 0,
-        filename: `최적경로결과_${fileDate}.pdf`,
+        filename: `경로결과_${fileDate}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: {
           scale: 2,
@@ -251,12 +258,12 @@ const Header = ({ onSearchClick }) => {
         },
       };
 
-      await html2pdf().from(target).set(options).save();
-      setIsShareOpen(false);
+      const worker = html2pdf().from(clone).set(options);
+      await savePreparedPdf(worker, () => isCurrent() && target.isConnected && target.dataset.exportContext === context && target.dataset.exportReady === "true" && getAuthSnapshot().accountKey === account);
     } catch (error) {
-      alert("PDF 저장에 실패했어요.");
+      throw error;
     } finally {
-      target.classList.remove("is-exporting");
+      wrapper.remove();
     }
   };
 
@@ -501,6 +508,7 @@ const Header = ({ onSearchClick }) => {
           variant="schedule"
           shareUrl={routeShareUrl}
           onSavePdf={handleSavePdfFromShare}
+          contextKey={location.pathname + location.search}
         />
       )}
 

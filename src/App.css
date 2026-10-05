@@ -178,6 +178,18 @@ svg {
   }
 }
 
+/* Only the route fallback stretches. Resolved pages keep their own layout. */
+.app-content:has(> .route-transition > .earth-loading-screen--page) {
+  display: flex;
+  flex-direction: column;
+}
+
+.route-transition:has(> .earth-loading-screen--page) {
+  display: flex;
+  flex: 1;
+  animation: none;
+}
+
 html[data-theme="dark"] :where(
   .header, .footer, .footer-nav, .page-wrap,
   [class$="-page"], [class$="-card"], [class$="-modal"],

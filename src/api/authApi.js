@@ -1,5 +1,6 @@
 import api from "./api";
 import { ACCESS_TOKEN_KEY, clearAuthenticatedUserStorage } from "../utils/authStorage";
+import { notifyAuthChange } from "../utils/authState";
 
 const extractToken = (response) => {
   const headers = response.headers || {};
@@ -135,6 +136,7 @@ const saveToken = (token, { persistent = true } = {}) => {
   otherStorage.removeItem("token");
   otherStorage.removeItem("jakdang_access_token");
   otherStorage.removeItem("petapp_session_v1");
+  notifyAuthChange();
 
   return normalizedToken;
 };

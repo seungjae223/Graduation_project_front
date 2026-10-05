@@ -4,26 +4,13 @@ import { createPortal } from "react-dom";
 import api from "../api/api";
 import useModalFocus from "../utils/useModalFocus";
 import "./FolderSelectModal.css";
+import useReadQuery from "../utils/useReadQuery";
+import useMutationTask from "../utils/useMutationTask";
+import useSessionKey from "../utils/useSessionKey";
+import { getAuthSnapshot } from "../utils/authState";
+import { requireList } from "../api/responseContract";
 
 const FOLDERS_API = "/api/folders";
-
-const getArrayData = (data) => {
-  if (Array.isArray(data)) return data;
-
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.folders)) return data.folders;
-  if (Array.isArray(data?.result)) return data.result;
-  if (Array.isArray(data?.results)) return data.results;
-
-  if (Array.isArray(data?.data?.content)) return data.data.content;
-  if (Array.isArray(data?.data?.items)) return data.data.items;
-  if (Array.isArray(data?.data?.folders)) return data.data.folders;
-  if (Array.isArray(data?.result?.content)) return data.result.content;
-
-  return [];
-};
 
 const getObjectData = (data) => {
   if (!data || Array.isArray(data)) return data;
@@ -87,23 +74,7 @@ const normalizeFolder = (folder) => {
 };
 
 const normalizeFolderList = (data) => {
-  return getArrayData(data).map(normalizeFolder).filter(Boolean);
-};
-
-const mergeFolder = (folderList, folder) => {
-  if (!folder) return folderList;
-
-  const hasFolder = folderList.some(
-    (item) => String(item.id) === String(folder.id)
-  );
-
-  if (hasFolder) {
-    return folderList.map((item) =>
-      String(item.id) === String(folder.id) ? folder : item
-    );
-  }
-
-  return [...folderList, folder];
+  return requireList(data).map(normalizeFolder).filter(Boolean);
 };
 
 export const loadSavedFolders = async () => {
@@ -148,36 +119,6 @@ const FolderIcon = ({ width = 30, height = 24 }) => (
   </svg>
 );
 
-const DescriptionIcon = () => (
-  <svg viewBox="0 0 34 34" width="30" height="30" aria-hidden="true">
-    <path
-      d="M6 9H22"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3"
-      strokeLinecap="round"
-    />
-    <path
-      d="M6 16H17"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3"
-      strokeLinecap="round"
-    />
-    <path
-      d="M6 23H12"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3"
-      strokeLinecap="round"
-    />
-    <path
-      d="M21.6 25.2L15.5 27L17.3 20.9L25.6 12.6C26.4 11.8 27.7 11.8 28.5 12.6L29.9 14C30.7 14.8 30.7 16.1 29.9 16.9L21.6 25.2Z"
-      fill="currentColor"
-    />
-  </svg>
-);
-
 function FolderSelectModal({
   open,
   onClose,
@@ -186,6 +127,7 @@ function FolderSelectModal({
   defaultSelectedFolderId = "",
   folders: foldersProp,
   onCreateFolder,
+  contextKey = "",
 }) {
   const [folders, setFolders] = useState([]);
   const [selectedFolderId, setSelectedFolderId] = useState("");
@@ -193,11 +135,23 @@ function FolderSelectModal({
   const [folderLoadError, setFolderLoadError] = useState("");
 
   const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
-  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const account = useSessionKey();
+  const taskKey = account + ":" + contextKey;
+  const [folderOwner, setFolderOwner] = useState(taskKey);
+  const [createOwner, setCreateOwner] = useState(taskKey);
+  const visibleFolders = useMemo(() => folderOwner === taskKey ? folders : [], [folderOwner, taskKey, folders]);
+  const showCreate = isCreateFolderOpen && createOwner === taskKey;
+  const createTask = useMutationTask(taskKey);
+  const isCreatingFolder = createTask.status === "running";
+  const current = useRef({ open, taskKey, epoch: 0 });
+  if (current.current.open !== open || current.current.taskKey !== taskKey) {
+    current.current = { open, taskKey, epoch: current.current.epoch + 1 };
+  }
   const [newFolderName, setNewFolderName] = useState("");
-  const [newFolderDescription, setNewFolderDescription] = useState("");
   const [createFolderError, setCreateFolderError] = useState("");
 
+  useEffect(() => () => { current.current = { open: false, taskKey: null, epoch: current.current.epoch + 1 }; }, []);
+  const autoSelect = useRef(true);
   const selectedFolderButtonRef = useRef(null);
   const dialogRef = useModalFocus({
     open,
@@ -229,51 +183,28 @@ function FolderSelectModal({
 
   const applyFolders = useCallback(
     (nextFolders) => {
+      setFolderOwner(taskKey);
       setFolders(nextFolders);
       setSelectedFolderId(getInitialFolderId(nextFolders));
     },
-    [getInitialFolderId]
+    [getInitialFolderId, taskKey]
   );
 
-  const fetchFolders = useCallback(async () => {
-    setFolderLoadError("");
-
-    if (Array.isArray(foldersProp)) {
-      const nextFolders = normalizeFolderList(foldersProp);
-      applyFolders(nextFolders);
-      return nextFolders;
-    }
-
-    try {
-      setIsLoadingFolders(true);
-
-      const nextFolders = await loadSavedFolders();
-      applyFolders(nextFolders);
-
-      return nextFolders;
-    } catch (error) {
-      logSafeApiError(error, "FolderSelectModal.jsx");
-
-      setFolders([]);
-      setSelectedFolderId("");
-      setFolderLoadError("폴더를 불러오지 못했습니다.");
-
-      return [];
-    } finally {
-      setIsLoadingFolders(false);
-    }
-  }, [applyFolders, foldersProp]);
-
+  const readFolders = async () => Array.isArray(foldersProp) ? normalizeFolderList(foldersProp) : loadSavedFolders();
+  const listQuery = useReadQuery(taskKey + ":" + open + ":" + current.current.epoch, async signal => {
+    if (Array.isArray(foldersProp)) return normalizeFolderList(foldersProp);
+    const response = await api.get(FOLDERS_API, { signal });
+    return normalizeFolderList(response.data);
+  }, open && account !== "anonymous", () => getAuthSnapshot().accountKey === account);
   useEffect(() => {
-    if (!open) return;
-
-    fetchFolders();
-    setIsCreateFolderOpen(false);
-    setNewFolderName("");
-    setNewFolderDescription("");
-    setCreateFolderError("");
-  }, [fetchFolders, open]);
-
+    setIsLoadingFolders(listQuery.status === "loading");
+    setFolderLoadError(listQuery.status === "error" ? "폴더를 불러오지 못했습니다." : "");
+    if (listQuery.status === "success") {
+      if (autoSelect.current) applyFolders(listQuery.data);
+      else { setFolderOwner(taskKey); setFolders(listQuery.data); setSelectedFolderId(""); }
+    }
+  }, [listQuery.status, listQuery.data, applyFolders, taskKey]);
+  useEffect(() => { setFolders([]); setSelectedFolderId(""); setIsCreateFolderOpen(false); }, [taskKey]);
   useEffect(() => {
     if (!open || isCreateFolderOpen) return;
 
@@ -284,14 +215,13 @@ function FolderSelectModal({
 
   const selectedFolder = useMemo(() => {
     return (
-      folders.find((folder) => String(folder.id) === String(selectedFolderId)) ||
+      visibleFolders.find((folder) => String(folder.id) === String(selectedFolderId)) ||
       null
     );
-  }, [folders, selectedFolderId]);
+  }, [visibleFolders, selectedFolderId]);
 
   const resetCreateFolderForm = () => {
     setNewFolderName("");
-    setNewFolderDescription("");
     setCreateFolderError("");
   };
 
@@ -303,7 +233,8 @@ function FolderSelectModal({
   const handleOpenCreateFolder = () => {
     if (isSaving || isCreatingFolder || isLoadingFolders) return;
 
-    resetCreateFolderForm();
+    createTask.reset();
+    setCreateOwner(taskKey);
     setIsCreateFolderOpen(true);
   };
 
@@ -314,92 +245,27 @@ function FolderSelectModal({
     setIsCreateFolderOpen(false);
   };
 
-  const handleCreateFolder = async (event) => {
+  const handleCreateFolder = async event => {
     event.preventDefault();
-
-    if (isSaving || isCreatingFolder) return;
-
-    const trimmedFolderName = newFolderName.trim();
-    const trimmedFolderDescription = newFolderDescription.trim();
-
-    if (!trimmedFolderName) {
-      setCreateFolderError("폴더 이름을 입력해주세요.");
-      return;
-    }
-
-    const duplicated = folders.some(
-      (folder) =>
-        folder.name.trim().toLowerCase() === trimmedFolderName.toLowerCase()
+    if (isSaving || createTask.blocked || createTask.status === "success") return;
+    const name = newFolderName.trim();
+    if (!name || name.length > 255) { setCreateFolderError("폴더 이름은 공백만 입력할 수 없으며 1~255자로 입력해주세요."); return; }
+    setCreateFolderError("");
+    autoSelect.current = false;
+    const epoch = current.current.epoch;
+    await createTask.run(
+      () => onCreateFolder ? onCreateFolder({ name }) : api.post(FOLDERS_API, { name }),
+      async () => {
+        const next = await readFolders();
+        if (!current.current.open || current.current.taskKey !== taskKey || current.current.epoch !== epoch || getAuthSnapshot().accountKey !== account) throw new Error("화면 변경");
+        setFolderOwner(taskKey); setFolders(next); setSelectedFolderId("");
+      }, {
+        failure: "새 폴더 생성에 실패했어요. 입력은 유지됩니다.",
+        success: "폴더가 생성됐어요. 목록으로 돌아가 직접 폴더를 선택해 주세요. 장소는 아직 저장되지 않았습니다.",
+        refreshFailure: "폴더는 생성됐지만 목록을 불러오지 못했어요.",
+      }
     );
-
-    if (duplicated) {
-      setCreateFolderError("이미 같은 이름의 폴더가 있습니다.");
-      return;
-    }
-
-    try {
-      setIsCreatingFolder(true);
-      setCreateFolderError("");
-
-      let createdFolder = null;
-
-      if (onCreateFolder) {
-        const result = await onCreateFolder({
-          name: trimmedFolderName,
-          description: trimmedFolderDescription,
-        });
-
-        createdFolder = normalizeFolder(result);
-      } else {
-        const response = await api.post(FOLDERS_API, {
-          name: trimmedFolderName,
-        });
-
-        createdFolder = normalizeFolder(response.data);
-      }
-
-      let latestFolders = folders;
-
-      try {
-        if (Array.isArray(foldersProp)) {
-          latestFolders = normalizeFolderList(foldersProp);
-        } else {
-          latestFolders = await loadSavedFolders();
-        }
-      } catch (reloadError) {
-        logSafeApiError(reloadError, "FolderSelectModal.jsx");
-      }
-
-      if (!createdFolder) {
-        createdFolder =
-          latestFolders.find(
-            (folder) =>
-              folder.name.trim().toLowerCase() ===
-              trimmedFolderName.toLowerCase()
-          ) || null;
-      }
-
-      if (!createdFolder) {
-        setCreateFolderError(
-          "폴더는 생성됐지만 폴더 정보를 확인하지 못했습니다. 다시 열어주세요."
-        );
-        return;
-      }
-
-      const nextFolders = mergeFolder(latestFolders, createdFolder);
-
-      setFolders(nextFolders);
-      setSelectedFolderId(createdFolder.id);
-      resetCreateFolderForm();
-      setIsCreateFolderOpen(false);
-    } catch (error) {
-      logSafeApiError(error, "FolderSelectModal.jsx");
-      setCreateFolderError("새 폴더 생성에 실패했습니다.");
-    } finally {
-      setIsCreatingFolder(false);
-    }
   };
-
   const handleSaveClick = () => {
     if (!selectedFolder || isSaving || isCreatingFolder || isLoadingFolders) {
       return;
@@ -408,7 +274,7 @@ function FolderSelectModal({
     onSave?.(selectedFolder);
   };
 
-  if (!open) return null;
+  if (!open || account === "anonymous") return null;
 
   const modalElement = (
     <div
@@ -416,7 +282,7 @@ function FolderSelectModal({
       role="presentation"
       onClick={handleBackdropClick}
     >
-      {isCreateFolderOpen ? (
+      {showCreate ? (
         <section
           ref={dialogRef}
           className="folder-create-modal"
@@ -466,41 +332,20 @@ function FolderSelectModal({
                     setCreateFolderError("");
                   }}
                   placeholder="폴더 이름을 입력하세요"
-                  maxLength={30}
+                  maxLength={255}
                   autoComplete="off"
                   autoFocus
-                  disabled={isSaving || isCreatingFolder}
+                  disabled={isSaving || createTask.blocked || createTask.status === "success"}
                 />
               </div>
 
+              {createTask.message && <p role="status">{createTask.status === "unknown" ? "폴더가 생성되었을 수 있어요. 목록을 확인해 주세요. 자동으로 다시 생성하지 않습니다." : createTask.message}</p>}
+              {["unknown", "refreshError"].includes(createTask.status) && <button type="button" onClick={createTask.retryRead}>목록 다시 확인</button>}
+              {isCreatingFolder && <p role="status">생성 요청 처리 중에는 닫을 수 없습니다.</p>}
               {createFolderError && (
                 <p className="folder-create-error">{createFolderError}</p>
               )}
 
-              <label
-                className="folder-create-label folder-create-description-label"
-                htmlFor="folder-description"
-              >
-                설명
-              </label>
-
-              <div className="folder-create-textarea-box">
-                <span className="folder-create-textarea-icon">
-                  <DescriptionIcon />
-                </span>
-
-                <textarea
-                  id="folder-description"
-                  value={newFolderDescription}
-                  onChange={(event) =>
-                    setNewFolderDescription(event.target.value)
-                  }
-                  placeholder="설명을 입력하세요 (선택)"
-                  rows={3}
-                  maxLength={80}
-                  disabled={isSaving || isCreatingFolder}
-                />
-              </div>
             </div>
 
             <footer className="folder-create-footer">
@@ -515,9 +360,10 @@ function FolderSelectModal({
 
               <button
                 type="submit"
+                aria-label="폴더 생성"
                 className="folder-create-submit-btn"
                 disabled={
-                  isSaving || isCreatingFolder || !newFolderName.trim()
+                  isSaving || createTask.blocked || createTask.status === "success" || !newFolderName.trim()
                 }
               >
                 {isCreatingFolder ? "만드는 중..." : "+ 만들기"}
@@ -559,13 +405,13 @@ function FolderSelectModal({
                   폴더를 불러오는 중입니다...
                 </p>
               ) : folderLoadError ? (
-                <p className="folder-select-empty-text">{folderLoadError}</p>
-              ) : folders.length === 0 ? (
+                <div><p className="folder-select-empty-text">{folderLoadError}</p><button type="button" onClick={listQuery.retry}>폴더 목록 다시 불러오기</button></div>
+              ) : visibleFolders.length === 0 ? (
                 <p className="folder-select-empty-text">
                   생성된 폴더가 없습니다.
                 </p>
               ) : (
-                folders.map((folder) => {
+                visibleFolders.map((folder) => {
                   const selected =
                     String(selectedFolderId) === String(folder.id);
 
@@ -579,7 +425,7 @@ function FolderSelectModal({
                       }`}
                       onClick={() => setSelectedFolderId(folder.id)}
                       aria-pressed={selected}
-                      disabled={isSaving || isCreatingFolder}
+                      disabled={isSaving || isCreatingFolder || isLoadingFolders}
                     >
                       <span className="folder-select-icon-circle">
                         <FolderIcon />

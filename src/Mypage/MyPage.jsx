@@ -1011,20 +1011,7 @@ const MyPage = () => {
           </div>
         </section>
 
-        <button
-          type="button"
-          className="mypage-invite-banner"
-          onClick={() => void 0}
-        >
-          <div className="mypage-invite-text">
-            <strong>친구 초대하고 포인트 받기!</strong>
-            <span>함께 여행갈 친구를 초대해보세요.</span>
-          </div>
-
-          <ArrowIcon />
-        </button>
-
-        <section className="mypage-section">
+<section className="mypage-section">
           <h2 className="mypage-section-title">나의 활동</h2>
 
           <div className="mypage-menu-list">

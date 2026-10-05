@@ -1,8 +1,9 @@
 import { logSafeApiError } from "../utils/safeLog";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import useModalFocus from "../utils/useModalFocus";
 import "./ShareModal.css";
+import useSessionKey from "../utils/useSessionKey";
 
 const copyText = async (text) => {
   if (!text) {
@@ -26,8 +27,8 @@ const copyText = async (text) => {
   textarea.focus();
   textarea.select();
 
-  const copied = document.execCommand("copy");
-  document.body.removeChild(textarea);
+  let copied;
+  try { copied = document.execCommand("copy"); } finally { textarea.remove(); }
 
   if (!copied) {
     throw new Error("링크 복사 실패");
@@ -43,66 +44,54 @@ function ShareModal({
   previewSubtitle = "",
   previewImage = "",
   onSavePdf,
+  contextKey = shareUrl,
+  exportBlockedReason = "",
 }) {
-  const [copied, setCopied] = useState(false);
-  const [isSavingPdf, setIsSavingPdf] = useState(false);
-  const dialogRef = useModalFocus({
-    open,
-    onClose,
-    canClose: !isSavingPdf,
-    lockScroll: true,
-  });
-
-  const showPreviewCard = variant !== "schedule";
-
-  const displayUrl = useMemo(() => {
-    return (shareUrl || "").replace(/^https?:\/\//, "");
-  }, [shareUrl]);
-
-  const previewUrl = useMemo(() => {
-    return displayUrl.toUpperCase();
-  }, [displayUrl]);
-
+  const account = useSessionKey();
+  const [task, setTask] = useState({ status: "idle", kind: "", message: "" });
+  const lock = useRef(null);
+  const current = useRef({ open, contextKey, account }); current.current = { open, contextKey, account };
+  const generation = useRef(0);
   useEffect(() => {
-    if (!copied) return undefined;
-
-    const timer = window.setTimeout(() => {
-      setCopied(false);
-    }, 1400);
-
-    return () => window.clearTimeout(timer);
-  }, [copied]);
-
+    const version = ++generation.current; lock.current = null;
+    setTask({ status: "idle", kind: "", message: "" });
+    return () => { generation.current = version + 1; lock.current = null; };
+  }, [open, contextKey, account]);
+  const busy = task.status === "running";
+  const close = () => { if (!lock.current) onClose?.(); };
+  const dialogRef = useModalFocus({ open, onClose: close, canClose: !busy, lockScroll: true });
+  const showPreviewCard = variant !== "schedule";
+  const previewUrl = useMemo(() => (shareUrl || "").replace(/^https?:\/\//, "").toUpperCase(), [shareUrl]);
+  const execute = async kind => {
+    if (lock.current) return;
+    const version = generation.current;
+    const operation = { version }; lock.current = operation;
+    const initial = { open, contextKey, account };
+    const isCurrent = () => generation.current === version && current.current.open &&
+      current.current.contextKey === initial.contextKey && current.current.account === initial.account;
+    setTask({ status: "running", kind, message: kind === "copy" ? "링크 복사 중..." : "PDF 생성 중... 처리 중에는 닫을 수 없습니다." });
+    try {
+      if (kind === "copy") await copyText(shareUrl);
+      else {
+        if (exportBlockedReason) throw new Error(exportBlockedReason);
+        if (typeof onSavePdf !== "function") throw new Error("PDF 출력할 내용이 없습니다.");
+        await onSavePdf({ isCurrent });
+      }
+      if (isCurrent()) setTask({ status: "success", kind, message: kind === "copy" ? "링크를 복사했어요." : "파일 저장 요청을 보냈어요. 저장 여부는 브라우저에서 확인해 주세요." });
+    } catch (error) {
+      if (isCurrent()) {
+        logSafeApiError(error, "ShareModal.jsx");
+        setTask({ status: "error", kind, message: kind === "copy" ? "자동 복사가 어려워요. 아래 링크를 직접 선택해 복사해 주세요." : exportBlockedReason || "PDF를 생성하지 못했어요. 다시 시도해 주세요." });
+      }
+    } finally { if (lock.current === operation) lock.current = null; }
+  };
+  const handleCopy = () => execute("copy");
+  const handlePdf = () => execute("pdf");
+  const copied = task.status === "success" && task.kind === "copy";
+  const isSavingPdf = busy && task.kind === "pdf";
   if (!open) return null;
-
-  const handleCopy = async () => {
-    try {
-      await copyText(shareUrl);
-      setCopied(true);
-    } catch (error) {
-      logSafeApiError(error, "ShareModal.jsx");
-      alert("링크 복사에 실패했어요.");
-    }
-  };
-
-  const handlePdf = async () => {
-    if (typeof onSavePdf !== "function") {
-      alert("PDF 저장 기능을 찾지 못했어요.");
-      return;
-    }
-
-    try {
-      setIsSavingPdf(true);
-      await onSavePdf();
-    } catch (error) {
-      logSafeApiError(error, "ShareModal.jsx");
-    } finally {
-      setIsSavingPdf(false);
-    }
-  };
-
   return createPortal(
-    <div className="share-modal-overlay" onClick={onClose}>
+    <div className="share-modal-overlay" onClick={close}>
       <div
         ref={dialogRef}
         className="share-modal-sheet"
@@ -118,7 +107,8 @@ function ShareModal({
           <button
             type="button"
             className="share-modal-close"
-            onClick={onClose}
+            onClick={close}
+            disabled={busy}
             aria-label="닫기"
             data-modal-initial-focus
           >
@@ -133,6 +123,7 @@ function ShareModal({
             type="button"
             className="share-modal-action-card"
             onClick={handleCopy}
+            disabled={busy}
             aria-label="링크 복사"
           >
             <span className="share-modal-action-icon">
@@ -155,7 +146,7 @@ function ShareModal({
             type="button"
             className="share-modal-action-card"
             onClick={handlePdf}
-            disabled={isSavingPdf}
+            disabled={busy || Boolean(exportBlockedReason)}
             aria-label="PDF로 저장하기"
           >
             <span className="share-modal-action-icon">
@@ -176,6 +167,10 @@ function ShareModal({
           </button>
         </div>
 
+        {(task.message || exportBlockedReason) && <div className="share-modal-status" role="status"><p>{task.message || exportBlockedReason}</p>
+          {task.status === "error" && <button type="button" onClick={() => execute(task.kind)}>다시 시도</button>}
+          {task.status === "error" && task.kind === "copy" && <label>직접 복사할 링크<input aria-label="직접 복사할 링크" readOnly value={shareUrl} onFocus={event => event.target.select()} /></label>}
+        </div>}
         {showPreviewCard && (
           <div
             className={`share-modal-preview-card ${

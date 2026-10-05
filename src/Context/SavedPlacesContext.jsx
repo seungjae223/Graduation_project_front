@@ -6,12 +6,23 @@ import React, {
   useState,
 } from "react";
 
+import useSessionKey from "../utils/useSessionKey";
+import { getAuthSnapshot } from "../utils/authState";
 const SavedPlacesContext = createContext(null);
 
 const getPlaceId = (place) => place?.id ?? place?.placeId;
 
 export const SavedPlacesProvider = ({ children }) => {
-  const [savedPlaces, setSavedPlaces] = useState([]);
+  const accountKey = useSessionKey();
+  const [records, setRecords] = useState({ accountKey, places: [] });
+  const savedPlaces = useMemo(() => records.accountKey === accountKey ? records.places : [], [records, accountKey]);
+  const setSavedPlaces = useCallback(update => {
+    if (getAuthSnapshot().accountKey !== accountKey) return;
+    setRecords(previous => {
+      const places = previous.accountKey === accountKey ? previous.places : [];
+      return { accountKey, places: typeof update === "function" ? update(places) : update };
+    });
+  }, [accountKey]);
 
   const isSaved = useCallback(
     (id) => {
@@ -38,7 +49,7 @@ export const SavedPlacesProvider = ({ children }) => {
 
       return [...prev, place];
     });
-  }, []);
+  }, [setSavedPlaces]);
 
   const removeSavedPlace = useCallback((id) => {
     if (id === null || id === undefined) return;
@@ -46,7 +57,7 @@ export const SavedPlacesProvider = ({ children }) => {
     setSavedPlaces((prev) =>
       prev.filter((place) => String(getPlaceId(place)) !== String(id)),
     );
-  }, []);
+  }, [setSavedPlaces]);
 
   const toggleSavedPlace = useCallback(
     (place) => {
@@ -66,7 +77,7 @@ export const SavedPlacesProvider = ({ children }) => {
 
   const clearSavedPlaces = useCallback(() => {
     setSavedPlaces([]);
-  }, []);
+  }, [setSavedPlaces]);
 
   const value = useMemo(
     () => ({

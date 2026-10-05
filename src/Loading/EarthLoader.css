@@ -169,3 +169,10 @@
     transform: skewX(0deg) rotate(0deg);
   }
 }
+
+.earth-loading-screen--page {
+  flex: 1;
+  min-height: 0;
+  padding: 24px;
+  background: transparent;
+}

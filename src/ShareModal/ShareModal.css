@@ -286,3 +286,5 @@
     font-size: 10px;
   }
 }
+
+.share-modal-status { padding: 12px 0; line-height: 1.5; }.share-modal-status input { display: block; width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #d9eaf7; border-radius: 10px; }.share-modal-status button { padding: 10px 14px; border: 0; border-radius: 10px; background: #eef7ff; color: #1689d9; font: inherit; }

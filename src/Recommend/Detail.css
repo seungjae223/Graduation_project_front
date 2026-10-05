@@ -301,3 +301,6 @@
   background: #19a5f4;
   color: #ffffff;
 }
+.detail-image-placeholder { min-height: 220px; display: flex; align-items: center; justify-content: center; background: var(--surface-color, #eef3f8); color: var(--text-color, #6b7788); }
+
+.detail-query-notice { padding: 16px; margin: 12px 16px 80px; background: #eef7ff; color: #283342; border-radius: 16px; line-height: 1.5; }

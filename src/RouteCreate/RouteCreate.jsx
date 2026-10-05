@@ -15,11 +15,11 @@ import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import StartPlaceModal from "./StartPlaceModal";
 import useModalFocus from "../utils/useModalFocus";
 import api from "../api/api";
+import useGenerationTask from "./useGenerationTask";
 
 const ROUTE_SELECTED_PLACE_KEY = "routeSelectedPlace";
 const ROUTE_DRAFT_PLACES_KEY = "routeDraftPlaces";
 const RECENT_PLACES_KEY = "recentPlaces";
-const ROUTE_FIXED_TIME_STORAGE_PREFIX = "route_fixed_time_map";
 const PLACE_SEARCH_API = "/api/places/search";
 const TRIPS_API = "/api/trips";
 
@@ -1351,117 +1351,6 @@ const normalizeSourceId = (value) => {
 };
 
 
-const normalizeTimeMapText = (value = "") =>
-  String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "");
-
-const addRouteTimeMapEntry = (timeMap, key, value) => {
-  if (!key || !value?.timeLabel) return;
-
-  timeMap[key] = value;
-};
-
-const buildRouteTimeMap = (route = {}) => {
-  const timeMap = {};
-  const selectedDates = Array.isArray(route.selectedDates)
-    ? route.selectedDates
-    : [];
-  const placesByDate = route.placesByDate || {};
-  const dateKeys =
-    selectedDates.length > 0
-      ? selectedDates.map(formatDateKey).filter(Boolean)
-      : Object.keys(placesByDate);
-
-  dateKeys.forEach((dateKey, dayIndex) => {
-    const day = dayIndex + 1;
-    const dayPlaces = Array.isArray(placesByDate[dateKey])
-      ? placesByDate[dateKey]
-      : [];
-
-    dayPlaces.forEach((place, placeIndex) => {
-      const timeLabel = place?.timeLabel || place?.time || "";
-
-      if (!timeLabel) return;
-
-      const name =
-        place.name ||
-        place.title ||
-        place.placeName ||
-        place.destinationName ||
-        "";
-      const address =
-        place.desc || place.address || place.roadAddress || place.addr || "";
-      const visitOrder = place.visitOrder || placeIndex + 1;
-      const entry = {
-        id: place.id,
-        localId: place.id,
-        tripPlaceId: place.tripPlaceId,
-        serverTripPlaceId: place.serverTripPlaceId,
-        placeId: place.placeId,
-        originalId: place.originalId,
-        destinationId: place.destinationId,
-        sourceId: place.sourceId,
-        name,
-        title: name,
-        placeName: name,
-        address,
-        desc: address,
-        day,
-        dateKey,
-        visitOrder,
-        localOrder: visitOrder,
-        timeLabel,
-        time: timeLabel,
-        isFixedTime: Boolean(place.isFixedTime),
-      };
-
-      addRouteTimeMapEntry(timeMap, `${day}:index:${visitOrder}`, entry);
-      addRouteTimeMapEntry(timeMap, `${day}:localId:${place.id}`, entry);
-      addRouteTimeMapEntry(timeMap, `${day}:tripPlaceId:${place.tripPlaceId}`, entry);
-      addRouteTimeMapEntry(
-        timeMap,
-        `${day}:tripPlaceId:${place.serverTripPlaceId}`,
-        entry
-      );
-      addRouteTimeMapEntry(timeMap, `${day}:placeId:${place.placeId}`, entry);
-      addRouteTimeMapEntry(timeMap, `${day}:placeId:${place.originalId}`, entry);
-      addRouteTimeMapEntry(
-        timeMap,
-        `${day}:placeId:${place.destinationId}`,
-        entry
-      );
-      addRouteTimeMapEntry(timeMap, `${day}:sourceId:${place.sourceId}`, entry);
-      addRouteTimeMapEntry(
-        timeMap,
-        `${day}:name:${normalizeTimeMapText(name)}`,
-        entry
-      );
-      addRouteTimeMapEntry(
-        timeMap,
-        `${day}:address:${normalizeTimeMapText(address)}`,
-        entry
-      );
-    });
-  });
-
-  return timeMap;
-};
-
-const persistRouteTimeMap = (routeId, timeMap = {}) => {
-  if (!routeId || typeof window === "undefined") return;
-
-  try {
-    window.localStorage.setItem(
-      `${ROUTE_FIXED_TIME_STORAGE_PREFIX}:${routeId}`,
-      JSON.stringify(timeMap)
-    );
-  } catch (error) {
-    logSafeApiError(error, "RouteCreate.jsx");
-  }
-};
-
 const normalizeIncomingRoutePlace = (place) => {
   if (!place) {
     return null;
@@ -1757,10 +1646,9 @@ const getTripPlaceId = (tripPlace) => {
     : null;
 };
 
-const addPlacesToTrip = async (tripId, savedRoute) => {
+const addPlacesToTrip = async (tripId, savedRoute, record) => {
   const tripPlaceMap = {};
   const addedCountByDay = {};
-  const serverPlaceIdByLocalId = {};
   const serverTripPlaceIdByLocalId = {};
 
   for (let dayIndex = 0; dayIndex < savedRoute.selectedDates.length; dayIndex++) {
@@ -1772,6 +1660,7 @@ const addPlacesToTrip = async (tripId, savedRoute) => {
       const place = dayPlaces[placeIndex];
       const placeId = await ensureServerPlaceId(place);
 
+      record?.(`장소 추가: ${day}일차 ${placeIndex + 1}번째`, false);
       const response = await api.post(
         `${TRIPS_API}/${tripId}/places/${placeId}`,
         null,
@@ -1792,13 +1681,13 @@ const addPlacesToTrip = async (tripId, savedRoute) => {
         );
       }
 
+      record?.(`장소 추가: ${day}일차 ${placeIndex + 1}번째`, true);
       const localPlaceKey = place.id || `${dateKey}-${placeIndex}`;
 
       tripPlaceMap[localPlaceKey] = tripPlaceData;
       tripPlaceMap[`tripPlace:${tripPlaceId}`] = tripPlaceData;
       tripPlaceMap[`place:${placeId}`] = tripPlaceData;
 
-      serverPlaceIdByLocalId[localPlaceKey] = placeId;
       serverTripPlaceIdByLocalId[localPlaceKey] = tripPlaceId;
 
       addedCountByDay[day] = (addedCountByDay[day] || 0) + 1;
@@ -1808,7 +1697,6 @@ const addPlacesToTrip = async (tripId, savedRoute) => {
   return {
     tripPlaceMap,
     addedCountByDay,
-    serverPlaceIdByLocalId,
     serverTripPlaceIdByLocalId,
   };
 };
@@ -1819,6 +1707,7 @@ const setStartPointsToServer = async ({
   selectedStartPlaces,
   tripPlaceMap,
   addedCountByDay,
+  record,
 }) => {
   for (let dayIndex = 0; dayIndex < savedRoute.selectedDates.length; dayIndex++) {
     const day = dayIndex + 1;
@@ -1847,9 +1736,11 @@ const setStartPointsToServer = async ({
       );
     }
 
+    record?.(`출발지 설정: ${day}일차`, false);
     await api.post(
       `${TRIPS_API}/${tripId}/days/${day}/places/${tripPlaceId}/start`
     );
+    record?.(`출발지 설정: ${day}일차`, true);
   }
 };
 
@@ -1858,6 +1749,7 @@ const updateFixedSchedulesToServer = async ({
   savedRoute,
   selectedStartPlaces,
   tripPlaceMap,
+  record,
 }) => {
   for (let dayIndex = 0; dayIndex < savedRoute.selectedDates.length; dayIndex++) {
     const day = dayIndex + 1;
@@ -1869,8 +1761,9 @@ const updateFixedSchedulesToServer = async ({
       if (!place.isFixedTime || String(place.id) === String(startLocalId)) continue;
 
       const tripPlaceId = getTripPlaceId(tripPlaceMap[place.id]);
-      if (!tripPlaceId) continue;
+      if (!tripPlaceId) throw new Error("시간을 설정할 여행 장소 ID를 확인하지 못했습니다.");
 
+      record?.(`고정 시간 설정: ${day}일차`, false);
       await api.patch(
         `${TRIPS_API}/${tripId}/days/${day}/places/${tripPlaceId}/schedule`,
         {
@@ -1880,6 +1773,7 @@ const updateFixedSchedulesToServer = async ({
           isNextDay: Boolean(place.isNextDay),
         }
       );
+      record?.(`고정 시간 설정: ${day}일차`, true);
     }
   }
 };
@@ -1889,7 +1783,7 @@ const getOptimizedPlacesByDay = async (tripId, day) => {
   return getArrayData(response.data);
 };
 
-const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}) => {
+const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}, record) => {
   const optimizedByDay = {};
 
   for (let dayIndex = 0; dayIndex < savedRoute.selectedDates.length; dayIndex++) {
@@ -1897,12 +1791,14 @@ const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}) => {
 
     if (!addedCountByDay[day]) continue;
 
+    record?.(`최적화: ${day}일차`, false);
     const optimizeResponse = await api.post(
       `${TRIPS_API}/${tripId}/days/${day}/optimize`,
       null,
       { params: { startTime: "10:00" } }
     );
 
+    record?.(`최적화: ${day}일차`, true);
     const optimizedPlaces = getArrayData(optimizeResponse.data);
 
     optimizedByDay[day] =
@@ -1917,7 +1813,6 @@ const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}) => {
 const mapOptimizedPlacesToSavedRoute = (
   savedRoute,
   optimizedByDay,
-  serverPlaceIdByLocalId = {},
   serverTripPlaceIdByLocalId = {}
 ) => {
   const nextPlacesByDate = JSON.parse(
@@ -1940,22 +1835,15 @@ const mapOptimizedPlacesToSavedRoute = (
       .sort((a, b) => Number(a.visitOrder || 0) - Number(b.visitOrder || 0))
       .map((tripPlace, index) => {
         const tripPlaceId = getTripPlaceId(tripPlace);
-        const tripPlacePlaceId = Number(tripPlace.placeId);
 
         const matchedPlace =
           existingPlaces.find((place) => {
             const localKey = place.id;
             const localTripPlaceId = serverTripPlaceIdByLocalId[localKey];
-            const localPlaceId =
-              serverPlaceIdByLocalId[localKey] || getNumericPlaceId(place);
-
             return (
-              (tripPlaceId &&
-                Number(localTripPlaceId) === Number(tripPlaceId)) ||
-              (localPlaceId && Number(localPlaceId) === tripPlacePlaceId)
+              tripPlaceId && Number(localTripPlaceId) === Number(tripPlaceId)
             );
           }) ||
-          existingPlaces[index] ||
           {};
 
         return {
@@ -1985,7 +1873,13 @@ const mapOptimizedPlacesToSavedRoute = (
   };
 };
 
-const saveRouteToServer = async (savedRoute, startPlaceMap = {}) => {
+export const saveRouteToServer = async (savedRoute, startPlaceMap = {}, onProgress = () => {}) => {
+  const completed = [];
+  const record = (stage, success) => {
+    if (success) completed.push(stage);
+    onProgress({ stage, completed: [...completed] });
+  };
+  record("여행 생성", false);
   const tripPayload = buildTripPayload(savedRoute);
 
   const tripResponse = await api.post(TRIPS_API, tripPayload);
@@ -2000,21 +1894,23 @@ const saveRouteToServer = async (savedRoute, startPlaceMap = {}) => {
   const tripId = Number(tripData?.id || tripData?.tripId || serverSavedRoute.id);
 
   if (!Number.isInteger(tripId) || tripId <= 0) {
-    return serverSavedRoute;
+    throw new Error("서버 여행 ID를 확인하지 못했습니다.");
   }
-
+  onProgress({ tripId });
+  record("여행 생성", true);
+  record("장소 추가", false);
   const {
     tripPlaceMap,
     addedCountByDay,
-    serverPlaceIdByLocalId,
     serverTripPlaceIdByLocalId,
-  } = await addPlacesToTrip(tripId, savedRoute);
+  } = await addPlacesToTrip(tripId, savedRoute, record);
 
   await updateFixedSchedulesToServer({
     tripId,
     savedRoute,
     selectedStartPlaces: startPlaceMap,
     tripPlaceMap,
+    record,
   });
 
   await setStartPointsToServer({
@@ -2023,25 +1919,23 @@ const saveRouteToServer = async (savedRoute, startPlaceMap = {}) => {
     selectedStartPlaces: startPlaceMap,
     tripPlaceMap,
     addedCountByDay,
+    record,
   });
 
   const optimizedByDay = await optimizeTripDays(
     tripId,
     savedRoute,
-    addedCountByDay
+    addedCountByDay,
+    record
   );
 
   serverSavedRoute = mapOptimizedPlacesToSavedRoute(
     serverSavedRoute,
     optimizedByDay,
-    serverPlaceIdByLocalId,
     serverTripPlaceIdByLocalId
   );
 
-  const fixedTimeMap = buildRouteTimeMap(serverSavedRoute);
-  persistRouteTimeMap(tripId, fixedTimeMap);
-
-  const optimizedTripPlaces = Object.values(optimizedByDay).flatMap((places) =>
+const optimizedTripPlaces = Object.values(optimizedByDay).flatMap((places) =>
     Array.isArray(places) ? places : []
   );
 
@@ -2060,7 +1954,6 @@ const saveRouteToServer = async (savedRoute, startPlaceMap = {}) => {
 
   return {
     ...serverSavedRoute,
-    fixedTimeMap,
     serverData: {
       trip: tripData,
       tripPlaces: uniqueTripPlaces,
@@ -2096,9 +1989,10 @@ const RouteCreate = () => {
   const [hasServerSearchCompleted, setHasServerSearchCompleted] =
     useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
-  const [isSavingRoute, setIsSavingRoute] = useState(false);
-  const [isGeneratingRoute, setIsGeneratingRoute] = useState(false);
+  const isSavingRoute = false;
   const [generatedRoute, setGeneratedRoute] = useState(null);
+  const generation = useGenerationTask();
+  const isGeneratingRoute = generation.status === "running";
   const [startPlaceErrorMessage, setStartPlaceErrorMessage] = useState("");
   const [isStartPlaceModalOpen, setIsStartPlaceModalOpen] = useState(false);
   const [startPlaceDayIndex, setStartPlaceDayIndex] = useState(0);
@@ -2593,6 +2487,12 @@ const RouteCreate = () => {
   };
 
   const handleGenerateRoute = () => {
+    if (generation.status === "running") return;
+    if (generation.status === "failed") {
+      setIsStartPlaceModalOpen(false);
+      return;
+    }
+    generation.reset();
     const hasAnyPlace = selectedDates.some((date) => {
       const dateKey = formatDateKey(date);
       return (placesByDate[dateKey] || []).length > 0;
@@ -2650,10 +2550,6 @@ const RouteCreate = () => {
       createdAt: new Date().toISOString(),
       selectedDates: routeSelectedDates,
       placesByDate: routePlacesByDate,
-      fixedTimeMap: buildRouteTimeMap({
-        selectedDates: routeSelectedDates,
-        placesByDate: routePlacesByDate,
-      }),
       thumbnail: firstPlace?.thumb || "",
       summary: {
         daysCount: selectedDates.length,
@@ -2667,171 +2563,42 @@ const RouteCreate = () => {
   };
 
   const handleConfirmStartPlaces = async () => {
-    const reorderedPlacesByDate = selectedDates.reduce(
-      (acc, date) => {
-        const dateKey = formatDateKey(date);
-        const dayPlaces = acc[dateKey] || [];
-        const selectedId = selectedStartPlaces[dateKey] || dayPlaces[0]?.id;
-
-        acc[dateKey] = moveSelectedPlaceToFirst(dayPlaces, selectedId);
-
-        return acc;
-      },
-      { ...placesByDate }
-    );
-
-    const savedRoute = buildRouteDraft(reorderedPlacesByDate);
-
+    if (generation.status === "running" || generation.status === "failed") return;
+    const reordered = selectedDates.reduce((acc, date) => {
+      const key = formatDateKey(date);
+      const places = acc[key] || [];
+      acc[key] = moveSelectedPlaceToFirst(places, selectedStartPlaces[key] || places[0]?.id);
+      return acc;
+    }, { ...placesByDate });
     try {
-      setIsGeneratingRoute(true);
+
       setStartPlaceErrorMessage("");
-      setPlacesByDate(reorderedPlacesByDate);
-
-      const serverSavedRoute = await saveRouteToServer(
-        savedRoute,
-        selectedStartPlaces
-      );
-
-      setGeneratedRoute(serverSavedRoute);
-
-      if (serverSavedRoute.placesByDate) {
-        setPlacesByDate(serverSavedRoute.placesByDate);
-      }
-
+      const result = await generation.run(update => saveRouteToServer(buildRouteDraft(reordered), selectedStartPlaces, update));
+      if (!result) return;
+      setGeneratedRoute(result);
+      setPlacesByDate(result.placesByDate || reordered);
       setIsStartPlaceModalOpen(false);
-
-      setTimeout(() => {
-        setIsCompleteModalOpen(true);
-      }, 50);
+      setIsCompleteModalOpen(true);
     } catch (error) {
       logSafeApiError(error, "RouteCreate.jsx");
-
-      if (error.message.includes("Network Error")) {
-        setStartPlaceErrorMessage(
-          "네트워크 연결을 확인한 뒤 다시 시도해주세요."
-        );
-        return;
-      }
-
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        setStartPlaceErrorMessage(
-          "로그인 정보가 만료되었거나 권한이 없습니다. 다시 로그인해주세요."
-        );
-        return;
-      }
-
-      setStartPlaceErrorMessage(
-        getErrorMessage(
-          error,
-          "최적 경로 생성에 실패했습니다. 잠시 후 다시 시도해주세요."
-        )
-      );
-    } finally {
-      setIsGeneratingRoute(false);
+      setIsStartPlaceModalOpen(false);
+      setStartPlaceErrorMessage("일부 내용이 저장되었을 수 있어요. 중복 생성을 피하려면 일정 목록에서 저장 상태를 확인해 주세요.");
     }
   };
-
   const handleCloseCompleteModal = () => {
-    if (isSavingRoute || isGeneratingRoute) return;
+    if (isGeneratingRoute) return;
     setIsCompleteModalOpen(false);
   };
-
-  const handleConfirmRoute = async () => {
-    if (generatedRoute) {
-      setIsCompleteModalOpen(false);
-
-      navigate(`/route-result?id=${generatedRoute.id}`, {
-        state: {
-          savedRoute: generatedRoute,
-          selectedDates,
-          placesByDate: generatedRoute.placesByDate || placesByDate,
-        },
-      });
-
-      return;
-    }
-
-    const routeDraft = buildRouteDraft();
-
-    try {
-      setIsSavingRoute(true);
-
-      const serverSavedRoute = await saveRouteToServer(
-        routeDraft,
-        selectedStartPlaces
-      );
-
-      setIsCompleteModalOpen(false);
-
-      navigate(`/route-result?id=${serverSavedRoute.id}`, {
-        state: {
-          savedRoute: serverSavedRoute,
-          selectedDates,
-          placesByDate: serverSavedRoute.placesByDate || placesByDate,
-        },
-      });
-    } catch (error) {
-      logSafeApiError(error, "RouteCreate.jsx");
-
-      if (error.message.includes("Network Error")) {
-        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-      } else if (
-        error.response?.status === 401 ||
-        error.response?.status === 403
-      ) {
-        alert("로그인 정보가 만료되었거나 권한이 없습니다. 다시 로그인해주세요.");
-      } else {
-        alert(
-          getErrorMessage(
-            error,
-            "여행 생성에 실패했습니다. 잠시 후 다시 시도해주세요."
-          )
-        );
-      }
-    } finally {
-      setIsSavingRoute(false);
-    }
+  const handleConfirmRoute = () => {
+    if (!generatedRoute || generation.status !== "success") return;
+    setIsCompleteModalOpen(false);
+    navigate(`/route-result?id=${encodeURIComponent(generatedRoute.id)}`, { state: { savedRoute: generatedRoute } });
   };
-
-  const handleSaveRouteLater = async () => {
-    if (generatedRoute) {
-      setIsCompleteModalOpen(false);
-      alert("일정이 저장되었습니다.");
-      return;
-    }
-
-    const routeDraft = buildRouteDraft();
-
-    try {
-      setIsSavingRoute(true);
-
-      await saveRouteToServer(routeDraft, selectedStartPlaces);
-
-      setIsCompleteModalOpen(false);
-      alert("일정이 저장되었습니다.");
-    } catch (error) {
-      logSafeApiError(error, "RouteCreate.jsx");
-
-      if (error.message.includes("Network Error")) {
-        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-      } else if (
-        error.response?.status === 401 ||
-        error.response?.status === 403
-      ) {
-        alert("로그인 정보가 만료되었거나 권한이 없습니다. 다시 로그인해주세요.");
-      } else {
-        alert(
-          getErrorMessage(
-            error,
-            "여행 저장에 실패했습니다. 잠시 후 다시 시도해주세요."
-          )
-        );
-      }
-    } finally {
-      setIsSavingRoute(false);
-    }
+  const handleSaveRouteLater = () => {
+    if (!generatedRoute || generation.status !== "success") return;
+    setIsCompleteModalOpen(false);
+    navigate("/schedule");
   };
-
   const completeDialogRef = useModalFocus({
     open: isCompleteModalOpen,
     onClose: handleCloseCompleteModal,
@@ -2842,6 +2609,20 @@ const RouteCreate = () => {
   return (
     <div className="route-create-page">
       <div className="route-create-screen">
+        {generation.status === "running" && <p className="generation-feedback" role="status">{generation.stage} 중...</p>}
+        {generation.status === "failed" && <section className="generation-feedback" role="alert">
+          <h2>경로 생성을 완료하지 못했어요</h2>
+          <p>중단 단계: {generation.stage}</p>
+          <p>성공 응답을 확인한 작업: {generation.completed.length ? generation.completed.join(" · ") : "없음"}</p>
+          {generation.tripId && <p>확인된 여행 ID: {generation.tripId} (전체 저장 완료를 의미하지 않습니다)</p>}
+          <p>일부 내용이 저장되었을 수 있어요. 중복 생성을 피하려면 일정 목록에서 저장 상태를 확인해 주세요.</p>
+          <button type="button" onClick={() => navigate(generation.tripId ? `/route-result?id=${generation.tripId}` : "/schedule")}>저장 상태 확인</button>
+          <button type="button" onClick={() => {
+            if (window.confirm("기존 작업의 저장 여부가 불명확합니다. 일정 목록에서 확인했나요? 새로 생성하면 중복 일정이 생길 수 있습니다. 입력을 유지하고 새 작업을 준비할까요?")) {
+              generation.reset(); setStartPlaceErrorMessage(""); setIsStartPlaceModalOpen(false);
+            }
+          }}>입력을 유지하고 새 작업 준비</button>
+        </section>}
         <section className="calendar-section">
           <div className="calendar-header">
             <button
@@ -3115,7 +2896,7 @@ const RouteCreate = () => {
             className="route-generate-btn"
             onClick={handleGenerateRoute}
           >
-            최적 경로 생성하기
+            경로 생성하기
           </button>
         </div>
       </div>
@@ -3148,6 +2929,8 @@ const RouteCreate = () => {
         onConfirm={handleConfirmStartPlaces}
         isSubmitting={isGeneratingRoute}
         submitError={startPlaceErrorMessage}
+        progressText={`${generation.stage} 중...`}
+        submitBlocked={generation.status === "failed"}
       />
 
       <FavoritePlacesModal
@@ -3188,7 +2971,7 @@ const RouteCreate = () => {
             </h3>
 
             <p id="route-complete-description" className="route-complete-desc">
-              알고리즘이 분석한 최적의 경로가 <br />
+              등록한 장소를 바탕으로 생성한 경로가 <br />
               생성되었습니다. <br />
               지금 바로 확인해 보세요.
             </p>

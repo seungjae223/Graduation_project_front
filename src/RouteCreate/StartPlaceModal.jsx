@@ -42,6 +42,8 @@ const StartPlaceModal = ({
   onConfirm,
   isSubmitting = false,
   submitError = "",
+  progressText = "생성 중...",
+  submitBlocked = false,
 }) => {
   const [isPlaceDropdownOpen, setIsPlaceDropdownOpen] = useState(false);
   const dialogRef = useModalFocus({
@@ -342,9 +344,9 @@ const StartPlaceModal = ({
             type="button"
             className="start-place-confirm-btn"
             onClick={onConfirm}
-            disabled={isConfirmDisabled || isSubmitting}
+            disabled={isConfirmDisabled || isSubmitting || submitBlocked}
           >
-            {isSubmitting ? "생성 중..." : "확인"}
+            {isSubmitting ? progressText : "확인"}
           </button>
         </div>
       </div>

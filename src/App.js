@@ -165,7 +165,7 @@ function Layout() {
               : ""
           }`}
         >
-          <Suspense fallback={<EarthLoader text="화면을 불러오는 중..." />}>
+          <Suspense fallback={<EarthLoader variant="page" text="화면을 불러오는 중..." />}>
             <Routes>
               <Route path="/" element={<OnBoarding />} />
               <Route path="/onboarding" element={<OnBoarding />} />
@@ -197,7 +197,7 @@ function Layout() {
               <Route path="/route-create" element={<RouteCreate />} />
               <Route path="/detail" element={<Detail />} />
               <Route path="/route-result" element={<RouteResult />} />
-              <Route path="/schedule" element={<Schedule />} />
+              <Route path="/schedule" element={<RequireAuth><Schedule /></RequireAuth>} />
               <Route path="/popular-all" element={<PopularAll />} />
               <Route path="/my-schedule" element={<RequireAuth><MySchedule /></RequireAuth>} />
 

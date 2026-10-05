@@ -1,5 +1,6 @@
 import axios from "axios";
 import { clearAuthenticatedUserStorage, tokenCandidates } from "../utils/authStorage";
+import { getAuthSnapshot, notifyAuthChange } from "../utils/authState";
 import { logSafeApiError } from "../utils/safeLog";
 import { buildLoginPath, getCurrentReturnPath } from "../utils/authRedirect";
 
@@ -118,6 +119,8 @@ api.interceptors.request.use(
     const isPublicApi = isPublicApiPath(config);
 
     config.headers = config.headers || {};
+    notifyAuthChange();
+    config._authCredentialVersion = getAuthSnapshot().credentialVersion;
 
     // Clear every casing, including caller-supplied public-request headers.
     Object.keys(config.headers).forEach((key) => {
@@ -151,6 +154,8 @@ api.interceptors.response.use(
     const isPublicApi = error.config ? isPublicApiPath(error.config) : false;
 
     logSafeApiError(error, "api");
+    const sentVersion = error.config?._authCredentialVersion;
+    if (sentVersion !== undefined && sentVersion !== getAuthSnapshot().credentialVersion) return Promise.reject(error);
 
     // 401은 로그인 만료로 처리
     if (status === 401 && !isPublicApi) {

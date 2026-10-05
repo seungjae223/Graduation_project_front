@@ -1,13 +1,14 @@
 import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
 import { logSafeApiError } from "../utils/safeLog";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MySchedule.css";
-import api, { getAccessToken } from "../api/api";
+import { getTripsApi } from "../api/tripApi";
+
 
 import beachImg from "../img/서비스 소개 .png";
 
-const TRIPS_API = "/api/trips";
+
 
 const ChevronRightIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -118,24 +119,6 @@ const formatDateText = (date, withYear = true) => {
   const day = String(targetDate.getDate()).padStart(2, "0");
 
   return withYear ? `${year}.${month}.${day}` : `${month}.${day}`;
-};
-
-const getScheduleArray = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.trips)) return data.trips;
-  if (Array.isArray(data?.tripList)) return data.tripList;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.result)) return data.result;
-  if (Array.isArray(data?.results)) return data.results;
-
-  if (Array.isArray(data?.data?.content)) return data.data.content;
-  if (Array.isArray(data?.data?.trips)) return data.data.trips;
-  if (Array.isArray(data?.data?.items)) return data.data.items;
-  if (Array.isArray(data?.result?.content)) return data.result.content;
-
-  return [];
 };
 
 const getScheduleDates = (schedule) => {
@@ -300,193 +283,6 @@ const getScheduleImage = (schedule) => {
   );
 };
 
-const normalizeCompareText = (value) => {
-  if (value === null || value === undefined) return "";
-
-  return String(value).trim().toLowerCase();
-};
-
-const decodeJwtPayload = (token) => {
-  try {
-    if (!token) return null;
-
-    const payload = token.split(".")[1];
-
-    if (!payload) return null;
-
-    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const paddedBase64 = base64.padEnd(
-      base64.length + ((4 - (base64.length % 4)) % 4),
-      "=",
-    );
-
-    const decoded = atob(paddedBase64);
-    const json = decodeURIComponent(
-      decoded
-        .split("")
-        .map((char) => {
-          return `%${`00${char.charCodeAt(0).toString(16)}`.slice(-2)}`;
-        })
-        .join(""),
-    );
-
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
-};
-
-const getStoredJSON = (storage, key) => {
-  try {
-    const raw = storage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-};
-
-const getUserEmailFromObject = (user = {}) => {
-  const nestedUser =
-    user.user ||
-    user.member ||
-    user.userInfo ||
-    user.memberInfo ||
-    user.profile ||
-    {};
-
-  return (
-    user.email ||
-    user.userEmail ||
-    user.memberEmail ||
-    user.loginEmail ||
-    user.accountEmail ||
-    user.emailAddress ||
-    user.mail ||
-    nestedUser.email ||
-    nestedUser.userEmail ||
-    nestedUser.memberEmail ||
-    nestedUser.loginEmail ||
-    nestedUser.accountEmail ||
-    nestedUser.emailAddress ||
-    nestedUser.mail ||
-    ""
-  );
-};
-
-const getUserIdFromObject = (user = {}) => {
-  const nestedUser =
-    user.user ||
-    user.member ||
-    user.userInfo ||
-    user.memberInfo ||
-    user.profile ||
-    {};
-
-  return (
-    user.id ||
-    user.userId ||
-    user.memberId ||
-    user.accountId ||
-    nestedUser.id ||
-    nestedUser.userId ||
-    nestedUser.memberId ||
-    nestedUser.accountId ||
-    ""
-  );
-};
-
-const getCurrentUserIdentity = async () => {
-  const token = getAccessToken();
-  const payload = decodeJwtPayload(token);
-
-  const localUser = getStoredJSON(localStorage, "currentUser");
-  const sessionUser = getStoredJSON(sessionStorage, "currentUser");
-
-  let email =
-    getUserEmailFromObject(localUser || {}) ||
-    getUserEmailFromObject(sessionUser || {}) ||
-    localStorage.getItem("userEmail") ||
-    sessionStorage.getItem("userEmail") ||
-    payload?.email ||
-    payload?.userEmail ||
-    payload?.memberEmail ||
-    (typeof payload?.sub === "string" && payload.sub.includes("@")
-      ? payload.sub
-      : "") ||
-    "";
-
-  let id =
-    getUserIdFromObject(localUser || {}) ||
-    getUserIdFromObject(sessionUser || {}) ||
-    payload?.id ||
-    payload?.userId ||
-    payload?.memberId ||
-    payload?.accountId ||
-    "";
-
-  return {
-    email: normalizeCompareText(email),
-    id: normalizeCompareText(id),
-  };
-};
-
-const getTripOwnerEmail = (trip = {}) => {
-  return (
-    trip.userEmail ||
-    trip.email ||
-    trip.memberEmail ||
-    trip.ownerEmail ||
-    trip.createdByEmail ||
-    trip.writerEmail ||
-    trip.user?.email ||
-    trip.member?.email ||
-    trip.owner?.email ||
-    trip.createdBy?.email ||
-    trip.writer?.email ||
-    ""
-  );
-};
-
-const getTripOwnerId = (trip = {}) => {
-  return (
-    trip.userId ||
-    trip.memberId ||
-    trip.ownerId ||
-    trip.createdById ||
-    trip.writerId ||
-    trip.user?.id ||
-    trip.user?.userId ||
-    trip.member?.id ||
-    trip.member?.memberId ||
-    trip.owner?.id ||
-    trip.createdBy?.id ||
-    trip.writer?.id ||
-    ""
-  );
-};
-
-const hasTripOwnerInfo = (trip) => {
-  return Boolean(getTripOwnerEmail(trip) || getTripOwnerId(trip));
-};
-
-const isMyTrip = (trip, currentUserIdentity) => {
-  const currentEmail = currentUserIdentity.email;
-  const currentId = currentUserIdentity.id;
-
-  const ownerEmail = normalizeCompareText(getTripOwnerEmail(trip));
-  const ownerId = normalizeCompareText(getTripOwnerId(trip));
-
-  if (currentEmail && ownerEmail) {
-    return currentEmail === ownerEmail;
-  }
-
-  if (currentId && ownerId) {
-    return currentId === ownerId;
-  }
-
-  return false;
-};
-
 const convertScheduleToCard = (schedule, source = "server") => {
   const scheduleId =
     schedule?.id ??
@@ -541,25 +337,21 @@ function MySchedule() {
 
   const [activeTab, setActiveTab] = useState("upcoming");
   const [scheduleList, setScheduleList] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const requestRef = useRef(null);
+  const mountedRef = useRef(false);
   const loadSchedules = useCallback(async () => {
+    if (requestRef.current) return;
+    const request = new AbortController();
+    requestRef.current = request;
     try {
       setIsLoading(true);
       setErrorMessage("");
 
-      const response = await api.get(TRIPS_API);
-      const allServerTrips = getScheduleArray(response.data);
-      const currentUserIdentity = await getCurrentUserIdentity();
-
-      const hasOwnerInfo = allServerTrips.some(hasTripOwnerInfo);
-
-      const serverTrips =
-        hasOwnerInfo && (currentUserIdentity.email || currentUserIdentity.id)
-          ? allServerTrips.filter((trip) => isMyTrip(trip, currentUserIdentity))
-          : allServerTrips;
-
+      const serverTrips = await getTripsApi({ signal: request.signal });
+      if (!mountedRef.current || request.signal.aborted) return;
       const scheduleMap = new Map();
 
       serverTrips
@@ -573,6 +365,7 @@ function MySchedule() {
         [...scheduleMap.values()].sort((a, b) => b.startTime - a.startTime),
       );
     } catch (error) {
+      if (!mountedRef.current || request.signal.aborted || error.code === "ERR_CANCELED") return;
       logSafeApiError(error, "MySchedule.jsx");
       setScheduleList([]);
 
@@ -595,12 +388,15 @@ function MySchedule() {
         ),
       );
     } finally {
-      setIsLoading(false);
+      if (requestRef.current === request) requestRef.current = null;
+      if (mountedRef.current && !request.signal.aborted) setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    mountedRef.current = true;
     loadSchedules();
+    return () => { mountedRef.current = false; requestRef.current?.abort(); requestRef.current = null; };
   }, [loadSchedules]);
 
   useEffect(() => {
@@ -703,13 +499,17 @@ function MySchedule() {
           </div>
         ) : errorMessage ? (
           <div className="my-schedule-empty">
-            <p>{errorMessage}</p>
+            <p role="alert">{errorMessage}</p>
+            <button type="button" onClick={loadSchedules} disabled={isLoading}>다시 불러오기</button>
           </div>
         ) : (
           <>
             <div className="my-schedule-list">
               {currentList.map((schedule) => (
                 <article
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); handleOpenSchedule(schedule); } }}
                   key={`${schedule.source}-${schedule.id}`}
                   className="my-schedule-card"
                   onClick={() => handleOpenSchedule(schedule)}
@@ -743,7 +543,7 @@ function MySchedule() {
 
             {currentList.length === 0 && (
               <div className="my-schedule-empty">
-                <p>저장된 일정이 없습니다.</p>
+                <p>{scheduleList.length ? (activeTab === "upcoming" ? "다가오는 일정이 없어요. 지난 일정 탭에서 확인해 주세요." : "지난 일정이 없어요. 다가오는 일정 탭에서 확인해 주세요.") : "저장된 일정이 없습니다."}</p>
               </div>
             )}
           </>

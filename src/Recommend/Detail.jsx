@@ -1,4 +1,4 @@
-import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
+import { savePreparedPdf } from "../utils/pdfTask";
 import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -14,10 +14,14 @@ import FolderSelectModal from "../FolderSelectModal/FolderSelectModal";
 import EarthLoader from "../Loading/EarthLoader";
 import "./Detail.css";
 import api from "../api/api";
+import useReadQuery from "../utils/useReadQuery";
+import useMutationTask from "../utils/useMutationTask";
+import useSessionKey from "../utils/useSessionKey";
+import { getAuthSnapshot } from "../utils/authState";
+import { buildLoginPath } from "../utils/authRedirect";
+import { requireList } from "../api/responseContract";
 
 import forestImg from "../img/도쿄.png";
-import museumImg from "../img/교토.png";
-import beachImg from "../img/서비스 소개 .png";
 
 const PLACES_API = "/api/places";
 const FOLDERS_API = "/api/folders";
@@ -142,145 +146,6 @@ const SavePlaceIcon = ({ active = false }) => (
     />
   </svg>
 );
-
-const PLACE_FALLBACK_BY_ID = {
-  101: {
-    id: 101,
-    title: "포레스트 하우스",
-    address: "강원도 평창군",
-    rating: 4.9,
-    image: forestImg,
-    tags: ["#자연힐링", "#조용함"],
-  },
-  102: {
-    id: 102,
-    title: "뮤지엄 산",
-    address: "경기도 원주시",
-    rating: 4.7,
-    image: museumImg,
-    tags: ["#건축미", "#산책코스"],
-  },
-  103: {
-    id: 103,
-    title: "우도 해녀의 집",
-    address: "제주 제주시",
-    rating: 4.8,
-    image: beachImg,
-    tags: ["#제주맛집", "#해산물"],
-  },
-  104: {
-    id: 104,
-    title: "평창 패러글라이딩",
-    address: "강원도 평창군",
-    rating: 4.6,
-    image: forestImg,
-    tags: ["#스릴", "#액티비티"],
-  },
-  105: {
-    id: 105,
-    title: "무드 스테이",
-    address: "서울 성동구",
-    rating: 4.8,
-    image: museumImg,
-    tags: ["#감성숙소", "#포토스팟"],
-  },
-  201: {
-    id: 201,
-    title: "담양 죽녹원",
-    address: "전라남도 담양군",
-    rating: 4.8,
-    image: forestImg,
-    tags: ["#자연", "#조용함", "#산책로"],
-  },
-  202: {
-    id: 202,
-    title: "제주 사려니숲길",
-    address: "제주특별자치도 제주시",
-    rating: 4.9,
-    image: museumImg,
-    tags: ["#숲체험", "#힐링", "#인생샷"],
-  },
-  203: {
-    id: 203,
-    title: "강릉 안목해변",
-    address: "강원도 강릉시",
-    rating: 4.7,
-    image: beachImg,
-    tags: ["#바다", "#카페거리", "#힐숨"],
-  },
-  301: {
-    id: 301,
-    title: "평창 패러글라이딩",
-    address: "강원도 평창군",
-    rating: 4.6,
-    image: forestImg,
-    tags: ["#스릴", "#하늘체험", "#액티비티"],
-  },
-  302: {
-    id: 302,
-    title: "양양 서핑비치",
-    address: "강원도 양양군",
-    rating: 4.8,
-    image: beachImg,
-    tags: ["#서핑", "#바다", "#도전"],
-  },
-  303: {
-    id: 303,
-    title: "제주 카트 체험장",
-    address: "제주특별자치도 제주시",
-    rating: 4.7,
-    image: museumImg,
-    tags: ["#속도감", "#가족체험", "#실외"],
-  },
-  401: {
-    id: 401,
-    title: "우도 해녀의 집",
-    address: "제주특별자치도 제주시",
-    rating: 4.8,
-    image: beachImg,
-    tags: ["#제주맛집", "#해산물", "#로컬"],
-  },
-  402: {
-    id: 402,
-    title: "전주 한옥마을 비빔밥집",
-    address: "전라북도 전주시",
-    rating: 4.7,
-    image: forestImg,
-    tags: ["#한식", "#전주", "#필수코스"],
-  },
-  403: {
-    id: 403,
-    title: "부산 해운대 횟집",
-    address: "부산광역시 해운대구",
-    rating: 4.9,
-    image: museumImg,
-    tags: ["#회맛집", "#바다뷰", "#신선함"],
-  },
-  501: {
-    id: 501,
-    title: "무드 스테이",
-    address: "서울 성동구",
-    rating: 4.8,
-    image: museumImg,
-    tags: ["#감성숙소", "#포토스팟", "#무드"],
-  },
-  502: {
-    id: 502,
-    title: "서울 루프탑 카페",
-    address: "서울 용산구",
-    rating: 4.7,
-    image: beachImg,
-    tags: ["#야경", "#카페", "#인생샷"],
-  },
-  503: {
-    id: 503,
-    title: "제주 필름무드 스팟",
-    address: "제주특별자치도 서귀포시",
-    rating: 4.9,
-    image: forestImg,
-    tags: ["#필름감성", "#오션뷰", "#사진명소"],
-  },
-};
 
 const SPECIAL_DETAIL_COPY = {
   "담양 죽녹원": {
@@ -472,31 +337,6 @@ const getResponseData = (data) => {
   return data;
 };
 
-const getArrayData = (data) => {
-  if (Array.isArray(data)) return data;
-
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.folders)) return data.folders;
-  if (Array.isArray(data?.places)) return data.places;
-  if (Array.isArray(data?.savedPlaces)) return data.savedPlaces;
-  if (Array.isArray(data?.recommendations)) return data.recommendations;
-  if (Array.isArray(data?.result)) return data.result;
-  if (Array.isArray(data?.results)) return data.results;
-
-  if (Array.isArray(data?.data?.folders)) return data.data.folders;
-  if (Array.isArray(data?.data?.content)) return data.data.content;
-  if (Array.isArray(data?.data?.items)) return data.data.items;
-  if (Array.isArray(data?.data?.places)) return data.data.places;
-  if (Array.isArray(data?.data?.savedPlaces)) return data.data.savedPlaces;
-  if (Array.isArray(data?.data?.recommendations)) {
-    return data.data.recommendations;
-  }
-
-  return [];
-};
-
 const getFolderId = (folder) => {
   return folder?.id ?? folder?.folderId ?? folder?.folder_id ?? null;
 };
@@ -600,7 +440,8 @@ const normalizePlaceDetail = (place, fallbackPlace) => {
     place?.destinationName ||
     fallbackPlace.title;
 
-  const special = SPECIAL_DETAIL_COPY[title] || {};
+  const serverOnly = fallbackPlace === EMPTY_DETAIL_PLACE;
+  const special = serverOnly ? {} : SPECIAL_DETAIL_COPY[title] || {};
 
   const id =
     place?.id ??
@@ -637,7 +478,7 @@ const normalizePlaceDetail = (place, fallbackPlace) => {
     place?.thumbnailUrl ||
     place?.photoUrl ||
     fallbackPlace.image ||
-    forestImg;
+    (serverOnly ? "" : forestImg);
 
   const region = place?.region || fallbackPlace.region || "";
   const theme = place?.theme || place?.themeName || fallbackPlace.theme || "";
@@ -672,12 +513,10 @@ const normalizePlaceDetail = (place, fallbackPlace) => {
     place?.content ||
     place?.summary ||
     special.intro ||
-    buildFallbackIntro(mergedPlace);
+    (serverOnly ? "소개 정보가 없습니다." : buildFallbackIntro(mergedPlace));
 
-  const reviews = normalizeReviews(
-    place?.reviews || place?.reviewList || special.reviews,
-    mergedPlace
-  );
+  const actualReviews = place?.reviews || place?.reviewList || special.reviews;
+  const reviews = serverOnly && !actualReviews?.length ? [] : normalizeReviews(actualReviews, mergedPlace);
 
   return {
     id,
@@ -699,8 +538,6 @@ const normalizePlaceDetail = (place, fallbackPlace) => {
     originalData: place,
   };
 };
-
-const getErrorMessage = safeApiErrorMessage;
 
 const EMPTY_DETAIL_PLACE = {
   id: "",
@@ -729,134 +566,53 @@ function Detail() {
 
   const idParam = Number(searchParams.get("id"));
 
-  const normalizationFallback = useMemo(() => {
-    return PLACE_FALLBACK_BY_ID[idParam] || EMPTY_DETAIL_PLACE;
-  }, [idParam]);
-
-  const initialDetailPlace = useMemo(() => {
-    const placeFromState = location.state?.place;
-
-    if (!placeFromState) return null;
-
-    return normalizePlaceDetail(placeFromState, normalizationFallback);
-  }, [location.state, normalizationFallback]);
-
-  const [detailPlace, setDetailPlace] = useState(
-    initialDetailPlace || EMPTY_DETAIL_PLACE
-  );
-  const [hasResolvedDetail, setHasResolvedDetail] = useState(
-    Boolean(initialDetailPlace)
-  );
-  const [isLoading, setIsLoading] = useState(
-    !initialDetailPlace && Number.isInteger(idParam) && idParam > 0
-  );
-  const [loadError, setLoadError] = useState("");
-  const [isSavingPlace, setIsSavingPlace] = useState(false);
-  const [serverSaved, setServerSaved] = useState(false);
-  const [serverSavedFolderInfo, setServerSavedFolderInfo] = useState(null);
+  const sessionKey = useSessionKey();
+  const requestKey = String(idParam) + ":" + sessionKey;
+  const currentTarget = React.useRef(requestKey); currentTarget.current = requestKey;
+  const identityMatches = () => getAuthSnapshot().accountKey === sessionKey;
+  const validPlace = Number.isInteger(idParam) && idParam > 0;
+  const basicQuery = useReadQuery(requestKey, async signal => {
+    const response = await api.get(PLACES_API + "/" + idParam, { signal });
+    const place = getResponseData(response.data);
+    if (!place || Number(place.id) !== idParam || !place.name) throw new Error("장소 응답 오류");
+    return { ...normalizePlaceDetail(place, EMPTY_DETAIL_PLACE), hasServerRating: typeof place.rating === "number", serverReviewCount: typeof place.reviewCount === "number" ? place.reviewCount : null };
+  }, validPlace, identityMatches);
+  const reviewQuery = useReadQuery(requestKey, async signal => {
+    const response = await api.get(PLACES_API + "/" + idParam + "/reviews", { signal });
+    return requireList(response.data);
+  }, validPlace, identityMatches);
+  const savedQuery = useReadQuery(requestKey, async signal => {
+    const response = await api.get(FOLDERS_API, { signal });
+    const folders = requireList(response.data);
+    const responses = await Promise.all(folders.map(folder => api.get(getFolderPlacesUrl(getFolderId(folder)), { signal })));
+    let found = null;
+    responses.forEach((response, index) => {
+      const places = requireList(response.data);
+      const matched = places.find(place => String(getSavedPlaceId(place)) === String(idParam));
+      if (matched && !found) found = { folderId: String(getFolderId(folders[index])), placeId: String(getSavedPlaceId(matched)) };
+    });
+    return found;
+  }, validPlace && sessionKey !== "anonymous", identityMatches);
+  const [visibleReviews, setVisibleReviews] = useState(3);
+  useEffect(() => { setVisibleReviews(3); }, [requestKey]);
+  const detailPlace = {
+    ...(basicQuery.data || EMPTY_DETAIL_PLACE),
+    reviews: reviewQuery.status === "success" ? reviewQuery.data.map(review => ({
+      id: review.id, name: review.nickname || review.userName || "여행자",
+      badge: "", rating: review.rating, content: review.comment || review.content || "",
+    })) : [],
+  };
+  const hasResolvedDetail = basicQuery.data !== null;
+  const isLoading = basicQuery.status === "loading";
+  const loadError = validPlace ? "장소 상세 정보를 불러오지 못했습니다." : "장소 정보가 없거나 주소가 올바르지 않습니다.";
+  const saveTask = useMutationTask(requestKey);
+  const isSavingPlace = saveTask.status === "running";
+  const [pageNotice, setPageNotice] = useState("");
+  const serverSaved = savedQuery.status === "success" && Boolean(savedQuery.data);
+  const serverSavedFolderInfo = savedQuery.data;
   const [folderModalOpen, setFolderModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
-
-  useEffect(() => {
-    setDetailPlace(initialDetailPlace || EMPTY_DETAIL_PLACE);
-    setHasResolvedDetail(Boolean(initialDetailPlace));
-    setLoadError("");
-  }, [initialDetailPlace]);
-
-  useEffect(() => {
-    const fetchPlaceDetail = async () => {
-      if (!Number.isInteger(idParam) || idParam <= 0) {
-        setIsLoading(false);
-        setLoadError("장소 정보가 없거나 주소가 올바르지 않습니다.");
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setLoadError("");
-
-        const [placeResponse, reviewResponse] = await Promise.all([
-          api.get(`${PLACES_API}/${idParam}`),
-          api.get(`${PLACES_API}/${idParam}/reviews`).catch((error) => {
-            logSafeApiError(error, "Detail.jsx");
-            return { data: [] };
-          }),
-        ]);
-        const placeData = getResponseData(placeResponse.data);
-        const reviews = getArrayData(reviewResponse.data);
-
-        setDetailPlace(
-          normalizePlaceDetail(
-            { ...placeData, reviews, reviewCount: reviews.length },
-            normalizationFallback
-          )
-        );
-        setHasResolvedDetail(true);
-      } catch (error) {
-        logSafeApiError(error, "Detail.jsx");
-        setLoadError(
-          error.message?.includes("Network Error")
-            ? "네트워크 연결을 확인한 뒤 다시 시도해주세요."
-            : getErrorMessage(error, "장소 상세 정보를 불러오지 못했습니다.")
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPlaceDetail();
-  }, [idParam, normalizationFallback]);
-
-  useEffect(() => {
-    const fetchSavedState = async () => {
-      if (!detailPlace?.id) return;
-
-      try {
-        const folderResponse = await api.get(FOLDERS_API);
-        const folderList = getArrayData(folderResponse.data).filter(
-          (folder) => getFolderId(folder) !== null && getFolderId(folder) !== undefined
-        );
-
-        const placeResponses = await Promise.allSettled(
-          folderList.map((folder) => api.get(getFolderPlacesUrl(getFolderId(folder))))
-        );
-
-        let nextSavedInfo = null;
-
-        placeResponses.some((result, index) => {
-          if (result.status !== "fulfilled") return false;
-
-          const folderId = getFolderId(folderList[index]);
-          const savedPlaces = getArrayData(result.value.data);
-
-          const matchedPlace = savedPlaces.find((savedPlace) => {
-            const savedId = getSavedPlaceId(savedPlace);
-
-            return String(savedId) === String(detailPlace.id);
-          });
-
-          if (!matchedPlace) return false;
-
-          nextSavedInfo = {
-            folderId: String(folderId),
-            placeId: String(getSavedPlaceId(matchedPlace) ?? detailPlace.id),
-          };
-
-          return true;
-        });
-
-        setServerSaved(Boolean(nextSavedInfo));
-        setServerSavedFolderInfo(nextSavedInfo);
-      } catch (error) {
-        logSafeApiError(error, "Detail.jsx");
-        setServerSaved(false);
-        setServerSavedFolderInfo(null);
-      }
-    };
-
-    fetchSavedState();
-  }, [detailPlace.id]);
-
+  useEffect(() => { setPageNotice(""); setFolderModalOpen(false); setShareModalOpen(false); }, [requestKey]);
   useEffect(() => {
     if (!detailPlace?.id) {
       return;
@@ -906,7 +662,7 @@ function Detail() {
   ]);
 
   const contextSaved = isSaved(detailPlace.id);
-  const saved = serverSaved || contextSaved;
+  const saved = serverSaved;
 
   const shareUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -932,7 +688,7 @@ function Detail() {
   });
 
   const closeFolderModal = () => {
-    if (isSavingPlace) return;
+    if (saveTask.blocked || savedQuery.status !== "success") return;
     setFolderModalOpen(false);
   };
 
@@ -942,88 +698,39 @@ function Detail() {
     );
   };
 
+  const refreshSaved = async () => {
+    if (!await savedQuery.retry()) throw new Error("저장 여부 재조회 실패");
+  };
   const removeSavedPlace = async () => {
-    const savedPlacePayload = buildSavedPlacePayload();
-
-    try {
-      setIsSavingPlace(true);
-
-      if (serverSavedFolderInfo?.folderId) {
-        await api.delete(
-          getFolderPlaceDeleteUrl(
-            serverSavedFolderInfo.folderId,
-            serverSavedFolderInfo.placeId || detailPlace.id
-          )
-        );
-      }
-
-      setServerSaved(false);
-      setServerSavedFolderInfo(null);
-
-      if (contextSaved) {
-        toggleSavedPlace(savedPlacePayload);
-      }
-    } catch (error) {
-      logSafeApiError(error, "Detail.jsx");
-
-      if (error.message.includes("Network Error")) {
-        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-        return;
-      }
-
-      alert(
-        getErrorMessage(
-          error,
-          "관심 장소 변경에 실패했습니다. 잠시 후 다시 시도해주세요."
-        )
-      );
-    } finally {
-      setIsSavingPlace(false);
-    }
+    if (!serverSavedFolderInfo?.folderId) return;
+    const operationKey = requestKey;
+    await saveTask.run(async () => {
+      await api.delete(getFolderPlaceDeleteUrl(serverSavedFolderInfo.folderId, serverSavedFolderInfo.placeId));
+      if (currentTarget.current === operationKey && identityMatches() && contextSaved) toggleSavedPlace(buildSavedPlacePayload());
+    }, refreshSaved, {
+      failure: "관심 장소 해제에 실패했어요.",
+      success: "관심 장소 해제와 최신 상태 확인을 완료했어요.",
+      refreshFailure: "관심 장소는 해제됐지만 최신 저장 상태를 확인하지 못했어요.",
+    });
   };
-
-  const savePlaceToFolder = async (folder) => {
-    const savedPlacePayload = buildSavedPlacePayload(folder);
-
-    try {
-      setIsSavingPlace(true);
-
-      const registeredPlaceId = await registerPlace(detailPlace);
-
-      await postFolderPlace(folder, registeredPlaceId);
-
-      setServerSaved(true);
-      setServerSavedFolderInfo({
-        folderId: String(folder.id),
-        placeId: String(registeredPlaceId),
-      });
-
-      if (!contextSaved) {
-        toggleSavedPlace(savedPlacePayload);
+  const savePlaceToFolder = async folder => {
+    const operationKey = requestKey;
+    if (savedQuery.status !== "success") return;
+    await saveTask.run(async () => {
+      const id = await registerPlace(detailPlace);
+      await postFolderPlace(folder, id);
+      if (currentTarget.current === operationKey && identityMatches()) {
+        if (!contextSaved) toggleSavedPlace(buildSavedPlacePayload(folder));
+        setFolderModalOpen(false);
       }
-
-      setFolderModalOpen(false);
-    } catch (error) {
-      logSafeApiError(error, "Detail.jsx");
-
-      if (error.message.includes("Network Error")) {
-        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-        return;
-      }
-
-      alert(
-        getErrorMessage(
-          error,
-          "관심 장소 변경에 실패했습니다. 잠시 후 다시 시도해주세요."
-        )
-      );
-    } finally {
-      setIsSavingPlace(false);
-    }
+    }, refreshSaved, {
+      failure: "관심 장소 저장에 실패했어요.",
+      success: "관심 장소 저장과 최신 상태 확인을 완료했어요.",
+      refreshFailure: "관심 장소는 저장됐지만 최신 저장 상태를 확인하지 못했어요.",
+    });
   };
-
   const handleToggleSaved = async () => {
-    if (isSavingPlace) return;
+    if (saveTask.blocked || savedQuery.status !== "success") return;
 
     if (saved) {
       await removeSavedPlace();
@@ -1037,12 +744,11 @@ function Detail() {
     setShareModalOpen(true);
   };
 
-  const handleSavePdf = async () => {
+  const handleSavePdf = async ({ isCurrent = () => true } = {}) => {
     const target = document.getElementById("detail-pdf");
 
     if (!target) {
-      alert("PDF로 저장할 내용을 찾지 못했어요.");
-      return;
+      throw new Error("PDF로 저장할 내용을 찾지 못했어요.");
     }
 
     const pageHeightPx = Math.ceil(window.innerHeight);
@@ -1083,9 +789,10 @@ function Detail() {
         },
       };
 
-      await html2pdf().from(clone).set(options).save();
+      const worker = html2pdf().from(clone).set(options);
+      await savePreparedPdf(worker, () => isCurrent() && currentTarget.current === requestKey && identityMatches());
     } catch (error) {
-      alert("PDF 저장에 실패했어요.");
+      throw error;
     } finally {
       wrapper.remove();
     }
@@ -1098,7 +805,7 @@ function Detail() {
 
     return (
       <div className="detail-page">
-        <section className="detail-sheet" role="alert">
+        <section className="detail-sheet" role="alert"><button type="button" onClick={basicQuery.retry}>상세 다시 불러오기</button>
           <h1 className="detail-title">장소 정보를 표시할 수 없어요</h1>
           <p className="detail-section-text">
             {loadError || "잠시 후 다시 시도해주세요."}
@@ -1119,11 +826,7 @@ function Detail() {
     <>
       <div id="detail-pdf" className="detail-page">
         <section className="detail-hero">
-          <img
-            src={detailPlace.image}
-            alt={detailPlace.title}
-            className="detail-hero-image"
-          />
+          {detailPlace.image ? <img src={detailPlace.image} alt={detailPlace.title} className="detail-hero-image" /> : <div className="detail-image-placeholder">사진 정보 없음</div>}
 
           <div className="detail-top-actions">
             <button
@@ -1149,7 +852,7 @@ function Detail() {
                 type="button"
                 className="detail-action-btn"
                 onClick={handleToggleSaved}
-                disabled={isSavingPlace}
+                disabled={saveTask.blocked || savedQuery.status !== "success"}
                 aria-label={saved ? "관심 장소 해제" : "관심 장소 추가"}
               >
                 <HeartIcon active={saved} />
@@ -1187,15 +890,18 @@ function Detail() {
 
               <div className="detail-review-summary">
                 <span className="detail-review-star">★</span>
-                <span>{Number(detailPlace.rating).toFixed(1)}</span>
+                <span>{basicQuery.data?.hasServerRating ? Number(detailPlace.rating).toFixed(1) : "평점 미제공"}</span>
                 <small>
-                  ({Number(detailPlace.reviewCount).toLocaleString("ko-KR")})
+                  ({reviewQuery.status === "success" ? reviewQuery.data.length.toLocaleString("ko-KR") : basicQuery.data?.serverReviewCount ?? "리뷰 수 미확인"})
                 </small>
               </div>
             </div>
 
+            {reviewQuery.status === "loading" && <p role="status">리뷰를 불러오는 중이에요.</p>}
+            {reviewQuery.status === "error" && <div role="alert"><p>리뷰를 불러오지 못했어요. 다시 시도해 주세요.</p><button type="button" onClick={reviewQuery.retry}>리뷰 다시 불러오기</button></div>}
+            {reviewQuery.status === "success" && reviewQuery.data.length === 0 && <p>아직 리뷰가 없어요.</p>}
             <div className="detail-review-list">
-              {detailPlace.reviews.map((review) => (
+              {detailPlace.reviews.slice(0, visibleReviews).map((review) => (
                 <article key={review.id} className="detail-review-card">
                   <div className="detail-review-top">
                     <div className="detail-review-author">
@@ -1219,9 +925,7 @@ function Detail() {
               ))}
             </div>
 
-            <button type="button" className="detail-review-more-btn">
-              리뷰 더보기
-            </button>
+            {reviewQuery.status === "success" && visibleReviews < detailPlace.reviews.length && <button type="button" className="detail-review-more-btn" onClick={() => setVisibleReviews(count => Math.min(count + 3, detailPlace.reviews.length))}>리뷰 더보기</button>}
           </section>
         </section>
 
@@ -1230,7 +934,7 @@ function Detail() {
             type="button"
             className={`detail-save-btn ${saved ? "saved" : ""}`}
             onClick={handleToggleSaved}
-            disabled={isSavingPlace}
+            disabled={saveTask.blocked || savedQuery.status !== "success"}
           >
             <SavePlaceIcon active={saved} />
             <span>
@@ -1244,6 +948,13 @@ function Detail() {
         </div>
       </div>
 
+      {saveTask.message && <section className="detail-query-notice" role="status"><p>{saveTask.message}</p>{["refreshError", "unknown"].includes(saveTask.status) && <button type="button" onClick={saveTask.retryRead}>최신 저장 상태 다시 확인</button>}</section>}
+      {pageNotice && <p className="detail-query-notice" role="status">{pageNotice}</p>}
+      {sessionKey === "anonymous" && <button type="button" className="detail-query-notice" onClick={() => navigate(buildLoginPath(location.pathname + location.search))}>관심 장소를 저장하려면 로그인해 주세요</button>}
+      {sessionKey !== "anonymous" && savedQuery.status !== "success" && <section className="detail-query-notice" role="status">
+        <p>{savedQuery.status === "loading" ? "저장 여부 확인 중..." : "저장 여부를 확인하지 못했어요."}</p>
+        {savedQuery.status === "error" && <button type="button" onClick={savedQuery.retry}>저장 여부 다시 확인</button>}
+      </section>}
       <ShareModal
         open={shareModalOpen}
         onClose={() => setShareModalOpen(false)}
@@ -1253,9 +964,11 @@ function Detail() {
         previewSubtitle={detailPlace.address}
         previewImage={detailPlace.image}
         onSavePdf={handleSavePdf}
+        contextKey={requestKey}
+        exportBlockedReason={basicQuery.status !== "success" || reviewQuery.status !== "success" ? "상세 정보와 리뷰 조회가 완료된 뒤 PDF를 생성할 수 있습니다." : ""}
       />
 
-      <FolderSelectModal
+      <FolderSelectModal key={requestKey} contextKey={requestKey}
         open={folderModalOpen}
         onClose={closeFolderModal}
         onSave={savePlaceToFolder}

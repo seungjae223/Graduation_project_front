@@ -1,16 +1,15 @@
 import { logSafeApiError } from "../utils/safeLog";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../api/api";
-import useModalFocus from "../utils/useModalFocus";
 import "./SavedPlaces.css";
+import useSessionKey from "../utils/useSessionKey";
+import { getAuthSnapshot } from "../utils/authState";
+import InputDialog from "../components/InputDialog";
+import useMutationTask from "../utils/useMutationTask";
 
 import folderFilledIcon from "../img/파랑색폴더.png";
-import editIcon from "../img/연필.png";
 import folderAddIcon from "../img/폴더추가.png";
-import bluePencilIcon from "../img/파랑연필.png";
-import redTrashIcon from "../img/빨강쓰레기.png";
 
 import tokyoImg from "../img/도쿄.png";
 import kyotoImg from "../img/교토.png";
@@ -103,19 +102,6 @@ const PlusIcon = () => (
     />
   </svg>
 );
-
-const useBodyScrollLock = (isLocked) => {
-  useEffect(() => {
-    if (!isLocked) return undefined;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isLocked]);
-};
 
 const SortTabButtons = ({ activeSort, onChange }) => (
   <section className="saved-sort-tabs">
@@ -289,234 +275,30 @@ const sortByTab = (items = [], activeSort, getName) => {
   return copiedItems;
 };
 
-const FolderManageModal = ({
-  isOpen,
-  folder,
-  onClose,
-  onOpenRename,
-  onOpenDelete,
-}) => {
-  useBodyScrollLock(isOpen);
-  const dialogRef = useModalFocus({ open: isOpen, onClose });
-
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div className="folder-modal-backdrop" onClick={onClose}>
-      <div
-        ref={dialogRef}
-        className="folder-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="folder-modal-title"
-        tabIndex={-1}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="folder-modal-header">
-          <h2 id="folder-modal-title">폴더 관리</h2>
-        </div>
-
-        <div className="folder-modal-body">
-          <button
-            type="button"
-            className="folder-modal-menu-item"
-            onClick={() => onOpenRename(folder)}
-            data-modal-initial-focus
-          >
-            <span className="folder-modal-icon-circle blue">
-              <img src={bluePencilIcon} alt="" />
-            </span>
-
-            <span className="folder-modal-menu-text">폴더 이름 변경</span>
-
-            <span className="folder-modal-arrow">
-              <ArrowRightIcon />
-            </span>
-          </button>
-
-          <div className="folder-modal-divider" />
-
-          <button
-            type="button"
-            className="folder-modal-menu-item delete"
-            onClick={() => onOpenDelete(folder)}
-          >
-            <span className="folder-modal-icon-circle red">
-              <img src={redTrashIcon} alt="" />
-            </span>
-
-            <span className="folder-modal-menu-text">폴더 삭제</span>
-
-            <span className="folder-modal-arrow">
-              <ArrowRightIcon />
-            </span>
-          </button>
-        </div>
-
-        <div className="folder-modal-footer">
-          <button
-            type="button"
-            className="folder-modal-cancel"
-            onClick={onClose}
-          >
-            취소
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-};
-
-const FolderRenameModal = ({
-  isOpen,
-  folderName,
-  folderDescription,
-  onChangeName,
-  onChangeDescription,
-  onClose,
-  onSubmit,
-}) => {
-  useBodyScrollLock(isOpen);
-  const dialogRef = useModalFocus({ open: isOpen, onClose });
-
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div className="folder-modal-backdrop" onClick={onClose}>
-      <div
-        ref={dialogRef}
-        className="folder-rename-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="folder-rename-title"
-        tabIndex={-1}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <h2 id="folder-rename-title">폴더 이름 변경</h2>
-
-        <div className="folder-rename-form">
-          <label>
-            <span>폴더명</span>
-            <input
-              type="text"
-              value={folderName}
-              maxLength={30}
-              onChange={(event) => onChangeName(event.target.value)}
-              data-modal-initial-focus
-            />
-          </label>
-
-          <label>
-            <span>설명</span>
-            <input
-              type="text"
-              value={folderDescription}
-              maxLength={80}
-              onChange={(event) => onChangeDescription(event.target.value)}
-            />
-          </label>
-        </div>
-
-        <div className="folder-rename-actions">
-          <button
-            type="button"
-            className="folder-rename-cancel"
-            onClick={onClose}
-          >
-            취소
-          </button>
-
-          <button
-            type="button"
-            className="folder-rename-submit"
-            onClick={onSubmit}
-          >
-            변경하기
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-};
-
-const FolderDeleteModal = ({ isOpen, onClose, onSubmit }) => {
-  useBodyScrollLock(isOpen);
-  const dialogRef = useModalFocus({ open: isOpen, onClose });
-
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div className="folder-modal-backdrop" onClick={onClose}>
-      <div
-        ref={dialogRef}
-        className="folder-delete-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="folder-delete-title"
-        aria-describedby="folder-delete-description"
-        tabIndex={-1}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="folder-delete-top">
-          <div className="folder-delete-warning-circle" aria-hidden="true">
-            <svg viewBox="0 0 48 48" className="folder-delete-warning-icon">
-              <path d="M21.1 7.2c1.3-2.3 4.5-2.3 5.8 0l16.2 28.1c1.3 2.2-.3 5-2.9 5H7.8c-2.6 0-4.2-2.8-2.9-5L21.1 7.2Z" />
-              <path d="M24 17.2v10.9" className="folder-delete-warning-line" />
-              <circle cx="24" cy="34.1" r="2.1" className="folder-delete-warning-dot" />
-            </svg>
-          </div>
-        </div>
-
-        <div className="folder-delete-content">
-          <h2 id="folder-delete-title">폴더를 삭제하시겠습니까?</h2>
-          <p id="folder-delete-description">
-            폴더를 삭제하면 그 안에 저장된 모든 장소 목록이 함께 사라집니다.
-            이 작업은 되돌릴 수 없습니다.
-          </p>
-
-          <div className="folder-delete-actions">
-            <button
-              type="button"
-              className="folder-delete-cancel"
-              onClick={onClose}
-              data-modal-initial-focus
-            >
-              취소
-            </button>
-
-            <button
-              type="button"
-              className="folder-delete-submit"
-              onClick={onSubmit}
-            >
-              삭제하기
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-};
-
-function SavedPlaces() {
+function SavedPlacesContent() {
   const navigate = useNavigate();
+  const account = useSessionKey();
+  const currentAccount = useRef(account); currentAccount.current = account;
   const [searchParams, setSearchParams] = useSearchParams();
   const folderIdFromUrl = searchParams.get("folderId");
 
   const [activeSort, setActiveSort] = useState("전체보기");
-  const [modalType, setModalType] = useState(null);
-  const [selectedFolder, setSelectedFolder] = useState(null);
   const [folders, setFolders] = useState([]);
   const [openedFolder, setOpenedFolder] = useState(null);
   const [openedFolderPlaces, setOpenedFolderPlaces] = useState([]);
   const [isLoadingFolders, setIsLoadingFolders] = useState(false);
   const [isLoadingPlaces, setIsLoadingPlaces] = useState(false);
-  const [renameName, setRenameName] = useState("");
-  const [renameDescription, setRenameDescription] = useState("");
 
+  const [createOpen, setCreateOpen] = useState(false);
+  const [folderName, setFolderName] = useState("");
+  const [validation, setValidation] = useState("");
+  const createTask = useMutationTask(account + ":create-folder");
+  const removeTask = useMutationTask(account + ":remove:" + openedFolder?.id);
+  const currentFolder = useRef(openedFolder?.id); currentFolder.current = openedFolder?.id;
+
+  const [listError, setListError] = useState("");
+  const folderVersion = useRef(0);
+  useEffect(() => () => { ++folderVersion.current; currentFolder.current = null; }, []);
   const loadFolderPlaces = useCallback(async (folderId) => {
     const response = await api.get(getFolderPlacesUrl(folderId));
 
@@ -526,8 +308,11 @@ function SavedPlaces() {
   }, []);
 
   const loadFolders = useCallback(async () => {
+    const belongs = () => currentAccount.current === account && getAuthSnapshot().accountKey === account;
+    if (account === "anonymous") return;
     try {
       setIsLoadingFolders(true);
+      setListError("");
 
       const response = await api.get(FOLDERS_API);
       const nextFolders = getArrayData(response.data).map((folder, index) =>
@@ -541,13 +326,14 @@ function SavedPlaces() {
             return [String(folder.id), places.length];
           } catch (error) {
             logSafeApiError(error, "SavedPlaces.jsx");
-            return [String(folder.id), 0];
+            throw error;
           }
         })
       );
 
       const countMap = Object.fromEntries(countEntries);
 
+      if (!belongs()) return;
       setFolders(
         nextFolders.map((folder) => ({
           ...folder,
@@ -556,14 +342,17 @@ function SavedPlaces() {
       );
     } catch (error) {
       logSafeApiError(error, "SavedPlaces.jsx");
-      setFolders([]);
+      if (belongs()) setListError("폴더 목록을 불러오지 못했어요.");
+      throw error;
     } finally {
-      setIsLoadingFolders(false);
+      if (belongs()) setIsLoadingFolders(false);
     }
-  }, [loadFolderPlaces]);
+  }, [loadFolderPlaces, account]);
 
   useEffect(() => {
-    loadFolders();
+    setFolders([]); setOpenedFolder(null); setOpenedFolderPlaces([]); setCreateOpen(false); setFolderName(""); setListError("");
+    ++folderVersion.current;
+    void loadFolders().catch(() => {});
   }, [loadFolders]);
 
   const totalSavedCount = useMemo(() => {
@@ -581,9 +370,12 @@ function SavedPlaces() {
   const openFolder = useCallback(
     async (folder, shouldUpdateUrl = true) => {
       if (!folder?.id) return;
+      const version = ++folderVersion.current;
+
 
       try {
         setOpenedFolder(folder);
+        currentFolder.current = folder.id;
         setIsLoadingPlaces(true);
         setActiveSort("전체보기");
 
@@ -592,15 +384,15 @@ function SavedPlaces() {
         }
 
         const places = await loadFolderPlaces(folder.id);
-        setOpenedFolderPlaces(places);
+        if (currentAccount.current === account && folderVersion.current === version && String(currentFolder.current) === String(folder.id)) setOpenedFolderPlaces(places);
       } catch (error) {
         logSafeApiError(error, "SavedPlaces.jsx");
-        setOpenedFolderPlaces([]);
+        if (currentAccount.current === account && folderVersion.current === version && String(currentFolder.current) === String(folder.id)) setListError("장소 목록을 불러오지 못했어요.");
       } finally {
-        setIsLoadingPlaces(false);
+        if (currentAccount.current === account && folderVersion.current === version && String(currentFolder.current) === String(folder.id)) setIsLoadingPlaces(false);
       }
     },
-    [loadFolderPlaces, setSearchParams]
+    [loadFolderPlaces, setSearchParams, account]
   );
 
   useEffect(() => {
@@ -616,18 +408,11 @@ function SavedPlaces() {
   }, [folderIdFromUrl, folders, openedFolder, openFolder]);
 
   const handleCloseFolder = () => {
+    ++folderVersion.current; currentFolder.current = null;
     setOpenedFolder(null);
     setOpenedFolderPlaces([]);
     setActiveSort("전체보기");
     setSearchParams({});
-  };
-
-  const handleEditClick = (event, folder) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    setSelectedFolder(folder);
-    setModalType("manage");
   };
 
   const handleArrowClick = (event, folder) => {
@@ -637,60 +422,18 @@ function SavedPlaces() {
     openFolder(folder);
   };
 
-  const handleCloseModal = () => {
-    setModalType(null);
-    setSelectedFolder(null);
-    setRenameName("");
-    setRenameDescription("");
+  const handleAddFolderClick = () => { createTask.reset(); setValidation(""); setCreateOpen(true); };
+  const submitFolder = async () => {
+    if (createTask.blocked || createTask.status === "success") return;
+    const name = folderName.trim();
+    if (!name || name.length > 255) { setValidation("폴더명은 공백만 입력할 수 없으며 1~255자로 입력해주세요."); return; }
+    setValidation("");
+    await createTask.run(() => api.post(FOLDERS_API, { name }), loadFolders, {
+      failure: "폴더 생성에 실패했어요. 입력한 이름은 유지됩니다.",
+      success: "폴더가 생성됐어요. 취소 버튼으로 닫을 수 있습니다.",
+      refreshFailure: "폴더는 생성됐지만 목록을 새로 불러오지 못했어요.",
+    });
   };
-
-  const handleOpenRenameModal = (folder) => {
-    setSelectedFolder(folder);
-    setRenameName(folder?.title || "");
-    setRenameDescription(folder?.description || "");
-    setModalType("rename");
-  };
-
-  const handleOpenDeleteModal = (folder) => {
-    setSelectedFolder(folder);
-    setModalType("delete");
-  };
-
-  const handleRenameSubmit = () => {
-    alert("현재 백엔드에 폴더 이름 변경 API가 없습니다.");
-    handleCloseModal();
-  };
-
-  const handleDeleteSubmit = () => {
-    alert("현재 백엔드에 폴더 삭제 API가 없습니다.");
-    handleCloseModal();
-  };
-
-  const handleAddFolderClick = async () => {
-    const defaultName = `새 폴더 ${folders.length + 1}`;
-    const folderName = window.prompt("새 폴더 이름을 입력해주세요.", defaultName);
-
-    if (folderName === null) return;
-
-    const trimmedName = folderName.trim();
-
-    if (!trimmedName) {
-      alert("폴더 이름을 입력해주세요.");
-      return;
-    }
-
-    try {
-      await api.post(FOLDERS_API, {
-        name: trimmedName,
-      });
-
-      await loadFolders();
-    } catch (error) {
-      logSafeApiError(error, "SavedPlaces.jsx");
-      alert("새 폴더 생성에 실패했습니다.");
-    }
-  };
-
   const handlePlaceClick = (place) => {
     navigate(`/detail?id=${encodeURIComponent(place.placeId || place.id)}`, {
       state: { place },
@@ -711,19 +454,18 @@ function SavedPlaces() {
 
     if (!isConfirmed) return;
 
-    try {
-      await api.delete(getFolderPlaceDeleteUrl(openedFolder.id, place.placeId));
-
-      const nextPlaces = await loadFolderPlaces(openedFolder.id);
-      setOpenedFolderPlaces(nextPlaces);
-
+    const folderId = openedFolder.id;
+    const placeId = place.placeId;
+    await removeTask.run(() => api.delete(getFolderPlaceDeleteUrl(folderId, placeId)), async () => {
+      const places = await loadFolderPlaces(folderId);
+      if (currentAccount.current === account && String(currentFolder.current) === String(folderId)) setOpenedFolderPlaces(places);
       await loadFolders();
-    } catch (error) {
-      logSafeApiError(error, "SavedPlaces.jsx");
-      alert("폴더에서 장소를 삭제하지 못했습니다.");
-    }
+    }, {
+      failure: "이 폴더에서 장소를 제거하지 못했어요.",
+      success: "이 폴더에서 장소를 제거했어요.",
+      refreshFailure: "장소는 제거됐지만 최신 목록을 불러오지 못했어요.",
+    });
   };
-
   const handleDiscoverPlacesClick = () => {
     if (!openedFolder?.id) return;
 
@@ -732,6 +474,14 @@ function SavedPlaces() {
 
   return (
     <main className="saved-places-page">
+      <InputDialog open={createOpen} title="새 폴더 만들기" label="폴더명" value={folderName} maxLength={255}
+        onChange={setFolderName} onClose={() => setCreateOpen(false)} onSubmit={submitFolder}
+        busy={createTask.status === "running"} blocked={createTask.blocked || createTask.status === "success"} message={validation || createTask.message}
+        onRetry={["refreshError", "unknown"].includes(createTask.status) ? createTask.retryRead : null} />
+      {listError && <section role="alert"><p>{listError}</p><button type="button" onClick={() => loadFolders().catch(() => {})}>목록 다시 불러오기</button></section>}
+      {removeTask.message && <section role="status"><p>{removeTask.message}</p>
+        {["refreshError", "unknown"].includes(removeTask.status) && <button type="button" onClick={removeTask.retryRead}>최신 목록 다시 확인</button>}
+      </section>}
       {openedFolder ? (
         <>
           <section className="saved-folder-detail-header">
@@ -808,7 +558,8 @@ function SavedPlaces() {
                   <button
                     type="button"
                     className="saved-place-more-button"
-                    onClick={(event) => handlePlaceMoreClick(event, place)}
+                    disabled={removeTask.blocked}
+onClick={(event) => handlePlaceMoreClick(event, place)}
                     aria-label="장소 삭제"
                   >
                     <MoreVerticalIcon />
@@ -887,16 +638,7 @@ function SavedPlaces() {
                   </div>
 
                   <div className="saved-folder-actions">
-                    <button
-                      type="button"
-                      className="saved-folder-action-button saved-folder-edit-button"
-                      onClick={(event) => handleEditClick(event, folder)}
-                      aria-label="폴더 관리 열기"
-                    >
-                      <img src={editIcon} alt="" />
-                    </button>
-
-                    <button
+<button
                       type="button"
                       className="saved-folder-action-button"
                       onClick={(event) => handleArrowClick(event, folder)}
@@ -931,31 +673,11 @@ function SavedPlaces() {
         </>
       )}
 
-      <FolderManageModal
-        isOpen={modalType === "manage"}
-        folder={selectedFolder}
-        onClose={handleCloseModal}
-        onOpenRename={handleOpenRenameModal}
-        onOpenDelete={handleOpenDeleteModal}
-      />
-
-      <FolderRenameModal
-        isOpen={modalType === "rename"}
-        folderName={renameName}
-        folderDescription={renameDescription}
-        onChangeName={setRenameName}
-        onChangeDescription={setRenameDescription}
-        onClose={handleCloseModal}
-        onSubmit={handleRenameSubmit}
-      />
-
-      <FolderDeleteModal
-        isOpen={modalType === "delete"}
-        onClose={handleCloseModal}
-        onSubmit={handleDeleteSubmit}
-      />
     </main>
   );
 }
 
-export default SavedPlaces;
+export default function SavedPlaces() {
+  const account = useSessionKey();
+  return <SavedPlacesContent key={account} />;
+}

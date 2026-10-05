@@ -1,3 +1,4 @@
+import { notifyAuthChange } from "./authState";
 export const ACCESS_TOKEN_KEY = "accessToken";
 const PRIVATE_KEYS = new Set([
   ACCESS_TOKEN_KEY, "token", "tokenType", "refreshToken", "isLoggedIn", "keepLogin",
@@ -20,6 +21,7 @@ export function clearAuthenticatedUserStorage() {
       // One unavailable store must not prevent clearing the other.
     }
   }
+  notifyAuthChange();
 }
 
 // Migrate legacy aliases in-place without changing persistence across reloads/tabs.

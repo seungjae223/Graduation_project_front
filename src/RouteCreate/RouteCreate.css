@@ -1550,3 +1550,7 @@ body,
     font-size: 15px;
   }
 }
+
+.generation-feedback { margin-bottom: 18px; padding: 18px; border: 1px solid #d9e6f2; border-radius: 16px; overflow-wrap: anywhere; }
+.generation-feedback h2 { font-size: 18px; }
+.generation-feedback button { padding: 10px 14px; margin: 8px 8px 0 0; border-radius: 10px; border: 1px solid #21a0f6; background: transparent; color: inherit; }

@@ -1,4 +1,5 @@
 import api from "./api";
+import { requireList, requireTrip } from "./responseContract";
 
 const TRIP_BASE_URL = "/api/trips";
 
@@ -346,36 +347,44 @@ export const updateTripApi = async (id, tripRequest) => {
   return normalizeTrip(unwrapData(response.data));
 };
 
-export const getTripsApi = async () => {
-  const response = await api.get(TRIP_BASE_URL);
+export const getTripsApi = async (options = {}) => {
+  const response = await api.get(TRIP_BASE_URL, options);
 
-  return normalizeList(response.data).map(normalizeTrip);
+  const trips = requireList(response.data);
+  if (trips.some(trip => !Number.isSafeInteger(Number(trip?.id)) || Number(trip.id) <= 0)) {
+    throw new Error("일정 목록의 ID를 확인할 수 없습니다.");
+  }
+  return trips.map(normalizeTrip);
 };
 
-export const getTripByIdApi = async (id) => {
+export const getTripByIdApi = async (id, options = {}) => {
   const tripId = assertPositiveInteger(id, "여행 id가 필요합니다.");
 
-  const response = await api.get(`${TRIP_BASE_URL}/${tripId}`);
+  const response = await api.get(`${TRIP_BASE_URL}/${tripId}`, options);
 
-  return normalizeTrip(unwrapData(response.data));
+  return normalizeTrip(requireTrip(response.data, tripId));
 };
 
-export const getTripPlacesApi = async (tripId) => {
+export const getTripPlacesApi = async (tripId, options = {}) => {
   if (!tripId) return [];
 
   try {
     const safeTripId = assertPositiveInteger(tripId, "여행 id가 필요합니다.");
 
-    const response = await api.get(`${TRIP_BASE_URL}/${safeTripId}/places`);
+    const response = await api.get(`${TRIP_BASE_URL}/${safeTripId}/places`, options);
 
-    return normalizeList(response.data).map((place) =>
+    const places = requireList(response.data);
+    if (places.some(place => !Number.isSafeInteger(Number(place?.id)) || Number(place.id) <= 0 ||
+        !Number.isSafeInteger(Number(place.placeId)) || Number(place.placeId) <= 0 ||
+        !Number.isInteger(Number(place.day)) || Number(place.day) < 1 ||
+        !Number.isInteger(Number(place.visitOrder)) || Number(place.visitOrder) < 1) ||
+        new Set(places.map(place => `${place.day}:${place.visitOrder}`)).size !== places.length) {
+      throw new Error("일정 장소 응답을 확인할 수 없습니다.");
+    }
+    return places.map((place) =>
       normalizeTripPlace(place)
     );
   } catch (error) {
-    if (error.response?.status === 404) {
-      return [];
-    }
-
     throw error;
   }
 };
@@ -399,10 +408,6 @@ export const getTripDayPlacesApi = async ({ tripId, day }) => {
       normalizeTripPlace(place, safeDay)
     );
   } catch (error) {
-    if (error.response?.status === 404) {
-      return [];
-    }
-
     throw error;
   }
 };
@@ -411,6 +416,7 @@ export const getTripTimelineApi = async ({
   tripId,
   day,
   startTime = DEFAULT_START_TIME,
+  signal,
 }) => {
   if (!tripId || !day) return [];
 
@@ -424,13 +430,14 @@ export const getTripTimelineApi = async ({
   const response = await api.get(
     `${TRIP_BASE_URL}/${safeTripId}/days/${safeDay}/timeline`,
     {
+      signal,
       params: {
         startTime,
       },
     }
   );
 
-  return normalizeList(response.data).map(normalizeTimelineItem);
+  return requireList(response.data).map(normalizeTimelineItem);
 };
 
 export const addPlaceToTripApi = async ({
