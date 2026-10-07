@@ -2,13 +2,21 @@ const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
 const publicDir = path.resolve(process.cwd(), "public");
-test.each(["dark", "light", null])("theme initializes synchronously: %s", (saved) => {
+test.each([
+  ["dark", "dark"],
+  ["light", "light"],
+  [null, "light"],
+  ["", "light"],
+  ["abc", "light"],
+])("theme initializes synchronously from saved value %p", (saved, expected) => {
   const document = { documentElement: { dataset: {}, style: {} } };
   vm.runInNewContext(fs.readFileSync(path.join(publicDir, "theme-init.js"), "utf8"), {
-    document, localStorage: { getItem: () => saved }, window: { matchMedia: () => ({matches:true}) },
+    document,
+    localStorage: { getItem: () => saved },
+    window: { matchMedia: () => { throw new Error("system theme must not be read"); } },
   });
-  expect(document.documentElement.dataset.theme).toBe(saved || "dark");
-  expect(document.documentElement.style.colorScheme).toBe(saved || "dark");
+  expect(document.documentElement.dataset.theme).toBe(expected);
+  expect(document.documentElement.style.colorScheme).toBe(expected);
 });
 test("security headers and original SPA fallback are retained", () => {
   const headers = fs.readFileSync(path.join(publicDir, "_headers"), "utf8");

@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import useModalFocus from "../utils/useModalFocus";
 import "./MyPage.css";
 import api, { getAccessToken } from "../api/api";
+import { USE_MOCK } from "../config/mockConfig";
+import { getMockUser, saveMockUser } from "../mocks/authMock";
 import { clearAuthenticatedUserStorage } from "../utils/authStorage";
 
 import adminMenuIcon from "../img/관리자.png";
@@ -12,13 +14,13 @@ import locationPinIcon from "../img/파랑색 위치.png";
 import navigationArrowIcon from "../img/Background.png";
 import compassIcon from "../img/나침반.png";
 import routeIcon from "../img/동선.png";
+import { getStoredTheme, saveTheme } from "../utils/theme";
 
 const DEFAULT_USER_NAME = "여행자";
-const THEME_STORAGE_KEY = "site-theme";
 
 const getCurrentTheme = () => {
-  if (typeof document === "undefined") return "light";
-  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+  if (typeof window === "undefined") return "light";
+  return getStoredTheme();
 };
 
 const DEFAULT_MYPAGE_STATS = {
@@ -356,6 +358,7 @@ const normalizeToken = (token) => {
 };
 
 const getStoredUser = () => {
+  if (USE_MOCK) return getMockUser();
   try {
     const localUser = localStorage.getItem("currentUser");
     if (localUser) return JSON.parse(localUser);
@@ -626,6 +629,10 @@ const getUserDisplayName = (user) => {
 
 const saveUserToStorage = (user) => {
   if (!user) return;
+  if (USE_MOCK) {
+    saveMockUser(user);
+    return;
+  }
 
   try {
     localStorage.setItem("currentUser", JSON.stringify(user));
@@ -666,14 +673,7 @@ const MyPage = () => {
   const isAdmin = currentRole === "ADMIN" || currentRole === "ROLE_ADMIN";
 
   const handleThemeChange = (nextTheme) => {
-    document.documentElement.dataset.theme = nextTheme;
-    document.documentElement.style.colorScheme = nextTheme;
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
-    } catch (error) {
-      logSafeApiError(error, "MyPage.jsx");
-    }
-    setTheme(nextTheme);
+    setTheme(saveTheme(nextTheme));
   };
 
   useEffect(() => {

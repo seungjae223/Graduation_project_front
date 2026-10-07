@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { loadKakaoMapsScript } from "../utils/kakaoMapLoader";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
@@ -11,7 +12,7 @@ import routeIcon from "../img/경로.png";
 import tokyo from "../img/도쿄.png";
 import kyoto from "../img/교토.png";
 
-let kakaoMapsLoadingPromise = null;
+
 
 const LOCATION_STORAGE_KEY = "currentLocation";
 const LOCATION_LABEL_STORAGE_KEY = "currentLocationLabel";
@@ -27,80 +28,6 @@ const travelMockData = [
 
 const VISIBLE_TRAVEL_COUNT = 2;
 
-const loadKakaoMapsScript = () => {
-  if (window.kakao?.maps?.services) {
-    return Promise.resolve(window.kakao);
-  }
-
-  if (kakaoMapsLoadingPromise) {
-    return kakaoMapsLoadingPromise;
-  }
-
-  kakaoMapsLoadingPromise = new Promise((resolve, reject) => {
-    const appKey = process.env.REACT_APP_KAKAO_MAP_JS_KEY;
-
-    if (!appKey) {
-      reject(new Error("카카오맵 JS 키가 없습니다."));
-      return;
-    }
-
-    const initialize = () => {
-      if (!window.kakao?.maps?.load) {
-        reject(new Error("카카오맵 SDK 초기화에 실패했습니다."));
-        return;
-      }
-
-      window.kakao.maps.load(() => {
-        if (window.kakao?.maps?.services) {
-          resolve(window.kakao);
-        } else {
-          reject(new Error("카카오맵 services 라이브러리를 찾지 못했습니다."));
-        }
-      });
-    };
-
-    const existingScript = document.querySelector(
-      'script[data-kakao-maps="true"], script[src*="dapi.kakao.com/v2/maps/sdk.js"]'
-    );
-
-    if (existingScript) {
-      if (window.kakao?.maps?.services) {
-        resolve(window.kakao);
-        return;
-      }
-
-      if (window.kakao?.maps?.load) {
-        initialize();
-        return;
-      }
-
-      existingScript.addEventListener("load", initialize, { once: true });
-      existingScript.addEventListener(
-        "error",
-        () => reject(new Error("카카오맵 SDK 로드 실패")),
-        { once: true }
-      );
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src =
-      `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}` +
-      `&autoload=false&libraries=services`;
-    script.async = true;
-    script.defer = true;
-    script.dataset.kakaoMaps = "true";
-    script.onload = initialize;
-    script.onerror = () => reject(new Error("카카오맵 SDK 로드 실패"));
-
-    document.head.appendChild(script);
-  }).catch((error) => {
-    kakaoMapsLoadingPromise = null;
-    throw error;
-  });
-
-  return kakaoMapsLoadingPromise;
-};
 
 const getAddressLabelFromKakaoMap = async (latitude, longitude) => {
   try {
@@ -157,6 +84,13 @@ const getLocationErrorMessage = (error) => {
 
 const Home = () => {
   const navigate = useNavigate();
+  const locationRequest = useRef(0);
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    ++locationRequest.current;
+    return () => { mounted.current = false; };
+  }, []);
 
   const [selectedMenu, setSelectedMenu] = useState("route");
   const [keyword, setKeyword] = useState("");
@@ -172,10 +106,12 @@ const Home = () => {
         return;
       }
 
+      const request = ++locationRequest.current;
       setIsLocationLoading(true);
 
       navigator.geolocation.getCurrentPosition(
         async (position) => {
+          if (!mounted.current || request !== locationRequest.current) return;
           const { latitude, longitude } = position.coords;
 
           const currentLocation = {
@@ -188,6 +124,7 @@ const Home = () => {
             longitude
           );
 
+          if (!mounted.current || request !== locationRequest.current) return;
           localStorage.setItem(
             LOCATION_STORAGE_KEY,
             JSON.stringify(currentLocation)
@@ -208,6 +145,7 @@ const Home = () => {
           }
         },
         (error) => {
+          if (!mounted.current || request !== locationRequest.current) return;
 
           const errorMessage = getLocationErrorMessage(error);
 
@@ -322,6 +260,7 @@ const Home = () => {
 
     try {
       const status = await navigator.permissions.query({ name: "geolocation" });
+      if (!mounted.current) return;
 
       if (status.state !== "granted") {
         localStorage.setItem("locationPermissionAllowed", "false");
@@ -331,6 +270,7 @@ const Home = () => {
 
       requestCurrentLocation({ shouldNavigate: true });
     } catch (error) {
+      if (!mounted.current) return;
       alert("위치 권한 상태를 확인하지 못했습니다.");
     }
   };

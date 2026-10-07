@@ -1,4 +1,6 @@
 import axios from "axios";
+import { USE_MOCK } from "../config/mockConfig";
+import { mockAdapter } from "../mocks/mockAdapter";
 import { clearAuthenticatedUserStorage, tokenCandidates } from "../utils/authStorage";
 import { getAuthSnapshot, notifyAuthChange } from "../utils/authState";
 import { logSafeApiError } from "../utils/safeLog";
@@ -116,6 +118,17 @@ export const getAccessToken = () => tokenCandidates().map(normalizeToken)
 
 api.interceptors.request.use(
   (config) => {
+    if (USE_MOCK) {
+      config.adapter = mockAdapter;
+      config.headers = config.headers || {};
+      Object.keys(config.headers).forEach(key => {
+        if (key.toLowerCase() === "authorization") delete config.headers[key];
+      });
+      return config;
+    }
+    if (!API_BASE_URL) {
+      throw new Error("REACT_APP_API_BASE_URL 설정이 필요합니다.");
+    }
     const isPublicApi = isPublicApiPath(config);
 
     config.headers = config.headers || {};

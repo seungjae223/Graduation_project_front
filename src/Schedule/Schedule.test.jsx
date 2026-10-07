@@ -23,6 +23,6 @@ test("empty list differs from failure and retry", async () => {
 });
 test("reentry fetches a fresh server list", async () => {
   getTripsApi.mockResolvedValueOnce([]).mockResolvedValueOnce([trip]);
-  const first = setup(); await screen.findByText("저장된 일정이 없습니다."); first.unmount();
+  const view = setup(); await screen.findByText("저장된 일정이 없습니다."); view.unmount();
   setup(); expect(await screen.findByText("서버 여행")).toBeInTheDocument();
 });

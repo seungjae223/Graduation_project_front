@@ -1,3 +1,4 @@
+/* eslint-disable testing-library/no-node-access -- Verify that navigation retains the same SVG nodes. */
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router-dom";

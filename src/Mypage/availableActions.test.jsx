@@ -1,11 +1,11 @@
-jest.mock("../utils/useSessionKey", () => ({ __esModule: true, default: () => "account:test" }));
-jest.mock("../utils/authState", () => ({ getAuthSnapshot: () => ({ accountKey: "account:test" }) }));
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import SavedPlaces from "./SavedPlaces";
 import MyPage from "./MyPage";
 import ShareModal from "../ShareModal/ShareModal";
 import api from "../api/api";
+jest.mock("../utils/useSessionKey", () => ({ __esModule: true, default: () => "account:test" }));
+jest.mock("../utils/authState", () => ({ getAuthSnapshot: () => ({ accountKey: "account:test" }) }));
 jest.mock("../api/api", () => ({ __esModule: true, default: { get: jest.fn(), post: jest.fn(), delete: jest.fn() }, getAccessToken: () => "test-only-token" }));
 beforeEach(() => {
   jest.clearAllMocks();

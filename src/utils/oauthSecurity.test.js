@@ -14,6 +14,7 @@ test.each(["google", "kakao"])("%s context is provider-bound, single-use and exp
   expect(consumeOAuthState(provider, "old")).toBe(false);
 });
 test.each(["http://accounts.google.com/?state=x", "https://accounts.google.com.evil.example/?state=x",
+  // eslint-disable-next-line no-script-url -- Malicious URL fixture must be rejected.
   "javascript:alert(1)", "https://user@accounts.google.com/?state=x"])("rejects %s", (url) => {
   expect(() => beginOAuth("google", url, "x")).toThrow();
   expect(sessionStorage.getItem("oauth_state_google")).toBeNull();

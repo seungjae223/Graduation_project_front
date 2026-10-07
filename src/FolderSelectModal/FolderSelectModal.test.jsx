@@ -1,3 +1,4 @@
+import userEvent from "@testing-library/user-event";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import FolderSelectModal from "./FolderSelectModal";
 import api from "../api/api";
@@ -10,7 +11,7 @@ const openCreate = async () => { await screen.findAllByText("같은 이름"); fi
 test("ID-less success has no name-based selection and duplicate submits only POST once", async () => {
   const save = jest.fn(); render(<FolderSelectModal open onClose={jest.fn()} onSave={save} />); await openCreate();
   let complete; api.post.mockImplementation(() => new Promise(resolve => { complete = resolve; }));
-  fireEvent.submit(screen.getByLabelText("폴더 이름").closest("form")); fireEvent.submit(screen.getByLabelText("폴더 이름").closest("form")); expect(api.post).toHaveBeenCalledTimes(1);
+  userEvent.click(screen.getByLabelText("폴더 이름")); userEvent.keyboard("{Enter}"); userEvent.click(screen.getByLabelText("폴더 이름")); userEvent.keyboard("{Enter}"); expect(api.post).toHaveBeenCalledTimes(1);
   expect(screen.getByRole("button", { name: "새 폴더 만들기 닫기" })).toBeDisabled();
   await act(async () => complete({ data: "폴더 생성 완료" })); await screen.findByText(/목록으로 돌아가 직접 폴더/);
   fireEvent.click(screen.getByRole("button", { name: "취소" }));
@@ -21,17 +22,17 @@ test("ID-less success has no name-based selection and duplicate submits only POS
 });
 test("confirmed create with failed list retries GET only", async () => {
   render(<FolderSelectModal open onClose={jest.fn()} />); await openCreate(); api.post.mockResolvedValue({ data: "폴더 생성 완료" }); api.get.mockRejectedValueOnce(new Error("read failed"));
-  fireEvent.submit(screen.getByLabelText("폴더 이름").closest("form")); await screen.findByText("폴더는 생성됐지만 목록을 불러오지 못했어요.");
+  userEvent.click(screen.getByLabelText("폴더 이름")); userEvent.keyboard("{Enter}"); await screen.findByText("폴더는 생성됐지만 목록을 불러오지 못했어요.");
   fireEvent.click(screen.getByRole("button", { name: "목록 다시 확인" })); await screen.findByText(/목록으로 돌아가 직접 폴더/); expect(api.post).toHaveBeenCalledTimes(1);
 });
 
 test("lost response retains input and only permits list reads, never automatic recreation", async () => {
   render(<FolderSelectModal open onClose={jest.fn()} />); await openCreate();
   api.post.mockRejectedValueOnce(new Error("timeout"));
-  fireEvent.submit(screen.getByLabelText("폴더 이름").closest("form"));
+  userEvent.click(screen.getByLabelText("폴더 이름")); userEvent.keyboard("{Enter}");
   await screen.findByText(/폴더가 생성되었을 수/);
   expect(screen.getByLabelText("폴더 이름")).toHaveValue("같은 이름");
-  fireEvent.submit(screen.getByLabelText("폴더 이름").closest("form"));
+  userEvent.click(screen.getByLabelText("폴더 이름")); userEvent.keyboard("{Enter}");
   fireEvent.click(screen.getByRole("button", { name: "목록 다시 확인" }));
   await waitFor(() => expect(api.get).toHaveBeenCalledTimes(2));
   expect(api.post).toHaveBeenCalledTimes(1);
@@ -42,7 +43,7 @@ test.each(["reopen", "place", "account"])("late creation refresh cannot replace 
   const props = { open: true, onClose: jest.fn(), contextKey: "place1" };
   const { rerender } = render(<FolderSelectModal {...props} />); await openCreate();
   api.post.mockImplementationOnce(() => new Promise(resolve => { complete = resolve; }));
-  fireEvent.submit(screen.getByLabelText("폴더 이름").closest("form"));
+  userEvent.click(screen.getByLabelText("폴더 이름")); userEvent.keyboard("{Enter}");
   if (mode === "reopen") rerender(<FolderSelectModal {...props} open={false} />);
   if (mode === "account") mockAccount = "account:B";
   rerender(<FolderSelectModal {...props} contextKey={mode === "place" ? "place2" : "place1"} />);

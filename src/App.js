@@ -14,6 +14,8 @@ import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
 import SearchPop from "./SearchPopup/SearchPop";
 import EarthLoader from "./Loading/EarthLoader";
+import RouteErrorBoundary from "./Loading/RouteErrorBoundary";
+import useSessionKey from "./utils/useSessionKey";
 import { SavedPlacesProvider } from "./Context/SavedPlacesContext";
 import { getAccessToken } from "./api/api";
 import { buildLoginPath } from "./utils/authRedirect";
@@ -65,6 +67,7 @@ const AdminInquiryWrite = lazy(() =>
 );
 
 function RequireAuth({ children }) {
+  useSessionKey();
   const location = useLocation();
 
   if (!getAccessToken()) {
@@ -91,6 +94,7 @@ function NotFound() {
 }
 
 function Layout() {
+  useSessionKey();
   const location = useLocation();
   const [isSearchPopOpen, setIsSearchPopOpen] = useState(false);
   const previousPathRef = useRef(null);
@@ -165,6 +169,7 @@ function Layout() {
               : ""
           }`}
         >
+          <RouteErrorBoundary key={`${location.pathname}${location.search}`}>
           <Suspense fallback={<EarthLoader variant="page" text="화면을 불러오는 중..." />}>
             <Routes>
               <Route path="/" element={<OnBoarding />} />
@@ -219,6 +224,7 @@ function Layout() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          </RouteErrorBoundary>
         </div>
       </main>
 
@@ -234,27 +240,6 @@ function Layout() {
 }
 
 function App() {
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const syncSystemTheme = (event) => {
-      let savedTheme = null;
-      try {
-        savedTheme = localStorage.getItem("site-theme");
-      } catch (error) {
-        // 저장소 접근이 차단된 환경에서는 시스템 설정을 따른다.
-      }
-
-      if (savedTheme === "light" || savedTheme === "dark") return;
-
-      const nextTheme = event.matches ? "dark" : "light";
-      document.documentElement.dataset.theme = nextTheme;
-      document.documentElement.style.colorScheme = nextTheme;
-    };
-
-    media.addEventListener?.("change", syncSystemTheme);
-    return () => media.removeEventListener?.("change", syncSystemTheme);
-  }, []);
-
   return (
     <SavedPlacesProvider>
       <BrowserRouter>

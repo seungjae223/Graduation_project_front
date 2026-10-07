@@ -1,9 +1,9 @@
-jest.mock("../utils/useSessionKey", () => ({ __esModule: true, default: () => "account:test" }));
-jest.mock("../utils/authState", () => ({ getAuthSnapshot: () => ({ accountKey: "account:test" }) }));
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, useNavigate } from "react-router-dom";
 import Detail from "./Detail";
 import api from "../api/api";
+jest.mock("../utils/useSessionKey", () => ({ __esModule: true, default: () => "account:test" }));
+jest.mock("../utils/authState", () => ({ getAuthSnapshot: () => ({ accountKey: "account:test" }) }));
 jest.mock("../api/api", () => ({ __esModule: true, default: { get: jest.fn(), post: jest.fn().mockResolvedValue({}), delete: jest.fn() }, getAccessToken: () => "test-session", getApiErrorMessage: (_, fallback) => fallback }));
 jest.mock("../Context/SavedPlacesContext", () => ({ useSavedPlaces: () => ({ isSaved: () => false, toggleSavedPlace: jest.fn() }) }));
 jest.mock("../utils/recentPlaces", () => ({ saveRecentPlace: jest.fn() }));

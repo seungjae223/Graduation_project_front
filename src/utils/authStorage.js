@@ -1,4 +1,6 @@
 import { notifyAuthChange } from "./authState";
+import { USE_MOCK } from "../config/mockConfig";
+import { clearMockSession, readMockSession } from "../mocks/authMock";
 export const ACCESS_TOKEN_KEY = "accessToken";
 const PRIVATE_KEYS = new Set([
   ACCESS_TOKEN_KEY, "token", "tokenType", "refreshToken", "isLoggedIn", "keepLogin",
@@ -10,6 +12,11 @@ const PRIVATE_KEYS = new Set([
 ]);
 
 export function clearAuthenticatedUserStorage() {
+  if (USE_MOCK) {
+    clearMockSession();
+    notifyAuthChange();
+    return;
+  }
   for (const name of ["localStorage", "sessionStorage"]) {
     try {
       const storage = window[name];
@@ -26,6 +33,10 @@ export function clearAuthenticatedUserStorage() {
 
 // Migrate legacy aliases in-place without changing persistence across reloads/tabs.
 export function tokenCandidates() {
+  if (USE_MOCK) {
+    const session = readMockSession();
+    return session ? [session.token] : [];
+  }
   const candidates = [];
   for (const name of ["localStorage", "sessionStorage"]) {
     try {

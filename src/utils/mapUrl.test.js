@@ -9,6 +9,7 @@ test.each([
   expect(isMapUrlForProvider(url, provider)).toBe(true);
 });
 test.each([
+  // eslint-disable-next-line no-script-url -- Malicious URL fixture must be rejected.
   "javascript:alert('google.com kakao.com')", "https://evil.example/google.com/kakao.com",
   "https://www.google.com.evil.example/maps", "https://map.kakao.com@evil.example/",
   "http://map.kakao.com/link/map/test", "https://www.google.com/url?q=https://evil.example",

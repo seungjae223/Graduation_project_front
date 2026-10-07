@@ -1,4 +1,5 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+/* eslint-disable testing-library/no-node-access -- Assert absence of the empty SDK map container. */
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import RouteResult from "./RouteResult";
 import { getTripByIdApi, getTripPlacesApi, getTripTimelineApi } from "../api/tripApi";

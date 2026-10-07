@@ -41,8 +41,8 @@ test.each(["place", "schedule", "start", "optimize"])("%s failure keeps confirme
   expect(result.current.status).toBe("failed"); expect(result.current.tripId).toBe(42);
   expect(result.current.completed).toContain("여행 생성"); expect(JSON.stringify(draft)).toBe(before);
   const urls = api.post.mock.calls.map(call => call[0]);
-  if (["place", "schedule"].includes(stage)) expect(urls.some(url => url.endsWith("/start"))).toBe(false);
-  if (stage !== "optimize") expect(urls.some(url => url.endsWith("/optimize"))).toBe(false);
+  expect(["place", "schedule"].includes(stage) && urls.some(url => url.endsWith("/start"))).toBe(false);
+  expect(stage !== "optimize" && urls.some(url => url.endsWith("/optimize"))).toBe(false);
   const calls = api.post.mock.calls.length;
   await act(async () => result.current.run(update => saveRouteToServer(draft, {}, update)));
   expect(api.post).toHaveBeenCalledTimes(calls);

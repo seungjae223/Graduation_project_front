@@ -89,7 +89,13 @@ const Login = () => {
     try {
       setIsLoading(true);
       saveSocialLoginReturnPath(returnPath);
-      const { authorizationUrl, state } = await getSocialAuthorizationApi(provider);
+      const result = await getSocialAuthorizationApi(provider);
+      if (result.authenticated) {
+        sessionStorage.removeItem("socialLoginReturnTo");
+        navigate(returnPath, { replace: true });
+        return;
+      }
+      const { authorizationUrl, state } = result;
       window.location.assign(beginOAuth(provider, authorizationUrl, state));
     } catch (error) {
       logSafeApiError(error, "oauth-start");

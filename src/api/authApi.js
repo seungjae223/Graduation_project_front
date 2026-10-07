@@ -1,4 +1,6 @@
 import api from "./api";
+import { USE_MOCK } from "../config/mockConfig";
+import { loginMock, signupMock } from "../mocks/authMock";
 import { ACCESS_TOKEN_KEY, clearAuthenticatedUserStorage } from "../utils/authStorage";
 import { notifyAuthChange } from "../utils/authState";
 
@@ -143,6 +145,11 @@ const saveToken = (token, { persistent = true } = {}) => {
 
 export const loginApi = async ({ email, password, keepLogin = true }) => {
   const normalizedEmail = normalizeEmail(email);
+  if (USE_MOCK) {
+    const result = loginMock({ email: normalizedEmail, keepLogin });
+    notifyAuthChange();
+    return result;
+  }
 
   const response = await api.post(
     "/api/auth/login",
@@ -197,6 +204,7 @@ export const logoutApi = clearAuthenticatedUserStorage;
 export const signupApi = async ({ email, password, nickname }) => {
   const normalizedEmail = normalizeEmail(email);
   const normalizedNickname = normalizeNickname(nickname);
+  if (USE_MOCK) return signupMock({ email: normalizedEmail, nickname: normalizedNickname });
 
   const response = await api.post("/api/auth/signup", {
     email: normalizedEmail,
@@ -218,6 +226,12 @@ export const getSocialAuthorizationApi = async (provider) => {
     throw new Error("지원하지 않는 소셜 로그인입니다.");
   }
 
+  if (USE_MOCK) {
+    const result = loginMock();
+    notifyAuthChange();
+    return { ...result, authenticated: true };
+  }
+
   const response = await api.get(`/api/auth/${provider}/authorize`);
   const authorizationUrl = response.data?.authorizationUrl;
   const state = response.data?.state;
@@ -236,6 +250,12 @@ export const completeSocialLoginApi = async ({ provider, code, state }) => {
 
   if (!code || !state) {
     throw new Error("소셜 로그인 인증 정보가 없습니다.");
+  }
+
+  if (USE_MOCK) {
+    const result = loginMock();
+    notifyAuthChange();
+    return result;
   }
 
   const response = await api.post(`/api/auth/${provider}/login`, {

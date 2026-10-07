@@ -1,4 +1,4 @@
-import { savePreparedPdf } from "./pdfTask";
+import { savePreparedPdf, waitForPdfImages } from "./pdfTask";
 
 test("navigation during rendering prevents the browser save request", async () => {
   let finish;
@@ -9,6 +9,22 @@ test("navigation during rendering prevents the browser save request", async () =
   finish();
   await expect(task).rejects.toThrow("출력 대상이 변경됐습니다.");
   expect(worker.save).not.toHaveBeenCalled();
+});
+
+test("an already failed image does not hang PDF export", async () => {
+  const image = { complete: true, naturalWidth: 0, addEventListener: jest.fn() };
+  await waitForPdfImages({ querySelectorAll: () => [image] });
+  expect(image.addEventListener).not.toHaveBeenCalled();
+});
+
+test("pending images time out and release event listeners", async () => {
+  jest.useFakeTimers();
+  const image = { complete: false, addEventListener: jest.fn(), removeEventListener: jest.fn() };
+  const task = waitForPdfImages({ querySelectorAll: () => [image] });
+  jest.advanceTimersByTime(15000);
+  await expect(task).rejects.toThrow("시간 초과");
+  expect(image.removeEventListener).toHaveBeenCalledTimes(2);
+  jest.useRealTimers();
 });
 
 test("valid output requests one save; renderer failure requests none", async () => {

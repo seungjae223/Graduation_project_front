@@ -1,4 +1,4 @@
-import { savePreparedPdf } from "../utils/pdfTask";
+import { savePreparedPdf, waitForPdfImages } from "../utils/pdfTask";
 import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -260,30 +260,6 @@ const waitForNextPaint = () =>
     });
   });
 
-const waitForImages = async (root) => {
-  const images = Array.from(root.querySelectorAll("img"));
-
-  if (!images.length) return;
-
-  await Promise.all(
-    images.map((img) => {
-      if (img.complete && img.naturalWidth > 0) {
-        return Promise.resolve();
-      }
-
-      return new Promise((resolve) => {
-        const done = () => {
-          img.removeEventListener("load", done);
-          img.removeEventListener("error", done);
-          resolve();
-        };
-
-        img.addEventListener("load", done, { once: true });
-        img.addEventListener("error", done, { once: true });
-      });
-    })
-  );
-};
 
 const createPdfClone = (target) => {
   const rect = target.getBoundingClientRect();
@@ -756,7 +732,7 @@ function Detail() {
 
     try {
       await waitForNextPaint();
-      await waitForImages(clone);
+      await waitForPdfImages(clone);
       await waitForNextPaint();
 
       const today = new Date();

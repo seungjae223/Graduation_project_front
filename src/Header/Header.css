@@ -45,6 +45,18 @@
   justify-content: center;
 
   cursor: pointer;
+  color: var(--color-text);
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.icon-btn:hover,
+.icon-btn:focus-visible {
+  background: var(--color-hover);
+}
+
+.icon-btn:active {
+  transform: scale(0.94);
 }
 
 .header-icon,

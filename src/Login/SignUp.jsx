@@ -1,5 +1,5 @@
 import { logSafeApiError } from "../utils/safeLog";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import "./SignUp.css";
@@ -131,6 +131,15 @@ const SignupCompleteModal = ({ open, onStart }) => {
 const SignUp = () => {
   const navigate = useNavigate();
   const emailAlertReturnFocusRef = useRef(null);
+  const verificationVersion = useRef(0);
+  const emailTask = useRef(false);
+  const signupTask = useRef(false);
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    ++verificationVersion.current;
+    return () => { mounted.current = false; };
+  }, []);
 
   const [showPw, setShowPw] = useState(false);
   const [showPwConfirm, setShowPwConfirm] = useState(false);
@@ -156,6 +165,7 @@ const SignUp = () => {
 
   const handleChange = (key, value) => {
     if (key === "email") {
+      ++verificationVersion.current;
       setForm((prev) => ({
         ...prev,
         email: value,
@@ -168,6 +178,7 @@ const SignUp = () => {
     }
 
     if (key === "code") {
+      ++verificationVersion.current;
       setForm((prev) => ({
         ...prev,
         code: value,
@@ -197,6 +208,7 @@ const SignUp = () => {
   };
 
   const handleSendCode = async (event) => {
+    if (emailTask.current) return;
     const normalizedEmail = form.email.trim().toLowerCase();
 
     if (!normalizedEmail || !isValidEmail(normalizedEmail)) {
@@ -205,10 +217,14 @@ const SignUp = () => {
       return;
     }
 
+    const version = ++verificationVersion.current;
     try {
+      emailTask.current = true;
       setIsSendingCode(true);
+      setIsCodeVerified(false);
 
       await sendEmailCodeApi(normalizedEmail);
+      if (!mounted.current || version !== verificationVersion.current) return;
 
       setForm((prev) => ({
         ...prev,
@@ -221,6 +237,7 @@ const SignUp = () => {
 
       alert("인증번호가 발송되었습니다. 이메일을 확인해주세요.");
     } catch (error) {
+      if (!mounted.current || version !== verificationVersion.current) return;
       logSafeApiError(error, "SignUp.jsx");
 
       alert(
@@ -230,11 +247,13 @@ const SignUp = () => {
         )
       );
     } finally {
-      setIsSendingCode(false);
+      emailTask.current = false;
+      if (mounted.current) setIsSendingCode(false);
     }
   };
 
   const handleVerifyCode = async () => {
+    if (emailTask.current) return;
     const normalizedEmail = form.email.trim().toLowerCase();
     const verificationCode = form.code.trim();
 
@@ -248,7 +267,9 @@ const SignUp = () => {
       return;
     }
 
+    const version = verificationVersion.current;
     try {
+      emailTask.current = true;
       setIsVerifyingCode(true);
 
       await verifyEmailCodeApi({
@@ -256,9 +277,11 @@ const SignUp = () => {
         code: verificationCode,
       });
 
+      if (!mounted.current || version !== verificationVersion.current) return;
       setIsCodeVerified(true);
       alert("이메일 인증이 완료되었습니다.");
     } catch (error) {
+      if (!mounted.current || version !== verificationVersion.current) return;
       logSafeApiError(error, "SignUp.jsx");
 
       setIsCodeVerified(false);
@@ -270,7 +293,8 @@ const SignUp = () => {
         )
       );
     } finally {
-      setIsVerifyingCode(false);
+      emailTask.current = false;
+      if (mounted.current) setIsVerifyingCode(false);
     }
   };
 
@@ -297,6 +321,7 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (signupTask.current) return;
 
     const trimmedName = form.name.trim();
     const normalizedEmail = form.email.trim().toLowerCase();
@@ -334,6 +359,7 @@ const SignUp = () => {
     }
 
     try {
+      signupTask.current = true;
       setIsSubmitting(true);
 
       await signupApi({
@@ -342,8 +368,9 @@ const SignUp = () => {
         nickname: trimmedName,
       });
 
-      setIsCompleteModalOpen(true);
+      if (mounted.current) setIsCompleteModalOpen(true);
     } catch (error) {
+      if (!mounted.current) return;
       logSafeApiError(error, "SignUp.jsx");
 
       alert(
@@ -353,7 +380,8 @@ const SignUp = () => {
         )
       );
     } finally {
-      setIsSubmitting(false);
+      signupTask.current = false;
+      if (mounted.current) setIsSubmitting(false);
     }
   };
 
@@ -416,7 +444,7 @@ const SignUp = () => {
                   type="button"
                   className="signup-inline-btn signup-code-send-btn"
                   onClick={handleSendCode}
-                  disabled={isSendingCode}
+                  disabled={isSendingCode || isVerifyingCode}
                 >
                   {isSendingCode ? "발송 중..." : "인증번호 발송"}
                 </button>
@@ -467,7 +495,7 @@ const SignUp = () => {
                   type="button"
                   className="signup-inline-btn"
                   onClick={handleVerifyCode}
-                  disabled={!isCodeSent || isVerifyingCode}
+                  disabled={!isCodeSent || isVerifyingCode || isSendingCode}
                 >
                   {isVerifyingCode ? "확인 중..." : "인증 확인"}
                 </button>

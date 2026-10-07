@@ -1,3 +1,4 @@
+/* eslint-disable testing-library/no-node-access -- Track the native focused element during keyboard traversal. */
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";

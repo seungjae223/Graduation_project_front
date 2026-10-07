@@ -1,3 +1,4 @@
+import { loadKakaoMapsScript } from "../utils/kakaoMapLoader";
 import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
 import { logSafeApiError } from "../utils/safeLog";
 import { isMapUrlForProvider } from "../utils/mapUrl";
@@ -28,7 +29,7 @@ import useModalFocus from "../utils/useModalFocus";
 import "./RouteResult.css";
 
 let mapsConfigured = false;
-let kakaoMapsLoadingPromise = null;
+
 const runtimeCoordinateCache = new Map();
 const TIMELINE_ITEM_BUTTON_STYLE = { cursor: "pointer" };
 const DELETE_ROUTE_EVENT = "route-result-delete-schedule";
@@ -881,70 +882,7 @@ const resolveMapDataForDay = async (day, dayIndex, resolveDynamicCoord) => {
   ).filter(Boolean);
   return buildMapDataFromResolvedPoints(sourceItems, resolvedPoints);
 };
-const loadKakaoMapsScript = () => {
-  if (window.kakao?.maps?.services) {
-    return Promise.resolve(window.kakao);
-  }
-  if (kakaoMapsLoadingPromise) {
-    return kakaoMapsLoadingPromise;
-  }
-  kakaoMapsLoadingPromise = new Promise((resolve, reject) => {
-    const appKey =
-      process.env.REACT_APP_KAKAO_MAP_JS_KEY ||
-      process.env.REACT_APP_KAKao_MAP_JS_KEY;
-    if (!appKey) {
-      reject(new Error("카카오맵 JS 키가 없습니다."));
-      return;
-    }
-    const initialize = () => {
-      if (!window.kakao?.maps?.load) {
-        reject(new Error("카카오맵 SDK 초기화에 실패했습니다."));
-        return;
-      }
-      window.kakao.maps.load(() => {
-        if (window.kakao?.maps?.services) {
-          resolve(window.kakao);
-        } else {
-          reject(new Error("카카오맵 services 라이브러리를 찾지 못했습니다."));
-        }
-      });
-    };
-    const existingScript = document.querySelector(
-      'script[data-kakao-maps="true"]',
-    );
-    if (existingScript) {
-      if (window.kakao?.maps?.services) {
-        resolve(window.kakao);
-        return;
-      }
-      if (window.kakao?.maps?.load) {
-        initialize();
-        return;
-      }
-      existingScript.addEventListener("load", initialize, { once: true });
-      existingScript.addEventListener(
-        "error",
-        () => reject(new Error("카카오맵 SDK 로드 실패")),
-        { once: true },
-      );
-      return;
-    }
-    const script = document.createElement("script");
-    script.src =
-      `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}` +
-      `&autoload=false&libraries=services`;
-    script.async = true;
-    script.defer = true;
-    script.dataset.kakaoMaps = "true";
-    script.onload = initialize;
-    script.onerror = () => reject(new Error("카카오맵 SDK 로드 실패"));
-    document.head.appendChild(script);
-  }).catch((error) => {
-    kakaoMapsLoadingPromise = null;
-    throw error;
-  });
-  return kakaoMapsLoadingPromise;
-};
+
 const resolveKakaoCoordinate = (kakao, title, placesService, geocoder) =>
   new Promise((resolve) => {
     const keyword = normalizeTitle(title);
@@ -1844,8 +1782,10 @@ const DetailSection = ({
     </section>
   );
 };
-const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
+export const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
   const mapRef = useRef(null);
+  const onOpenMapRef = useRef(onOpenMap);
+  onOpenMapRef.current = onOpenMap;
   const [mapError, setMapError] = useState("");
   const fallbackMapData = useMemo(
     () => buildMapDataFromDay(dayData, dayIndex),
@@ -1866,6 +1806,7 @@ const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
     let markers = [];
     let polylines = [];
     let mapClickListener = null;
+    let idleListener = null;
     const drawStraightLine = (gm, line, bounds) => {
       line.path.forEach((point) => bounds.extend(point));
 
@@ -1884,10 +1825,11 @@ const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
     (async () => {
       try {
         const { Map } = await importLibrary("maps");
-        await importLibrary("routes");
+        const { Marker } = await importLibrary("marker");
+        const { Geocoder } = await importLibrary("geocoding");
         if (!mounted || !mapRef.current) return;
         const gm = window.google.maps;
-        const geocoder = new gm.Geocoder();
+        const geocoder = new Geocoder();
         const resolvedMapData = await resolveMapDataForDay(
           dayData,
           dayIndex,
@@ -1913,8 +1855,8 @@ const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
           mapTypeControl: false,
         });
         mapClickListener = map.addListener("click", () => {
-          if (typeof onOpenMap === "function") {
-            onOpenMap();
+          if (typeof onOpenMapRef.current === "function") {
+            onOpenMapRef.current();
           }
         });
         const bounds = new gm.LatLngBounds();
@@ -1924,7 +1866,7 @@ const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
         mapData.markers.forEach((marker) => {
           const position = { lat: marker.lat, lng: marker.lng };
           bounds.extend(position);
-          const markerInstance = new gm.Marker({
+          const markerInstance = new Marker({
             map,
             position,
             title: marker.title,
@@ -1941,8 +1883,8 @@ const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
         });
         if (mapData.markers.length > 1) {
           map.fitBounds(bounds, 60);
-          gm.event.addListenerOnce(map, "idle", () => {
-            if (map && map.getZoom() > 13) {
+          idleListener = gm.event.addListenerOnce(map, "idle", () => {
+            if (mounted && map && map.getZoom() > 13) {
               map.setZoom(13);
             }
           });
@@ -1952,6 +1894,7 @@ const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
         }
         setMapError("");
       } catch (error) {
+        if (!mounted) return;
         logSafeApiError(error, "RouteResult.jsx");
         setMapError(
           "지도를 불러오지 못했어요. API 키 또는 Google Cloud 설정을 확인해 주세요.",
@@ -1963,10 +1906,11 @@ const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
       if (mapClickListener) {
         mapClickListener.remove();
       }
+      if (idleListener) idleListener.remove();
       markers.forEach((marker) => marker.setMap(null));
       polylines.forEach((polyline) => polyline.setMap(null));
     };
-  }, [dayData, dayIndex, fallbackMapData, onOpenMap]);
+  }, [dayData, dayIndex, fallbackMapData]);
   return (
     <div className="route-map-mock">
       {" "}
@@ -1994,8 +1938,10 @@ const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
     </div>
   );
 };
-const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
+export const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
   const mapRef = useRef(null);
+  const onOpenMapRef = useRef(onOpenMap);
+  onOpenMapRef.current = onOpenMap;
   const [mapError, setMapError] = useState("");
 
   const fallbackMapData = useMemo(
@@ -2004,6 +1950,7 @@ const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
   );
 
   useEffect(() => {
+    let mounted = true;
     let map = null;
     let clickHandler = null;
     let resizeTimer = null;
@@ -2012,7 +1959,7 @@ const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
 
     loadKakaoMapsScript()
       .then(async (kakao) => {
-        if (!mapRef.current) return;
+        if (!mounted || !mapRef.current) return;
 
         const placesService = new kakao.maps.services.Places();
         const geocoder = new kakao.maps.services.Geocoder();
@@ -2024,7 +1971,7 @@ const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
             resolveKakaoCoordinate(kakao, title, placesService, geocoder)
         );
 
-        if (!mapRef.current) return;
+        if (!mounted || !mapRef.current) return;
 
         const mapData =
           resolvedMapData.markers.length >= fallbackMapData.markers.length
@@ -2041,8 +1988,8 @@ const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
         });
 
         clickHandler = () => {
-          if (typeof onOpenMap === "function") {
-            onOpenMap();
+          if (typeof onOpenMapRef.current === "function") {
+            onOpenMapRef.current();
           }
         };
 
@@ -2138,6 +2085,7 @@ const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
         setMapError("");
       })
       .catch((error) => {
+        if (!mounted) return;
         logSafeApiError(error, "RouteResult.jsx");
         setMapError(
           "카카오 지도를 불러오지 못했어요. JS 키 또는 JavaScript SDK 도메인을 확인해 주세요."
@@ -2145,6 +2093,7 @@ const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
       });
 
     return () => {
+      mounted = false;
       if (resizeTimer) {
         clearTimeout(resizeTimer);
       }
@@ -2156,7 +2105,7 @@ const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
       markers.forEach((marker) => marker.setMap(null));
       polylines.forEach((polyline) => polyline.setMap(null));
     };
-  }, [dayData, dayIndex, fallbackMapData, onOpenMap]);
+  }, [dayData, dayIndex, fallbackMapData]);
 
   return (
     <div className="route-map-mock">
@@ -2182,8 +2131,6 @@ const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
         </button>
       </div>
     </div>
-    ,
-    document.body
   );
 };
 const PdfMapPreview = ({ dayData, dayIndex }) => {

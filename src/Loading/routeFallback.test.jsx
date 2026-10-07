@@ -1,3 +1,4 @@
+/* eslint-disable testing-library/no-node-access, testing-library/no-container -- Verify the route shell and decorative SVG structure. */
 import React, { Suspense, lazy } from "react";
 import { act, render, screen } from "@testing-library/react";
 import EarthLoader from "./EarthLoader";

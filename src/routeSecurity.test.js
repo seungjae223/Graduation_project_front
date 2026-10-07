@@ -19,6 +19,7 @@ test("unknown direct route preserves the existing 404 UI", async () => {
   render(<App />);
   expect(await screen.findByRole("heading", {name:"페이지를 찾을 수 없습니다"})).toBeInTheDocument();
 });
+  // eslint-disable-next-line no-script-url -- Malicious URL fixture must be rejected.
 test.each(["https://evil.example", "//evil.example", "/\\evil.example", "/\n/evil.example", "javascript:alert(1)"])("unsafe returnTo is rejected: %s", value => {
   expect(isSafeInternalPath(value)).toBe(false);
   expect(getReturnPathFromSearch(`?returnTo=${encodeURIComponent(value)}`)).toBe("/home");

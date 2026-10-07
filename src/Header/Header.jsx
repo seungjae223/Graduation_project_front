@@ -1,4 +1,4 @@
-import { savePreparedPdf } from "../utils/pdfTask";
+import { savePreparedPdf, waitForPdfImages } from "../utils/pdfTask";
 import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useMemo, useState } from "react";
 import "./Header.css";
@@ -142,32 +142,6 @@ const Header = ({ onSearchClick }) => {
       });
     });
 
-  const waitForPdfImages = async (root) => {
-    const images = Array.from(
-      root.querySelectorAll('img[data-pdf-asset="true"]')
-    );
-
-    if (!images.length) return;
-
-    await Promise.all(
-      images.map((img) => {
-        if (img.complete && img.naturalWidth > 0) {
-          return Promise.resolve();
-        }
-
-        return new Promise((resolve) => {
-          const done = () => {
-            img.removeEventListener("load", done);
-            img.removeEventListener("error", done);
-            resolve();
-          };
-
-          img.addEventListener("load", done, { once: true });
-          img.addEventListener("error", done, { once: true });
-        });
-      })
-    );
-  };
 
   const buildPdfFileDate = () => {
     const today = new Date();
@@ -234,7 +208,7 @@ const Header = ({ onSearchClick }) => {
 
     try {
       await waitForNextPaint();
-      await waitForPdfImages(clone);
+      await waitForPdfImages(clone, 'img[data-pdf-asset="true"]');
       await waitForNextPaint();
 
       const fileDate = buildPdfFileDate();
