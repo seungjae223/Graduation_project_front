@@ -1,0 +1,8 @@
+PASS src/Login/OAuthCallback.test.js
+PASS src/Login/SignUp.test.jsx
+PASS src/OnBoarding/onboardingTransition.test.js
+
+Test Suites: 3 passed, 3 total
+Tests:       14 passed, 14 total
+Snapshots:   0 total
+Time:        7.91 s

@@ -12,7 +12,7 @@
   height: 400px;            
   align-self: stretch;     
 
-  background-color: lightgray;
+  background-color: var(--color-surface-muted);
   background-repeat: no-repeat;
  background-size: cover;
 background-position: center;
@@ -33,8 +33,17 @@ background-position: center;
   margin-top: 40px;
 }
 
+.onboarding .text-area h2,
+.onboarding .text-area p {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+@media (max-width: 374px) {
+  .onboarding-copy-break { display: none; }
+}
+
 .text-area h2 {
-  color: #0F172A;
+  color: var(--color-text-strong);
 text-align: center;
 font-family: "Noto Sans KR";
 font-size: 30px;
@@ -45,7 +54,7 @@ letter-spacing: -0.75px;
 }
 
 .text-area p {
-  color: #475569;
+  color: var(--color-text-muted);
 text-align: center;
 font-family: "Noto Sans KR";
 font-size: 18px;
@@ -65,22 +74,22 @@ line-height: 29.25px; /* 162.5% */
 .dot {
   width: 6px;
   height: 6px;
-  background-color: #d1d1d6;
+  background-color: var(--color-border-strong);
   border-radius: 50%;
 }
 
 .dot.active {
   width: 18px;
   border-radius: 10px;
-  background-color: #2b9ed8;
+  background-color: var(--color-primary);
 }
 
 /* 버튼 */
 .next-btn {
   width: 100%;
   height: 52px;
-  background-color: #2b9ed8;
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
   border: none;
   border-radius: 12px;
   font-size: 16px;
@@ -234,6 +243,11 @@ html.onboarding-transitioning .onboarding-route .text-area p {
   view-transition-name: onboarding-description;
 }
 
+.onboarding-route[data-onboarding-entry="settled"] .image-wrapper,
+.onboarding-route[data-onboarding-entry="settled"] .text-area h2,
+.onboarding-route[data-onboarding-entry="settled"] .text-area p,
+.onboarding-route[data-onboarding-entry="settled"] .dot,
+.onboarding-route[data-onboarding-entry="settled"] .next-btn,
 html.onboarding-transitioning .onboarding-route .image-wrapper,
 html.onboarding-transitioning .onboarding-route .text-area h2,
 html.onboarding-transitioning .onboarding-route .text-area p,
@@ -396,4 +410,18 @@ html.onboarding-transitioning::view-transition-new(onboarding-description) {
   html.onboarding-transitioning::view-transition-new(onboarding-description) {
     animation: none;
   }
+}
+
+/* Fallback transition snapshots are rendered under body, outside .text-area. */
+.onboarding-exit-snapshot--title {
+  color: var(--color-text-strong);
+}
+
+.onboarding-exit-snapshot--description {
+  color: var(--color-text-muted);
+}
+
+.onboarding .next-btn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
 }

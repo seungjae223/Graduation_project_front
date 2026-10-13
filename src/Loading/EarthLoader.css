@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .earth {
@@ -35,7 +35,7 @@
 
 .earth p {
   margin: 10px 0 0;
-  color: #0ea5e9;
+  color: var(--color-accent-text);
   display: flex;
   justify-content: center;
   align-items: center;

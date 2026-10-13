@@ -26,24 +26,24 @@ const RouteCreateMiniIcon = () => (
     fill="none"
     aria-hidden="true"
   >
-    <circle cx="6" cy="7" r="2" fill="#19A5F4" />
-    <circle cx="18" cy="7" r="2" fill="#19A5F4" />
-    <circle cx="12" cy="18" r="2" fill="#19A5F4" />
+    <circle cx="6" cy="7" r="2" fill="currentColor" />
+    <circle cx="18" cy="7" r="2" fill="currentColor" />
+    <circle cx="12" cy="18" r="2" fill="currentColor" />
     <path
       d="M8 7H16"
-      stroke="#19A5F4"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
     />
     <path
       d="M7.4 8.7L10.8 15.4"
-      stroke="#19A5F4"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
     />
     <path
       d="M16.6 8.7L13.2 15.4"
-      stroke="#19A5F4"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
     />

@@ -1,4 +1,5 @@
-import { act, render, waitFor } from "@testing-library/react";
+/* eslint-disable testing-library/no-node-access -- Inspect SDK-owned children retained by the provider after React updates. */
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { GoogleMapBox, KakaoMapBox } from "./RouteResult";
 import { importLibrary } from "@googlemaps/js-api-loader";
 import { loadKakaoMapsScript } from "../utils/kakaoMapLoader";
@@ -10,7 +11,10 @@ const makeSdk = () => {
   const overlays = [];
   const maps = [];
   const listener = { remove: jest.fn() };
-  const Map = jest.fn(function () {
+  const Map = jest.fn(function (container) {
+    const attribution = document.createElement("span");
+    attribution.textContent = "SDK map attribution";
+    container.appendChild(attribution);
     this.addListener = jest.fn(() => listener);
     this.fitBounds = jest.fn(); this.setBounds = jest.fn();
     maps.push(this);
@@ -43,6 +47,35 @@ test.each(["google", "kakao"])("%s attaches markers once, retains the map for ca
   overlays.forEach(overlay => expect(overlay.setMap).toHaveBeenCalledWith(null));
   const removeListener = provider === "google" ? listener.remove : sdk.event.removeListener;
   expect(removeListener).toHaveBeenCalledTimes(1);
+});
+
+test.each(["google", "kakao"])("%s keeps one SDK layer through coordinate publication, memo updates, reorder and reset", async provider => {
+  const { sdk } = makeSdk();
+  window.google = { maps: sdk }; window.kakao = { maps: sdk };
+  importLibrary.mockImplementation(async library => ({
+    maps: { Map: sdk.Map }, marker: { Marker: sdk.Marker }, geocoding: { Geocoder: sdk.Geocoder },
+  }[library]));
+  loadKakaoMapsScript.mockResolvedValue(window.kakao);
+  const Box = provider === "google" ? GoogleMapBox : KakaoMapBox;
+  const props = { dayIndex: 0, coordinateOwner: "account:A:trip1", onOpenMap: jest.fn() };
+  const view = render(<Box {...props} dayData={day} />);
+  await waitFor(() => expect(sdk.Map).toHaveBeenCalledTimes(1));
+  const published = { ...day, items: day.items.map(item => ({ ...item, latitude: item.lat, longitude: item.lng, memo: "변경된 메모" })) };
+  view.rerender(<Box {...props} dayData={published} />);
+  await act(async () => { await Promise.resolve(); });
+  expect(sdk.Map).toHaveBeenCalledTimes(1);
+  view.rerender(<Box {...props} dayData={{ ...published, items: [...published.items].reverse() }} />);
+  await act(async () => { await Promise.resolve(); });
+  view.rerender(<Box {...props} dayData={day} />);
+  await act(async () => { await Promise.resolve(); });
+  expect(sdk.Map).toHaveBeenCalledTimes(1);
+  expect(screen.getAllByText("SDK map attribution")).toHaveLength(1);
+  const host = sdk.Map.mock.calls[0][0];
+  view.rerender(<Box {...props} coordinateOwner="account:B:trip2" dayData={day} />);
+  await waitFor(() => expect(sdk.Map).toHaveBeenCalledTimes(2));
+  expect(screen.getAllByText("SDK map attribution")).toHaveLength(1);
+  view.unmount();
+  expect(host.childElementCount).toBe(0);
 });
 
 test("unmounted Kakao consumer ignores SDK completion", async () => {

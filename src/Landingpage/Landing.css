@@ -17,9 +17,9 @@
   object-fit: contain;
 }
 
-.badge {
-  background: #2b9ed8;
-  color: white;
+.landing .badge {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   font-size: 12px;
   padding: 6px 12px;
   border-radius: 20px;
@@ -27,8 +27,8 @@
   margin-bottom: 12px;
 }
 
-.overlay h1 {
-  color: white;
+.landing .overlay h1 {
+  color: var(--color-on-primary);
   font-size: 22px;
   font-weight: 700;
 }
@@ -39,11 +39,11 @@
   margin-top: 20px;
 }
 
-.blue {
-  color: #2b9ed8;
+.landing .blue {
+  color: var(--color-accent-text);
 }
 
-.feature {
+.landing .feature {
   margin-top: 30px;
   display: flex;
   flex-direction: column;
@@ -51,12 +51,12 @@
 }
 
 /* 카드 */
-.card {
+.landing .card {
   display: flex;
   gap: 16px;
   align-items: flex-start;
 
-  background: #f2f2f7;
+  background: var(--color-surface-muted);
   padding: 16px;
   border-radius: 16px;
 }
@@ -66,7 +66,7 @@
   width: 48px;
   height: 48px;
   flex-shrink: 0;
-  background: #e9f6fd;
+  background: var(--color-accent-soft);
   border-radius: 12px;
 
   display: flex;
@@ -79,26 +79,27 @@
   overflow-wrap: anywhere;
 }
 
-.icon-box img {
+.landing .icon-box img {
   width: 24px;
   height: 24px;
 }
 
 /* 텍스트 */
-.card h3 {
+.landing .card h3 {
+  color: var(--color-text-strong);
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 6px;
 }
 
-.card p {
+.landing .card p {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   line-height: 1.4;
 }
 
 /* 공통 버튼 */
-.btn {
+.landing .btn {
   width: 100%;
   height: 52px;
   border-radius: 12px;
@@ -111,33 +112,33 @@
 }
 
 /* 비활성 */
-.btn.inactive {
-  background-color: #0DA6F21A; /* 10% */
-  color: #0DA6F2;
+.landing .btn.inactive {
+  background-color: var(--color-accent-soft); /* 10% */
+  color: var(--color-accent-text);
 }
 
 /* 활성 */
-.btn.active {
-  background-color: #0DA6F2;
-  color: #ffffff;
+.landing .btn.active {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
-.scroll {
+.landing .scroll {
   margin-top: 16px;
   font-size: 12px;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 /* 카드 */
-.feature {
+.landing .feature {
   margin-top: 30px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.card {
-  background: #f2f2f7;
+.landing .card {
+  background: var(--color-surface-muted);
   padding: 16px;
   border-radius: 12px;
   text-align: left;
@@ -150,7 +151,7 @@
   min-height: 205px;
   padding: 50px 16px 35px;
   box-sizing: border-box;
-  background: #f3f8fe;
+  background: var(--color-surface-muted);
   text-align: center;
 }
 
@@ -160,7 +161,7 @@
 }
 
 .landing-footer-brand {
-  color: #16a5f2;
+  color: var(--color-accent-text);
   font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
@@ -169,7 +170,7 @@
 
 .landing-footer-copyright {
   margin-top: 9px;
-  color: #687b95;
+  color: var(--color-text-muted);
   font-size: 14px;
   font-weight: 400;
   line-height: 1.45;
@@ -205,10 +206,6 @@ body,
   padding: 0;
 }
 
-body {
-  overflow-x: hidden;
-  background: #f8fbfd;
-}
 
 /* 전체 화면을 모바일 앱 시안처럼 중앙 고정 */
 .landing {
@@ -218,7 +215,7 @@ body {
   margin: 0 auto !important;
   padding: 16px 0 0 !important;
   box-sizing: border-box;
-  background: #f8fbfd;
+  background: var(--color-page);
 }
 
 /* 상단 이미지 카드 */
@@ -258,11 +255,11 @@ body {
   line-height: 1.2;
   font-weight: 800;
   letter-spacing: -0.04em;
-  color: #111827;
+  color: var(--color-text-strong);
 }
 
-.blue {
-  color: #0da6f2;
+.landing .blue {
+  color: var(--color-accent-text);
 }
 
 .landing-content p {
@@ -271,11 +268,11 @@ body {
   line-height: 1.75;
   font-weight: 400;
   letter-spacing: -0.03em;
-  color: #5b6678;
+  color: var(--color-text-muted);
 }
 
 /* 버튼은 아래쪽에 자연스럽게 */
-.btn {
+.landing .btn {
   margin-top: 18px;
 }
 
@@ -304,8 +301,8 @@ body {
 
 /*
  * Desktop widths previously showed two different page backgrounds: the app
- * column used #f8fbfd while the surrounding document used #f2f4f7.  Keep the
- * landing page as one continuous white canvas without changing other routes.
+ * column and surrounding document used different colors. Keep the landing
+ * canvas continuous using the active theme without changing other routes.
  */
 html:has(.landing),
 body:has(.landing),
@@ -314,11 +311,16 @@ body:has(.landing),
 .app-content:has(.landing),
 .route-transition:has(.landing),
 .landing {
-  background: #ffffff;
+  background: var(--color-page);
 }
 
 @media (min-width: 768px) {
   .app:has(.landing) {
     box-shadow: none;
   }
+}
+
+.landing .btn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
 }

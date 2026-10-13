@@ -1,0 +1,48 @@
+[
+  {
+    "Name": "HTTPS OpenAPI",
+    "Status": 200,
+    "FinalUri": "https://nomango-backend-prod-3-27-110-86.nip.io/v3/api-docs",
+    "AllowOrigin": null,
+    "AllowMethods": null,
+    "AllowHeaders": null,
+    "OpenApi": "3.1.0",
+    "HasOrderApi": true
+  },
+  {
+    "Name": "Protected API without token",
+    "Status": 403,
+    "FinalUri": "https://nomango-backend-prod-3-27-110-86.nip.io/api/trips",
+    "AllowOrigin": null,
+    "AllowMethods": null,
+    "AllowHeaders": null
+  },
+  {
+    "Name": "Local frontend CORS PATCH",
+    "Status": 200,
+    "FinalUri": "https://nomango-backend-prod-3-27-110-86.nip.io/api/trips/1/days/1/places/order",
+    "AllowOrigin": [
+      "http://localhost:3000"
+    ],
+    "AllowMethods": [
+      "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+    ],
+    "AllowHeaders": [
+      "authorization, content-type"
+    ]
+  },
+  {
+    "Name": "Deployed frontend CORS PATCH",
+    "Status": 200,
+    "FinalUri": "https://nomango-backend-prod-3-27-110-86.nip.io/api/trips/1/days/1/places/order",
+    "AllowOrigin": [
+      "https://noman-go.netlify.app"
+    ],
+    "AllowMethods": [
+      "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+    ],
+    "AllowHeaders": [
+      "authorization, content-type"
+    ]
+  }
+]

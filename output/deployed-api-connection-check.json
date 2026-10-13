@@ -1,0 +1,22 @@
+[
+  {
+    "Name": "Protected API without token",
+    "Status": 403,
+    "AllowOrigin": null,
+    "AllowMethods": null,
+    "AllowHeaders": null
+  },
+  {
+    "Name": "Local frontend CORS PATCH",
+    "Status": 200,
+    "AllowOrigin": [
+      "http://localhost:3000"
+    ],
+    "AllowMethods": [
+      "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+    ],
+    "AllowHeaders": [
+      "authorization, content-type"
+    ]
+  }
+]

@@ -31,9 +31,10 @@ export default function useMutationTask(key) {
     task.reading = true;
     const unknown = states[key]?.status === "unknown";
     try {
-      await task.refresh();
-      publish(key, { status: unknown ? "unknown" : "success", message: unknown ? "최신 목록을 확인했습니다. 이번 변경의 반영 여부는 확정할 수 없습니다. 화면을 확인해 주세요." : task.labels.success });
-      if (!unknown && locks.current.get(target) === task) locks.current.delete(target);
+      const result = await task.refresh();
+      const confirmed = !unknown || result?.confirmed === true;
+      publish(key, { status: confirmed ? "success" : "unknown", message: confirmed ? task.labels.success : "최신 목록을 확인했습니다. 이번 변경의 반영 여부는 확정할 수 없습니다. 화면을 확인해 주세요." });
+      if (confirmed && locks.current.get(target) === task) locks.current.delete(target);
     } catch { publish(key, { status: unknown ? "unknown" : "refreshError", message: unknown ? "변경 여부와 최신 목록을 확인하지 못했어요." : task.labels.refreshFailure }); }
     finally { task.reading = false; }
   };

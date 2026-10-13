@@ -2,56 +2,56 @@ import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useRef, useState } from "react";
 import {
   useLocation,
-  useNavigate,
+  Link,
   useSearchParams,
 } from "react-router-dom";
 import "./VerifyCode.css";
 import { getApiErrorMessage } from "../api/api";
 import { sendEmailCodeApi, verifyEmailCodeApi } from "../api/authApi";
+import { buildAuthPath, getAuthReturnPath } from "./authPaths";
+import useAuthRequest, { isCanceledAuthRequest } from "./useAuthRequest";
+import useEmailCooldown from "./useEmailCooldown";
 
 const CODE_LENGTH = 6;
-const TIMER_SECONDS = 300;
 const getErrorMessage = getApiErrorMessage;
 
 const VerifyCode = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
   const email = location.state?.email || searchParams.get("email") || "";
+  const returnPath = getAuthReturnPath(location.search);
+  const scope = `${location.key}:${location.pathname}${location.search}:${email}`;
+  const task = useAuthRequest(scope);
+  const emailCooldown = useEmailCooldown(email);
 
   const inputRefs = useRef([]);
+  const resendFocus = useRef(null);
 
   const [code, setCode] = useState(Array(CODE_LENGTH).fill(""));
-  const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [isResending, setIsResending] = useState(false);
-
+  const [isVerified, setIsVerified] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
+  const isVerifying = task.busy === "verify";
+  const isResending = task.busy === "resend";
+  // Email send/verify currently provide no expiration metadata. The server
+  // validates expiration; a new visit must not invent another five minutes.
   useEffect(() => {
-    if (!email) {
-      alert("이메일 정보가 없습니다. 다시 시도해주세요.");
-      navigate("/find-password", { replace: true });
-    }
-  }, [email, navigate]);
-
+    setCode(Array(CODE_LENGTH).fill(""));
+    setIsVerified(false);
+    setErrorMessage("");
+    setStatusMessage("");
+    resendFocus.current = null;
+  }, [scope]);
   useEffect(() => {
-    if (timeLeft <= 0) return;
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeLeft]);
-
-  const formatTime = (seconds) => {
-    const minutes = String(Math.floor(seconds / 60)).padStart(2, "0");
-    const remainSeconds = String(seconds % 60).padStart(2, "0");
-
-    return `${minutes}:${remainSeconds}`;
-  };
+    if (task.busy || resendFocus.current === null) return;
+    if (resendFocus.current === scope) inputRefs.current[0]?.focus();
+    resendFocus.current = null;
+  }, [scope, task.busy]);
 
   const handleCodeChange = (index, value) => {
+    if (task.busy || isVerified) return;
+    setErrorMessage("");
     const onlyNumber = value.replace(/[^0-9]/g, "");
 
     if (!onlyNumber) {
@@ -71,6 +71,7 @@ const VerifyCode = () => {
   };
 
   const handleKeyDown = (index, e) => {
+    if (task.busy || isVerified) return;
     if (e.key !== "Backspace") return;
 
     if (code[index]) {
@@ -87,6 +88,7 @@ const VerifyCode = () => {
 
   const handlePaste = (e) => {
     e.preventDefault();
+    if (task.busy || isVerified) return;
 
     const pastedValue = e.clipboardData
       .getData("text")
@@ -110,34 +112,37 @@ const VerifyCode = () => {
   };
 
   const handleResendCode = async () => {
-    if (isResending) return;
-
+    if (!email || isVerified || emailCooldown.remaining > 0) return;
+    const request = task.begin("resend");
+    if (!request) return;
+    setErrorMessage("");
+    setStatusMessage("");
     try {
-      setIsResending(true);
-
-      await sendEmailCodeApi(email);
+      await sendEmailCodeApi(email, request.options);
+      if (!request.isCurrent()) return;
+      emailCooldown.start();
 
       setCode(Array(CODE_LENGTH).fill(""));
-      setTimeLeft(TIMER_SECONDS);
-      inputRefs.current[0]?.focus();
-
-      alert("인증번호를 다시 발송했습니다.");
+      resendFocus.current = scope;
+      setStatusMessage("인증번호를 다시 발송했습니다.");
     } catch (error) {
+      if (!request.isCurrent() || isCanceledAuthRequest(error)) return;
+      emailCooldown.blockFromError(error);
       logSafeApiError(error, "VerifyCode.jsx");
 
-      if (error.message.includes("Network Error")) {
-        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
+      if (error.message?.includes("Network Error")) {
+        setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
         return;
       }
 
-      alert(
+      setErrorMessage(
         getErrorMessage(
           error,
           "인증번호 재발송에 실패했습니다. 잠시 후 다시 시도해주세요."
         )
       );
     } finally {
-      setIsResending(false);
+      task.end(request);
     }
   };
 
@@ -147,50 +152,52 @@ const VerifyCode = () => {
     const verificationCode = code.join("");
 
     if (verificationCode.length !== CODE_LENGTH) {
-      alert("6자리 인증번호를 모두 입력해주세요.");
+      setErrorMessage("6자리 인증번호를 모두 입력해주세요.");
       return;
     }
 
-    if (timeLeft <= 0) {
-      alert("인증 시간이 만료되었습니다. 인증번호를 다시 받아주세요.");
-      return;
-    }
-
+    if (!email || isVerified) return;
+    const request = task.begin("verify");
+    if (!request) return;
+    setErrorMessage("");
+    setStatusMessage("");
     try {
-      setIsVerifying(true);
-
       const response = await verifyEmailCodeApi({
         email,
         code: verificationCode,
-      });
-
-      const successMessage =
-        typeof response === "string" ? response : response?.message;
-
-      alert(successMessage || "인증이 완료되었습니다.");
-
-      // 비밀번호 재설정 페이지가 생기면 여기 경로만 바꾸면 됨
-      navigate("/login", { replace: true });
+      }, request.options);
+      if (!request.isCurrent()) return;
+      if (response?.verified === false) throw new Error("인증번호를 확인해주세요.");
+      setIsVerified(true);
+      setStatusMessage("이메일 인증이 완료되었습니다.");
     } catch (error) {
+      if (!request.isCurrent() || isCanceledAuthRequest(error)) return;
       logSafeApiError(error, "VerifyCode.jsx");
 
-      if (error.message.includes("Network Error")) {
-        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
+      if (error.message?.includes("Network Error")) {
+        setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
         return;
       }
 
-      alert(
+      setErrorMessage(
         getErrorMessage(
           error,
           "인증번호가 올바르지 않거나 인증 시간이 만료되었습니다."
         )
       );
     } finally {
-      setIsVerifying(false);
+      task.end(request);
     }
   };
 
   const isCodeComplete = code.every((number) => number !== "");
+
+  if (!email) {
+    return <main className="verify-code-page"><section className="verify-code-form">
+      <h1>인증할 이메일을 확인해 주세요.</h1>
+      <Link className="verify-code-login" to={buildAuthPath("/find-password", returnPath)}>이메일 다시 입력하기</Link>
+    </section></main>;
+  }
 
   return (
     <main className="verify-code-page">
@@ -205,7 +212,7 @@ const VerifyCode = () => {
           </h1>
 
           <p className="verify-code-desc">
-            <span>{email || "user@example.com"}</span> 으로 인증번호가 발송되었습니다.
+            <span>{email}</span> 주소의 인증번호를 입력해 주세요.
             <br />
             메일함을 확인해 주세요.
           </p>
@@ -220,6 +227,7 @@ const VerifyCode = () => {
                 type="text"
                 inputMode="numeric"
                 maxLength={1}
+                disabled={Boolean(task.busy) || isVerified}
                 value={number}
                 autoFocus={index === 0}
                 onChange={(e) => handleCodeChange(index, e.target.value)}
@@ -230,31 +238,30 @@ const VerifyCode = () => {
           </div>
 
           <div className="verify-code-info">
-            <div className="verify-code-timer">
-              <span className="timer-icon">⏱</span>
-              <span>{formatTime(timeLeft)}</span>
-            </div>
-
             <button
               type="button"
               className="verify-code-resend"
               onClick={handleResendCode}
-              disabled={isResending}
+              disabled={Boolean(task.busy) || isVerified || emailCooldown.remaining > 0}
             >
-              <span className="resend-icon">↻</span>
-              <span>{isResending ? "재발송 중..." : "인증번호 재발송"}</span>
+              <span className="resend-icon" aria-hidden="true">↻</span>
+              <span>{isResending ? "재발송 중..." : emailCooldown.remaining > 0 ? `${emailCooldown.remaining}초 후 재발송` : "인증번호 재발송"}</span>
             </button>
           </div>
+          {errorMessage && <p className="verify-code-error" role="alert">{errorMessage}</p>}
+          {statusMessage && <p className="verify-code-status" role="status">{statusMessage}</p>}
+          {isVerified && <p className="verify-code-service-notice">현재 비밀번호 변경 기능은 준비 중입니다.</p>}
         </section>
 
         <section className="verify-code-bottom">
           <button
             type="submit"
             className="verify-code-submit"
-            disabled={!isCodeComplete || isVerifying}
+            disabled={!isCodeComplete || Boolean(task.busy) || isVerified}
           >
-            {isVerifying ? "확인 중..." : "확인"}
+            {isVerifying ? "확인 중..." : isVerified ? "인증 완료" : "확인"}
           </button>
+          <Link className="verify-code-login" to={buildAuthPath("/login", returnPath)}>로그인으로 돌아가기</Link>
         </section>
       </form>
     </main>

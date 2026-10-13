@@ -1,0 +1,30 @@
+PASS src/Search/Search.test.jsx
+PASS src/SearchPopup/SearchPop.test.jsx
+PASS src/mocks/mockMode.test.jsx (5.094 s)
+  ● Console
+
+    console.error
+      Request failed { context: 'api' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/api/api.js:169:20
+      at Axios.request (node_modules/axios/lib/core/Axios.js:41:14)
+      at getRecentSearchesApi (src/api/placeApi.js:49:16)
+      at Object.retry (src/utils/useReadQuery.js:19:20)
+
+PASS src/Homepage/Home.test.jsx
+
+Test Suites: 4 passed, 4 total
+Tests:       30 passed, 30 total
+Snapshots:   0 total
+Time:        10.864 s
+Ran all test suites within paths "src/Search/Search.test.jsx", "src/SearchPopup/SearchPop.test.jsx", "src/Homepage/Home.test.jsx", "src/mocks/mockMode.test.jsx".
+Test results written to: output\frontend-fixes\root-search.json

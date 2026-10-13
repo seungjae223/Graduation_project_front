@@ -20,7 +20,7 @@ const OnBoarding2 = () => {
         <h2>동선 최적화는 저희가 할게요</h2>
         <p>
           AI가 분석한 가장 효율적인 경로로 이동 시간을
-          <br />
+          <br className="onboarding-copy-break" />{" "}
           아끼고 여행에 집중해 보세요.
         </p>
       </div>

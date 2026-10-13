@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import useModalFocus from "../utils/useModalFocus";
+import PlacePhoto from "../components/PlacePhoto";
 import "./StartPlaceModal.css";
 import locationIcon from "../img/파랑색 위치.png";
 import arrowIcon from "../img/위쪽 화살표.png";
@@ -74,7 +75,7 @@ const StartPlaceModal = ({
   const currentPlaces = activeDateKey ? placesByDate[activeDateKey] || [] : [];
 
   const activeSelectedId =
-    selectedStartPlaces[activeDateKey] || currentPlaces[0]?.id || "";
+    selectedStartPlaces[activeDateKey] || currentPlaces.find(place => !place.isFixedTime)?.id || "";
 
   const isConfirmDisabled = selectedDates.some((date) => {
     const dateKey = getDateKey(date);
@@ -84,9 +85,9 @@ const StartPlaceModal = ({
       return false;
     }
 
-    const selectedId = selectedStartPlaces[dateKey] || dayPlaces[0]?.id;
+    const selectedId = selectedStartPlaces[dateKey] || dayPlaces.find(place => !place.isFixedTime)?.id;
 
-    return !dayPlaces.some((place) => place.id === selectedId);
+    return !dayPlaces.some((place) => place.id === selectedId && !place.isFixedTime);
   });
 
   const handleRequestClose = () => {
@@ -241,6 +242,7 @@ const StartPlaceModal = ({
             <strong>출발지 지정</strong>
             <span>{currentPlaces.length}개의 장소 검색됨</span>
           </div>
+          <p className="start-place-time-limit">출발 시간은 오전 10시입니다. 고정 시간이 있는 장소는 출발지로 선택할 수 없어요. 해당 장소의 고정 시간을 해제하거나 다른 출발지를 선택해 주세요.</p>
 
           <section
             className={`start-place-list-card ${
@@ -288,15 +290,12 @@ const StartPlaceModal = ({
                           isSelected ? "is-selected" : ""
                         }`}
                         aria-pressed={isSelected}
+                        aria-label={place.isFixedTime ? `${place.name} (고정 시간 설정으로 출발지 선택 불가)` : place.name}
                         onClick={() => onSelectPlace(activeDateKey, place.id)}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || place.isFixedTime}
                       >
                         <span className="start-place-thumb">
-                          {placeImage ? (
-                            <img src={placeImage} alt="" />
-                          ) : (
-                            <span>{place.name?.slice(0, 1) || "장"}</span>
-                          )}
+                          <PlacePhoto src={placeImage} alt={place.name || "장소"} className="start-place-photo" />
                         </span>
 
                         <span className="start-place-text">

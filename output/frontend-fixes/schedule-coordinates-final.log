@@ -1,0 +1,12 @@
+PASS src/RouteResult/mapCoordinates.test.jsx
+  √ a single place keeps its exact server coordinate instead of falling back to its name (1 ms)
+  √ resolved coordinates reject obsolete owners, dates and visits while retaining visit identity after reordering (13 ms)
+  √ map buttons expose independent keyboard actions and preserve the drag handle (52 ms)
+  √ coordinate association follows stable visits when the order changes (10 ms)
+  √ dynamically resolved coordinates are shared by the real result page and PDF payload (98 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        1.849 s
+Ran all test suites within paths "src/RouteResult/mapCoordinates.test.jsx".

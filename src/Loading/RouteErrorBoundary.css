@@ -1,0 +1,36 @@
+.route-error-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.route-error-actions > .not-found-action {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.route-error-actions .route-error-home,
+.route-error-actions .route-error-home:visited {
+  flex: 1;
+  padding: 0 8px;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.route-error-actions .route-error-home:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.route-error-actions > button.not-found-action {
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .route-error-actions {
+    flex-direction: column;
+  }
+}

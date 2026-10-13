@@ -79,6 +79,10 @@ export const SavedPlacesProvider = ({ children }) => {
     setSavedPlaces([]);
   }, [setSavedPlaces]);
 
+  const syncSavedPlaces = useCallback((places, complete = false) => {
+    setSavedPlaces(previous => complete ? places : [...new Map([...previous, ...places].map(place => [String(getPlaceId(place)), place])).values()]);
+  }, [setSavedPlaces]);
+
   const value = useMemo(
     () => ({
       savedPlaces,
@@ -87,6 +91,7 @@ export const SavedPlacesProvider = ({ children }) => {
       removeSavedPlace,
       toggleSavedPlace,
       clearSavedPlaces,
+      syncSavedPlaces,
     }),
     [
       savedPlaces,
@@ -95,6 +100,7 @@ export const SavedPlacesProvider = ({ children }) => {
       removeSavedPlace,
       toggleSavedPlace,
       clearSavedPlaces,
+      syncSavedPlaces,
     ],
   );
 

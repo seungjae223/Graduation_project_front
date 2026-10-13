@@ -1,53 +1,15 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./AdminFooter.css";
 
 import statsIcon from "../../img/검은색 통계.png";
 import inquiryIcon from "../../img/문의.png";
 
-const LogIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    className="admin-footer-log-icon"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
-    <rect
-      x="4"
-      y="4"
-      width="16"
-      height="12"
-      rx="2"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
-    <path
-      d="M9 8L12 10.8L9 13.5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M13.5 13.5H17"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
 const AdminFooter = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const activeTab = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    return params.get("tab") || "stats";
-  }, [location.search]);
+  const activeTab = "stats";
 
   const isAdminMainPage = location.pathname === "/admin";
   const isAdminInquiryPage = location.pathname.startsWith("/admin/inquiry");
@@ -59,13 +21,6 @@ const AdminFooter = () => {
       type: "image",
       icon: statsIcon,
       onClick: () => navigate("/admin"),
-    },
-    {
-      key: "logs",
-      label: "로그",
-      type: "component",
-      icon: <LogIcon />,
-      onClick: () => navigate("/admin?tab=logs"),
     },
     {
       key: "inquiry",
@@ -85,9 +40,6 @@ const AdminFooter = () => {
       return isAdminMainPage && activeTab === "stats";
     }
 
-    if (key === "logs") {
-      return isAdminMainPage && activeTab === "logs";
-    }
 
     return false;
   };

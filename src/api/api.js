@@ -5,6 +5,8 @@ import { clearAuthenticatedUserStorage, tokenCandidates } from "../utils/authSto
 import { getAuthSnapshot, notifyAuthChange } from "../utils/authState";
 import { logSafeApiError } from "../utils/safeLog";
 import { buildLoginPath, getCurrentReturnPath } from "../utils/authRedirect";
+import { getEmailRetrySeconds } from "../utils/emailCooldown";
+import { getSignupFailure } from "../utils/signupError";
 
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL ||
@@ -211,6 +213,15 @@ export const getApiErrorMessage = (
     429: "요청이 많습니다. 잠시 후 다시 시도해주세요.",
   };
   const status = Number(error?.response?.status);
+  const emailRetrySeconds = getEmailRetrySeconds(error);
+  if (emailRetrySeconds) {
+    return `인증번호는 ${emailRetrySeconds}초 후 다시 요청할 수 있습니다.`;
+  }
+  const signupFailure = getSignupFailure(error);
+  if (signupFailure) return signupFailure.message;
+  if (status === 503 && error?.response?.data?.message === "소셜 로그인 서비스 설정이 완료되지 않았습니다.") {
+    return "소셜 로그인 서비스 설정이 완료되지 않았습니다.";
+  }
   if (messages[status]) return messages[status];
   if (status >= 500) return "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
   if (error?.request && !error?.response) return "네트워크 연결을 확인해주세요.";

@@ -1,5 +1,6 @@
 import api from "./api";
 import { requireList, requireTrip } from "./responseContract";
+import { validateTripRequest } from "../utils/tripValidation";
 
 const TRIP_BASE_URL = "/api/trips";
 
@@ -8,30 +9,13 @@ const DEFAULT_COORDS = {
   longitude: 126.978,
 };
 
-const DEFAULT_START_TIME = "09:00";
+const DEFAULT_START_TIME = "10:00";
 
-const normalizeList = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.trips)) return data.trips;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.places)) return data.places;
-  if (Array.isArray(data?.tripPlaces)) return data.tripPlaces;
-  if (Array.isArray(data?.result)) return data.result;
-  if (Array.isArray(data?.results)) return data.results;
-  if (Array.isArray(data?.response)) return data.response;
-
-  if (Array.isArray(data?.data?.content)) return data.data.content;
-  if (Array.isArray(data?.data?.items)) return data.data.items;
-  if (Array.isArray(data?.data?.places)) return data.data.places;
-  if (Array.isArray(data?.data?.trips)) return data.data.trips;
-  if (Array.isArray(data?.data?.tripPlaces)) return data.data.tripPlaces;
-  if (Array.isArray(data?.data?.result)) return data.data.result;
-  if (Array.isArray(data?.data?.results)) return data.data.results;
-  if (Array.isArray(data?.data?.response)) return data.data.response;
-
-  return [];
+const assertStartTime = (value) => {
+  if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(String(value))) {
+    throw new Error("시작 시간은 HH:mm 형식으로 입력해주세요.");
+  }
+  return value;
 };
 
 const unwrapData = (data) => {
@@ -48,7 +32,7 @@ const unwrapData = (data) => {
 const assertPositiveInteger = (value, message) => {
   const numberValue = Number(value);
 
-  if (!Number.isInteger(numberValue) || numberValue <= 0) {
+  if (!Number.isSafeInteger(numberValue) || numberValue <= 0) {
     throw new Error(message);
   }
 
@@ -207,6 +191,9 @@ const toDisplayTimeLabel = (value) => {
 
 const normalizeTripRequest = (tripRequest = {}) => {
   const today = getTodayDateKey();
+  for (const value of [tripRequest.startDate, tripRequest.endDate]) {
+    if (value != null && !formatDateKey(value)) throw new Error("여행 날짜를 확인해주세요.");
+  }
 
   const startDate =
     formatDateKey(
@@ -224,20 +211,15 @@ const normalizeTripRequest = (tripRequest = {}) => {
         startDate
     ) || startDate;
 
-  return {
+  const request = {
     title: String(tripRequest.title || "여행 일정").trim(),
     destination: String(tripRequest.destination || "서울").trim(),
-    startDate,
-    endDate,
-    latitude: toNumberOrDefault(
-      tripRequest.latitude ?? tripRequest.lat,
-      DEFAULT_COORDS.latitude
-    ),
-    longitude: toNumberOrDefault(
-      tripRequest.longitude ?? tripRequest.lng ?? tripRequest.lon,
-      DEFAULT_COORDS.longitude
-    ),
+    startDate: typeof tripRequest.startDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(tripRequest.startDate) ? tripRequest.startDate : startDate,
+    endDate: typeof tripRequest.endDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(tripRequest.endDate) ? tripRequest.endDate : endDate,
+    latitude: Number(tripRequest.latitude ?? tripRequest.lat ?? DEFAULT_COORDS.latitude),
+    longitude: Number(tripRequest.longitude ?? tripRequest.lng ?? tripRequest.lon ?? DEFAULT_COORDS.longitude),
   };
+  return validateTripRequest(request);
 };
 
 export const normalizeTrip = (trip = {}) => {
@@ -404,7 +386,7 @@ export const getTripDayPlacesApi = async ({ tripId, day }) => {
       `${TRIP_BASE_URL}/${safeTripId}/days/${safeDay}/places`
     );
 
-    return normalizeList(response.data).map((place) =>
+    return requireList(response.data).map((place) =>
       normalizeTripPlace(place, safeDay)
     );
   } catch (error) {
@@ -432,7 +414,7 @@ export const getTripTimelineApi = async ({
     {
       signal,
       params: {
-        startTime,
+        startTime: assertStartTime(startTime),
       },
     }
   );
@@ -505,15 +487,26 @@ export const updateTripPlaceScheduleApi = async ({
   );
   const payload = {};
 
-  if (schedule?.fixed !== undefined) payload.fixed = Boolean(schedule.fixed);
-  if (schedule?.arrivalTime !== undefined) {
-    payload.arrivalTime = schedule.arrivalTime || null;
+  if (schedule?.fixed != null) {
+    if (typeof schedule.fixed !== "boolean") throw new Error("고정 시간 설정을 확인해주세요.");
+    payload.fixed = schedule.fixed;
   }
-  if (schedule?.stayDuration !== undefined) {
-    payload.stayDuration = Number(schedule.stayDuration);
+  if (schedule?.arrivalTime != null) {
+    if (!/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(schedule.arrivalTime)) {
+      throw new Error("도착 시간을 확인해주세요.");
+    }
+    payload.arrivalTime = schedule.arrivalTime;
   }
-  if (schedule?.isNextDay !== undefined) {
-    payload.isNextDay = Boolean(schedule.isNextDay);
+  if (schedule?.stayDuration != null) {
+    const minutes = Number(schedule.stayDuration);
+    if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440) {
+      throw new Error("체류 시간은 1~1440분으로 입력해주세요.");
+    }
+    payload.stayDuration = minutes;
+  }
+  if (schedule?.isNextDay != null) {
+    if (typeof schedule.isNextDay !== "boolean") throw new Error("다음 날 설정을 확인해주세요.");
+    payload.isNextDay = schedule.isNextDay;
   }
 
   const response = await api.patch(
@@ -565,12 +558,27 @@ export const optimizeTripDayApi = async ({
   const response = await api.post(
     `${TRIP_BASE_URL}/${safeTripId}/days/${safeDay}/optimize`,
     null,
-    { params: { startTime } }
+    { params: { startTime: assertStartTime(startTime) } }
   );
 
-  return normalizeList(response.data).map((place) =>
+  return requireList(response.data).map((place) =>
     normalizeTripPlace(place, safeDay)
   );
+};
+
+export const updateTripPlaceOrderApi = async ({
+  tripId, day, tripPlaceIds, startTime = DEFAULT_START_TIME,
+}) => {
+  const safeTripId = assertPositiveInteger(tripId, "여행 id가 필요합니다.");
+  const safeDay = assertPositiveInteger(day, "일차 day 값이 필요합니다.");
+  if (!Array.isArray(tripPlaceIds)) throw new Error("방문 순서를 확인해주세요.");
+  const ids = tripPlaceIds.map(id => assertPositiveInteger(id, "방문 항목 ID를 확인해주세요."));
+  if (new Set(ids).size !== ids.length) throw new Error("방문 항목 ID는 중복될 수 없습니다.");
+  const response = await api.patch(
+    `${TRIP_BASE_URL}/${safeTripId}/days/${safeDay}/places/order`,
+    { tripPlaceIds: ids, startTime: assertStartTime(startTime) }
+  );
+  return requireList(response.data).map(place => normalizeTripPlace(place, safeDay));
 };
 
 export const deleteTripApi = async (id) => {
@@ -677,6 +685,7 @@ export const mapTripToSavedRoute = (
           stayDuration: place.stayDuration || 0,
           isFixedTime: Boolean(place.isFixed),
           isFixed: Boolean(place.isFixed),
+          isNextDay: Boolean(place.isNextDay),
           isStartPoint: Boolean(place.isStartPoint),
           memo: place.memo || "",
         };

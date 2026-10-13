@@ -4,6 +4,7 @@
 }
 
 .login {
+  color: var(--color-text);
   width: 100%;
   max-width: 430px;
   min-height: 100vh;
@@ -15,14 +16,14 @@
   justify-content: center;
 
   padding: clamp(14px, 4vw, 24px);
-  background: #ffffff;
+  background: var(--color-page);
 }
 
 /* 카드 */
 .login-card {
   width: 100%;
   max-width: 360px;
-  background: #f8f9fb;
+  background: var(--color-surface-muted);
   padding: clamp(16px, 4.5vw, 24px);
   border-radius: 20px;
 }
@@ -37,13 +38,13 @@
   font-size: clamp(20px, 5vw, 24px);
   font-weight: 700;
   margin: 0 0 6px;
-  color: #111827;
+  color: var(--color-text-strong);
 }
 
 .login-header p {
   margin: 0;
   font-size: clamp(12px, 3.4vw, 14px);
-  color: #6b7280;
+  color: var(--color-text-muted);
   line-height: 1.5;
 }
 
@@ -51,7 +52,7 @@
 .login .icon-circle {
   width: clamp(50px, 14vw, 62px);
   height: clamp(50px, 14vw, 62px);
-  background: #e9f6fd;
+  background: var(--color-accent-soft);
   border-radius: 50%;
 
   display: flex;
@@ -68,46 +69,50 @@
 }
 
 /* 입력 */
-.input-group {
+.login .input-group {
   margin-bottom: clamp(10px, 3vw, 14px);
 }
 
-.input-group label {
+.login .input-group label {
   display: block;
   margin-bottom: 5px;
   font-size: clamp(13px, 3.5vw, 14px);
-  color: #111827;
+  color: var(--color-text-strong);
 }
 
-.input-group input {
+.login .input-group input {
+  color: var(--color-text);
   width: 100%;
   height: clamp(42px, 12vw, 48px);
 
   border-radius: 15px;
-  border: 1px solid #ddd;
-  background: #ffffff;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-input);
 
   padding: 0 12px;
   font-size: clamp(13px, 3.5vw, 15px);
   outline: none;
 }
 
-.input-group input:focus {
-  border-color: #0da6f2;
+.login .input-group input:focus {
+  border-color: var(--color-focus);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 /* 비밀번호 */
-.password-box {
+.login .password-box {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.password-box input {
+.login .password-box input {
   padding-right: 42px;
 }
 
-.eye-icon {
+.login .eye-icon {
+  color: var(--color-text-muted);
   position: absolute;
   right: 2px;
   width: 44px;
@@ -120,7 +125,7 @@
   cursor: pointer;
 }
 
-.eye-icon img {
+.login .eye-icon svg {
   width: 18px;
   height: 18px;
   object-fit: contain;
@@ -129,7 +134,7 @@
 .login-field-error,
 .login-submit-error {
   margin: 6px 2px 0;
-  color: #d92d20;
+  color: var(--color-danger);
   font-size: 12px;
   line-height: 1.45;
 }
@@ -154,12 +159,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #374151;
+  color: var(--color-text);
   white-space: nowrap;
 }
 
-.link {
-  color: #0da6f2;
+.login .link {
+  color: var(--color-accent-text);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -169,8 +174,8 @@
   width: 100%;
   height: clamp(48px, 13vw, 56px);
 
-  background: #0da6f2;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
 
   border: none;
   border-radius: 10px;
@@ -183,35 +188,35 @@
 }
 
 /* 회원가입 */
-.signup {
+.login .signup {
   text-align: center;
   font-size: clamp(13px, 3.5vw, 14px);
-  color: #374151;
+  color: var(--color-text);
 }
 
-.signup span {
-  color: #0da6f2;
+.login .signup a {
+  color: var(--color-accent-text);
   font-weight: bold;
   cursor: pointer;
 }
 
 /* 구분선 */
-.divider {
+.login .divider {
   text-align: center;
   margin: clamp(14px, 4vw, 18px) 0;
-  color: #aaa;
+  color: var(--color-text-muted);
   font-size: clamp(12px, 3.3vw, 13px);
 }
 
 /* 소셜 */
-.social {
+.login .social {
   display: flex;
   gap: 10px;
   width: 100%;
 }
 
-.kakao,
-.google {
+.login .kakao,
+.login .google {
   flex: 1;
   min-width: 0;
   height: clamp(42px, 12vw, 48px);
@@ -228,25 +233,25 @@
   cursor: pointer;
 }
 
-.kakao {
+.login .kakao {
   background: #fee500;
   color: #111827;
   border: none;
 }
 
-.google {
+.login .google {
   background: #ffffff;
   color: #202124;
   border: 1px solid #dadce0;
 }
 
-.google:hover {
+.login .google:hover {
   background: #f8fafd;
 }
 
 /* 소셜 버튼 아이콘 */
-.kakao img,
-.google img {
+.login .kakao img,
+.login .google img {
   width: clamp(16px, 4.5vw, 18px);
   height: clamp(16px, 4.5vw, 18px);
   object-fit: contain;
@@ -281,12 +286,12 @@
     gap: 8px;
   }
 
-  .social {
+  .login .social {
     gap: 8px;
   }
 
-  .kakao,
-  .google {
+  .login .kakao,
+  .login .google {
     font-size: 12px;
   }
 }
@@ -309,4 +314,37 @@
   .login-card {
     max-width: 340px;
   }
+}
+
+.login .input-group input::placeholder {
+  color: var(--color-placeholder);
+  opacity: 1;
+}
+
+.login .input-group input[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+.login-options input {
+  accent-color: var(--color-primary);
+}
+
+.login-btn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.login-btn:disabled {
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.login .eye-icon:focus-visible,
+.login .link:focus-visible,
+.login .signup a:focus-visible,
+.login-btn:focus-visible,
+.login .kakao:focus-visible,
+.login .google:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
 }

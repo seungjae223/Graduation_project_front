@@ -1,7 +1,7 @@
 export function makeTripPlace(place, tripId, id, day, visitOrder) {
   return { id, tripPlaceId: id, tripId, placeId: place.id, placeName: place.name,
     address: place.address, latitude: place.latitude, longitude: place.longitude, placeType: place.placeType,
-    imageUrl: place.imageUrl, day, visitOrder, isStartPoint: visitOrder === 1,
+    imageUrl: place.imageUrl, day, visitOrder, isStartPoint: false,
     arrivalTime: "", departureTime: "", stayDuration: 60, isFixed: false, isNextDay: false, memo: "" };
 }
 export function seedSchedules(places) {
@@ -15,7 +15,7 @@ export function seedSchedules(places) {
   const tripPlaces = selections.map(([tripId, placeId, day], i) => {
     const key = `${tripId}:${day}`;
     orders[key] = (orders[key] || 0) + 1;
-    return makeTripPlace(places.find(place => place.id === placeId), tripId, i + 1, day, orders[key]);
+    return { ...makeTripPlace(places.find(place => place.id === placeId), tripId, i + 1, day, orders[key]), isStartPoint: orders[key] === 1 };
   });
   return { trips, tripPlaces };
 }
@@ -35,6 +35,9 @@ export function buildTimeline(trip, places, startTime = "10:00") {
   return [...places].sort((a, b) => a.visitOrder - b.visitOrder).map((place, index) => {
     const travel = index ? 20 : 0;
     const arrival = place.isFixed && place.arrivalTime ? minutes(place.arrivalTime) + (place.isNextDay ? 1440 : 0) : cursor + travel;
+    if (place.isFixed && arrival < cursor + travel) {
+      throw Object.assign(new Error("고정 시간에 도착할 수 없는 방문 순서입니다."), { status: 400 });
+    }
     const departure = arrival + (place.stayDuration ?? 60);
     cursor = departure;
     return { visitOrder: place.visitOrder, placeName: place.placeName, placeType: place.placeType,

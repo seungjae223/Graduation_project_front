@@ -1,0 +1,1799 @@
+FAIL src/mocks/mockMode.test.jsx (8.301 s)
+  ● 구글 로그인 uses existing return route without OAuth navigation
+
+    Unable to find an element with the text: 서울 주말 여행. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="app"
+        >
+          <header
+            class="header"
+          >
+            <div
+              class="header-side"
+            >
+              <button
+                aria-label="뒤로 가기"
+                class="icon-btn"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="header-icon"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M15 4 7 12l8 8"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div
+              class="header-center"
+            >
+              <span
+                class="brand-wordmark brand-wordmark--default"
+              >
+                너만 오면 go
+              </span>
+            </div>
+            <div
+              class="header-side"
+            />
+          </header>
+          <main
+            class="app-content with-footer"
+          >
+            <div
+              class="route-transition "
+              data-page-entry="ready"
+            >
+              <div
+                class="my-schedule-page"
+              >
+                <div
+                  class="my-schedule-tabs"
+                >
+                  <button
+                    class="my-schedule-tab active"
+                    type="button"
+                  >
+                    다가오는 일정
+                  </button>
+                  <button
+                    class="my-schedule-tab "
+                    type="button"
+                  >
+                    지난 일정
+                  </button>
+                </div>
+                <div
+                  class="my-schedule-content"
+                >
+                  <button
+                    class="my-schedule-create-btn"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      width="22"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        fill="none"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      />
+                      <path
+                        d="M12 8V16M8 12H16"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-width="2"
+                      />
+                    </svg>
+                    <span>
+                      새 일정 만들기
+                    </span>
+                  </button>
+                  <div
+                    class="my-schedule-section-header"
+                  >
+                    <h2>
+                      다가오는 일정
+                      <span>
+                        2
+                      </span>
+                    </h2>
+                  </div>
+                  <div
+                    class="my-schedule-list"
+                  >
+                    <article
+                      class="my-schedule-card"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <img
+                        alt="제주 힐링 여행"
+                        class="my-schedule-thumb"
+                        src="서비스 소개 .png"
+                      />
+                      <div
+                        class="my-schedule-card-body"
+                      >
+                        <div
+                          class="my-schedule-card-top"
+                        >
+                          <span
+                            class="my-schedule-dday"
+                          >
+                            D-3
+                          </span>
+                        </div>
+                        <h3>
+                          제주 힐링 여행
+                        </h3>
+                        <p
+                          class="my-schedule-date"
+                        >
+                          2026.10.15 - 10.16
+                        </p>
+                        <div
+                          class="my-schedule-location"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            width="14"
+                          >
+                            <path
+                              d="M12 20C12 20 6.5 14.9 6.5 10.9C6.5 7.7 9.1 5 12.2 5C15.4 5 18 7.7 18 10.9C18 14.9 12.5 20 12.5 20H12Z"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-linejoin="round"
+                              stroke-width="1.8"
+                            />
+                            <circle
+                              cx="12.2"
+                              cy="10.8"
+                              fill="none"
+                              r="2"
+                              stroke="currentColor"
+                              stroke-width="1.8"
+                            />
+                          </svg>
+                          <span>
+                            제주
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="my-schedule-chevron"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          width="20"
+                        >
+                          <path
+                            d="M9 6L15 12L9 18"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.4"
+                          />
+                        </svg>
+                      </div>
+                    </article>
+                    <article
+                      class="my-schedule-card"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <img
+                        alt="부산 바다 여행"
+                        class="my-schedule-thumb"
+                        src="서비스 소개 .png"
+                      />
+                      <div
+                        class="my-schedule-card-body"
+                      >
+                        <div
+                          class="my-schedule-card-top"
+                        >
+                          <span
+                            class="my-schedule-dday"
+                          >
+                            D-8
+                          </span>
+                        </div>
+                        <h3>
+                          부산 바다 여행
+                        </h3>
+                        <p
+                          class="my-schedule-date"
+                        >
+                          2026.10.20
+                        </p>
+                        <div
+                          class="my-schedule-location"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            width="14"
+                          >
+                            <path
+                              d="M12 20C12 20 6.5 14.9 6.5 10.9C6.5 7.7 9.1 5 12.2 5C15.4 5 18 7.7 18 10.9C18 14.9 12.5 20 12.5 20H12Z"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-linejoin="round"
+                              stroke-width="1.8"
+                            />
+                            <circle
+                              cx="12.2"
+                              cy="10.8"
+                              fill="none"
+                              r="2"
+                              stroke="currentColor"
+                              stroke-width="1.8"
+                            />
+                          </svg>
+                          <span>
+                            부산
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="my-schedule-chevron"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          width="20"
+                        >
+                          <path
+                            d="M9 6L15 12L9 18"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.4"
+                          />
+                        </svg>
+                      </div>
+                    </article>
+                  </div>
+                  <div
+                    class="my-schedule-recommend-card"
+                  >
+                    <h3>
+                      어디로 떠나볼까요?
+                    </h3>
+                    <p>
+                      너만 오면 go가 추천하는 맞춤형 여행 코스
+                    </p>
+                    <button
+                      type="button"
+                    >
+                      추천 받기
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+          <footer
+            class="footer"
+          >
+            <nav
+              aria-label="하단 메뉴"
+              class="footer-nav"
+            >
+              <button
+                aria-pressed="false"
+                class="tab  home-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  홈
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="tab  search-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  검색
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="tab  recommend-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  추천
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="tab  calendar-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  일정
+                </span>
+              </button>
+              <button
+                aria-pressed="true"
+                class="tab active mypage-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  마이페이지
+                </span>
+              </button>
+            </nav>
+          </footer>
+        </div>
+      </div>
+    </body>
+
+      53 |   render(<App />);
+      54 |   fireEvent.click(await screen.findByRole("button", { name: button }));
+    > 55 |   expect(await screen.findByText("서울 주말 여행")).toBeInTheDocument();
+         |                       ^
+      56 |   expect(window.location.pathname).toBe("/my-schedule");
+      57 |   expect(sessionStorage.getItem("oauth_state_google")).toBeNull();
+      58 |   expect(sessionStorage.getItem("oauth_state_kakao")).toBeNull();
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at findByText (node_modules/@testing-library/dom/dist/query-helpers.js:86:33)
+      at src/mocks/mockMode.test.jsx:55:23
+
+  ● 카카오 로그인 uses existing return route without OAuth navigation
+
+    Unable to find an element with the text: 서울 주말 여행. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="app"
+        >
+          <header
+            class="header"
+          >
+            <div
+              class="header-side"
+            >
+              <button
+                aria-label="뒤로 가기"
+                class="icon-btn"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="header-icon"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M15 4 7 12l8 8"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div
+              class="header-center"
+            >
+              <span
+                class="brand-wordmark brand-wordmark--default"
+              >
+                너만 오면 go
+              </span>
+            </div>
+            <div
+              class="header-side"
+            />
+          </header>
+          <main
+            class="app-content with-footer"
+          >
+            <div
+              class="route-transition "
+              data-page-entry="ready"
+            >
+              <div
+                class="my-schedule-page"
+              >
+                <div
+                  class="my-schedule-tabs"
+                >
+                  <button
+                    class="my-schedule-tab active"
+                    type="button"
+                  >
+                    다가오는 일정
+                  </button>
+                  <button
+                    class="my-schedule-tab "
+                    type="button"
+                  >
+                    지난 일정
+                  </button>
+                </div>
+                <div
+                  class="my-schedule-content"
+                >
+                  <button
+                    class="my-schedule-create-btn"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      width="22"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        fill="none"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      />
+                      <path
+                        d="M12 8V16M8 12H16"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-width="2"
+                      />
+                    </svg>
+                    <span>
+                      새 일정 만들기
+                    </span>
+                  </button>
+                  <div
+                    class="my-schedule-section-header"
+                  >
+                    <h2>
+                      다가오는 일정
+                      <span>
+                        2
+                      </span>
+                    </h2>
+                  </div>
+                  <div
+                    class="my-schedule-list"
+                  >
+                    <article
+                      class="my-schedule-card"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <img
+                        alt="제주 힐링 여행"
+                        class="my-schedule-thumb"
+                        src="서비스 소개 .png"
+                      />
+                      <div
+                        class="my-schedule-card-body"
+                      >
+                        <div
+                          class="my-schedule-card-top"
+                        >
+                          <span
+                            class="my-schedule-dday"
+                          >
+                            D-3
+                          </span>
+                        </div>
+                        <h3>
+                          제주 힐링 여행
+                        </h3>
+                        <p
+                          class="my-schedule-date"
+                        >
+                          2026.10.15 - 10.16
+                        </p>
+                        <div
+                          class="my-schedule-location"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            width="14"
+                          >
+                            <path
+                              d="M12 20C12 20 6.5 14.9 6.5 10.9C6.5 7.7 9.1 5 12.2 5C15.4 5 18 7.7 18 10.9C18 14.9 12.5 20 12.5 20H12Z"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-linejoin="round"
+                              stroke-width="1.8"
+                            />
+                            <circle
+                              cx="12.2"
+                              cy="10.8"
+                              fill="none"
+                              r="2"
+                              stroke="currentColor"
+                              stroke-width="1.8"
+                            />
+                          </svg>
+                          <span>
+                            제주
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="my-schedule-chevron"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          width="20"
+                        >
+                          <path
+                            d="M9 6L15 12L9 18"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.4"
+                          />
+                        </svg>
+                      </div>
+                    </article>
+                    <article
+                      class="my-schedule-card"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <img
+                        alt="부산 바다 여행"
+                        class="my-schedule-thumb"
+                        src="서비스 소개 .png"
+                      />
+                      <div
+                        class="my-schedule-card-body"
+                      >
+                        <div
+                          class="my-schedule-card-top"
+                        >
+                          <span
+                            class="my-schedule-dday"
+                          >
+                            D-8
+                          </span>
+                        </div>
+                        <h3>
+                          부산 바다 여행
+                        </h3>
+                        <p
+                          class="my-schedule-date"
+                        >
+                          2026.10.20
+                        </p>
+                        <div
+                          class="my-schedule-location"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            width="14"
+                          >
+                            <path
+                              d="M12 20C12 20 6.5 14.9 6.5 10.9C6.5 7.7 9.1 5 12.2 5C15.4 5 18 7.7 18 10.9C18 14.9 12.5 20 12.5 20H12Z"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-linejoin="round"
+                              stroke-width="1.8"
+                            />
+                            <circle
+                              cx="12.2"
+                              cy="10.8"
+                              fill="none"
+                              r="2"
+                              stroke="currentColor"
+                              stroke-width="1.8"
+                            />
+                          </svg>
+                          <span>
+                            부산
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="my-schedule-chevron"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          width="20"
+                        >
+                          <path
+                            d="M9 6L15 12L9 18"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.4"
+                          />
+                        </svg>
+                      </div>
+                    </article>
+                  </div>
+                  <div
+                    class="my-schedule-recommend-card"
+                  >
+                    <h3>
+                      어디로 떠나볼까요?
+                    </h3>
+                    <p>
+                      너만 오면 go가 추천하는 맞춤형 여행 코스
+                    </p>
+                    <button
+                      type="button"
+                    >
+                      추천 받기
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+          <footer
+            class="footer"
+          >
+            <nav
+              aria-label="하단 메뉴"
+              class="footer-nav"
+            >
+              <button
+                aria-pressed="false"
+                class="tab  home-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  홈
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="tab  search-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  검색
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="tab  recommend-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  추천
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="tab  calendar-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  일정
+                </span>
+              </button>
+              <button
+                aria-pressed="true"
+                class="tab active mypage-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  마이페이지
+                </span>
+              </button>
+            </nav>
+          </footer>
+        </div>
+      </div>
+    </body>
+
+      53 |   render(<App />);
+      54 |   fireEvent.click(await screen.findByRole("button", { name: button }));
+    > 55 |   expect(await screen.findByText("서울 주말 여행")).toBeInTheDocument();
+         |                       ^
+      56 |   expect(window.location.pathname).toBe("/my-schedule");
+      57 |   expect(sessionStorage.getItem("oauth_state_google")).toBeNull();
+      58 |   expect(sessionStorage.getItem("oauth_state_kakao")).toBeNull();
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at findByText (node_modules/@testing-library/dom/dist/query-helpers.js:86:33)
+      at src/mocks/mockMode.test.jsx:55:23
+
+PASS src/Login/SignUp.test.jsx
+PASS src/Loading/RouteErrorBoundary.test.jsx
+PASS src/FolderSelectModal/FolderSelectModal.test.jsx
+PASS src/Login/OAuthCallback.test.js
+PASS src/RouteResult/editing.test.jsx
+PASS src/Search/Search.test.jsx
+PASS src/Mypage/availableActions.test.jsx
+PASS src/Recommend/Detail.test.jsx
+PASS src/routeSecurity.test.js
+PASS src/RouteCreate/generation.test.js
+PASS src/RouteResult/useTripResult.test.js
+PASS src/Schedule/Schedule.test.jsx
+PASS src/RouteResult/keyboardOrder.test.jsx
+PASS src/RouteResult/mapLifecycle.test.jsx
+PASS src/Footer/Footer.test.js
+PASS src/ShareModal/ShareModal.test.jsx
+PASS src/RouteResult/RouteResult.test.jsx
+PASS src/utils/requestTasks.test.js
+PASS src/OnBoarding/onboardingTransition.test.js
+PASS src/utils/authState.test.jsx
+PASS src/Homepage/Home.test.jsx
+PASS src/animations/PageTransition.test.jsx
+PASS src/api/security.test.js
+PASS src/Loading/routeFallback.test.jsx
+PASS src/api/apiConfig.test.js
+PASS src/components/InputDialog.test.jsx
+PASS src/App.test.js
+PASS src/api/authApi.test.js
+PASS src/utils/pdfTask.test.js
+PASS src/utils/oauthSecurity.test.js
+PASS src/api/api.test.js
+PASS src/components/PlacePhoto.test.jsx
+PASS src/utils/kakaoMapLoader.test.js
+PASS src/api/travelContracts.test.js
+PASS src/utils/securityAssets.test.js
+PASS src/utils/theme.test.js
+PASS src/utils/mapUrl.test.js
+PASS src/utils/safeLog.test.js
+PASS src/utils/authStorage.test.js
+PASS src/RouteResult/temporaryOrder.test.js
+PASS src/utils/mobileResponsive.test.js
+FAIL src/utils/iconRendering.test.js
+  ● route search preserves the padded asset ratio without changing its anchor
+
+    expect(received).toMatch(expected)
+
+    Expected pattern: /width:\s*auto;/
+    Received string:  "
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      width: 30px;
+      height: 18px;
+      max-width: none;
+      object-fit: contain;
+      display: block;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+    "
+
+       7 | test("route search preserves the padded asset ratio without changing its anchor", () => {
+       8 |   const css = rule("RouteCreate/RouteCreate.css", ".route-search-icon");
+    >  9 |   expect(css).toMatch(/width:\s*auto;/);
+         |               ^
+      10 |   expect(css).toMatch(/height:\s*18px;/);
+      11 |   expect(css).toMatch(/left:\s*16px;/);
+      12 |   expect(css).toMatch(/object-fit:\s*contain;/);
+
+      at Object.<anonymous> (src/utils/iconRendering.test.js:9:15)
+
+PASS src/utils/detailBack.test.js
+PASS src/utils/placeType.test.js
+
+Summary of all failing tests
+FAIL src/mocks/mockMode.test.jsx (8.301 s)
+  ● 구글 로그인 uses existing return route without OAuth navigation
+
+    Unable to find an element with the text: 서울 주말 여행. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="app"
+        >
+          <header
+            class="header"
+          >
+            <div
+              class="header-side"
+            >
+              <button
+                aria-label="뒤로 가기"
+                class="icon-btn"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="header-icon"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M15 4 7 12l8 8"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div
+              class="header-center"
+            >
+              <span
+                class="brand-wordmark brand-wordmark--default"
+              >
+                너만 오면 go
+              </span>
+            </div>
+            <div
+              class="header-side"
+            />
+          </header>
+          <main
+            class="app-content with-footer"
+          >
+            <div
+              class="route-transition "
+              data-page-entry="ready"
+            >
+              <div
+                class="my-schedule-page"
+              >
+                <div
+                  class="my-schedule-tabs"
+                >
+                  <button
+                    class="my-schedule-tab active"
+                    type="button"
+                  >
+                    다가오는 일정
+                  </button>
+                  <button
+                    class="my-schedule-tab "
+                    type="button"
+                  >
+                    지난 일정
+                  </button>
+                </div>
+                <div
+                  class="my-schedule-content"
+                >
+                  <button
+                    class="my-schedule-create-btn"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      width="22"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        fill="none"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      />
+                      <path
+                        d="M12 8V16M8 12H16"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-width="2"
+                      />
+                    </svg>
+                    <span>
+                      새 일정 만들기
+                    </span>
+                  </button>
+                  <div
+                    class="my-schedule-section-header"
+                  >
+                    <h2>
+                      다가오는 일정
+                      <span>
+                        2
+                      </span>
+                    </h2>
+                  </div>
+                  <div
+                    class="my-schedule-list"
+                  >
+                    <article
+                      class="my-schedule-card"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <img
+                        alt="제주 힐링 여행"
+                        class="my-schedule-thumb"
+                        src="서비스 소개 .png"
+                      />
+                      <div
+                        class="my-schedule-card-body"
+                      >
+                        <div
+                          class="my-schedule-card-top"
+                        >
+                          <span
+                            class="my-schedule-dday"
+                          >
+                            D-3
+                          </span>
+                        </div>
+                        <h3>
+                          제주 힐링 여행
+                        </h3>
+                        <p
+                          class="my-schedule-date"
+                        >
+                          2026.10.15 - 10.16
+                        </p>
+                        <div
+                          class="my-schedule-location"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            width="14"
+                          >
+                            <path
+                              d="M12 20C12 20 6.5 14.9 6.5 10.9C6.5 7.7 9.1 5 12.2 5C15.4 5 18 7.7 18 10.9C18 14.9 12.5 20 12.5 20H12Z"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-linejoin="round"
+                              stroke-width="1.8"
+                            />
+                            <circle
+                              cx="12.2"
+                              cy="10.8"
+                              fill="none"
+                              r="2"
+                              stroke="currentColor"
+                              stroke-width="1.8"
+                            />
+                          </svg>
+                          <span>
+                            제주
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="my-schedule-chevron"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          width="20"
+                        >
+                          <path
+                            d="M9 6L15 12L9 18"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.4"
+                          />
+                        </svg>
+                      </div>
+                    </article>
+                    <article
+                      class="my-schedule-card"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <img
+                        alt="부산 바다 여행"
+                        class="my-schedule-thumb"
+                        src="서비스 소개 .png"
+                      />
+                      <div
+                        class="my-schedule-card-body"
+                      >
+                        <div
+                          class="my-schedule-card-top"
+                        >
+                          <span
+                            class="my-schedule-dday"
+                          >
+                            D-8
+                          </span>
+                        </div>
+                        <h3>
+                          부산 바다 여행
+                        </h3>
+                        <p
+                          class="my-schedule-date"
+                        >
+                          2026.10.20
+                        </p>
+                        <div
+                          class="my-schedule-location"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            width="14"
+                          >
+                            <path
+                              d="M12 20C12 20 6.5 14.9 6.5 10.9C6.5 7.7 9.1 5 12.2 5C15.4 5 18 7.7 18 10.9C18 14.9 12.5 20 12.5 20H12Z"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-linejoin="round"
+                              stroke-width="1.8"
+                            />
+                            <circle
+                              cx="12.2"
+                              cy="10.8"
+                              fill="none"
+                              r="2"
+                              stroke="currentColor"
+                              stroke-width="1.8"
+                            />
+                          </svg>
+                          <span>
+                            부산
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="my-schedule-chevron"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          width="20"
+                        >
+                          <path
+                            d="M9 6L15 12L9 18"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.4"
+                          />
+                        </svg>
+                      </div>
+                    </article>
+                  </div>
+                  <div
+                    class="my-schedule-recommend-card"
+                  >
+                    <h3>
+                      어디로 떠나볼까요?
+                    </h3>
+                    <p>
+                      너만 오면 go가 추천하는 맞춤형 여행 코스
+                    </p>
+                    <button
+                      type="button"
+                    >
+                      추천 받기
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+          <footer
+            class="footer"
+          >
+            <nav
+              aria-label="하단 메뉴"
+              class="footer-nav"
+            >
+              <button
+                aria-pressed="false"
+                class="tab  home-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  홈
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="tab  search-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  검색
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="tab  recommend-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  추천
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="tab  calendar-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  일정
+                </span>
+              </button>
+              <button
+                aria-pressed="true"
+                class="tab active mypage-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  마이페이지
+                </span>
+              </button>
+            </nav>
+          </footer>
+        </div>
+      </div>
+    </body>
+
+      53 |   render(<App />);
+      54 |   fireEvent.click(await screen.findByRole("button", { name: button }));
+    > 55 |   expect(await screen.findByText("서울 주말 여행")).toBeInTheDocument();
+         |                       ^
+      56 |   expect(window.location.pathname).toBe("/my-schedule");
+      57 |   expect(sessionStorage.getItem("oauth_state_google")).toBeNull();
+      58 |   expect(sessionStorage.getItem("oauth_state_kakao")).toBeNull();
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at findByText (node_modules/@testing-library/dom/dist/query-helpers.js:86:33)
+      at src/mocks/mockMode.test.jsx:55:23
+
+  ● 카카오 로그인 uses existing return route without OAuth navigation
+
+    Unable to find an element with the text: 서울 주말 여행. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="app"
+        >
+          <header
+            class="header"
+          >
+            <div
+              class="header-side"
+            >
+              <button
+                aria-label="뒤로 가기"
+                class="icon-btn"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="header-icon"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M15 4 7 12l8 8"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div
+              class="header-center"
+            >
+              <span
+                class="brand-wordmark brand-wordmark--default"
+              >
+                너만 오면 go
+              </span>
+            </div>
+            <div
+              class="header-side"
+            />
+          </header>
+          <main
+            class="app-content with-footer"
+          >
+            <div
+              class="route-transition "
+              data-page-entry="ready"
+            >
+              <div
+                class="my-schedule-page"
+              >
+                <div
+                  class="my-schedule-tabs"
+                >
+                  <button
+                    class="my-schedule-tab active"
+                    type="button"
+                  >
+                    다가오는 일정
+                  </button>
+                  <button
+                    class="my-schedule-tab "
+                    type="button"
+                  >
+                    지난 일정
+                  </button>
+                </div>
+                <div
+                  class="my-schedule-content"
+                >
+                  <button
+                    class="my-schedule-create-btn"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      width="22"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        fill="none"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      />
+                      <path
+                        d="M12 8V16M8 12H16"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-width="2"
+                      />
+                    </svg>
+                    <span>
+                      새 일정 만들기
+                    </span>
+                  </button>
+                  <div
+                    class="my-schedule-section-header"
+                  >
+                    <h2>
+                      다가오는 일정
+                      <span>
+                        2
+                      </span>
+                    </h2>
+                  </div>
+                  <div
+                    class="my-schedule-list"
+                  >
+                    <article
+                      class="my-schedule-card"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <img
+                        alt="제주 힐링 여행"
+                        class="my-schedule-thumb"
+                        src="서비스 소개 .png"
+                      />
+                      <div
+                        class="my-schedule-card-body"
+                      >
+                        <div
+                          class="my-schedule-card-top"
+                        >
+                          <span
+                            class="my-schedule-dday"
+                          >
+                            D-3
+                          </span>
+                        </div>
+                        <h3>
+                          제주 힐링 여행
+                        </h3>
+                        <p
+                          class="my-schedule-date"
+                        >
+                          2026.10.15 - 10.16
+                        </p>
+                        <div
+                          class="my-schedule-location"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            width="14"
+                          >
+                            <path
+                              d="M12 20C12 20 6.5 14.9 6.5 10.9C6.5 7.7 9.1 5 12.2 5C15.4 5 18 7.7 18 10.9C18 14.9 12.5 20 12.5 20H12Z"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-linejoin="round"
+                              stroke-width="1.8"
+                            />
+                            <circle
+                              cx="12.2"
+                              cy="10.8"
+                              fill="none"
+                              r="2"
+                              stroke="currentColor"
+                              stroke-width="1.8"
+                            />
+                          </svg>
+                          <span>
+                            제주
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="my-schedule-chevron"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          width="20"
+                        >
+                          <path
+                            d="M9 6L15 12L9 18"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.4"
+                          />
+                        </svg>
+                      </div>
+                    </article>
+                    <article
+                      class="my-schedule-card"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <img
+                        alt="부산 바다 여행"
+                        class="my-schedule-thumb"
+                        src="서비스 소개 .png"
+                      />
+                      <div
+                        class="my-schedule-card-body"
+                      >
+                        <div
+                          class="my-schedule-card-top"
+                        >
+                          <span
+                            class="my-schedule-dday"
+                          >
+                            D-8
+                          </span>
+                        </div>
+                        <h3>
+                          부산 바다 여행
+                        </h3>
+                        <p
+                          class="my-schedule-date"
+                        >
+                          2026.10.20
+                        </p>
+                        <div
+                          class="my-schedule-location"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            width="14"
+                          >
+                            <path
+                              d="M12 20C12 20 6.5 14.9 6.5 10.9C6.5 7.7 9.1 5 12.2 5C15.4 5 18 7.7 18 10.9C18 14.9 12.5 20 12.5 20H12Z"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-linejoin="round"
+                              stroke-width="1.8"
+                            />
+                            <circle
+                              cx="12.2"
+                              cy="10.8"
+                              fill="none"
+                              r="2"
+                              stroke="currentColor"
+                              stroke-width="1.8"
+                            />
+                          </svg>
+                          <span>
+                            부산
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="my-schedule-chevron"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          width="20"
+                        >
+                          <path
+                            d="M9 6L15 12L9 18"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.4"
+                          />
+                        </svg>
+                      </div>
+                    </article>
+                  </div>
+                  <div
+                    class="my-schedule-recommend-card"
+                  >
+                    <h3>
+                      어디로 떠나볼까요?
+                    </h3>
+                    <p>
+                      너만 오면 go가 추천하는 맞춤형 여행 코스
+                    </p>
+                    <button
+                      type="button"
+                    >
+                      추천 받기
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+          <footer
+            class="footer"
+          >
+            <nav
+              aria-label="하단 메뉴"
+              class="footer-nav"
+            >
+              <button
+                aria-pressed="false"
+                class="tab  home-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  홈
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="tab  search-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  검색
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="tab  recommend-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  추천
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="tab  calendar-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  일정
+                </span>
+              </button>
+              <button
+                aria-pressed="true"
+                class="tab active mypage-tab"
+                type="button"
+              >
+                <div
+                  class="tab-icon-wrap"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="tab-icon"
+                    focusable="false"
+                  />
+                </div>
+                <span
+                  class="tab-label"
+                >
+                  마이페이지
+                </span>
+              </button>
+            </nav>
+          </footer>
+        </div>
+      </div>
+    </body>
+
+      53 |   render(<App />);
+      54 |   fireEvent.click(await screen.findByRole("button", { name: button }));
+    > 55 |   expect(await screen.findByText("서울 주말 여행")).toBeInTheDocument();
+         |                       ^
+      56 |   expect(window.location.pathname).toBe("/my-schedule");
+      57 |   expect(sessionStorage.getItem("oauth_state_google")).toBeNull();
+      58 |   expect(sessionStorage.getItem("oauth_state_kakao")).toBeNull();
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at findByText (node_modules/@testing-library/dom/dist/query-helpers.js:86:33)
+      at src/mocks/mockMode.test.jsx:55:23
+
+FAIL src/utils/iconRendering.test.js
+  ● route search preserves the padded asset ratio without changing its anchor
+
+    expect(received).toMatch(expected)
+
+    Expected pattern: /width:\s*auto;/
+    Received string:  "
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      width: 30px;
+      height: 18px;
+      max-width: none;
+      object-fit: contain;
+      display: block;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+    "
+
+       7 | test("route search preserves the padded asset ratio without changing its anchor", () => {
+       8 |   const css = rule("RouteCreate/RouteCreate.css", ".route-search-icon");
+    >  9 |   expect(css).toMatch(/width:\s*auto;/);
+         |               ^
+      10 |   expect(css).toMatch(/height:\s*18px;/);
+      11 |   expect(css).toMatch(/left:\s*16px;/);
+      12 |   expect(css).toMatch(/object-fit:\s*contain;/);
+
+      at Object.<anonymous> (src/utils/iconRendering.test.js:9:15)
+
+
+Test Suites: 2 failed, 43 passed, 45 total
+Tests:       3 failed, 210 passed, 213 total
+Snapshots:   0 total
+Time:        28.081 s, estimated 31 s
+Test results written to: output\dark-audit\tests.json

@@ -1,39 +1,26 @@
-import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
-import { logSafeApiError } from "../utils/safeLog";
-import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
+
+import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import AnimatedHeart from "../AnimatedHeart/AnimatedHeart";
-import FolderSelectModal from "../FolderSelectModal/FolderSelectModal";
+import useReadQuery from "../utils/useReadQuery";
+import useSessionKey from "../utils/useSessionKey";
+import { getAuthSnapshot } from "../utils/authState";
+import { requireList } from "../api/responseContract";
+import usePlaceSaving from "../utils/usePlaceSaving";
+import PlaceSavingFeedback, { PlaceSaveModal } from "../components/PlaceSavingFeedback";
 import api from "../api/api";
 import "./PopularAll.css";
 
-import tokyoImg from "../img/도쿄.png";
-import kyotoImg from "../img/교토.png";
-import beachImg from "../img/서비스 소개 .png";
+import PlacePhoto from "../components/PlacePhoto";
 
-const FOLDERS_API = "/api/folders";
+
 const PLACES_API = "/api/places";
+const EMPTY_PLACES = [];
 
 const filterList = ["전체", "일본", "한국", "동남아"];
 
-const getArrayData = (data) => {
-  if (Array.isArray(data)) return data;
 
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.places)) return data.places;
-  if (Array.isArray(data?.folders)) return data.folders;
-  if (Array.isArray(data?.result)) return data.result;
-  if (Array.isArray(data?.results)) return data.results;
-
-  if (Array.isArray(data?.data?.content)) return data.data.content;
-  if (Array.isArray(data?.data?.items)) return data.data.items;
-  if (Array.isArray(data?.data?.places)) return data.data.places;
-  if (Array.isArray(data?.data?.folders)) return data.data.folders;
-
-  return [];
-};
 
 const getNumberValue = (...values) => {
   for (const value of values) {
@@ -63,31 +50,11 @@ const getIdValue = (...values) => {
   return null;
 };
 
-const normalizeFolder = (folder = {}) => {
-  const folderId = getIdValue(folder.id, folder.folderId);
 
-  if (!folderId) {
-    return null;
-  }
 
-  return {
-    ...folder,
-    id: folderId,
-    name: folder.name || folder.folderName || "이름 없는 폴더",
-  };
-};
 
-const fetchFolders = async () => {
-  const response = await api.get(FOLDERS_API);
 
-  return getArrayData(response.data).map(normalizeFolder).filter(Boolean);
-};
 
-const fetchFolderPlaces = async (folderId) => {
-  const response = await api.get(`${FOLDERS_API}/${folderId}/places`);
-
-  return getArrayData(response.data);
-};
 
 const getPlaceText = (place = {}) =>
   [
@@ -102,24 +69,6 @@ const getPlaceText = (place = {}) =>
   ]
     .filter(Boolean)
     .join(" ");
-
-const getPlaceImage = (place = {}) => {
-  const text = getPlaceText(place);
-
-  if (/교토|kyoto/i.test(text)) {
-    return kyotoImg;
-  }
-
-  if (
-    /제주|부산|광안리|해운대|바다|해변|오션|발리|다낭|베트남|인도네시아|beach|bali|danang/i.test(
-      text
-    )
-  ) {
-    return beachImg;
-  }
-
-  return tokyoImg;
-};
 
 const getPlaceTags = (place = {}) => {
   if (Array.isArray(place.tags) && place.tags.length > 0) {
@@ -170,7 +119,7 @@ const normalizePlace = (place = {}, index = 0) => {
     name,
     placeName: name,
     title: name,
-    image: place.image || place.imageUrl || getPlaceImage({ ...place, name }),
+    image: place.imageUrl || place.thumbnailUrl || place.image || "",
     tags: getPlaceTags(place),
     address: place.address || "",
     latitude,
@@ -207,98 +156,17 @@ const isMatchedFilter = (place, selectedFilter) => {
   return matcher.test(text);
 };
 
-const getErrorMessage = safeApiErrorMessage;
+
 
 function PopularAll() {
-  const navigate = useNavigate();
 
   const [selectedFilter, setSelectedFilter] = useState("전체");
-  const [places, setPlaces] = useState([]);
-  const [serverSavedIds, setServerSavedIds] = useState([]);
-  const [savedFolderMap, setSavedFolderMap] = useState({});
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isSavingId, setIsSavingId] = useState(null);
-  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
-  const [folderTargetPlace, setFolderTargetPlace] = useState(null);
-
-  const fetchFolderSavedPlaces = async () => {
-    try {
-      const folders = await fetchFolders();
-
-      const placeIdSet = new Set();
-      const nextFolderMap = {};
-
-      await Promise.all(
-        folders.map(async (folder) => {
-          try {
-            const folderPlaces = await fetchFolderPlaces(folder.id);
-
-            folderPlaces.forEach((place) => {
-              const placeId = getIdValue(place.id, place.placeId);
-
-              if (!placeId) return;
-
-              placeIdSet.add(placeId);
-              nextFolderMap[placeId] = folder;
-            });
-          } catch (error) {
-            logSafeApiError(error, "PopularAll.jsx");
-          }
-        })
-      );
-
-      setServerSavedIds([...placeIdSet]);
-      setSavedFolderMap(nextFolderMap);
-    } catch (error) {
-      logSafeApiError(error, "PopularAll.jsx");
-    }
-  };
-
-  useEffect(() => {
-    let mounted = true;
-
-    const fetchPlacesData = async () => {
-      try {
-        const response = await api.get(PLACES_API);
-        const data = getArrayData(response.data);
-
-        if (!mounted) return;
-
-        setPlaces(data.map((place, index) => normalizePlace(place, index)));
-      } catch (error) {
-        logSafeApiError(error, "PopularAll.jsx");
-
-        if (!mounted) return;
-
-        setPlaces([]);
-      } finally {
-        if (mounted) {
-          setIsLoaded(true);
-        }
-      }
-    };
-
-    fetchPlacesData();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const loadSavedPlaces = async () => {
-      if (!mounted) return;
-      await fetchFolderSavedPlaces();
-    };
-
-    loadSavedPlaces();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const account = useSessionKey();
+  const saving = usePlaceSaving();
+  const { isSavingId } = saving;
+  const listing = useReadQuery(`${account}:popular-all`, async signal => requireList((await api.get(PLACES_API, { signal })).data).map(normalizePlace), true, () => getAuthSnapshot().accountKey === account);
+  const places = listing.data || EMPTY_PLACES;
+  const isLoaded = Boolean(listing.data);
 
   const visiblePlaces = useMemo(() => {
     if (!isLoaded) {
@@ -319,172 +187,18 @@ function PopularAll() {
   }, [filteredPlaces]);
 
   const monthlyPlaces = useMemo(() => {
-    return filteredPlaces.slice(4, 8);
+    return filteredPlaces.slice(4);
   }, [filteredPlaces]);
 
-  const handleCardClick = (place) => {
-    navigate(`/detail?id=${encodeURIComponent(place.id)}`, {
-      state: { place },
-    });
-  };
-
-  const closeFolderModal = () => {
-    if (isSavingId) return;
-
-    setIsFolderModalOpen(false);
-    setFolderTargetPlace(null);
-  };
-
-  const removeSavedPlace = async (place) => {
-    const placeId = getIdValue(place.id, place.placeId);
-
-    if (!placeId) {
-      alert("장소 ID가 올바르지 않아 삭제할 수 없습니다.");
-      return;
-    }
-
-    try {
-      setIsSavingId(placeId);
-
-      const savedFolder = savedFolderMap[placeId];
-      const folderId = getIdValue(savedFolder?.id, savedFolder?.folderId);
-
-      if (!folderId) {
-        alert("이 장소가 저장된 폴더 정보를 찾지 못했어요.");
-        await fetchFolderSavedPlaces();
-        return;
-      }
-
-      await api.delete(`${FOLDERS_API}/${folderId}/places/${placeId}`);
-
-      setServerSavedIds((prev) =>
-        prev.filter((savedId) => savedId !== placeId)
-      );
-
-      setSavedFolderMap((prev) => {
-        const nextMap = { ...prev };
-        delete nextMap[placeId];
-        return nextMap;
-      });
-    } catch (error) {
-      logSafeApiError(error, "PopularAll.jsx");
-
-      if (error.message.includes("Network Error")) {
-        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-        return;
-      }
-
-      if (error.response?.status === 403) {
-        alert("폴더에서 장소를 삭제할 권한이 없습니다. 로그인 상태를 확인해주세요.");
-        return;
-      }
-
-      alert(
-        getErrorMessage(
-          error,
-          "폴더에서 장소를 삭제하지 못했습니다. 잠시 후 다시 시도해주세요."
-        )
-      );
-    } finally {
-      setIsSavingId(null);
-    }
-  };
-
-  const savePlaceToFolder = async (place, folder) => {
-    const placeId = getIdValue(place.id, place.placeId);
-    const folderId = getIdValue(folder?.id, folder?.folderId);
-
-    if (!placeId) {
-      alert("장소 ID가 올바르지 않아 저장할 수 없습니다.");
-      return;
-    }
-
-    if (!folderId) {
-      alert("폴더 ID가 올바르지 않습니다. 폴더 목록은 서버에서 받아와야 합니다.");
-      return;
-    }
-
-    try {
-      setIsSavingId(placeId);
-
-      await api.post(`${FOLDERS_API}/${folderId}/places/${placeId}`);
-
-      const savedFolder = {
-        ...folder,
-        id: folderId,
-      };
-
-      setServerSavedIds((prev) => {
-        const nextIds = new Set(prev);
-        nextIds.add(placeId);
-        return [...nextIds];
-      });
-
-      setSavedFolderMap((prev) => ({
-        ...prev,
-        [placeId]: savedFolder,
-      }));
-
-      setIsFolderModalOpen(false);
-      setFolderTargetPlace(null);
-    } catch (error) {
-      logSafeApiError(error, "PopularAll.jsx");
-
-      if (error.message.includes("Network Error")) {
-        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-        return;
-      }
-
-      if (error.response?.status === 403) {
-        alert(
-          "폴더에 장소를 저장할 권한이 없습니다. 로그인 상태 또는 폴더 권한을 확인해주세요."
-        );
-        return;
-      }
-
-      alert(
-        getErrorMessage(
-          error,
-          "폴더에 장소를 저장하지 못했습니다. 잠시 후 다시 시도해주세요."
-        )
-      );
-    } finally {
-      setIsSavingId(null);
-    }
-  };
-
-  const handleSaveFolder = async (folder) => {
-    const targetPlaceId = getIdValue(folderTargetPlace?.id);
-
-    if (!folderTargetPlace || isSavingId === targetPlaceId) return;
-
-    await savePlaceToFolder(folderTargetPlace, folder);
-  };
-
-  const handleToggleSaved = async (event, place, saved) => {
-    event.stopPropagation();
-
-    const placeId = getIdValue(place.id, place.placeId);
-
-    if (!placeId) {
-      alert("장소 ID가 올바르지 않습니다.");
-      return;
-    }
-
-    if (isSavingId === placeId) return;
-
-    if (saved) {
-      await removeSavedPlace(place);
-      return;
-    }
-
-    setFolderTargetPlace(place);
-    setIsFolderModalOpen(true);
-  };
+  const handleToggleSaved = saving.toggle;
 
   return (
     <>
       <div className="popular-all-page">
+        <PlaceSavingFeedback saving={saving} />
+        {listing.status === "loading" && !listing.data && <p role="status">장소를 불러오는 중...</p>}
+        {listing.status === "error" && <div role="alert"><p>장소를 불러오지 못했어요.</p><button type="button" onClick={listing.retry}>목록 다시 조회</button></div>}
+        {listing.status === "success" && !filteredPlaces.length && <p>조건에 맞는 장소가 없어요.</p>}
         <div className="popular-filter-row">
           {filterList.map((filter) => (
             <button
@@ -506,15 +220,14 @@ function PopularAll() {
         <section className="popular-grid popular-grid-one-column">
           {hotPlaces.map((place) => {
             const placeId = getIdValue(place.id, place.placeId);
-            const saved = placeId ? serverSavedIds.includes(placeId) : false;
+            const saved = saving.isSaved(placeId);
 
             return (
               <article
                 key={place.id}
                 className="popular-grid-card"
-                onClick={() => handleCardClick(place)}
               >
-                <img
+                <PlacePhoto
                   src={place.image}
                   alt={place.title}
                   className="popular-grid-image"
@@ -524,7 +237,8 @@ function PopularAll() {
                   type="button"
                   className="popular-like-btn"
                   onClick={(e) => handleToggleSaved(e, place, saved)}
-                  disabled={placeId ? isSavingId === placeId : false}
+                  disabled={saving.blocked || saving.folders.status === "loading" || isSavingId === place.id}
+                  aria-pressed={saved}
                   aria-label={saved ? "저장 취소" : "저장"}
                 >
                   <AnimatedHeart active={saved} />
@@ -533,7 +247,7 @@ function PopularAll() {
                 <div className="popular-grid-overlay" />
 
                 <div className="popular-grid-text">
-                  <h3>{place.title}</h3>
+                  <h3><Link className="popular-place-link" to={`/detail?id=${encodeURIComponent(place.id)}`}>{place.title}</Link></h3>
                 </div>
               </article>
             );
@@ -542,20 +256,19 @@ function PopularAll() {
 
         {monthlyPlaces.length > 0 && (
           <section className="popular-month-section">
-            <h2>이달의 추천지</h2>
+            <h2>더 많은 장소</h2>
 
             <div className="popular-month-list">
               {monthlyPlaces.map((place) => {
                 const placeId = getIdValue(place.id, place.placeId);
-                const saved = placeId ? serverSavedIds.includes(placeId) : false;
+                const saved = saving.isSaved(placeId);
 
                 return (
                   <article
                     key={place.id}
                     className="popular-month-card"
-                    onClick={() => handleCardClick(place)}
-                  >
-                    <img
+                      >
+                    <PlacePhoto
                       src={place.image}
                       alt={place.title}
                       className="popular-month-thumb"
@@ -563,13 +276,14 @@ function PopularAll() {
 
                     <div className="popular-month-body">
                       <div className="popular-month-top">
-                        <h3>{place.title}</h3>
+                        <h3><Link className="popular-place-link" to={`/detail?id=${encodeURIComponent(place.id)}`}>{place.title}</Link></h3>
 
                         <button
                           type="button"
                           className="popular-bookmark-btn popular-heart-btn"
                           onClick={(e) => handleToggleSaved(e, place, saved)}
-                          disabled={placeId ? isSavingId === placeId : false}
+                          disabled={saving.blocked || saving.folders.status === "loading" || isSavingId === place.id}
+                  aria-pressed={saved}
                           aria-label={saved ? "저장 취소" : "저장"}
                         >
                           <AnimatedHeart active={saved} />
@@ -592,16 +306,7 @@ function PopularAll() {
         )}
       </div>
 
-      <FolderSelectModal
-        open={isFolderModalOpen}
-        onClose={closeFolderModal}
-        onSave={handleSaveFolder}
-        isSaving={
-          folderTargetPlace
-            ? isSavingId === getIdValue(folderTargetPlace.id)
-            : false
-        }
-      />
+      <PlaceSaveModal saving={saving} />
     </>
   );
 }

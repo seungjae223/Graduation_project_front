@@ -19,14 +19,14 @@ html {
   text-size-adjust: 100%;
   /* Keep one document-level vertical scroller on every route. */
   overflow-x: hidden !important;
-  overflow-y: auto !important;
-  background: #f2f4f7;
+  overflow-y: auto;
+  background: var(--color-page);
 }
 
 body {
   /* A nested body scroller can stop touch scrolling in mobile emulation. */
   overflow-x: clip !important;
-  overflow-y: visible !important;
+  overflow-y: visible;
 }
 
 #root {
@@ -74,7 +74,7 @@ button {
 .schedule-empty-page,
 .calendar-page,
 .route-create-screen,
-.route-result-page,
+.route-result-page:not(.is-exporting),
 .my-schedule-page,
 .mypage-page,
 .saved-places-page,
@@ -225,7 +225,7 @@ button {
   html,
   body,
   #root {
-    background: #f2f4f7;
+    background: var(--color-canvas);
   }
 
   .app,
@@ -240,7 +240,7 @@ button {
   .schedule-empty-page,
   .calendar-page,
   .route-create-screen,
-  .route-result-page,
+  .route-result-page:not(.is-exporting),
   .my-schedule-page,
   .mypage-page,
   .saved-places-page,

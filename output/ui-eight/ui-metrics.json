@@ -1,0 +1,1778 @@
+[
+  {
+    "route": "onboarding",
+    "size": "320x568",
+    "clear": null,
+    "copy": {
+      "bottom": 361.4375,
+      "height": 40,
+      "top": 321.4375,
+      "width": 288
+    },
+    "cta": {
+      "bottom": 439.4375,
+      "height": 48,
+      "top": 391.4375,
+      "width": 288
+    },
+    "footerPosition": null,
+    "height": 568,
+    "image": {
+      "bottom": 275.4375,
+      "height": 187.4375,
+      "top": 88,
+      "width": 288
+    },
+    "indicator": {
+      "bottom": 379.4375,
+      "height": 6,
+      "top": 373.4375,
+      "width": 288
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": {
+      "bottom": 315.4375,
+      "height": 28,
+      "top": 287.4375,
+      "width": 288
+    },
+    "width": 320
+  },
+  {
+    "route": "onboarding2",
+    "size": "320x568",
+    "clear": null,
+    "copy": {
+      "bottom": 361.4375,
+      "height": 40,
+      "top": 321.4375,
+      "width": 288
+    },
+    "cta": {
+      "bottom": 439.4375,
+      "height": 48,
+      "top": 391.4375,
+      "width": 288
+    },
+    "footerPosition": null,
+    "height": 568,
+    "image": {
+      "bottom": 275.4375,
+      "height": 187.4375,
+      "top": 88,
+      "width": 288
+    },
+    "indicator": {
+      "bottom": 379.4375,
+      "height": 6,
+      "top": 373.4375,
+      "width": 288
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": {
+      "bottom": 315.4375,
+      "height": 28,
+      "top": 287.4375,
+      "width": 288
+    },
+    "width": 320
+  },
+  {
+    "route": "onboarding3",
+    "size": "320x568",
+    "clear": null,
+    "copy": {
+      "bottom": 361.4375,
+      "height": 40,
+      "top": 321.4375,
+      "width": 288
+    },
+    "cta": {
+      "bottom": 439.4375,
+      "height": 48,
+      "top": 391.4375,
+      "width": 288
+    },
+    "footerPosition": null,
+    "height": 568,
+    "image": {
+      "bottom": 275.4375,
+      "height": 187.4375,
+      "top": 88,
+      "width": 288
+    },
+    "indicator": {
+      "bottom": 379.4375,
+      "height": 6,
+      "top": 373.4375,
+      "width": 288
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": {
+      "bottom": 315.4375,
+      "height": 28,
+      "top": 287.4375,
+      "width": 288
+    },
+    "width": 320
+  },
+  {
+    "route": "search",
+    "size": "320x568",
+    "clear": {
+      "bottom": 279.1953125,
+      "height": 44,
+      "top": 235.1953125,
+      "width": 67.484375
+    },
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 568,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울 시티 나이트 투어",
+        "loaded": true
+      },
+      {
+        "alt": "제주 오설록",
+        "loaded": true
+      },
+      {
+        "alt": "부산 광안리",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": null,
+    "width": 320
+  },
+  {
+    "route": "recommend",
+    "size": "320x568",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 568,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울숲",
+        "loaded": true
+      },
+      {
+        "alt": "사려니숲길",
+        "loaded": true
+      },
+      {
+        "alt": "해운대해수욕장",
+        "loaded": true
+      },
+      {
+        "alt": "죽녹원",
+        "loaded": true
+      },
+      {
+        "alt": "도쿄 신주쿠 교엔",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": null,
+    "width": 320
+  },
+  {
+    "route": "route-result?id=1",
+    "size": "320x568",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 568,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": "column",
+    "theme": "light",
+    "title": null,
+    "width": 320
+  },
+  {
+    "route": "onboarding",
+    "size": "390x844",
+    "clear": null,
+    "copy": {
+      "bottom": 573.3984375,
+      "height": 58.5,
+      "top": 514.8984375,
+      "width": 343.203125
+    },
+    "cta": {
+      "bottom": 687.3984375,
+      "height": 52,
+      "top": 635.3984375,
+      "width": 343.203125
+    },
+    "footerPosition": null,
+    "height": 844,
+    "image": {
+      "bottom": 445.3984375,
+      "height": 340,
+      "top": 105.3984375,
+      "width": 343.203125
+    },
+    "indicator": {
+      "bottom": 611.3984375,
+      "height": 6,
+      "top": 605.3984375,
+      "width": 343.203125
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": {
+      "bottom": 506.8984375,
+      "height": 37.5,
+      "top": 469.3984375,
+      "width": 343.203125
+    },
+    "width": 390
+  },
+  {
+    "route": "onboarding2",
+    "size": "390x844",
+    "clear": null,
+    "copy": {
+      "bottom": 640.1484375,
+      "height": 87.75,
+      "top": 552.3984375,
+      "width": 343.203125
+    },
+    "cta": {
+      "bottom": 754.1484375,
+      "height": 52,
+      "top": 702.1484375,
+      "width": 343.203125
+    },
+    "footerPosition": null,
+    "height": 844,
+    "image": {
+      "bottom": 445.3984375,
+      "height": 340,
+      "top": 105.3984375,
+      "width": 343.203125
+    },
+    "indicator": {
+      "bottom": 678.1484375,
+      "height": 6,
+      "top": 672.1484375,
+      "width": 343.203125
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": {
+      "bottom": 544.3984375,
+      "height": 75,
+      "top": 469.3984375,
+      "width": 343.203125
+    },
+    "width": 390
+  },
+  {
+    "route": "onboarding3",
+    "size": "390x844",
+    "clear": null,
+    "copy": {
+      "bottom": 573.3984375,
+      "height": 58.5,
+      "top": 514.8984375,
+      "width": 343.203125
+    },
+    "cta": {
+      "bottom": 687.3984375,
+      "height": 52,
+      "top": 635.3984375,
+      "width": 343.203125
+    },
+    "footerPosition": null,
+    "height": 844,
+    "image": {
+      "bottom": 445.3984375,
+      "height": 340,
+      "top": 105.3984375,
+      "width": 343.203125
+    },
+    "indicator": {
+      "bottom": 611.3984375,
+      "height": 6,
+      "top": 605.3984375,
+      "width": 343.203125
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": {
+      "bottom": 506.8984375,
+      "height": 37.5,
+      "top": 469.3984375,
+      "width": 343.203125
+    },
+    "width": 390
+  },
+  {
+    "route": "search",
+    "size": "390x844",
+    "clear": {
+      "bottom": 283.1953125,
+      "height": 44,
+      "top": 239.1953125,
+      "width": 67.484375
+    },
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 844,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울 시티 나이트 투어",
+        "loaded": true
+      },
+      {
+        "alt": "제주 오설록",
+        "loaded": true
+      },
+      {
+        "alt": "부산 광안리",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": null,
+    "width": 390
+  },
+  {
+    "route": "recommend",
+    "size": "390x844",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 844,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울숲",
+        "loaded": true
+      },
+      {
+        "alt": "사려니숲길",
+        "loaded": true
+      },
+      {
+        "alt": "해운대해수욕장",
+        "loaded": true
+      },
+      {
+        "alt": "죽녹원",
+        "loaded": true
+      },
+      {
+        "alt": "도쿄 신주쿠 교엔",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": null,
+    "width": 390
+  },
+  {
+    "route": "route-result?id=1",
+    "size": "390x844",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 844,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": "row",
+    "theme": "light",
+    "title": null,
+    "width": 390
+  },
+  {
+    "route": "onboarding",
+    "size": "768x1024",
+    "clear": null,
+    "copy": {
+      "bottom": 691.796875,
+      "height": 58.5,
+      "top": 633.296875,
+      "width": 342
+    },
+    "cta": {
+      "bottom": 891.796875,
+      "height": 52,
+      "top": 839.796875,
+      "width": 342
+    },
+    "footerPosition": null,
+    "height": 1024,
+    "image": {
+      "bottom": 506,
+      "height": 400,
+      "top": 106,
+      "width": 342
+    },
+    "indicator": {
+      "bottom": 815.796875,
+      "height": 6,
+      "top": 809.796875,
+      "width": 342
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": {
+      "bottom": 608.3984375,
+      "height": 37.5,
+      "top": 570.8984375,
+      "width": 342
+    },
+    "width": 768
+  },
+  {
+    "route": "onboarding2",
+    "size": "768x1024",
+    "clear": null,
+    "copy": {
+      "bottom": 758.546875,
+      "height": 87.75,
+      "top": 670.796875,
+      "width": 342
+    },
+    "cta": {
+      "bottom": 958.546875,
+      "height": 52,
+      "top": 906.546875,
+      "width": 342
+    },
+    "footerPosition": null,
+    "height": 1024,
+    "image": {
+      "bottom": 506,
+      "height": 400,
+      "top": 106,
+      "width": 342
+    },
+    "indicator": {
+      "bottom": 882.546875,
+      "height": 6,
+      "top": 876.546875,
+      "width": 342
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": {
+      "bottom": 645.8984375,
+      "height": 75,
+      "top": 570.8984375,
+      "width": 342
+    },
+    "width": 768
+  },
+  {
+    "route": "onboarding3",
+    "size": "768x1024",
+    "clear": null,
+    "copy": {
+      "bottom": 691.796875,
+      "height": 58.5,
+      "top": 633.296875,
+      "width": 342
+    },
+    "cta": {
+      "bottom": 891.796875,
+      "height": 52,
+      "top": 839.796875,
+      "width": 342
+    },
+    "footerPosition": null,
+    "height": 1024,
+    "image": {
+      "bottom": 506,
+      "height": 400,
+      "top": 106,
+      "width": 342
+    },
+    "indicator": {
+      "bottom": 815.796875,
+      "height": 6,
+      "top": 809.796875,
+      "width": 342
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": {
+      "bottom": 608.3984375,
+      "height": 37.5,
+      "top": 570.8984375,
+      "width": 342
+    },
+    "width": 768
+  },
+  {
+    "route": "search",
+    "size": "768x1024",
+    "clear": {
+      "bottom": 283.1953125,
+      "height": 44,
+      "top": 239.1953125,
+      "width": 67.484375
+    },
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 1024,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울 시티 나이트 투어",
+        "loaded": true
+      },
+      {
+        "alt": "제주 오설록",
+        "loaded": true
+      },
+      {
+        "alt": "부산 광안리",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": null,
+    "width": 768
+  },
+  {
+    "route": "recommend",
+    "size": "768x1024",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 1024,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울숲",
+        "loaded": true
+      },
+      {
+        "alt": "사려니숲길",
+        "loaded": true
+      },
+      {
+        "alt": "해운대해수욕장",
+        "loaded": true
+      },
+      {
+        "alt": "죽녹원",
+        "loaded": true
+      },
+      {
+        "alt": "도쿄 신주쿠 교엔",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": null,
+    "width": 768
+  },
+  {
+    "route": "route-result?id=1",
+    "size": "768x1024",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 1024,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": "row",
+    "theme": "light",
+    "title": null,
+    "width": 768
+  },
+  {
+    "route": "onboarding",
+    "size": "1366x768",
+    "clear": null,
+    "copy": {
+      "bottom": 556.5546875,
+      "height": 58.5,
+      "top": 498.0546875,
+      "width": 342
+    },
+    "cta": {
+      "bottom": 670.5546875,
+      "height": 52,
+      "top": 618.5546875,
+      "width": 342
+    },
+    "footerPosition": null,
+    "height": 768,
+    "image": {
+      "bottom": 428.5546875,
+      "height": 322.5546875,
+      "top": 106,
+      "width": 342
+    },
+    "indicator": {
+      "bottom": 594.5546875,
+      "height": 6,
+      "top": 588.5546875,
+      "width": 342
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": {
+      "bottom": 490.0546875,
+      "height": 37.5,
+      "top": 452.5546875,
+      "width": 342
+    },
+    "width": 1366
+  },
+  {
+    "route": "onboarding2",
+    "size": "1366x768",
+    "clear": null,
+    "copy": {
+      "bottom": 623.3046875,
+      "height": 87.75,
+      "top": 535.5546875,
+      "width": 342
+    },
+    "cta": {
+      "bottom": 737.3046875,
+      "height": 52,
+      "top": 685.3046875,
+      "width": 342
+    },
+    "footerPosition": null,
+    "height": 768,
+    "image": {
+      "bottom": 428.5546875,
+      "height": 322.5546875,
+      "top": 106,
+      "width": 342
+    },
+    "indicator": {
+      "bottom": 661.3046875,
+      "height": 6,
+      "top": 655.3046875,
+      "width": 342
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": {
+      "bottom": 527.5546875,
+      "height": 75,
+      "top": 452.5546875,
+      "width": 342
+    },
+    "width": 1366
+  },
+  {
+    "route": "onboarding3",
+    "size": "1366x768",
+    "clear": null,
+    "copy": {
+      "bottom": 556.5546875,
+      "height": 58.5,
+      "top": 498.0546875,
+      "width": 342
+    },
+    "cta": {
+      "bottom": 670.5546875,
+      "height": 52,
+      "top": 618.5546875,
+      "width": 342
+    },
+    "footerPosition": null,
+    "height": 768,
+    "image": {
+      "bottom": 428.5546875,
+      "height": 322.5546875,
+      "top": 106,
+      "width": 342
+    },
+    "indicator": {
+      "bottom": 594.5546875,
+      "height": 6,
+      "top": 588.5546875,
+      "width": 342
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": {
+      "bottom": 490.0546875,
+      "height": 37.5,
+      "top": 452.5546875,
+      "width": 342
+    },
+    "width": 1366
+  },
+  {
+    "route": "search",
+    "size": "1366x768",
+    "clear": {
+      "bottom": 283.1953125,
+      "height": 44,
+      "top": 239.1953125,
+      "width": 67.484375
+    },
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 768,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울 시티 나이트 투어",
+        "loaded": true
+      },
+      {
+        "alt": "제주 오설록",
+        "loaded": true
+      },
+      {
+        "alt": "부산 광안리",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": null,
+    "width": 1366
+  },
+  {
+    "route": "recommend",
+    "size": "1366x768",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 768,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울숲",
+        "loaded": true
+      },
+      {
+        "alt": "사려니숲길",
+        "loaded": true
+      },
+      {
+        "alt": "해운대해수욕장",
+        "loaded": true
+      },
+      {
+        "alt": "죽녹원",
+        "loaded": true
+      },
+      {
+        "alt": "도쿄 신주쿠 교엔",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "light",
+    "title": null,
+    "width": 1366
+  },
+  {
+    "route": "route-result?id=1",
+    "size": "1366x768",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 768,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": "row",
+    "theme": "light",
+    "title": null,
+    "width": 1366
+  },
+  {
+    "route": "onboarding",
+    "size": "320x568",
+    "clear": null,
+    "copy": {
+      "bottom": 361.4375,
+      "height": 40,
+      "top": 321.4375,
+      "width": 288
+    },
+    "cta": {
+      "bottom": 439.4375,
+      "height": 48,
+      "top": 391.4375,
+      "width": 288
+    },
+    "footerPosition": null,
+    "height": 568,
+    "image": {
+      "bottom": 275.4375,
+      "height": 187.4375,
+      "top": 88,
+      "width": 288
+    },
+    "indicator": {
+      "bottom": 379.4375,
+      "height": 6,
+      "top": 373.4375,
+      "width": 288
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": {
+      "bottom": 315.4375,
+      "height": 28,
+      "top": 287.4375,
+      "width": 288
+    },
+    "width": 320
+  },
+  {
+    "route": "onboarding2",
+    "size": "320x568",
+    "clear": null,
+    "copy": {
+      "bottom": 361.4375,
+      "height": 40,
+      "top": 321.4375,
+      "width": 288
+    },
+    "cta": {
+      "bottom": 439.4375,
+      "height": 48,
+      "top": 391.4375,
+      "width": 288
+    },
+    "footerPosition": null,
+    "height": 568,
+    "image": {
+      "bottom": 275.4375,
+      "height": 187.4375,
+      "top": 88,
+      "width": 288
+    },
+    "indicator": {
+      "bottom": 379.4375,
+      "height": 6,
+      "top": 373.4375,
+      "width": 288
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": {
+      "bottom": 315.4375,
+      "height": 28,
+      "top": 287.4375,
+      "width": 288
+    },
+    "width": 320
+  },
+  {
+    "route": "onboarding3",
+    "size": "320x568",
+    "clear": null,
+    "copy": {
+      "bottom": 361.4375,
+      "height": 40,
+      "top": 321.4375,
+      "width": 288
+    },
+    "cta": {
+      "bottom": 439.4375,
+      "height": 48,
+      "top": 391.4375,
+      "width": 288
+    },
+    "footerPosition": null,
+    "height": 568,
+    "image": {
+      "bottom": 275.4375,
+      "height": 187.4375,
+      "top": 88,
+      "width": 288
+    },
+    "indicator": {
+      "bottom": 379.4375,
+      "height": 6,
+      "top": 373.4375,
+      "width": 288
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": {
+      "bottom": 315.4375,
+      "height": 28,
+      "top": 287.4375,
+      "width": 288
+    },
+    "width": 320
+  },
+  {
+    "route": "search",
+    "size": "320x568",
+    "clear": {
+      "bottom": 279.1953125,
+      "height": 44,
+      "top": 235.1953125,
+      "width": 67.484375
+    },
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 568,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울 시티 나이트 투어",
+        "loaded": true
+      },
+      {
+        "alt": "제주 오설록",
+        "loaded": true
+      },
+      {
+        "alt": "부산 광안리",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": null,
+    "width": 320
+  },
+  {
+    "route": "recommend",
+    "size": "320x568",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 568,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울숲",
+        "loaded": true
+      },
+      {
+        "alt": "사려니숲길",
+        "loaded": true
+      },
+      {
+        "alt": "해운대해수욕장",
+        "loaded": true
+      },
+      {
+        "alt": "죽녹원",
+        "loaded": true
+      },
+      {
+        "alt": "도쿄 신주쿠 교엔",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": null,
+    "width": 320
+  },
+  {
+    "route": "route-result?id=1",
+    "size": "320x568",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 568,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": "column",
+    "theme": "dark",
+    "title": null,
+    "width": 320
+  },
+  {
+    "route": "onboarding",
+    "size": "390x844",
+    "clear": null,
+    "copy": {
+      "bottom": 573.3984375,
+      "height": 58.5,
+      "top": 514.8984375,
+      "width": 343.203125
+    },
+    "cta": {
+      "bottom": 687.3984375,
+      "height": 52,
+      "top": 635.3984375,
+      "width": 343.203125
+    },
+    "footerPosition": null,
+    "height": 844,
+    "image": {
+      "bottom": 445.3984375,
+      "height": 340,
+      "top": 105.3984375,
+      "width": 343.203125
+    },
+    "indicator": {
+      "bottom": 611.3984375,
+      "height": 6,
+      "top": 605.3984375,
+      "width": 343.203125
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": {
+      "bottom": 506.8984375,
+      "height": 37.5,
+      "top": 469.3984375,
+      "width": 343.203125
+    },
+    "width": 390
+  },
+  {
+    "route": "onboarding2",
+    "size": "390x844",
+    "clear": null,
+    "copy": {
+      "bottom": 640.1484375,
+      "height": 87.75,
+      "top": 552.3984375,
+      "width": 343.203125
+    },
+    "cta": {
+      "bottom": 754.1484375,
+      "height": 52,
+      "top": 702.1484375,
+      "width": 343.203125
+    },
+    "footerPosition": null,
+    "height": 844,
+    "image": {
+      "bottom": 445.3984375,
+      "height": 340,
+      "top": 105.3984375,
+      "width": 343.203125
+    },
+    "indicator": {
+      "bottom": 678.1484375,
+      "height": 6,
+      "top": 672.1484375,
+      "width": 343.203125
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": {
+      "bottom": 544.3984375,
+      "height": 75,
+      "top": 469.3984375,
+      "width": 343.203125
+    },
+    "width": 390
+  },
+  {
+    "route": "onboarding3",
+    "size": "390x844",
+    "clear": null,
+    "copy": {
+      "bottom": 573.3984375,
+      "height": 58.5,
+      "top": 514.8984375,
+      "width": 343.203125
+    },
+    "cta": {
+      "bottom": 687.3984375,
+      "height": 52,
+      "top": 635.3984375,
+      "width": 343.203125
+    },
+    "footerPosition": null,
+    "height": 844,
+    "image": {
+      "bottom": 445.3984375,
+      "height": 340,
+      "top": 105.3984375,
+      "width": 343.203125
+    },
+    "indicator": {
+      "bottom": 611.3984375,
+      "height": 6,
+      "top": 605.3984375,
+      "width": 343.203125
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": {
+      "bottom": 506.8984375,
+      "height": 37.5,
+      "top": 469.3984375,
+      "width": 343.203125
+    },
+    "width": 390
+  },
+  {
+    "route": "search",
+    "size": "390x844",
+    "clear": {
+      "bottom": 283.1953125,
+      "height": 44,
+      "top": 239.1953125,
+      "width": 67.484375
+    },
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 844,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울 시티 나이트 투어",
+        "loaded": true
+      },
+      {
+        "alt": "제주 오설록",
+        "loaded": true
+      },
+      {
+        "alt": "부산 광안리",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": null,
+    "width": 390
+  },
+  {
+    "route": "recommend",
+    "size": "390x844",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 844,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울숲",
+        "loaded": true
+      },
+      {
+        "alt": "사려니숲길",
+        "loaded": true
+      },
+      {
+        "alt": "해운대해수욕장",
+        "loaded": true
+      },
+      {
+        "alt": "죽녹원",
+        "loaded": true
+      },
+      {
+        "alt": "도쿄 신주쿠 교엔",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": null,
+    "width": 390
+  },
+  {
+    "route": "route-result?id=1",
+    "size": "390x844",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 844,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": "row",
+    "theme": "dark",
+    "title": null,
+    "width": 390
+  },
+  {
+    "route": "onboarding",
+    "size": "768x1024",
+    "clear": null,
+    "copy": {
+      "bottom": 691.796875,
+      "height": 58.5,
+      "top": 633.296875,
+      "width": 342
+    },
+    "cta": {
+      "bottom": 891.796875,
+      "height": 52,
+      "top": 839.796875,
+      "width": 342
+    },
+    "footerPosition": null,
+    "height": 1024,
+    "image": {
+      "bottom": 506,
+      "height": 400,
+      "top": 106,
+      "width": 342
+    },
+    "indicator": {
+      "bottom": 815.796875,
+      "height": 6,
+      "top": 809.796875,
+      "width": 342
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": {
+      "bottom": 608.3984375,
+      "height": 37.5,
+      "top": 570.8984375,
+      "width": 342
+    },
+    "width": 768
+  },
+  {
+    "route": "onboarding2",
+    "size": "768x1024",
+    "clear": null,
+    "copy": {
+      "bottom": 758.546875,
+      "height": 87.75,
+      "top": 670.796875,
+      "width": 342
+    },
+    "cta": {
+      "bottom": 958.546875,
+      "height": 52,
+      "top": 906.546875,
+      "width": 342
+    },
+    "footerPosition": null,
+    "height": 1024,
+    "image": {
+      "bottom": 506,
+      "height": 400,
+      "top": 106,
+      "width": 342
+    },
+    "indicator": {
+      "bottom": 882.546875,
+      "height": 6,
+      "top": 876.546875,
+      "width": 342
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": {
+      "bottom": 645.8984375,
+      "height": 75,
+      "top": 570.8984375,
+      "width": 342
+    },
+    "width": 768
+  },
+  {
+    "route": "onboarding3",
+    "size": "768x1024",
+    "clear": null,
+    "copy": {
+      "bottom": 691.796875,
+      "height": 58.5,
+      "top": 633.296875,
+      "width": 342
+    },
+    "cta": {
+      "bottom": 891.796875,
+      "height": 52,
+      "top": 839.796875,
+      "width": 342
+    },
+    "footerPosition": null,
+    "height": 1024,
+    "image": {
+      "bottom": 506,
+      "height": 400,
+      "top": 106,
+      "width": 342
+    },
+    "indicator": {
+      "bottom": 815.796875,
+      "height": 6,
+      "top": 809.796875,
+      "width": 342
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": {
+      "bottom": 608.3984375,
+      "height": 37.5,
+      "top": 570.8984375,
+      "width": 342
+    },
+    "width": 768
+  },
+  {
+    "route": "search",
+    "size": "768x1024",
+    "clear": {
+      "bottom": 283.1953125,
+      "height": 44,
+      "top": 239.1953125,
+      "width": 67.484375
+    },
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 1024,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울 시티 나이트 투어",
+        "loaded": true
+      },
+      {
+        "alt": "제주 오설록",
+        "loaded": true
+      },
+      {
+        "alt": "부산 광안리",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": null,
+    "width": 768
+  },
+  {
+    "route": "recommend",
+    "size": "768x1024",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 1024,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울숲",
+        "loaded": true
+      },
+      {
+        "alt": "사려니숲길",
+        "loaded": true
+      },
+      {
+        "alt": "해운대해수욕장",
+        "loaded": true
+      },
+      {
+        "alt": "죽녹원",
+        "loaded": true
+      },
+      {
+        "alt": "도쿄 신주쿠 교엔",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": null,
+    "width": 768
+  },
+  {
+    "route": "route-result?id=1",
+    "size": "768x1024",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 1024,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": "row",
+    "theme": "dark",
+    "title": null,
+    "width": 768
+  },
+  {
+    "route": "onboarding",
+    "size": "1366x768",
+    "clear": null,
+    "copy": {
+      "bottom": 556.5546875,
+      "height": 58.5,
+      "top": 498.0546875,
+      "width": 342
+    },
+    "cta": {
+      "bottom": 670.5546875,
+      "height": 52,
+      "top": 618.5546875,
+      "width": 342
+    },
+    "footerPosition": null,
+    "height": 768,
+    "image": {
+      "bottom": 428.5546875,
+      "height": 322.5546875,
+      "top": 106,
+      "width": 342
+    },
+    "indicator": {
+      "bottom": 594.5546875,
+      "height": 6,
+      "top": 588.5546875,
+      "width": 342
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": {
+      "bottom": 490.0546875,
+      "height": 37.5,
+      "top": 452.5546875,
+      "width": 342
+    },
+    "width": 1366
+  },
+  {
+    "route": "onboarding2",
+    "size": "1366x768",
+    "clear": null,
+    "copy": {
+      "bottom": 623.3046875,
+      "height": 87.75,
+      "top": 535.5546875,
+      "width": 342
+    },
+    "cta": {
+      "bottom": 737.3046875,
+      "height": 52,
+      "top": 685.3046875,
+      "width": 342
+    },
+    "footerPosition": null,
+    "height": 768,
+    "image": {
+      "bottom": 428.5546875,
+      "height": 322.5546875,
+      "top": 106,
+      "width": 342
+    },
+    "indicator": {
+      "bottom": 661.3046875,
+      "height": 6,
+      "top": 655.3046875,
+      "width": 342
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": {
+      "bottom": 527.5546875,
+      "height": 75,
+      "top": 452.5546875,
+      "width": 342
+    },
+    "width": 1366
+  },
+  {
+    "route": "onboarding3",
+    "size": "1366x768",
+    "clear": null,
+    "copy": {
+      "bottom": 556.5546875,
+      "height": 58.5,
+      "top": 498.0546875,
+      "width": 342
+    },
+    "cta": {
+      "bottom": 670.5546875,
+      "height": 52,
+      "top": 618.5546875,
+      "width": 342
+    },
+    "footerPosition": null,
+    "height": 768,
+    "image": {
+      "bottom": 428.5546875,
+      "height": 322.5546875,
+      "top": 106,
+      "width": 342
+    },
+    "indicator": {
+      "bottom": 594.5546875,
+      "height": 6,
+      "top": 588.5546875,
+      "width": 342
+    },
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": {
+      "bottom": 490.0546875,
+      "height": 37.5,
+      "top": 452.5546875,
+      "width": 342
+    },
+    "width": 1366
+  },
+  {
+    "route": "search",
+    "size": "1366x768",
+    "clear": {
+      "bottom": 283.1953125,
+      "height": 44,
+      "top": 239.1953125,
+      "width": 67.484375
+    },
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 768,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울 시티 나이트 투어",
+        "loaded": true
+      },
+      {
+        "alt": "제주 오설록",
+        "loaded": true
+      },
+      {
+        "alt": "부산 광안리",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": null,
+    "width": 1366
+  },
+  {
+    "route": "recommend",
+    "size": "1366x768",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 768,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": "24px",
+    "photos": [
+      {
+        "alt": "서울숲",
+        "loaded": true
+      },
+      {
+        "alt": "사려니숲길",
+        "loaded": true
+      },
+      {
+        "alt": "해운대해수욕장",
+        "loaded": true
+      },
+      {
+        "alt": "죽녹원",
+        "loaded": true
+      },
+      {
+        "alt": "도쿄 신주쿠 교엔",
+        "loaded": true
+      }
+    ],
+    "summaryDirection": null,
+    "theme": "dark",
+    "title": null,
+    "width": 1366
+  },
+  {
+    "route": "route-result?id=1",
+    "size": "1366x768",
+    "clear": null,
+    "copy": null,
+    "cta": null,
+    "footerPosition": "static",
+    "height": 768,
+    "image": null,
+    "indicator": null,
+    "overflow": false,
+    "padding": null,
+    "photos": [],
+    "summaryDirection": "row",
+    "theme": "dark",
+    "title": null,
+    "width": 1366
+  }
+]

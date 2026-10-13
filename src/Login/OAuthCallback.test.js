@@ -9,6 +9,7 @@ jest.mock("react-router-dom", () => ({
   useParams: () => ({ provider: mockProvider }),
   useSearchParams: () => [mockSearchParams],
   useNavigate: () => mockNavigate,
+  useLocation: () => ({ key: "oauth-test-entry", pathname: `/oauth/${mockProvider}/callback` }),
 }), { virtual: true });
 jest.mock("../api/authApi", () => ({ completeSocialLoginApi: jest.fn() }));
 jest.mock("../Loading/EarthLoader", () => () => <div>Loading</div>);
@@ -24,8 +25,12 @@ test.each(["google", "kakao"])("%s: StrictMode에서도 일치한 state로 한 �
   sessionStorage.setItem(`oauth_state_${provider}`, JSON.stringify({ state: "expected", expiresAt: Date.now() + 60000 }));
   const view = render(<StrictMode><OAuthCallback /></StrictMode>);
   await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
+  expect(mockNavigate).toHaveBeenCalledWith("/home", { replace: true });
   expect(completeSocialLoginApi).toHaveBeenCalledTimes(1);
-  expect(completeSocialLoginApi).toHaveBeenCalledWith({ provider, code: "test-code", state: "expected" });
+  expect(completeSocialLoginApi).toHaveBeenCalledWith(
+    { provider, code: "test-code", state: "expected" },
+    expect.objectContaining({ signal: expect.any(AbortSignal), isCurrent: expect.any(Function) })
+  );
   expect(sessionStorage.getItem(`oauth_state_${provider}`)).toBeNull();
   expect(window.location.search).toBe("");
   view.unmount();

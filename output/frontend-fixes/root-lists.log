@@ -1,0 +1,41 @@
+FAIL src/Recommend/listFlows.test.jsx
+  ● internal save key Enter cannot invoke parent detail navigation
+
+    expect(element).not.toBeInTheDocument()
+
+    expected document not to contain element, found <p>상세 도착 ?id=1</p> instead
+
+      27 |   const button = screen.getByRole("button", { name: "저장", exact: true });
+      28 |   fireEvent.keyDown(button, { key }); userEvent.click(button);
+    > 29 |   expect(mockToggle).toHaveBeenCalledTimes(1); expect(screen.queryByText(/상세 도착/)).not.toBeInTheDocument();
+         |                                                                                        ^
+      30 |   fireEvent.keyDown(screen.getByRole("button", { name: /서버 장소 상세 보기/ }), { key: "Enter" });
+      31 |   expect(await screen.findByText(/상세 도착/)).toBeInTheDocument();
+      32 | });
+
+      at src/Recommend/listFlows.test.jsx:29:88
+
+  ● internal save key   cannot invoke parent detail navigation
+
+    expect(element).not.toBeInTheDocument()
+
+    expected document not to contain element, found <p>상세 도착 ?id=1</p> instead
+
+      27 |   const button = screen.getByRole("button", { name: "저장", exact: true });
+      28 |   fireEvent.keyDown(button, { key }); userEvent.click(button);
+    > 29 |   expect(mockToggle).toHaveBeenCalledTimes(1); expect(screen.queryByText(/상세 도착/)).not.toBeInTheDocument();
+         |                                                                                        ^
+      30 |   fireEvent.keyDown(screen.getByRole("button", { name: /서버 장소 상세 보기/ }), { key: "Enter" });
+      31 |   expect(await screen.findByText(/상세 도착/)).toBeInTheDocument();
+      32 | });
+
+      at src/Recommend/listFlows.test.jsx:29:88
+
+PASS src/utils/requestTasks.test.js
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       2 failed, 9 passed, 11 total
+Snapshots:   0 total
+Time:        3.603 s
+Ran all test suites within paths "src/Recommend/listFlows.test.jsx", "src/utils/requestTasks.test.js".
+Test results written to: output\frontend-fixes\root-lists.json

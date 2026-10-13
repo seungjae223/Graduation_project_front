@@ -6,7 +6,7 @@
   align-items: flex-end;
   justify-content: center;
   padding: 0 16px 0;
-  background: rgba(15, 23, 42, 0.28);
+  background: var(--color-backdrop);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -14,11 +14,11 @@
 .login-alert-sheet {
   width: 80%;
   max-width: 320px;
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 30px 30px 0 0;
   padding: 14px 22px 22px;
   text-align: center;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 24px 60px var(--color-shadow);
   animation: login-alert-slide-up 0.28s ease-out;
 }
 
@@ -37,7 +37,7 @@
   width: 72px;
   height: 10px;
   border-radius: 999px;
-  background: #d9e0ea;
+  background: var(--color-border-strong);
   margin: 0 auto 16px;
 }
 
@@ -46,7 +46,7 @@
   height: 92px;
   border-radius: 999px;
   margin: 0 auto 28px;
-  background: #fdf0f0;
+  background: var(--color-danger-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -63,7 +63,7 @@
   font-size: 28px;
   font-weight: 900;
   line-height: 1.3;
-  color: #17212f;
+  color: var(--color-text-strong);
   word-break: keep-all;
 }
 
@@ -72,7 +72,7 @@
   font-size: 17px;
   font-weight: 500;
   line-height: 1.7;
-  color: #6f7f92;
+  color: var(--color-text-muted);
   word-break: keep-all;
 }
 
@@ -82,8 +82,8 @@
   margin-top: 34px;
   border: none;
   border-radius: 18px;
-  background: #1da1f2;
-  color: #ffffff;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   font-size: 18px;
   font-weight: 900;
   display: inline-flex;
@@ -98,4 +98,12 @@
   width: 18px;
   height: 18px;
   object-fit: contain;
+}
+.login-alert-confirm-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+.login-alert-confirm-btn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
 }

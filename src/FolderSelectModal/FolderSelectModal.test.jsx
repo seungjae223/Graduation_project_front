@@ -51,3 +51,16 @@ test.each(["reopen", "place", "account"])("late creation refresh cannot replace 
   expect(screen.queryByText(/폴더가 생성됐어요/)).not.toBeInTheDocument();
   expect(api.post).toHaveBeenCalledTimes(1);
 });
+
+test("cancelling folder creation returns keyboard focus to the create-folder button without writing", async () => {
+  render(<FolderSelectModal open onClose={jest.fn()} />);
+  await screen.findAllByText("같은 이름");
+  const create = screen.getByRole("button", { name: /새 폴더/ });
+  userEvent.click(create);
+  expect(screen.getByLabelText("폴더 이름")).toHaveFocus();
+  userEvent.click(screen.getByRole("button", { name: "취소" }));
+  expect(screen.getByRole("button", { name: /새 폴더/ })).toHaveFocus();
+  userEvent.tab();
+  expect(screen.getByRole("button", { name: "취소" })).toHaveFocus();
+  expect(api.post).not.toHaveBeenCalled();
+});

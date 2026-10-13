@@ -1,5 +1,5 @@
 .heart-container {
-  --heart-outline-color: #cbd5e1;
+  --heart-outline-color: var(--color-text-muted);
   --heart-active-color: #ff3b30;
 
   position: relative;

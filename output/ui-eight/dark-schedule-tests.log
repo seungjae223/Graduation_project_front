@@ -1,0 +1,11 @@
+PASS src/FolderSelectModal/FolderSelectModal.test.jsx
+PASS src/RouteResult/editing.test.jsx
+PASS src/ShareModal/ShareModal.test.jsx
+PASS src/Schedule/Schedule.test.jsx
+PASS src/RouteResult/keyboardOrder.test.jsx
+PASS src/RouteCreate/generation.test.js
+
+Test Suites: 6 passed, 6 total
+Tests:       26 passed, 26 total
+Snapshots:   0 total
+Time:        7.923 s

@@ -1,4 +1,3 @@
-import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -8,10 +7,13 @@ import {
 } from "../api/placeApi";
 import "./Search.css";
 import useServerSearch from "./useServerSearch";
+import useReadQuery from "../utils/useReadQuery";
+import useMutationTask from "../utils/useMutationTask";
+import useSessionKey from "../utils/useSessionKey";
+import { getAuthSnapshot } from "../utils/authState";
 
-import hotMainImg from "../img/도쿄.png";
-import hotSubImg1 from "../img/교토.png";
-import hotSubImg2 from "../img/서비스 소개 .png";
+import PlacePhoto from "../components/PlacePhoto";
+import { getPlacePhoto } from "../data/placePhotos";
 
 
 
@@ -212,27 +214,6 @@ const GeojeIcon = () => (
   </svg>
 );
 
-const MoreIcon = () => (
-  <svg viewBox="0 0 24 24" className="svg-icon" aria-hidden="true">
-    <circle
-      cx="12"
-      cy="12"
-      r="7"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
-    <path
-      d="M12 8L10 12L14 11L12 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
 const regionItems = [
   { id: 1, name: "서울", Icon: SeoulIcon },
   { id: 2, name: "제주", Icon: JejuIcon },
@@ -241,7 +222,6 @@ const regionItems = [
   { id: 5, name: "경주", Icon: GyeongjuIcon },
   { id: 6, name: "여수", Icon: YeosuIcon },
   { id: 7, name: "거제", Icon: GeojeIcon },
-  { id: 8, name: "더보기", Icon: MoreIcon },
 ];
 
 const popularKeywords = [
@@ -258,94 +238,84 @@ const hotPlaces = [
     id: 1,
     title: "서울 시티 나이트 투어",
     subtitle: "화려한 도심의 야경을 한눈에",
-    image: hotMainImg,
+    ...getPlacePhoto("서울 시티 나이트 투어"),
     badge: "TRENDING",
   },
   {
     id: 2,
     title: "제주 오설록",
-    image: hotSubImg1,
+    ...getPlacePhoto("제주 오설록"),
   },
   {
     id: 3,
     title: "부산 광안리",
-    image: hotSubImg2,
+    ...getPlacePhoto("부산 광안리"),
   },
 ];
 
 function Search() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const account = useSessionKey();
 
   const keywordFromUrl = searchParams.get("keyword") || "";
   const locationState = location.state || {};
 
   const [query, setQuery] = useState(keywordFromUrl);
-  const [recentSearches, setRecentSearches] = useState([]);
   const search = useServerSearch();
+  const { submit: submitSearch, status: searchStatus, revision: searchRevision } = search;
   const searchedKeyword = search.keyword;
-  useEffect(() => { setQuery(searchParams.get("keyword") || ""); }, [searchParams]);
+  const recent = useReadQuery(`${account}:recent-searches`, signal => getRecentSearchesApi({ signal }), true, () => getAuthSnapshot().accountKey === account);
+  const recentSearches = (recent.data || []).slice(0, 10);
+  const recentTask = useMutationTask(`${account}:recent-searches`);
+  const retryRecents = recent.retry;
   useEffect(() => {
-    let mounted = true;
-
-    getRecentSearchesApi()
-      .then((items) => {
-        if (mounted) setRecentSearches(items.slice(0, 10));
-      })
-      .catch((error) => logSafeApiError(error, "Search.jsx"));
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const runSearch = (keyword) => {
+    const keyword = keywordFromUrl.trim().replace(/\s+/g, " ");
     setQuery(keyword);
-    void search.submit(keyword);
-  };
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    runSearch(query);
-  };
+    if (keyword) void submitSearch(keyword);
+  }, [keywordFromUrl, submitSearch]);
+  useEffect(() => {
+    if (searchStatus === "success") void retryRecents();
+  }, [searchStatus, searchRevision, retryRecents]);
 
-  const handleRemoveRecent = async (e, recentSearch) => {
-    e.stopPropagation();
-    try {
-      await deleteRecentSearchApi(recentSearch.id);
-      setRecentSearches((prev) =>
-        prev.filter((item) => String(item.id) !== String(recentSearch.id))
-      );
-    } catch (error) {
-      logSafeApiError(error, "Search.jsx");
-    }
+  const runSearch = value => {
+    const keyword = String(value || "").trim().replace(/\s+/g, " ");
+    setQuery(keyword);
+    if (!keyword || keyword.length > 100 || keyword === keywordFromUrl) { void search.submit(keyword); return; }
+    setSearchParams({ keyword });
   };
-
-  const handleClearRecent = async () => {
-    try {
-      await clearRecentSearchesApi();
-      setRecentSearches([]);
-    } catch (error) {
-      logSafeApiError(error, "Search.jsx");
-    }
+  const handleSearchSubmit = event => { event.preventDefault(); runSearch(query); };
+  const mutateRecent = async id => {
+    if (recentTask.blocked) return;
+    await recentTask.run(
+      () => id === null ? clearRecentSearchesApi() : deleteRecentSearchApi(id),
+      async () => {
+        const items = await recent.read();
+        if (!Array.isArray(items)) throw new Error("최근 검색어 확인 실패");
+        const confirmed = id === null ? items.length === 0 : !items.some(item => String(item.id) === String(id));
+        if (!confirmed) throw new Error("삭제 결과를 확인하지 못했습니다.");
+        return { confirmed: true };
+      }, { failure: "최근 검색어를 삭제하지 못했어요. 목록은 유지됩니다.", success: "최근 검색어를 삭제했습니다.", refreshFailure: "삭제 요청 후 최신 목록을 확인하지 못했어요." }
+    );
   };
+  const handleRemoveRecent = (event, item) => { event.stopPropagation(); void mutateRecent(item.id); };
+  const handleClearRecent = () => { void mutateRecent(null); };
 
   const handleRegionClick = (name) => {
-    if (name === "더보기") {
-      return;
-    }
-
     runSearch(name);
   };
 
   const handleResultClick = (place) => {
     navigate(`/detail?id=${encodeURIComponent(place.id)}&source=server-search`, {
       state: { place: { ...place, placeId: place.id, originalId: place.id,
-        title: place.name, desc: place.address, image: null, thumb: null }, source: "server-search" },
+        title: place.name, desc: place.address }, source: "server-search" },
     });
   };
 
   const isNearbyMode = locationState.mode === "nearby";
+  const coordinates = locationState.currentLocation;
+  const hasCoordinates = Number.isFinite(coordinates?.lat) && Number.isFinite(coordinates?.lng);
 
   return (
     <div className="search-page">
@@ -362,6 +332,7 @@ function Search() {
             value={query}
             maxLength={100}
             onChange={(e) => setQuery(e.target.value)}
+            aria-label="장소, 도시 또는 테마 검색"
             placeholder="장소, 도시 또는 테마 검색"
           />
         </form>
@@ -371,7 +342,7 @@ function Search() {
         <section className="search-section">
           <h2>내 주변 탐색</h2>
           <p className="empty-text">
-            현재 위치: {locationState.locationLabel || "위치 확인 완료"}
+            {hasCoordinates ? `현재 위치: ${locationState.locationLabel || "위치 확인 완료"}. 주변 장소 조회는 아직 지원되지 않습니다. 검색어로 장소를 찾아주세요.` : "위치 정보를 확인하지 못했어요. 홈에서 위치 권한을 확인해 주세요."}
           </p>
         </section>
       )}
@@ -384,7 +355,7 @@ function Search() {
             <p>{search.error}</p>
             <button type="button" className="clear-btn" onClick={() => runSearch(query)}>다시 검색</button>
           </div>}
-          {search.status === "success" && (search.items.length ? (
+          {search.items.length > 0 ? (
             <div className="popular-grid">
               {search.items.map(place => (
                 <button type="button" key={place.id} className="popular-card" onClick={() => handleResultClick(place)}>
@@ -394,7 +365,7 @@ function Search() {
                 </button>
               ))}
             </div>
-          ) : <p className="empty-text">검색 결과가 없어요.</p>)}
+          ) : search.status === "success" && <p className="empty-text">검색 결과가 없어요.</p>}
         </section>
       )}
       <section className="search-section">
@@ -403,35 +374,24 @@ function Search() {
 
           <button
             type="button"
-            className="clear-btn"
+            className="clear-btn recent-clear-btn"
             onClick={handleClearRecent}
+            disabled={recentTask.blocked}
           >
             전체 삭제
           </button>
         </div>
 
+        {recent.status === "loading" && <p role="status">최근 검색어를 불러오는 중...</p>}
+        {recent.status === "error" && <div role="alert"><p>최근 검색어를 불러오지 못했어요.</p><button type="button" className="clear-btn" onClick={recent.retry}>최근 검색어 다시 조회</button></div>}
+        {recentTask.message && <p role="status">{recentTask.message}</p>}
+        {["unknown", "refreshError"].includes(recentTask.status) && <button type="button" className="clear-btn" onClick={recentTask.retryRead}>삭제 결과 확인</button>}
         <div className="recent-tags">
-          {recentSearches.length > 0 ? (
-            recentSearches.map((recentSearch) => (
-              <button
-                type="button"
-                key={recentSearch.id}
-                className="recent-tag"
-                onClick={() => runSearch(recentSearch.keyword)}
-              >
-                <span>{recentSearch.keyword}</span>
-
-                <span
-                  className="tag-close"
-                  onClick={(e) => handleRemoveRecent(e, recentSearch)}
-                >
-                  ×
-                </span>
-              </button>
-            ))
-          ) : (
-            <p className="empty-text">최근 검색어가 없어요.</p>
-          )}
+          {recentSearches.map(item => <div className="recent-tag" key={item.id}>
+            <button type="button" className="recent-search-action" onClick={() => runSearch(item.keyword)}>{item.keyword}</button>
+            <button type="button" className="tag-close" aria-label={`${item.keyword} 최근 검색어 삭제`} onClick={event => handleRemoveRecent(event, item)} disabled={recentTask.blocked}>×</button>
+          </div>)}
+          {recent.status === "success" && !recentSearches.length && <p className="empty-text">최근 검색어가 없어요.</p>}
         </div>
       </section>
 
@@ -479,13 +439,13 @@ function Search() {
 
         <article
           className="hot-main-card"
-          onClick={() => runSearch(hotPlaces[0].title)}
+
         >
-          <img src={hotPlaces[0].image} alt={hotPlaces[0].title} />
+          <PlacePhoto src={hotPlaces[0].image} alt={hotPlaces[0].title} className="search-hot-main-photo" credit={hotPlaces[0].credit} />
 
           <div className="hot-main-overlay">
             <span className="hot-badge">{hotPlaces[0].badge}</span>
-            <h3>{hotPlaces[0].title}</h3>
+            <h3><button type="button" className="hot-place-action" onClick={() => runSearch(hotPlaces[0].title)}>{hotPlaces[0].title}</button></h3>
             <p>{hotPlaces[0].subtitle}</p>
           </div>
         </article>
@@ -495,12 +455,12 @@ function Search() {
             <article
               key={place.id}
               className="hot-sub-card"
-              onClick={() => runSearch(place.title)}
+
             >
-              <img src={place.image} alt={place.title} />
+              <PlacePhoto src={place.image} alt={place.title} className="search-hot-sub-photo" credit={place.credit} />
 
               <div className="hot-sub-overlay">
-                <h4>{place.title}</h4>
+                <h4><button type="button" className="hot-place-action" onClick={() => runSearch(place.title)}>{place.title}</button></h4>
               </div>
             </article>
           ))}

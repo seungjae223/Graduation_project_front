@@ -1,12 +1,8 @@
 import api from "./api";
 import { requireList } from "./responseContract";
+import { toApiTheme } from "../utils/placeTheme";
 
-const list = (data) => {
-  if (Array.isArray(data)) return data;
-  return data?.data || data?.content || data?.items || [];
-};
-
-export const getPlacesApi = async () => (await api.get("/api/places")).data;
+export const getPlacesApi = async () => requireList((await api.get("/api/places")).data);
 
 export const createPlaceApi = async (place) =>
   (await api.post("/api/places", place)).data;
@@ -34,18 +30,19 @@ export const searchPlacesApi = async (keyword, options = {}) => {
   return places;
 };
 
-export const getRecommendationsApi = async (params = {}) => {
+export const getRecommendationsApi = async (params = {}, options = {}) => {
   const response = await api.get("/api/recommendations", {
+    ...options,
     params: {
       ...(params.region ? { region: params.region } : {}),
-      ...(params.theme ? { theme: params.theme } : {}),
+      ...(params.theme ? { theme: toApiTheme(params.theme) } : {}),
     },
   });
-  return list(response.data);
+  return requireList(response.data);
 };
 
-export const getRecentSearchesApi = async () =>
-  list((await api.get("/api/recent-searches")).data);
+export const getRecentSearchesApi = async (options = {}) =>
+  requireList((await api.get("/api/recent-searches", options)).data);
 
 export const deleteRecentSearchApi = async (id) =>
   api.delete(`/api/recent-searches/${encodeURIComponent(id)}`);
@@ -53,10 +50,10 @@ export const deleteRecentSearchApi = async (id) =>
 export const clearRecentSearchesApi = async () =>
   api.delete("/api/recent-searches");
 
-export const getRecentPlacesApi = async () =>
-  list((await api.get("/api/recent-places")).data);
+export const getRecentPlacesApi = async (options = {}) =>
+  requireList((await api.get("/api/recent-places", options)).data);
 
-export const getFoldersApi = async () => list((await api.get("/api/folders")).data);
+export const getFoldersApi = async (options = {}) => requireList((await api.get("/api/folders", options)).data);
 
 export const createFolderApi = async (name) =>
   (await api.post("/api/folders", { name: String(name || "").trim() })).data;
@@ -71,16 +68,22 @@ export const removePlaceFromFolderApi = async ({ folderId, placeId }) =>
     `/api/folders/${encodeURIComponent(folderId)}/places/${encodeURIComponent(placeId)}`
   )).data;
 
-export const getFolderPlacesApi = async (folderId) =>
-  list(
-    (await api.get(`/api/folders/${encodeURIComponent(folderId)}/places`)).data
+export const getFolderPlacesApi = async (folderId, options = {}) =>
+  requireList(
+    (await api.get(`/api/folders/${encodeURIComponent(folderId)}/places`, options)).data
   );
 
 export const getReviewsApi = async (placeId) =>
-  list((await api.get(`/api/places/${encodeURIComponent(placeId)}/reviews`)).data);
+  requireList((await api.get(`/api/places/${encodeURIComponent(placeId)}/reviews`)).data);
 
-export const createReviewApi = async ({ placeId, comment, rating }) =>
-  (await api.post(`/api/places/${encodeURIComponent(placeId)}/reviews`, {
-    comment: String(comment || "").trim(),
-    rating: Number(rating),
+// The current backend permits review creation only for ADMIN; a USER receives 403.
+export const createReviewApi = async ({ placeId, comment, rating }) => {
+  const text = String(comment || "").trim();
+  const score = Number(rating);
+  if (!text || rating == null || rating === "" || !Number.isFinite(score) || score < 0 || score > 5) {
+    throw new Error("리뷰 내용과 0~5 사이의 평점을 입력해주세요.");
+  }
+  return (await api.post(`/api/places/${encodeURIComponent(placeId)}/reviews`, {
+    comment: text, rating: score,
   })).data;
+};

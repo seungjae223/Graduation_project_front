@@ -1,0 +1,231 @@
+PASS src/RouteResult/keyboardOrder.test.jsx
+PASS src/RouteResult/editing.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+PASS src/Recommend/Detail.test.jsx
+PASS src/FolderSelectModal/FolderSelectModal.test.jsx
+PASS src/ShareModal/ShareModal.test.jsx
+PASS src/RouteResult/RouteResult.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1885:24
+
+PASS src/Login/SignUp.test.jsx
+PASS src/Loading/RouteErrorBoundary.test.jsx
+PASS src/utils/iconRendering.test.js
+PASS src/utils/pdfTask.test.js
+PASS src/utils/theme.test.js
+
+Test Suites: 11 passed, 11 total
+Tests:       47 passed, 47 total
+Snapshots:   0 total
+Time:        9.013 s, estimated 10 s
+Ran all test suites within paths "src/Recommend/Detail.test.jsx", "src/utils/iconRendering.test.js", "src/FolderSelectModal/FolderSelectModal.test.jsx", "src/ShareModal/ShareModal.test.jsx", "src/RouteResult/keyboardOrder.test.jsx", "src/RouteResult/editing.test.jsx", "src/RouteResult/RouteResult.test.jsx", "src/Login/SignUp.test.jsx", "src/Loading/RouteErrorBoundary.test.jsx", "src/utils/pdfTask.test.js", "src/utils/theme.test.js".

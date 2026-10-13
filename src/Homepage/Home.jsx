@@ -8,23 +8,16 @@ import searchIcon from "../img/검색.png";
 import recommendIcon from "../img/파랑색 추천.png";
 import routeIcon from "../img/경로.png";
 
-// 이미지 (임시)
-import tokyo from "../img/도쿄.png";
-import kyoto from "../img/교토.png";
+import { getRecommendationsApi } from "../api/placeApi";
+import useReadQuery from "../utils/useReadQuery";
+import useSessionKey from "../utils/useSessionKey";
+import { getAuthSnapshot } from "../utils/authState";
+import PlacePhoto from "../components/PlacePhoto";
 
 
 
 const LOCATION_STORAGE_KEY = "currentLocation";
 const LOCATION_LABEL_STORAGE_KEY = "currentLocationLabel";
-
-const travelMockData = [
-  { id: 1, title: "도쿄", image: tokyo },
-  { id: 2, title: "교토", image: kyoto },
-  { id: 3, title: "오사카", image: tokyo },
-  { id: 4, title: "나라", image: kyoto },
-  { id: 5, title: "후쿠오카", image: tokyo },
-  { id: 6, title: "삿포로", image: kyoto },
-];
 
 const VISIBLE_TRAVEL_COUNT = 2;
 
@@ -84,6 +77,9 @@ const getLocationErrorMessage = (error) => {
 
 const Home = () => {
   const navigate = useNavigate();
+  const account = useSessionKey();
+  const travel = useReadQuery(`${account}:home-recommendations`, signal => getRecommendationsApi({}, { signal }), true, () => getAuthSnapshot().accountKey === account);
+  const travelData = travel.data || [];
   const locationRequest = useRef(0);
   const mounted = useRef(false);
   useEffect(() => {
@@ -163,14 +159,14 @@ const Home = () => {
   );
 
   useEffect(() => {
-    if (travelMockData.length <= VISIBLE_TRAVEL_COUNT) return undefined;
+    if (travelData.length <= VISIBLE_TRAVEL_COUNT) return undefined;
 
     const timer = setInterval(() => {
-      setTravelStartIndex((prev) => (prev + 1) % travelMockData.length);
+      setTravelStartIndex((prev) => (prev + 1) % travelData.length);
     }, 3000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [travelData.length]);
 
   useEffect(() => {
     let isMounted = true;
@@ -184,10 +180,11 @@ const Home = () => {
 
     if (!locationEnabled || !navigator.permissions) return undefined;
 
+    const request = locationRequest.current;
     navigator.permissions
       .query({ name: "geolocation" })
       .then((status) => {
-        if (isMounted && status.state === "granted") {
+        if (isMounted && request === locationRequest.current && status.state === "granted") {
           requestCurrentLocation();
         }
       })
@@ -201,11 +198,11 @@ const Home = () => {
 
   const visibleTravelData = Array.from(
     {
-      length: Math.min(VISIBLE_TRAVEL_COUNT, travelMockData.length),
+      length: Math.min(VISIBLE_TRAVEL_COUNT, travelData.length),
     },
     (_, index) => {
-      const dataIndex = (travelStartIndex + index) % travelMockData.length;
-      return travelMockData[dataIndex];
+      const dataIndex = (travelStartIndex + index) % travelData.length;
+      return travelData[dataIndex];
     }
   );
 
@@ -232,11 +229,7 @@ const Home = () => {
   };
 
   const handlePopularAllClick = () => {
-    navigate("/popular-all", {
-      state: {
-        travelList: travelMockData,
-      },
-    });
+    navigate("/popular-all");
   };
 
   const handleNearbyClick = async () => {
@@ -285,17 +278,16 @@ const Home = () => {
         </p>
 
         <form className="search-box" onSubmit={handleSearchSubmit}>
-          <span className="search-icon-frame">
+          <button type="submit" className="search-icon-frame" aria-label="검색">
             <img
               src={searchIcon}
-              alt="search"
-              onClick={handleSearchSubmit}
-              role="button"
+              alt=""
             />
-          </span>
+          </button>
 
           <input
             type="text"
+            aria-label="목적지 또는 테마 검색"
             placeholder="목적지 또는 테마를 검색하세요"
             value={keyword}
             maxLength={100}
@@ -306,7 +298,7 @@ const Home = () => {
 
       {/* 카드 2개 */}
       <div className="quick-menu">
-        <div
+        <button type="button"
           className={`menu-card ${
             selectedMenu === "recommend" ? "active" : ""
           }`}
@@ -322,9 +314,9 @@ const Home = () => {
 
           <h3>테마 추천</h3>
           <p>맞춤형 장소 찾기</p>
-        </div>
+        </button>
 
-        <div
+        <button type="button"
           className={`menu-card ${selectedMenu === "route" ? "active" : ""}`}
           onClick={handleRouteClick}
         >
@@ -338,12 +330,12 @@ const Home = () => {
 
           <h3>경로 생성</h3>
           <p>빠른 일정 짜기</p>
-        </div>
+        </button>
       </div>
 
       {/* 인기 여행지 */}
       <div className="home-popular-header">
-        <h2>인기 급상승 여행지</h2>
+        <h2>추천 여행지</h2>
 
         <button
           type="button"
@@ -354,15 +346,18 @@ const Home = () => {
         </button>
       </div>
 
+      {travel.status === "loading" && <p role="status">추천 여행지를 불러오는 중...</p>}
+      {travel.status === "error" && <div role="alert"><p>추천 여행지를 불러오지 못했어요.</p><button type="button" onClick={travel.retry}>다시 조회</button></div>}
+      {travel.status === "success" && !travelData.length && <p>추천 여행지가 없어요.</p>}
       <div className="travel-list">
         {visibleTravelData.map((place) => (
-          <div key={place.id} className="travel-card">
-            <img src={place.image} alt={place.title} />
+          <button type="button" key={place.id} className="travel-card" onClick={() => navigate(`/detail?id=${encodeURIComponent(place.id)}`)}>
+            <PlacePhoto src={place.imageUrl || place.thumbnailUrl || place.image} alt={place.name || place.title} />
 
             <div className="travel-overlay">
-              <span>{place.title}</span>
+              <span>{place.name || place.title}</span>
             </div>
-          </div>
+          </button>
         ))}
       </div>
 

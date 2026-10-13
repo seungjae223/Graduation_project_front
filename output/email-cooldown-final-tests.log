@@ -1,0 +1,17 @@
+PASS src/Login/emailCooldown.test.jsx
+  √ the reported 24-second 400 displays its reason, blocks retries and unlocks after the actual deadline (267 ms)
+  √ successful signup delivery prevents a resend for 60 seconds while verification remains available (110 ms)
+  √ a cooldown belongs to its email and does not block a corrected address (103 ms)
+  √ verification resend uses the server delay and keeps the entered code (75 ms)
+  √ email recovery also blocks repeated sends and lets the address be corrected (55 ms)
+  √ unknown email errors remain hidden (0) (1 ms)
+  √ unknown email errors remain hidden (61) (1 ms)
+  √ unknown email errors remain hidden (-1) (1 ms)
+  √ unknown email errors remain hidden (SQL password) (1 ms)
+  √ unknown email errors remain hidden (24초 <script>) (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       10 passed, 10 total
+Snapshots:   0 total
+Time:        8.292 s, estimated 11 s
+Ran all test suites within paths "src/Login/emailCooldown.test.jsx".

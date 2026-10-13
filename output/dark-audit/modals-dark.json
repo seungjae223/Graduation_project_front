@@ -1,0 +1,1182 @@
+[
+  {
+    "name": "share",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 568,
+      "left": 12.796875,
+      "right": 307.1953125,
+      "top": 214
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(248, 250, 252)",
+        "name": "닫기"
+      },
+      {
+        "bg": "rgb(32, 44, 60)",
+        "color": "rgb(255, 255, 255)",
+        "name": "링크 복사"
+      },
+      {
+        "bg": "rgb(32, 44, 60)",
+        "color": "rgb(255, 255, 255)",
+        "name": "PDF로 저장하기"
+      }
+    ],
+    "portal": true,
+    "text": "rgb(248, 250, 252)",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "share",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 844,
+      "left": 15.6015625,
+      "right": 374.3984375,
+      "top": 490
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(248, 250, 252)",
+        "name": "닫기"
+      },
+      {
+        "bg": "rgb(32, 44, 60)",
+        "color": "rgb(255, 255, 255)",
+        "name": "링크 복사"
+      },
+      {
+        "bg": "rgb(32, 44, 60)",
+        "color": "rgb(255, 255, 255)",
+        "name": "PDF로 저장하기"
+      }
+    ],
+    "portal": true,
+    "text": "rgb(248, 250, 252)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "share",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 703,
+      "left": 168,
+      "right": 600,
+      "top": 321
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(248, 250, 252)",
+        "name": "닫기"
+      },
+      {
+        "bg": "rgb(32, 44, 60)",
+        "color": "rgb(255, 255, 255)",
+        "name": "링크 복사"
+      },
+      {
+        "bg": "rgb(32, 44, 60)",
+        "color": "rgb(255, 255, 255)",
+        "name": "PDF로 저장하기"
+      }
+    ],
+    "portal": true,
+    "text": "rgb(248, 250, 252)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "share",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 575,
+      "left": 467,
+      "right": 899,
+      "top": 193
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(248, 250, 252)",
+        "name": "닫기"
+      },
+      {
+        "bg": "rgb(32, 44, 60)",
+        "color": "rgb(255, 255, 255)",
+        "name": "링크 복사"
+      },
+      {
+        "bg": "rgb(32, 44, 60)",
+        "color": "rgb(255, 255, 255)",
+        "name": "PDF로 저장하기"
+      }
+    ],
+    "portal": true,
+    "text": "rgb(248, 250, 252)",
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "folder",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 481.5,
+      "left": 20,
+      "right": 300,
+      "top": 86.5
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "폴더 선택 닫기"
+      },
+      {
+        "bg": "rgb(21, 52, 74)",
+        "color": "rgb(255, 255, 255)",
+        "name": "가고 싶은 서울"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(255, 255, 255)",
+        "name": "제주 여행"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(85, 189, 248)",
+        "name": "+ 새 폴더 만들기"
+      },
+      {
+        "bg": "rgb(32, 44, 60)",
+        "color": "rgb(174, 188, 205)",
+        "name": "취소"
+      },
+      {
+        "bg": "rgb(8, 121, 185)",
+        "color": "rgb(255, 255, 255)",
+        "name": "저장"
+      }
+    ],
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "folder",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 619.5,
+      "left": 20,
+      "right": 370,
+      "top": 224.5
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "폴더 선택 닫기"
+      },
+      {
+        "bg": "rgb(21, 52, 74)",
+        "color": "rgb(255, 255, 255)",
+        "name": "가고 싶은 서울"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(255, 255, 255)",
+        "name": "제주 여행"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(85, 189, 248)",
+        "name": "+ 새 폴더 만들기"
+      },
+      {
+        "bg": "rgb(32, 44, 60)",
+        "color": "rgb(174, 188, 205)",
+        "name": "취소"
+      },
+      {
+        "bg": "rgb(8, 121, 185)",
+        "color": "rgb(255, 255, 255)",
+        "name": "저장"
+      }
+    ],
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "folder",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 709.5,
+      "left": 189,
+      "right": 579,
+      "top": 314.5
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "폴더 선택 닫기"
+      },
+      {
+        "bg": "rgb(21, 52, 74)",
+        "color": "rgb(255, 255, 255)",
+        "name": "가고 싶은 서울"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(255, 255, 255)",
+        "name": "제주 여행"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(85, 189, 248)",
+        "name": "+ 새 폴더 만들기"
+      },
+      {
+        "bg": "rgb(32, 44, 60)",
+        "color": "rgb(174, 188, 205)",
+        "name": "취소"
+      },
+      {
+        "bg": "rgb(8, 121, 185)",
+        "color": "rgb(255, 255, 255)",
+        "name": "저장"
+      }
+    ],
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "folder",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 581.5,
+      "left": 488,
+      "right": 878,
+      "top": 186.5
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "폴더 선택 닫기"
+      },
+      {
+        "bg": "rgb(21, 52, 74)",
+        "color": "rgb(255, 255, 255)",
+        "name": "가고 싶은 서울"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(255, 255, 255)",
+        "name": "제주 여행"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(85, 189, 248)",
+        "name": "+ 새 폴더 만들기"
+      },
+      {
+        "bg": "rgb(32, 44, 60)",
+        "color": "rgb(174, 188, 205)",
+        "name": "취소"
+      },
+      {
+        "bg": "rgb(8, 121, 185)",
+        "color": "rgb(255, 255, 255)",
+        "name": "저장"
+      }
+    ],
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "folder-create",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 438,
+      "left": 20,
+      "right": 300,
+      "top": 130
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "새 폴더 만들기 닫기"
+      },
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(248, 250, 252)",
+        "name": ""
+      },
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "취소"
+      },
+      {
+        "bg": "rgb(43, 57, 75)",
+        "color": "rgb(174, 188, 205)",
+        "name": "폴더 생성"
+      }
+    ],
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "folder-create",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 576,
+      "left": 20,
+      "right": 370,
+      "top": 268
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "새 폴더 만들기 닫기"
+      },
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(248, 250, 252)",
+        "name": ""
+      },
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "취소"
+      },
+      {
+        "bg": "rgb(43, 57, 75)",
+        "color": "rgb(174, 188, 205)",
+        "name": "폴더 생성"
+      }
+    ],
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "folder-create",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 666,
+      "left": 189,
+      "right": 579,
+      "top": 358
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "새 폴더 만들기 닫기"
+      },
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(248, 250, 252)",
+        "name": ""
+      },
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "취소"
+      },
+      {
+        "bg": "rgb(43, 57, 75)",
+        "color": "rgb(174, 188, 205)",
+        "name": "폴더 생성"
+      }
+    ],
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "folder-create",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 538,
+      "left": 488,
+      "right": 878,
+      "top": 230
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "새 폴더 만들기 닫기"
+      },
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(248, 250, 252)",
+        "name": ""
+      },
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "취소"
+      },
+      {
+        "bg": "rgb(43, 57, 75)",
+        "color": "rgb(174, 188, 205)",
+        "name": "폴더 생성"
+      }
+    ],
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "privacy",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 552,
+      "left": 16,
+      "right": 304,
+      "top": 16
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "개인정보 처리방침 모달 닫기"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제1조 (목적)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제2조 (용어의 정의)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제3조 (약관의 효력 및 변경"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제4조 (관계법령의 적용)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제5조 (서비스의 내용)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제6조 (서비스 이용요금)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제7조 (서비스 이용의 제한 "
+      }
+    ],
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "privacy",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 828,
+      "left": 16,
+      "right": 374,
+      "top": 16
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "개인정보 처리방침 모달 닫기"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제1조 (목적)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제2조 (용어의 정의)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제3조 (약관의 효력 및 변경"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제4조 (관계법령의 적용)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제5조 (서비스의 내용)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제6조 (서비스 이용요금)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제7조 (서비스 이용의 제한 "
+      }
+    ],
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "privacy",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 872,
+      "left": 204,
+      "right": 564,
+      "top": 152
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "개인정보 처리방침 모달 닫기"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제1조 (목적)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제2조 (용어의 정의)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제3조 (약관의 효력 및 변경"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제4조 (관계법령의 적용)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제5조 (서비스의 내용)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제6조 (서비스 이용요금)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제7조 (서비스 이용의 제한 "
+      }
+    ],
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "privacy",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 744,
+      "left": 503,
+      "right": 863,
+      "top": 24
+    },
+    "children": [
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(174, 188, 205)",
+        "name": "개인정보 처리방침 모달 닫기"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제1조 (목적)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제2조 (용어의 정의)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제3조 (약관의 효력 및 변경"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제4조 (관계법령의 적용)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제5조 (서비스의 내용)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제6조 (서비스 이용요금)"
+      },
+      {
+        "bg": "rgb(23, 33, 47)",
+        "color": "rgb(248, 250, 252)",
+        "name": "제7조 (서비스 이용의 제한 "
+      }
+    ],
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "favorite",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 552,
+      "left": 12.796875,
+      "right": 307.1953125,
+      "top": 16
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "favorite",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 791.59375,
+      "left": 18,
+      "right": 372,
+      "top": 52.40625
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "favorite",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 882.59375,
+      "left": 199,
+      "right": 569,
+      "top": 141.40625
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "favorite",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 752,
+      "left": 490.5,
+      "right": 860.5,
+      "top": 16
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "fixed-time",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 493.921875,
+      "left": 12.796875,
+      "right": 307.1953125,
+      "top": 74.0703125
+    },
+    "portal": true,
+    "text": "rgb(248, 250, 252)",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "fixed-time",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 634.921875,
+      "left": 30,
+      "right": 360,
+      "top": 209.0703125
+    },
+    "portal": true,
+    "text": "rgb(248, 250, 252)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "fixed-time",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 724.921875,
+      "left": 214,
+      "right": 554,
+      "top": 299.0703125
+    },
+    "portal": true,
+    "text": "rgb(248, 250, 252)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "fixed-time",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 596.921875,
+      "left": 513,
+      "right": 853,
+      "top": 171.0703125
+    },
+    "portal": true,
+    "text": "rgb(248, 250, 252)",
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "start-place",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 536.5,
+      "left": 18,
+      "right": 302,
+      "top": 31.5
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "start-place",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 674.5,
+      "left": 18,
+      "right": 372,
+      "top": 169.5
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "start-place",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 772.5,
+      "left": 169,
+      "right": 599,
+      "top": 251.5
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "start-place",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 644.5,
+      "left": 468,
+      "right": 898,
+      "top": 123.5
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "memo",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 400.8984375,
+      "left": 28,
+      "right": 292,
+      "top": 167.1015625
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "memo",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 538.8984375,
+      "left": 63,
+      "right": 327,
+      "top": 305.1015625
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "memo",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 633.5,
+      "left": 234,
+      "right": 534,
+      "top": 390.5
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "memo",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 505.5,
+      "left": 533,
+      "right": 833,
+      "top": 262.5
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "delete-confirm",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 427.546875,
+      "left": 20,
+      "right": 300,
+      "top": 140.453125
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "delete-confirm",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 565.546875,
+      "left": 20,
+      "right": 370,
+      "top": 278.453125
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "delete-confirm",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 655.546875,
+      "left": 104,
+      "right": 664,
+      "top": 368.453125
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "delete-confirm",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 527.546875,
+      "left": 403,
+      "right": 963,
+      "top": 240.453125
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "input-dialog",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 404,
+      "left": 16,
+      "right": 304,
+      "top": 164
+    },
+    "portal": false,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "input-dialog",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 542,
+      "left": 16,
+      "right": 374,
+      "top": 302
+    },
+    "portal": false,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "input-dialog",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 632,
+      "left": 194,
+      "right": 574,
+      "top": 392
+    },
+    "portal": false,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "input-dialog",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 504,
+      "left": 493,
+      "right": 873,
+      "top": 264
+    },
+    "portal": false,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "location-permission",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 453.109375,
+      "left": 23,
+      "right": 297,
+      "top": 114.890625
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "location-permission",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 623.6875,
+      "left": 52,
+      "right": 338,
+      "top": 220.3125
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "location-permission",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 734.1171875,
+      "left": 234,
+      "right": 534,
+      "top": 289.8828125
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "location-permission",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 606.1171875,
+      "left": 533,
+      "right": 833,
+      "top": 161.8828125
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "inquiry-success",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 421.4921875,
+      "left": 24,
+      "right": 296,
+      "top": 146.5
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "inquiry-success",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 564.4921875,
+      "left": 49,
+      "right": 341,
+      "top": 279.5
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "inquiry-success",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 654.4921875,
+      "left": 238,
+      "right": 530,
+      "top": 369.5
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "inquiry-success",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 526.4921875,
+      "left": 537,
+      "right": 829,
+      "top": 241.5
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "admin-success",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 425.546875,
+      "left": 23,
+      "right": 297,
+      "top": 142.453125
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "admin-success",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 563.546875,
+      "left": 58,
+      "right": 332,
+      "top": 280.453125
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "admin-success",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 653.546875,
+      "left": 247,
+      "right": 521,
+      "top": 370.453125
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "admin-success",
+    "bg": "rgb(23, 33, 47)",
+    "box": {
+      "bottom": 525.546875,
+      "left": 546,
+      "right": 820,
+      "top": 242.453125
+    },
+    "portal": true,
+    "text": "rgb(241, 245, 249)",
+    "theme": "dark",
+    "width": 1366
+  }
+]

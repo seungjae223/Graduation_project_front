@@ -1,10 +1,11 @@
-import { getApiErrorMessage as safeApiErrorMessage } from "../../api/api";
-import { logSafeApiError } from "../../utils/safeLog";
-import React, { useEffect, useState } from "react";
+
+
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import "./AdminInquiryWrite.css";
 import api from "../../api/api";
+import useReadQuery from "../../utils/useReadQuery"; import useMutationTask from "../../utils/useMutationTask"; import useSessionKey from "../../utils/useSessionKey"; import { getAuthSnapshot } from "../../utils/authState"; import { readInquiryList, inquiryErrorMessage } from "../../Mypage/inquiryData";
 import useModalFocus from "../../utils/useModalFocus";
 
 const formatDateTime = (dateString) => {
@@ -25,70 +26,7 @@ const formatDateTime = (dateString) => {
   return `${yyyy}.${mm}.${dd} ${hh}:${mi}`;
 };
 
-const getInquiryArray = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.inquiries)) return data.inquiries;
-  if (Array.isArray(data?.result)) return data.result;
-  if (Array.isArray(data?.response)) return data.response;
 
-  return [];
-};
-
-const normalizeInquiry = (inquiry) => {
-  const rawStatus = String(inquiry.status || "").toLowerCase();
-
-  const answer =
-    inquiry.answer ||
-    inquiry.reply ||
-    inquiry.answerContent ||
-    inquiry.answerText ||
-    "";
-
-  const userEmail = inquiry.userEmail || inquiry.email || inquiry.customerEmail || "";
-
-  const customerName =
-    inquiry.customerName ||
-    inquiry.name ||
-    inquiry.nickname ||
-    (userEmail ? userEmail.split("@")[0] : "고객");
-
-  const isAnswered =
-    inquiry.answered === true ||
-    inquiry.isAnswered === true ||
-    Boolean(answer) ||
-    rawStatus === "answered" ||
-    rawStatus === "complete" ||
-    rawStatus === "completed" ||
-    rawStatus === "done" ||
-    rawStatus === "답변완료" ||
-    rawStatus === "답변 완료";
-
-  return {
-    id: inquiry.id ?? inquiry.inquiryId ?? inquiry.questionId,
-    title: inquiry.title || inquiry.subject || "제목 없음",
-    content: inquiry.content || inquiry.question || inquiry.body || "",
-    answer,
-    status: isAnswered ? "answered" : "pending",
-    answered: isAnswered,
-    createdAt:
-      inquiry.createdAt ||
-      inquiry.createdDate ||
-      inquiry.date ||
-      inquiry.updatedAt ||
-      "",
-    customerName,
-    customerEmail: userEmail || "이메일 정보 없음",
-    customerGrade: inquiry.customerGrade || inquiry.grade || "일반 회원",
-    bookingNumber: inquiry.bookingNumber || "",
-    checkInDate: inquiry.checkInDate || "",
-    originalData: inquiry,
-  };
-};
-
-const getErrorMessage = safeApiErrorMessage;
 
 const AdminSuccessModal = ({ open, onConfirm }) => {
   const dialogRef = useModalFocus({
@@ -140,305 +78,69 @@ const AdminSuccessModal = ({ open, onConfirm }) => {
   );
 };
 
+
 const AdminInquiryWrite = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
-
   const id = searchParams.get("id");
-
-  const [inquiry, setInquiry] = useState(null);
-  const [answer, setAnswer] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-
+  const account = useSessionKey();
+  const key = account + ":admin-answer:" + id;
+  const current = useRef(key); current.current = key;
+  const mounted = useRef(false);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const query = useReadQuery(key, async signal => {
+    const rows = readInquiryList((await api.get("/api/inquiries/admin", { signal })).data);
+    const found = rows.find(item => String(item.id) === String(id));
+    if (!found) throw Object.assign(new Error("문의 없음"), { response: { status: 404 } });
+    return found;
+  }, Boolean(id) && account !== "anonymous", () => getAuthSnapshot().accountKey === account);
+  const [draft, setDraft] = useState({ key, value: "", initialized: false });
+  const answer = draft.key === key ? draft.value : "";
   useEffect(() => {
-    if (!id) return;
-
-    const stateInquiry = location.state?.inquiry;
-
-    if (stateInquiry && String(stateInquiry.id) === String(id)) {
-      const normalizedStateInquiry = normalizeInquiry(stateInquiry);
-      setInquiry(normalizedStateInquiry);
-      setAnswer(normalizedStateInquiry.answer || "");
-    }
-
-    const fetchInquiry = async () => {
-      try {
-        setIsLoading(true);
-        setErrorMessage("");
-
-        const response = await api.get("/api/inquiries/admin");
-        const inquiryArray = getInquiryArray(response.data);
-
-        const foundInquiry = inquiryArray.find((item) => {
-          const itemId = item.id ?? item.inquiryId ?? item.questionId;
-          return String(itemId) === String(id);
-        });
-
-        if (!foundInquiry) {
-          setErrorMessage("문의 정보를 찾을 수 없습니다.");
-          return;
-        }
-
-        const normalizedInquiry = normalizeInquiry(foundInquiry);
-
-        setInquiry(normalizedInquiry);
-        setAnswer(normalizedInquiry.answer || "");
-      } catch (error) {
-        logSafeApiError(error, "AdminInquiryWrite.jsx");
-
-        if (error.message.includes("Network Error")) {
-          setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-          return;
-        }
-
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          setErrorMessage(
-            "관리자 권한이 없거나 로그인 정보가 만료되었습니다. 다시 로그인해주세요."
-          );
-          return;
-        }
-
-        setErrorMessage(
-          getErrorMessage(
-            error,
-            "문의 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
-          )
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchInquiry();
-  }, [id, location.state]);
-
-  const handleBackClick = () => {
-    if (inquiry?.status === "answered") {
-      navigate("/admin/inquiry?tab=answered");
-      return;
-    }
-
-    navigate("/admin/inquiry?tab=pending");
-  };
-
+    if (query.status === "success") setDraft(previous => previous.key === key && previous.initialized ? previous : { key, value: query.data.answer || "", initialized: true });
+  }, [key, query.status, query.data]);
+  const task = useMutationTask(key);
+  const [verified, setVerified] = useState({ key, inquiry: null });
+  const inquiry = verified.key === key && verified.inquiry ? verified.inquiry : query.data;
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [validation, setValidation] = useState("");
+  useEffect(() => { if (task.status === "success") setIsSuccessModalOpen(true); }, [task.status]);
+  const isAnswered = Boolean(inquiry?.answered);
+  const canEdit = query.status === "success" && !isAnswered && !task.blocked && task.status !== "success";
   const handleSubmit = async () => {
-    if (!id || !inquiry) return;
-
-    const trimmedAnswer = answer.trim();
-
-    if (!trimmedAnswer) {
-      alert("답변 내용을 입력해주세요.");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-
-      await api.post(
-        `/api/inquiries/admin/${id}/answer`,
-        trimmedAnswer,
-        {
-          headers: {
-            "Content-Type": "text/plain",
-          },
-        }
-      );
-
-      setInquiry((prev) => ({
-        ...prev,
-        answer: trimmedAnswer,
-        answered: true,
-        status: "answered",
-      }));
-
-      setAnswer(trimmedAnswer);
-      setIsSuccessModalOpen(true);
-    } catch (error) {
-      logSafeApiError(error, "AdminInquiryWrite.jsx");
-
-      if (error.message.includes("Network Error")) {
-        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-        return;
-      }
-
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        alert("관리자 권한이 없거나 로그인 정보가 만료되었습니다. 다시 로그인해주세요.");
-        return;
-      }
-
-      alert(
-        getErrorMessage(
-          error,
-          "답변 전송에 실패했습니다. 잠시 후 다시 시도해주세요."
-        )
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+    if (!canEdit || !id || !inquiry || current.current !== key) return;
+    const value = answer.trim();
+    if (!value) { setValidation("답변 내용을 입력해주세요."); return; }
+    setValidation("");
+    await task.run(() => api.post('/api/inquiries/admin/' + encodeURIComponent(id) + '/answer', value, { headers: { "Content-Type": "text/plain" } }), async () => {
+      const latest = readInquiryList((await api.get("/api/inquiries/admin")).data).find(item => String(item.id) === String(id));
+      if (!mounted.current || current.current !== key || getAuthSnapshot().accountKey !== account || !latest) throw new Error("문의 상태 확인 실패");
+      setVerified({ key, inquiry: latest });
+      return { confirmed: latest.answer === value && latest.answered };
+    }, { failure: "답변 전송에 실패했습니다. 작성한 내용은 유지됩니다.", success: "답변이 등록되었습니다.", refreshFailure: "답변은 전송됐지만 최신 상태를 확인하지 못했습니다. 작성한 내용은 유지됩니다." });
   };
-
-  const handleSuccessConfirm = () => {
-    setIsSuccessModalOpen(false);
-    navigate("/admin/inquiry?tab=answered", { replace: true });
-  };
-
-  if (!id) {
-    return (
-      <div className="admin-inquiry-write-page">
-        <div className="admin-inquiry-write-card">
-          <h2 className="admin-inquiry-error-title">
-            문의 정보를 찾을 수 없습니다.
-          </h2>
-
-          <button
-            type="button"
-            className="admin-answer-submit-button"
-            onClick={() => navigate("/admin/inquiry")}
-          >
-            목록으로 이동
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading && !inquiry) {
-    return (
-      <div className="admin-inquiry-write-page">
-        <div className="admin-inquiry-write-card">
-          <h2 className="admin-inquiry-error-title">
-            문의 정보를 불러오는 중입니다.
-          </h2>
-        </div>
-      </div>
-    );
-  }
-
-  if (errorMessage && !inquiry) {
-    return (
-      <div className="admin-inquiry-write-page">
-        <div className="admin-inquiry-write-card">
-          <h2 className="admin-inquiry-error-title">{errorMessage}</h2>
-
-          <button
-            type="button"
-            className="admin-answer-submit-button"
-            onClick={() => navigate("/admin/inquiry")}
-          >
-            목록으로 이동
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!inquiry) {
-    return (
-      <div className="admin-inquiry-write-page">
-        <div className="admin-inquiry-write-card">
-          <h2 className="admin-inquiry-error-title">
-            문의 정보를 찾을 수 없습니다.
-          </h2>
-
-          <button
-            type="button"
-            className="admin-answer-submit-button"
-            onClick={() => navigate("/admin/inquiry")}
-          >
-            목록으로 이동
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const isAnswered = inquiry.status === "answered";
-
-  return (
-    <div className="admin-inquiry-write-page">
-      <button
-        type="button"
-        className="admin-inquiry-back-button"
-        onClick={handleBackClick}
-      >
-        목록으로
-      </button>
-
-      <section className="admin-inquiry-write-card">
-        <p className="admin-inquiry-section-label">INQUIRY DETAILS</p>
-
-        <div className="admin-inquiry-detail-header">
-          <h2>{inquiry.title}</h2>
-          <span>{formatDateTime(inquiry.createdAt)}</span>
-        </div>
-
-        <div className="admin-inquiry-customer-box">
-          <div className="admin-inquiry-customer-avatar">
-            {inquiry.customerName.slice(0, 1)}
-          </div>
-
-          <div className="admin-inquiry-customer-info">
-            <strong>{inquiry.customerName}</strong>
-            <span>{inquiry.customerEmail}</span>
-            <span>{inquiry.customerGrade}</span>
-          </div>
-        </div>
-
-        <div className="admin-inquiry-content-box">
-          <p>{inquiry.content}</p>
-
-          {inquiry.bookingNumber && (
-            <p className="admin-inquiry-extra-line">
-              예약 번호: {inquiry.bookingNumber}
-            </p>
-          )}
-
-          {inquiry.checkInDate && (
-            <p className="admin-inquiry-extra-line">
-              체크인 예정일: {inquiry.checkInDate}
-            </p>
-          )}
-        </div>
-      </section>
-
-      <section className="admin-answer-write-card">
-        <p className="admin-inquiry-section-label">WRITE A RESPONSE</p>
-
-        <textarea
-          className="admin-answer-textarea"
-          placeholder="문의 사항에 대한 답변을 입력해주세요."
-          value={answer}
-          maxLength={255}
-          onChange={(e) => setAnswer(e.target.value)}
-          readOnly={isAnswered || isSubmitting}
-        />
-
-        {isAnswered && (
-          <p className="admin-answer-done-message">
-            이미 답변 완료된 문의입니다.
-          </p>
-        )}
-      </section>
-
-      <button
-        type="button"
-        className="admin-answer-submit-button"
-        onClick={handleSubmit}
-        disabled={isAnswered || isSubmitting}
-      >
-        {isAnswered ? "답변 완료" : isSubmitting ? "전송 중..." : "답변 전송하기"}
-      </button>
-
-      <AdminSuccessModal
-        open={isSuccessModalOpen}
-        onConfirm={handleSuccessConfirm}
-      />
-    </div>
-  );
+  const handleBackClick = () => navigate(isAnswered ? "/admin/inquiry?tab=answered" : "/admin/inquiry?tab=pending");
+  if (!id || (!inquiry && query.status !== "loading")) return <div className="admin-inquiry-write-page"><div className="admin-inquiry-write-card"><h2 className="admin-inquiry-error-title" role="alert">{!id ? "문의 정보를 찾을 수 없습니다." : inquiryErrorMessage(query.cause, "문의 정보와 권한을 확인하지 못했습니다.")}</h2>{id && <button type="button" className="admin-answer-submit-button" onClick={query.retry}>다시 불러오기</button>}<button type="button" className="admin-answer-submit-button" onClick={() => navigate("/admin/inquiry")}>목록으로 이동</button></div></div>;
+  if (!inquiry) return <div className="admin-inquiry-write-page"><div className="admin-inquiry-write-card"><h2 className="admin-inquiry-error-title" role="status">문의 정보를 불러오는 중입니다.</h2></div></div>;
+  return <div className="admin-inquiry-write-page">
+    <button type="button" className="admin-inquiry-back-button" onClick={handleBackClick}>목록으로</button>
+    {query.status === "error" && <div role="alert"><p>{inquiryErrorMessage(query.cause, "최신 문의 정보와 권한을 확인하지 못했습니다. 전송할 수 없습니다.")}</p><button type="button" onClick={query.retry}>다시 불러오기</button></div>}
+    {query.status === "loading" && <p role="status">최신 문의 정보를 확인하는 중입니다.</p>}
+    <section className="admin-inquiry-write-card">
+      <p className="admin-inquiry-section-label">INQUIRY DETAILS</p>
+      <div className="admin-inquiry-detail-header"><h2>{inquiry.title}</h2>{inquiry.createdAt && <span>{formatDateTime(inquiry.createdAt)}</span>}</div>
+      <div className="admin-inquiry-customer-box"><div className="admin-inquiry-customer-avatar">{(inquiry.customerName || inquiry.userEmail || "고객").slice(0, 1)}</div><div className="admin-inquiry-customer-info"><strong>{inquiry.customerName || "고객"}</strong><span>{inquiry.userEmail || "이메일 정보 없음"}</span>{inquiry.customerGrade && <span>{inquiry.customerGrade}</span>}</div></div>
+      <div className="admin-inquiry-content-box"><p>{inquiry.content}</p>{inquiry.bookingNumber && <p className="admin-inquiry-extra-line">예약 번호: {inquiry.bookingNumber}</p>}{inquiry.checkInDate && <p className="admin-inquiry-extra-line">체크인 예정일: {inquiry.checkInDate}</p>}</div>
+    </section>
+    <section className="admin-answer-write-card"><label htmlFor="admin-inquiry-answer" className="admin-inquiry-section-label">{isAnswered ? "문의 답변" : "WRITE A RESPONSE"}</label>
+      <textarea id="admin-inquiry-answer" className="admin-answer-textarea" placeholder="문의 사항에 대한 답변을 입력해주세요." value={answer} maxLength={255} onChange={event => { setDraft({ key, value: event.target.value, initialized: true }); setValidation(""); }} readOnly={!canEdit} />
+      {isAnswered && <p className="admin-answer-done-message">{inquiry.answer ? "이미 답변 완료된 문의입니다." : "답변 완료 상태이지만 답변 내용이 제공되지 않았습니다."}</p>}
+      {validation && <p role="alert">{validation}</p>}{task.message && <p role="status">{task.message}</p>}
+      {["unknown", "refreshError"].includes(task.status) && <button type="button" onClick={task.retryRead}>답변 결과 확인</button>}
+      {task.status === "unknown" && verified.inquiry && <p>최신 답변이 작성한 내용과 일치하지 않습니다. 처리 결과는 아직 미확정입니다.</p>}
+    </section>
+    <button type="button" className="admin-answer-submit-button" onClick={handleSubmit} disabled={!canEdit}>{isAnswered ? "답변 완료" : task.status === "running" ? "전송 중..." : "답변 전송하기"}</button>
+    <AdminSuccessModal open={isSuccessModalOpen} onConfirm={() => { setIsSuccessModalOpen(false); navigate("/admin/inquiry?tab=answered", { replace: true }); }} />
+  </div>;
 };
-
 export default AdminInquiryWrite;

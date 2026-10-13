@@ -1,0 +1,855 @@
+{
+  "date": "2026-10-12",
+  "counts": {
+    "completed": 57,
+    "verificationLimited": 6,
+    "contractNeeded": 8
+  },
+  "items": [
+    {
+      "id": 1,
+      "status": "수정·검증 완료",
+      "cause": "URL 변경을 조회 기준으로 통일하고 같은 검색 submit 중복을 방지.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Search/Search.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Search/useServerSearch.js"
+      ],
+      "verification": "자동화: URL/경쟁 응답. 브라우저: 홈 서울→부산 재검색→뒤로/앞으로/새로고침 일치.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "검색 URL과 결과가 양방향으로 연결되지 않음"
+    },
+    {
+      "id": 2,
+      "status": "계약·자료 확인 필요",
+      "cause": "기존 주변 조회 계약 없음. 전달 mode/좌표를 인지하고 미지원 상태 표시; 자동 위치 응답이 사용자 요청을 취소하던 경쟁도 수정.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Search/Search.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Homepage/Home.jsx"
+      ],
+      "verification": "자동화: 위치 요청 B→A 완료, 일반/StrictMode 사용자 이동·좌표 유지 5개.",
+      "limit": "주변 조회 method/path, 위·경도 필드, 반경·거리 단위, 정렬/권한/빈 응답 계약 필요.",
+      "title": "내 주변 탐색이 주변 장소 조회로 이어지지 않음"
+    },
+    {
+      "id": 3,
+      "status": "수정·검증 완료",
+      "cause": "고정 예시와 무관한 사진 제거; 제공되는 추천 API 콘텐츠에 맞춰 ‘추천 여행지’로 표시.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Homepage/Home.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Homepage/Home.css"
+      ],
+      "verification": "자동화: 서버 추천 흐름. 브라우저: 실제 추천명·사진, 라이트/다크 네 크기.",
+      "limit": "인기 순위·통계 계약을 새로 가정하지 않음.",
+      "title": "홈 인기 여행지가 운영 여부와 관계없이 고정 예시 목록임"
+    },
+    {
+      "id": 4,
+      "status": "수정·검증 완료",
+      "cause": "홈 메뉴 native button, 검색 form submit과 입력 이름 연결.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Homepage/Home.jsx"
+      ],
+      "verification": "브라우저: 홈 검색 한 번으로 결과; 자동화: 메뉴/검색 역할.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "홈 주요 카드와 검색 아이콘을 키보드로 사용할 수 없음"
+    },
+    {
+      "id": 5,
+      "status": "수정·검증 완료",
+      "cause": "최근 검색어 실행·삭제 sibling button과 개별 이름.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Search/Search.jsx"
+      ],
+      "verification": "자동화: 삭제가 검색을 실행하지 않음.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "최근 검색어 개별 삭제가 키보드로 불가능"
+    },
+    {
+      "id": 6,
+      "status": "수정·검증 완료",
+      "cause": "성공한 검색 뒤 서버 최근 검색어 재조회.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Search/Search.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/api/placeApi.js"
+      ],
+      "verification": "자동화: 검색 뒤 목록 반영.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "검색 후 최근 검색어가 현재 화면에서 갱신되지 않음"
+    },
+    {
+      "id": 7,
+      "status": "수정·검증 완료",
+      "cause": "최근 조회/삭제의 실패를 빈 목록과 분리하고 기존 목록 유지·영역 재시도.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Search/Search.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/utils/useReadQuery.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/utils/useMutationTask.js"
+      ],
+      "verification": "자동화: 실패 유지·재시도가 현재 검색을 초기화하지 않음.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "최근 검색어 조회·삭제 실패를 사용자에게 알리지 않음"
+    },
+    {
+      "id": 8,
+      "status": "수정·검증 완료",
+      "cause": "장소 버튼과 사진 출처 링크 분리.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Search/Search.jsx"
+      ],
+      "verification": "자동화: native 액션/독립 링크. 브라우저: 검색 장소 상세 진입.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "검색의 인기 장소 카드 상세 조작이 키보드로 불가능"
+    },
+    {
+      "id": 9,
+      "status": "수정·검증 완료",
+      "cause": "추천 allSettled로 전체 실패·부분 성공·진짜 빈 결과 분리. 서버 태그 검색 결과를 로컬 이름 필터가 버리던 문제도 제거.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/SearchPopup/SearchPop.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/SearchPopup/SearchPop.test.jsx"
+      ],
+      "verification": "자동화: 전체/부분 실패·기존 확정 목록 유지·태그 결과 보존. 브라우저: 실제 팝업 23개 목록 내부 스크롤.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "검색 팝업의 추천 조회 전체 실패가 빈 결과로 표시됨"
+    },
+    {
+      "id": 10,
+      "status": "수정·검증 완료",
+      "cause": "Total이 keyword 모드와 theme 모드를 구분하고 전체보기 검색어 유지.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Recommend/Recommend.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Recommend/Total.jsx"
+      ],
+      "verification": "자동화: 서울 검색 전체보기, 힐링 목록으로 변경 없음. 브라우저: 서울 Total 목록.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "추천 검색의 전체보기가 검색어를 무시함"
+    },
+    {
+      "id": 11,
+      "status": "수정·검증 완료",
+      "cause": "부모 카드 자신이 키 이벤트 대상일 때만 이동; 내부 저장·삭제의 키 조작 분리.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Recommend/Recommend.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Recommend/Total.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/SavedPlaces.jsx"
+      ],
+      "verification": "자동화: Enter/Space 상세 이동 없음. 브라우저: 저장 모달·삭제 확인 열림/취소 후 같은 페이지.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "카드 안의 저장·삭제 버튼 Enter가 상세 이동으로 전파됨"
+    },
+    {
+      "id": 12,
+      "status": "수정·검증 완료",
+      "cause": "저장 해제 전에 서버 폴더 매핑을 확인; DELETE 생략 성공과 추정 Context 해제 제거.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Recommend/Total.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/utils/usePlaceSaving.js"
+      ],
+      "verification": "자동화: 매핑 실패 DELETE 0회, 확정 삭제 뒤 read-back, 응답 유실 재전송 없음.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "Total 저장 취소가 서버 요청 없이 화면에서 성공 처리될 수 있음"
+    },
+    {
+      "id": 13,
+      "status": "수정·검증 완료",
+      "cause": "계정/조회 키·AbortSignal·요청 세대로 이전 success/error/finally 방어.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Recommend/Recommend.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Recommend/Total.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/utils/useReadQuery.js"
+      ],
+      "verification": "자동화: B 완료 뒤 늦은 A 성공·실패가 B를 변경하지 않음.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "추천·전체 목록의 이전 응답이 새 테마 결과를 덮을 수 있음"
+    },
+    {
+      "id": 14,
+      "status": "수정·검증 완료",
+      "cause": "전체/부분 폴더 매핑과 미확인 상태 분리; 같은 계정의 실패 폴더 확정 기록 보존.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/utils/useFolderSavedPlaces.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Context/SavedPlacesContext.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/components/PlaceSavingFeedback.jsx"
+      ],
+      "verification": "자동화: 일부 실패 보존·재조회, 성공 빈 폴더는 비움, 계정 전환 후 예전 GET의 후속 요청 0회.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "저장 여부 조회 실패를 저장하지 않은 상태로 취급함"
+    },
+    {
+      "id": 15,
+      "status": "수정·검증 완료",
+      "cause": "장소→folder IDs 전체 매핑 유지, 다중 저장은 제거할 폴더 선택. Detail의 독립 첫 폴더 삭제·전체 해제도 공통 훅으로 통일.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/utils/usePlaceSaving.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/utils/useFolderSavedPlaces.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Recommend/Detail.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Homepage/PopularAll.jsx"
+      ],
+      "verification": "자동화: A/B 중 선택 폴더 DELETE 1회·다른 폴더/공통 saved 유지; 조회 중 대상 교체 방어·응답 유실 GET 확인.",
+      "limit": "실제 브라우저 다중 폴더 삭제는 미실행; 운영 사용자 삭제 없음.",
+      "title": "여러 폴더에 저장한 장소를 하나의 폴더로만 관리함"
+    },
+    {
+      "id": 16,
+      "status": "계약·자료 확인 필요",
+      "cause": "distance=0 대체 제거; 의미/단위가 미확인인 거리순을 비활성화하고 이유 제공.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Recommend/Total.jsx"
+      ],
+      "verification": "자동화: 거리 미제공은 0 아님. 브라우저: 거리순 비활성 이유 표시.",
+      "limit": "거리 필드·기준 위치·단위·직선/이동거리 의미·유효성 계약 필요.",
+      "title": "거리 미제공 장소를 0으로 바꿔 거리순 정렬을 제공함"
+    },
+    {
+      "id": 17,
+      "status": "수정·검증 완료",
+      "cause": "평점 null과 실제 0 분리; 미제공 별점 생략.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Recommend/Recommend.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Recommend/Total.jsx"
+      ],
+      "verification": "자동화: 0 유지·미제공 UI 생략.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "추천에서 평점 미제공을 실제 0점처럼 표시함"
+    },
+    {
+      "id": 18,
+      "status": "수정·검증 완료",
+      "cause": "나머지 목록 slice(4)로 전체 제공, 8개 제한 제거.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Homepage/PopularAll.jsx"
+      ],
+      "verification": "자동화: 11개 응답의 9번째 이후 렌더 확인.",
+      "limit": "서버 페이지 계약이 추가되면 그 계약 연계 필요.",
+      "title": "인기 장소 전체보기에서 9번째 이후 항목이 숨겨짐"
+    },
+    {
+      "id": 19,
+      "status": "수정·검증 완료",
+      "cause": "이름 기반 무관한 도시/해변 fallback 제거, 실제 사진/PlacePhoto 사용.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Homepage/PopularAll.jsx"
+      ],
+      "verification": "자동화: 누락·실패 대체 영역, 실제 사진 유지.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "인기 장소의 사진 누락을 무관한 도시·해변 사진으로 대체함"
+    },
+    {
+      "id": 20,
+      "status": "수정·검증 완료",
+      "cause": "인기 전체보기 loading/error/empty와 재시도 분리.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Homepage/PopularAll.jsx"
+      ],
+      "verification": "자동화: 조회 실패와 정상 [] 구분·재시도 복구.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "인기 장소의 로딩·조회 실패·정상 빈 상태가 모두 빈 화면임"
+    },
+    {
+      "id": 21,
+      "status": "수정·검증 완료",
+      "cause": "상세 native Link와 저장 액션 분리.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Homepage/PopularAll.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Homepage/PopularAll.css"
+      ],
+      "verification": "자동화: 링크 목적지·독립 저장 액션.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "인기 장소 카드의 상세 이동이 키보드로 불가능"
+    },
+    {
+      "id": 22,
+      "status": "수정·검증 완료",
+      "cause": "Header 로컬 일정 삭제를 기존 deleteTrip API와 확인/중복 잠금/read-back으로 연결; 늦은 이동 방어.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Header/Header.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteResult/RouteResult.jsx"
+      ],
+      "verification": "자동화: 취소 0회·연속 확인 1회·서버 확정 후 이동·응답 유실 재전송 없음. 브라우저: 삭제 확인 취소 후 일정 유지.",
+      "limit": "운영 일정 삭제 미실행.",
+      "title": "결과 화면 휴지통이 서버 일정 삭제와 연결되지 않음"
+    },
+    {
+      "id": 23,
+      "status": "수정·검증 완료",
+      "cause": "예시 검색 목록 제거; 선택한 모든 장소를 현재 GET ID/이름과 검증한 뒤 첫 trip POST.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteCreate/RouteCreate.jsx"
+      ],
+      "verification": "자동화: 조회 전/실패 Enter, 잘못된 ID·이름/두 번째 장소 실패 시 첫 쓰기 0회.",
+      "limit": "운영 GET 계약은 별도.",
+      "title": "조회 전·실패 상태의 예시 장소를 실제 일정에 추가할 수 있음"
+    },
+    {
+      "id": 24,
+      "status": "수정·검증 완료",
+      "cause": "일정 검색 계정+keyword 조회 키, abort/current 검사, 닫기/재열기 정리.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteCreate/useRoutePlaceSearch.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteCreate/RouteCreate.jsx"
+      ],
+      "verification": "자동화: B 이후 늦은 A 성공/실패·닫기 후 응답 무효.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "일정 생성 검색의 이전 응답이 현재 결과를 덮음"
+    },
+    {
+      "id": 25,
+      "status": "수정·검증 완료",
+      "cause": "가상 두 폴더/예시 제거, 실제 폴더와 전체 장소·부분 실패 사용.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteCreate/useFavoriteFolders.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteCreate/RouteCreate.jsx"
+      ],
+      "verification": "자동화: 실제 폴더명·9개 목록·정상 빈 결과·일부 실패 확정 데이터 유지.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "일정 생성 관심장소가 실제 폴더 소속과 전체 목록을 무시함"
+    },
+    {
+      "id": 26,
+      "status": "계약·자료 확인 필요",
+      "cause": "출발 시각 저장 계약 없음. 10시 제한을 입력 단계에 표시하고 FIX 출발지 선택/첫 쓰기 차단.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteCreate/StartPlaceModal.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteCreate/RouteCreate.jsx"
+      ],
+      "verification": "자동화: FIX 출발지 비활성·잘못된 설정 첫 쓰기 0회·다른 FIX 저장 보존.",
+      "limit": "canonical startTime 형식·저장/수정/조회, optimize/timeline 연계 필요.",
+      "title": "출발지의 고정 시간 입력이 저장에서 제외되고 10시로 계산됨"
+    },
+    {
+      "id": 27,
+      "status": "수정·검증 완료",
+      "cause": "일정 카드의 picsum 제거, 실제 사진/공통 PlacePhoto.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteCreate/RouteCreate.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteCreate/StartPlaceModal.jsx"
+      ],
+      "verification": "자동화: 실제 결과만 선택·누락 사진 대체; PlacePhoto 로드 실패 회귀.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "일정 생성의 사진 누락을 임의 사진으로 대체함"
+    },
+    {
+      "id": 28,
+      "status": "수정·검증 완료",
+      "cause": "장소명 native 지도 버튼과 focus-visible, 드래그/메모 독립 유지.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteResult/RouteResult.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteResult/RouteResult.css"
+      ],
+      "verification": "자동화: 지도 Enter/Space 1회. 브라우저: 키보드 reorder→reset 동일 visit 포커스·메모 연결.",
+      "limit": "실제 터치/스크린리더는 미사용.",
+      "title": "일정 결과 카드의 키보드 포커스 표시와 조작 의미가 부족함"
+    },
+    {
+      "id": 29,
+      "status": "수정·검증 완료",
+      "cause": "중복 설정/레이어 지도 액션을 한 개의 실제 provider 지도 버튼으로 정리.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteResult/RouteResult.jsx"
+      ],
+      "verification": "자동화·브라우저: 카카오맵 경로 열기 1개.",
+      "limit": "외부 지도 앱 실제 실행은 미확인.",
+      "title": "지도 설정·레이어처럼 보이는 버튼이 같은 지도 열기 동작임"
+    },
+    {
+      "id": 30,
+      "status": "수정·검증 완료",
+      "cause": "내부 생성 패널 취소 시 새 폴더 버튼으로 포커스 복귀.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/FolderSelectModal/FolderSelectModal.jsx"
+      ],
+      "verification": "자동화·브라우저: 생성 input→취소→새 폴더 focus; 다음 Tab 모달 내부, 쓰기 0회.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "폴더 만들기 취소 후 모달 내부 포커스 복귀가 없음"
+    },
+    {
+      "id": 31,
+      "status": "수정·검증 완료",
+      "cause": "실제 답변 없는데 생성하던 처리 완료 답변/과거 날짜 제거; 불일치 미확인 처리.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/inquiryData.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/InquiryDetail.jsx"
+      ],
+      "verification": "자동화: 실제 답변만 표시. 브라우저: /inquiry/2 대기 문의 예시 답변 없음.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "답변 대기 문의에 예시 처리 완료 답변이 표시됨"
+    },
+    {
+      "id": 32,
+      "status": "수정·검증 완료",
+      "cause": "최근 장소 로컬 bookmark 토글을 공통 폴더 선택/서버 저장/read-back에 연결.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RecentPlacesPage/RecentPlacesPage.jsx"
+      ],
+      "verification": "자동화: 폴더 선택 POST→재조회→공통 saved 유지.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "최근 본 장소 북마크가 실제 저장 장소와 연결되지 않음"
+    },
+    {
+      "id": 33,
+      "status": "수정·검증 완료",
+      "cause": "imageUrl/thumbnailUrl/placeType alias와 사용자 분류명을 사용.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RecentPlacesPage/RecentPlacesPage.jsx"
+      ],
+      "verification": "자동화: 실제 imageUrl·RESTAURANT 음식점, PlacePhoto.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "최근 본 장소의 제공된 사진과 분류가 누락됨"
+    },
+    {
+      "id": 34,
+      "status": "수정·검증 완료",
+      "cause": "저장 카드 원본 API 값 보존하면서 공통 분류 라벨 적용.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/SavedPlaces.jsx"
+      ],
+      "verification": "자동화·브라우저: ATTRACTION→관광지.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "저장 장소에 영문 API 분류가 그대로 표시됨"
+    },
+    {
+      "id": 35,
+      "status": "수정·검증 완료",
+      "cause": "누락 4.8/무관한 사진 대체 제거; null/실제 사진 유지.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/SavedPlaces.jsx"
+      ],
+      "verification": "자동화: 사진 정보 없음·가짜 평점 없음. 브라우저: 실제 사진/분류.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "저장 장소의 누락된 평점·사진을 실제 정보처럼 채움"
+    },
+    {
+      "id": 36,
+      "status": "수정·검증 완료",
+      "cause": "선택 폴더 장소와 폴더 목록 query 분리, 해당 실패 요청 retry.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/SavedPlaces.jsx"
+      ],
+      "verification": "자동화: 실패한 현재 폴더 GET으로 복구·실패를 빈 상태로 표시하지 않음.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "폴더 장소 조회 실패의 재시도가 다른 요청을 실행함"
+    },
+    {
+      "id": 37,
+      "status": "수정·검증 완료",
+      "cause": "개수 allSettled·미확인 retry, 제공 count는 재사용.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/SavedPlaces.jsx"
+      ],
+      "verification": "자동화: 정상 폴더 유지·실패 개수 0 아님·count 제공 시 추가 GET 없음.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "한 폴더 개수 조회 실패가 모든 폴더 표시를 막음"
+    },
+    {
+      "id": 38,
+      "status": "수정·검증 완료",
+      "cause": "서버 []를 오래된 로컬 기록으로 대체하지 않음; 요청 상태/확정 데이터 유지.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RecentPlacesPage/RecentPlacesPage.jsx"
+      ],
+      "verification": "자동화: 정상 빈 배열 권위·로컬 부활 없음·실패 retry.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "최근 장소의 로딩·실패·정상 빈 결과가 구분되지 않음"
+    },
+    {
+      "id": 39,
+      "status": "수정·검증 완료",
+      "cause": "실제 로그 기능 없이 통계만 보이던 로그 메뉴 제거.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Admin/AdminFooter/AdminFooter.jsx"
+      ],
+      "verification": "브라우저: Mock ADMIN /admin?tab=logs에서도 실제 통계 선택·메뉴는 통계/문의만 표시. 코드: 로그 화면/API 없음.",
+      "limit": "ADMIN 로그 화면/API 계약 없음; 새 기능 추가하지 않음.",
+      "title": "관리자 로그 버튼을 눌러도 통계 화면이 표시됨"
+    },
+    {
+      "id": 40,
+      "status": "수정·검증 완료",
+      "cause": "초기 GET 성공 전 편집 보류, 문의/계정 단위 초안 한 번만 초기화.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Admin/AdminInquiryPage/AdminInquiryWrite.jsx"
+      ],
+      "verification": "자동화: GET 지연 중 편집 불가·입력 후 늦은 갱신이 초안 보존.",
+      "limit": "운영 ADMIN 계정·실제 답변 전송은 미사용. 지연 GET/초안 보호는 자동화로 검증.",
+      "title": "관리자 답변 조회 응답이 작성 중인 초안을 덮음"
+    },
+    {
+      "id": 41,
+      "status": "수정·검증 완료",
+      "cause": "location.state로 최신 실패/권한 오류 숨기지 않고 최신 조회 성공일 때만 전송.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Admin/AdminInquiryPage/AdminInquiryWrite.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/inquiryData.js"
+      ],
+      "verification": "자동화: 캐시 있어도 403 표시·전송 불가·늦은 ID 응답 거절.",
+      "limit": "운영 401/403/404 실응답은 미주입; Mock ADMIN 화면 및 자동화 권한 오류 검증과 구분.",
+      "title": "관리자 답변의 조회 실패·권한 오류가 숨겨짐"
+    },
+    {
+      "id": 42,
+      "status": "수정·검증 완료",
+      "cause": "통계 미확인 null/실제 0 구분, 계정별 error/retry·확정 데이터 유지.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/MyPage.jsx"
+      ],
+      "verification": "자동화: 실패→retry 실제 0/양수. 브라우저: 정상 통계 표시.",
+      "limit": "운영 통계 오류 실화면 미주입.",
+      "title": "마이페이지 통계 조회 실패가 0건으로 표시됨"
+    },
+    {
+      "id": 43,
+      "status": "수정했으나 검증 제한",
+      "cause": "기존 Mock/JWT/currentUser 역할 기반 관리자 가드 연결; 역할 미확인 별도 처리.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Admin/AdminAccessGuard.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/App.js"
+      ],
+      "verification": "자동화: 비로그인/USER/ADMIN/unknown. 브라우저: USER /admin 직접 URL 거절. 전용 Mock ADMIN 직접 접근 허용도 브라우저 확인.",
+      "limit": "운영 현재 사용자 role API·권한 최신성 계약 없음. ADMIN 실계정 미사용, 서버 권한 검증 대체 아님.",
+      "title": "관리자 직접 URL에 역할 확인이 없음"
+    },
+    {
+      "id": 44,
+      "status": "수정·검증 완료",
+      "cause": "문의 열람과 편집 분리, 대기/완료 모두 열람하고 완료 답변 read-only.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/Inquiry.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/InquiryDetail.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Admin/AdminInquiryPage/AdminInquiryPage.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Admin/AdminInquiryPage/AdminInquiryWrite.jsx"
+      ],
+      "verification": "자동화: 대기 사용자·완료 관리자 열람/편집 제한. 브라우저: 대기 상세. 전용 Mock ADMIN 완료 문의 열람·답변 read-only/전송 비활성 확인.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "대기 문의와 완료된 관리자 문의의 전체 내용을 열 수 없음"
+    },
+    {
+      "id": 45,
+      "status": "수정·검증 완료",
+      "cause": "최근 상세 Link·장소명/저장 상태를 포함하는 이름·aria-pressed.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RecentPlacesPage/RecentPlacesPage.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RecentPlacesPage/RecentPlacesPage.css"
+      ],
+      "verification": "자동화: 상세 목적지·저장 후 pressed=true.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "최근 장소 카드 상세 이동과 저장 상태의 접근성이 부족함"
+    },
+    {
+      "id": 46,
+      "status": "수정·검증 완료",
+      "cause": "Skip 목적지를 /home으로 변경, 로그인/기존 전환 보존.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Header/Header.jsx"
+      ],
+      "verification": "자동화: /·/onboarding·/onboarding2 Skip. 브라우저: onboarding2 Skip→실제 홈 표시.",
+      "limit": "onboarding3에는 Skip 대신 기존 시작 CTA가 있음.",
+      "title": "온보딩 Skip이 홈 진입 대신 온보딩을 다시 시작함"
+    },
+    {
+      "id": 47,
+      "status": "계약·자료 확인 필요",
+      "cause": "이메일 코드 인증만 성공하면 복구된 듯 로그인으로 이동하던 흐름 제거; 미변경 상태 정확히 표시.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/VerifyCode.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/authPaths.js"
+      ],
+      "verification": "자동화: 인증 후 거짓 비밀번호 변경 완료/자동 로그인 이동 없음.",
+      "limit": "복구 시작·권한 검증·새 비밀번호 저장 API method/path/payload/응답, 일회용 권한·계정/목적 바인딩·만료·실제 완료 기준 필요.",
+      "title": "비밀번호 찾기가 새 비밀번호 설정으로 이어지지 않음"
+    },
+    {
+      "id": 48,
+      "status": "수정·검증 완료",
+      "cause": "auth lifecycle lock/abort/current와 저장 직전 credentialVersion 검사.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/useAuthRequest.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/Login.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/FindPassword.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/VerifyCode.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/OAuthCallback.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/api/authApi.js"
+      ],
+      "verification": "자동화: 떠난 화면의 Login/mail/verify/OAuth 이동·토큰/캐시 저장 차단, 새 계정 보호, StrictMode OAuth.",
+      "limit": "실제 메일/OAuth 공급자 미사용; 취소는 서버 롤백 아님.",
+      "title": "이미 떠난 인증 화면의 늦은 응답이 다시 이동시킬 수 있음"
+    },
+    {
+      "id": 49,
+      "status": "수정·검증 완료",
+      "cause": "기존 안전 내부경로 검증을 authPaths로 재사용해 하위 흐름 returnTo 유지.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/authPaths.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/Login.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/SignUp.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/FindPassword.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/VerifyCode.jsx"
+      ],
+      "verification": "자동화: 전체 인증 Link/가입 완료 복귀·잘못된 외부 경로 거절. 브라우저: login→원래 Total URL.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "가입·비밀번호 찾기를 거치면 로그인 원래 목적지를 잃음"
+    },
+    {
+      "id": 50,
+      "status": "수정·검증 완료",
+      "cause": "인증 확인/재발송 공유 잠금·요청 세대, 실패 code 유지·성공 뒤 포커스.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/VerifyCode.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/useAuthRequest.js"
+      ],
+      "verification": "자동화: 연속 조작 상호배제·늦은 다른 이메일 응답 거절·실패 후 재시도.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "인증 확인과 재발송을 동시에 실행할 수 있음"
+    },
+    {
+      "id": 51,
+      "status": "계약·자료 확인 필요",
+      "cause": "매 진입 가짜 300초/countdown 제거; 실제 서버 검증 유지.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/VerifyCode.jsx"
+      ],
+      "verification": "자동화: 새 진입 05:00 재생성 없음·재발송 실패 code 보존.",
+      "limit": "expiresAt 형식/시간대 또는 TTL 단위+서버 sentAt, 복원/재발송 응답 필요. 실제 만료·백그라운드 일치 미확인.",
+      "title": "인증 남은 시간이 새로고침마다 5분으로 초기화됨"
+    },
+    {
+      "id": 52,
+      "status": "수정·검증 완료",
+      "cause": "가입 로그인 복귀 span→실제 Link·안전 returnTo.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/SignUp.jsx"
+      ],
+      "verification": "자동화: 실제 MemoryRouter 이동·href. 브라우저: 가입 화면 접근 가능한 Link.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "회원가입의 로그인으로 돌아가기를 키보드로 사용할 수 없음"
+    },
+    {
+      "id": 53,
+      "status": "수정·검증 완료",
+      "cause": "이메일 label htmlFor/id/autocomplete 연결.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/FindPassword.jsx"
+      ],
+      "verification": "자동화: getByLabelText와 발송 흐름.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "비밀번호 찾기 이메일 필드에 연결된 label이 없음"
+    },
+    {
+      "id": 54,
+      "status": "수정·검증 완료",
+      "cause": "실제 checkbox/label과 문서 보기 버튼 분리, 동의·취소 가능.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/SignUp.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/PrivacyPolicyModal.jsx"
+      ],
+      "verification": "자동화: 양방향 동의/가입 가능 상태. 브라우저: 문서 열기·Escape 후 checked=false, 문서 버튼 focus.",
+      "limit": "실제 가입/법적 동의 제출 없음.",
+      "title": "가입 동의를 취소할 수 없고 체크박스 이름이 없음"
+    },
+    {
+      "id": 55,
+      "status": "계약·자료 확인 필요",
+      "cause": "개인정보 자리에 위치기반 약관을 보이던 잘못된 본문/허위 동의 액션 제거.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/PrivacyPolicyModal.jsx"
+      ],
+      "verification": "자동화·브라우저: 기존 동의 대상 제목, 문서 미확인, 닫기 동작.",
+      "limit": "승인된 이용약관·개인정보 본문 또는 공식 URL, 제목·범위·동의 대상 필요.",
+      "title": "개인정보 처리방침 제목과 표시 문서가 다름"
+    },
+    {
+      "id": 56,
+      "status": "계약·자료 확인 필요",
+      "cause": "new Date 접속일을 게시일로 만들던 표시 제거.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/PrivacyPolicyModal.jsx"
+      ],
+      "verification": "자동화·브라우저: 임의 공시일자 없음.",
+      "limit": "승인 문서별 게시일·시행일·버전 필요.",
+      "title": "정책 공시일자가 접속 날짜로 바뀜"
+    },
+    {
+      "id": 57,
+      "status": "수정했으나 검증 제한",
+      "cause": "기존 regex 유지, 허용 문자·10자/대·소문자 조건과 실패 이유 input에 연결.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/passwordValidation.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/SignUp.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Login/SignUp.css"
+      ],
+      "verification": "자동화: 허용/거부 입력 회귀·aria-invalid/describedby. 브라우저: 정확한 규칙 설명.",
+      "limit": "서버 공식 비밀번호 정책 미제공; 정책을 임의 완화하지 않음.",
+      "title": "비밀번호 조건 설명과 버튼 비활성 이유가 맞지 않음"
+    },
+    {
+      "id": 58,
+      "status": "수정·검증 완료",
+      "cause": "공통 !important 충돌 제거, 실제 scrollingElement만 잠그고 마지막 모달 닫기에 overflowY/위치 복원.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/utils/useModalFocus.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/responsive.css"
+      ],
+      "verification": "자동화: StrictMode·중첩·최상위 Escape/canClose/마지막 복원. 브라우저: 긴 목록 scrollY212·height2719 유지, 휠/PageDown 배경 불변·내부 0→844·닫은 뒤212 복원.",
+      "limit": "실제 모바일 터치 미사용.",
+      "title": "모달의 스크롤 잠금 선언이 공통 CSS에 덮임"
+    },
+    {
+      "id": 59,
+      "status": "수정·검증 완료",
+      "cause": "키보드 PUSH 새 pathname에만 lazy 준비 후 제목 focus; 모달 있으면 대기 observer 종료.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/utils/useKeyboardRouteFocus.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/App.js"
+      ],
+      "verification": "자동화: POP/query/REPLACE/pointer/onboarding 보존·지연 진입 취소·모달 복귀. 브라우저: footer 키 이동 H1 focus·드래그/모달 focus 유지.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "일반 페이지 이동 후 새 콘텐츠에 대한 포커스 처리가 없음"
+    },
+    {
+      "id": 60,
+      "status": "수정·검증 완료",
+      "cause": "날짜 지난 fixture의 일정명 기대 대신 로그인 복귀 URL/목적지로 검증.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/mocks/mockMode.test.jsx"
+      ],
+      "verification": "자동화: 두 기존 소셜 로그인 테스트 통과, skip/fixture 날짜 밀기 없음.",
+      "limit": "운영 API·실기기 검증은 별도.",
+      "title": "Mock 로그인 테스트가 오늘 날짜에 따라 실패함"
+    },
+    {
+      "id": "C1",
+      "status": "수정했으나 검증 제한",
+      "cause": "확인된 문의 aliases/array/content 정규화 공통화; 알 수 없는 구조는 오류.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/inquiryData.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/InquiryDetail.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Admin/AdminInquiryPage/AdminInquiryWrite.jsx"
+      ],
+      "verification": "자동화: array/content/malformed→retry. 브라우저: Mock 상세 직접 진입.",
+      "limit": "운영 목록·상세 envelope/답변 필드/권한 오류 계약·목록→상세→새로고침 실응답 확인 필요.",
+      "title": "운영 문의 응답 형태와 상세 정규화 차이"
+    },
+    {
+      "id": "C2",
+      "status": "수정·검증 완료",
+      "cause": "최근 저장 JSON 배열/항목 ID·이름·날짜 검증, 유효 기록/다른 키 보존.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/utils/recentPlaces.js"
+      ],
+      "verification": "자동화: malformed JSON·객체/문자열/null·혼합 배열 검증.",
+      "limit": "사용자 실제 storage 이상은 미확인; 테스트 데이터로 검증.",
+      "title": "최근 기록 저장 데이터 형태 검증"
+    },
+    {
+      "id": "C3",
+      "status": "계약·자료 확인 필요",
+      "cause": "reverse 최신순 가정 제거; 최신순 비활성과 이유 제공.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/SavedPlaces.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/SavedPlaces.css"
+      ],
+      "verification": "브라우저·코드: 최신순 선택 제한, 원 순서 유지.",
+      "limit": "savedAt 등 실제 저장 시각 필드·timezone·API 기본/지정 정렬 계약 필요.",
+      "title": "저장 장소 최신순의 기본 정렬 계약"
+    },
+    {
+      "id": "C4",
+      "status": "수정했으나 검증 제한",
+      "cause": "응답 유실 unknown 잠금·입력 보존·GET 확인, 자동 재POST 차단.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/InquiryWrite.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Admin/AdminInquiryPage/AdminInquiryWrite.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/utils/useMutationTask.js"
+      ],
+      "verification": "자동화: 반영 후 응답 유실 POST1회 유지; 관리자 실제 답변 read-back 확인.",
+      "limit": "사용자 문의는 같은 본문만으로 동일 생성 요청을 증명 못함. request ID/idempotency 또는 생성 결과 조회 계약 필요; 운영 전송 없음.",
+      "title": "문의 전송 후 응답 유실과 재전송"
+    },
+    {
+      "id": "C5",
+      "status": "수정·검증 완료",
+      "cause": "메타 nowrap/min-width 줄바꿈 충돌 보완.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Admin/AdminInquiryPage/AdminInquiryPage.css",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Admin/AdminInquiryPage/AdminInquiryWrite.css",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Mypage/InquiryDetail.css"
+      ],
+      "verification": "브라우저: 전용 Mock ADMIN/긴 이메일·제목·본문, 목록 라이트/다크 320·390·768·1366px 및 상세320px, 실제 가로 폭320/scrollWidth320·줄바꿈 확인.",
+      "limit": "운영 관리자 미사용; 전용 fixture는 검증 뒤 원복. 실기기 미사용.",
+      "title": "긴 관리자 데이터의 모바일 줄바꿈"
+    },
+    {
+      "id": "C6",
+      "status": "수정했으나 검증 제한",
+      "cause": "날짜 미제공을 오늘/D-Day로 만들던 분류 제거; 날짜 미정 목록 제공.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/MySchedule/MySchedule.jsx"
+      ],
+      "verification": "자동화: 무날짜 날짜 미정·D-Day 없음, 갱신 실패 확정 데이터 유지.",
+      "limit": "서버 무날짜 일정 허용 여부·날짜/null 응답 계약 필요.",
+      "title": "날짜 없는 일정의 D-Day 표시"
+    },
+    {
+      "id": "C7",
+      "status": "수정·검증 완료",
+      "cause": "history 없는 onboarding3 뒤로가기에서 기존 전환으로 /onboarding2 안전 이동.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/Header/Header.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/OnBoarding/onboardingTransition.test.js"
+      ],
+      "verification": "자동화: fallback 도착/레이어/클래스 정리. 브라우저: 새 탭3→뒤로2, 클래스 없음·레이어0→Skip 홈.",
+      "limit": "실브라우저 fallback 강제와 Safari 미확인; native/fallback 경로는 자동화 검증.",
+      "title": "기록 없는 온보딩 직접 접속의 뒤로가기"
+    },
+    {
+      "id": "C8",
+      "status": "수정했으나 검증 제한",
+      "cause": "단일 장소 외부 Kakao 지도 URL도 확보된 좌표 전달.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteResult/RouteResult.jsx"
+      ],
+      "verification": "자동화: 동명 장소 다른 좌표가 다른 정확한 URL.",
+      "limit": "실제 외부 지도 앱의 표시 위치 미확인.",
+      "title": "한 장소만 있는 외부 지도 경로의 좌표 손실"
+    },
+    {
+      "id": "C9",
+      "status": "수정·검증 완료",
+      "cause": "서버 좌표 없는 장소의 주소 조회에 이름을 섞어 실패하고 임의 좌표/0m를 사용하던 경로를 수정. 주소로 해결한 좌표를 계정·trip·day·visit별 화면/PDF에 공유하고 모든 날짜 해결 뒤 출력. SDK SVG 전역 크기 충돌, PNGSD02 프록시400, PC 출력 폭 제한도 해당 영역만 수정.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteResult/useResolvedMapCoordinates.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteResult/RouteResult.jsx",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteResult/RouteResult.css",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/responsive.css",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/netlify/functions/pdf-map-image.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/scripts/pdf-map-image.test.cjs"
+      ],
+      "verification": "자동화: SDK 주소 geocoding, 모든 날짜 준비, 늦은 owner 거절, 거리 미확정/해결 상태. 실제 브라우저: 서버 좌표를 비운 Mock 일정에서 경복궁·북촌/광장시장·서울숲 해결, 904m/4.8km 화면과 PDF 일치. PNGSD02 HTTP400→200. 실제 PDF4페이지 모두 렌더해 지도·마커·경로선·출력 폭 확인.",
+      "limit": "임시 좌표 없는 Mock 데이터는 검증 후 원복. 좌표·구분 주소·provider ID 전부 없는 동명 장소의 정확성은 위치 식별 계약 필요.",
+      "title": "동적으로 찾은 지도 좌표와 PDF의 좌표 공유"
+    },
+    {
+      "id": "C10",
+      "status": "수정·검증 완료",
+      "cause": "시작 인증 snapshot/credentialVersion+signal/current를 각 생성 쓰기 전후 검사, 이탈/계정 전환 후 중단.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteCreate/generationRequest.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteCreate/useGenerationTask.js",
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RouteResult/useTripResult.js"
+      ],
+      "verification": "자동화: abort 무시 trip POST 뒤 추가 쓰기0·계정 변경 후 후속0·이전 timeline 거절.",
+      "limit": "전송한 쓰기의 서버 rollback 보장 없음; 실제 이탈 시 저장 단계 조회 계약 필요.",
+      "title": "일정 생성 중 이탈·계정 전환의 후속 작업"
+    },
+    {
+      "id": "C11",
+      "status": "수정·검증 완료",
+      "cause": "현재 상세가 URL/API만 사용함 확인 후 미사용 예시 state payload 제거.",
+      "files": [
+        "C:/Users/joyfu/Desktop/graduation_project/graduation/src/RecentPlacesPage/RecentPlacesPage.jsx"
+      ],
+      "verification": "코드·자동화: 상세 URL 흐름 유지.",
+      "limit": "현재 Detail 가짜 평점 표시 버그로 확대하지 않음.",
+      "title": "사용하지 않는 상세 이동 payload 정리"
+    }
+  ]
+}

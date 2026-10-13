@@ -1,128 +1,24 @@
-import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
-import { logSafeApiError } from "../utils/safeLog";
+
+
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Inquiry.css";
 import api from "../api/api";
+import useReadQuery from "../utils/useReadQuery"; import useSessionKey from "../utils/useSessionKey"; import { getAuthSnapshot } from "../utils/authState"; import { readInquiryList, inquiryErrorMessage } from "./inquiryData";
 
 const ITEMS_PER_PAGE = 5;
-
-const formatDate = (value) => {
-  if (!value) return "";
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return date.toISOString().slice(0, 10);
-};
-
-const getInquiryArray = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.inquiries)) return data.inquiries;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.result)) return data.result;
-  if (Array.isArray(data?.response)) return data.response;
-
-  return [];
-};
-
-const normalizeInquiry = (inquiry) => {
-  const rawStatus = String(inquiry.status || "").toLowerCase();
-
-  const answer =
-    inquiry.answer ||
-    inquiry.reply ||
-    inquiry.answerContent ||
-    inquiry.answerText ||
-    "";
-
-  const isAnswered =
-    inquiry.answered === true ||
-    inquiry.isAnswered === true ||
-    Boolean(answer) ||
-    rawStatus === "answered" ||
-    rawStatus === "complete" ||
-    rawStatus === "completed" ||
-    rawStatus === "done" ||
-    rawStatus === "답변완료";
-
-  return {
-    id: inquiry.id ?? inquiry.inquiryId ?? inquiry.questionId,
-    title: inquiry.title || inquiry.subject || "제목 없음",
-    content: inquiry.content || inquiry.question || inquiry.body || "",
-    userEmail: inquiry.userEmail || inquiry.email || "",
-    answer,
-    date: formatDate(
-      inquiry.createdAt ||
-        inquiry.createdDate ||
-        inquiry.date ||
-        inquiry.updatedAt ||
-        ""
-    ),
-    answered: isAnswered,
-    status: isAnswered ? "answered" : "waiting",
-    statusText:
-      inquiry.statusText ||
-      inquiry.statusName ||
-      (isAnswered ? "답변 완료" : "답변 대기"),
-    originalData: inquiry,
-  };
-};
-
-const getErrorMessage = safeApiErrorMessage;
+const EMPTY_INQUIRIES = [];
 
 const Inquiry = () => {
   const navigate = useNavigate();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [inquiries, setInquiries] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  useEffect(() => {
-    const fetchInquiries = async () => {
-      try {
-        setIsLoading(true);
-        setErrorMessage("");
-
-        const response = await api.get("/api/inquiries");
-        const inquiryArray = getInquiryArray(response.data);
-
-        setInquiries(inquiryArray.map(normalizeInquiry));
-        setCurrentPage(1);
-      } catch (error) {
-        logSafeApiError(error, "Inquiry.jsx");
-
-        if (error.message.includes("Network Error")) {
-          setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-          return;
-        }
-
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          setErrorMessage(
-            "로그인 정보가 만료되었거나 권한이 없습니다. 다시 로그인해주세요."
-          );
-          return;
-        }
-
-        setErrorMessage(
-          getErrorMessage(
-            error,
-            "문의사항 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
-          )
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchInquiries();
-  }, []);
+  const account = useSessionKey();
+  const query = useReadQuery(account + ":inquiries", async signal => readInquiryList((await api.get("/api/inquiries", { signal })).data), account !== "anonymous", () => getAuthSnapshot().accountKey === account);
+  const inquiries = query.data || EMPTY_INQUIRIES;
+  const isLoading = query.status === "loading" && !query.data;
+  const errorMessage = query.status === "error" ? inquiryErrorMessage(query.cause, "문의 목록을 불러오지 못했습니다. 다시 시도해 주세요.") : "";
+  useEffect(() => { setCurrentPage(1); }, [account]);
 
   const totalPages = Math.ceil(inquiries.length / ITEMS_PER_PAGE);
 
@@ -145,8 +41,8 @@ const Inquiry = () => {
     });
   };
 
-  const handleCardKeyDown = (event, inquiry, isAnswered) => {
-    if (!isAnswered) return;
+  const handleCardKeyDown = (event, inquiry) => {
+    if (event.target !== event.currentTarget) return;
 
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
@@ -187,7 +83,7 @@ const Inquiry = () => {
 
             {!isLoading && errorMessage && (
               <article className="inquiry-card">
-                <p className="inquiry-card-content">{errorMessage}</p>
+                <p className="inquiry-error-message" role="alert">{errorMessage}</p><button type="button" onClick={query.retry}>다시 불러오기</button>
               </article>
             )}
 
@@ -200,7 +96,6 @@ const Inquiry = () => {
             )}
 
             {!isLoading &&
-              !errorMessage &&
               currentInquiries.map((inquiry) => {
                 const isAnswered = inquiry.answered === true;
 
@@ -208,15 +103,15 @@ const Inquiry = () => {
                   <article
                     key={inquiry.id}
                     className={`inquiry-card ${
-                      isAnswered ? "is-clickable" : ""
+                      "is-clickable"
                     }`}
-                    role={isAnswered ? "button" : undefined}
-                    tabIndex={isAnswered ? 0 : undefined}
+                    role="button"
+                    tabIndex={0}
                     onClick={
-                      isAnswered ? () => handleCheckAnswer(inquiry) : undefined
+                      () => handleCheckAnswer(inquiry)
                     }
                     onKeyDown={(event) =>
-                      handleCardKeyDown(event, inquiry, isAnswered)
+                      handleCardKeyDown(event, inquiry)
                     }
                   >
                     <div className="inquiry-card-top">
@@ -225,7 +120,7 @@ const Inquiry = () => {
                           isAnswered ? "is-done" : "is-waiting"
                         }`}
                       >
-                        {isAnswered ? "답변 완료" : "답변 대기"}
+                        {inquiry.statusText}
                       </span>
 
                       {inquiry.date && (
@@ -237,7 +132,7 @@ const Inquiry = () => {
 
                     <p className="inquiry-card-content">{inquiry.content}</p>
 
-                    {isAnswered && (
+                    {(
                       <>
                         <div className="inquiry-card-divider" />
 
@@ -249,7 +144,7 @@ const Inquiry = () => {
                             handleCheckAnswer(inquiry);
                           }}
                         >
-                          답변 확인하기
+                          {isAnswered ? "답변 확인하기" : "문의 내용 보기"}
                           <span aria-hidden="true">›</span>
                         </button>
                       </>
@@ -315,17 +210,17 @@ const Inquiry = () => {
               >
                 <path
                   d="M4.5 5.5H19.5V15.5H8.4L4.5 19V5.5Z"
-                  fill="white"
+                  fill="currentColor"
                 />
                 <path
                   d="M9 10.5H15"
-                  stroke="#18A8ED"
+                  stroke="var(--color-primary)"
                   strokeWidth="2.1"
                   strokeLinecap="round"
                 />
                 <path
                   d="M12 7.5V13.5"
-                  stroke="#18A8ED"
+                  stroke="var(--color-primary)"
                   strokeWidth="2.1"
                   strokeLinecap="round"
                 />

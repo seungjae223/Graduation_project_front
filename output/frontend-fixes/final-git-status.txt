@@ -1,0 +1,155 @@
+ M src/Admin/AdminFooter/AdminFooter.css
+ M src/Admin/AdminFooter/AdminFooter.jsx
+ M src/Admin/AdminInquiryPage/AdminInquiryPage.css
+ M src/Admin/AdminInquiryPage/AdminInquiryPage.jsx
+ M src/Admin/AdminInquiryPage/AdminInquiryWrite.css
+ M src/Admin/AdminInquiryPage/AdminInquiryWrite.jsx
+ M src/Admin/AdminMain/AdminMain.css
+ M src/Admin/AdminMain/AdminMain.jsx
+ M src/Alert/Alert.css
+ M src/Alert/Alert.jsx
+ M src/AnimatedHeart/AnimatedHeart.css
+ M src/App.css
+ M src/App.js
+ M src/Calendar/Calendar.css
+ M src/Context/SavedPlacesContext.jsx
+ M src/FolderSelectModal/FolderSelectModal.css
+ M src/FolderSelectModal/FolderSelectModal.jsx
+ M src/FolderSelectModal/FolderSelectModal.test.jsx
+ M src/Footer/Footer.css
+ M src/Header/Header.jsx
+ M src/Homepage/Home.css
+ M src/Homepage/Home.jsx
+ M src/Homepage/Home.test.jsx
+ M src/Homepage/PopularAll.css
+ M src/Homepage/PopularAll.jsx
+ M src/Landingpage/Landing.css
+ M src/Loading/EarthLoader.css
+ M src/Loading/RouteErrorBoundary.jsx
+ M src/Loading/RouteErrorBoundary.test.jsx
+ M src/Login/FindPassword.css
+ M src/Login/FindPassword.jsx
+ M src/Login/Login.css
+ M src/Login/Login.jsx
+ M src/Login/LoginAlert.css
+ M src/Login/OAuthCallback.jsx
+ M src/Login/OAuthCallback.test.js
+ M src/Login/PrivacyPolicyModal.css
+ M src/Login/PrivacyPolicyModal.jsx
+ M src/Login/SignUp.css
+ M src/Login/SignUp.jsx
+ M src/Login/VerifyCode.css
+ M src/Login/VerifyCode.jsx
+ M src/MySchedule/MySchedule.css
+ M src/MySchedule/MySchedule.jsx
+ M src/Mypage/Inquiry.css
+ M src/Mypage/Inquiry.jsx
+ M src/Mypage/InquiryDetail.css
+ M src/Mypage/InquiryDetail.jsx
+ M src/Mypage/InquirySuccessModal.css
+ M src/Mypage/InquiryWrite.css
+ M src/Mypage/InquiryWrite.jsx
+ M src/Mypage/MyPage.css
+ M src/Mypage/MyPage.jsx
+ M src/Mypage/SavedPlaces.css
+ M src/Mypage/SavedPlaces.jsx
+ M src/Mypage/availableActions.test.jsx
+ M src/OnBoarding/OnBoarding.css
+ M src/OnBoarding/OnBoarding.jsx
+ M src/OnBoarding/OnBoarding2.jsx
+ M src/OnBoarding/onboardingTransition.js
+ M src/RecentPlacesPage/RecentPlacesPage.css
+ M src/RecentPlacesPage/RecentPlacesPage.jsx
+ M src/Recommend/Detail.css
+ M src/Recommend/Detail.jsx
+ M src/Recommend/Detail.test.jsx
+ M src/Recommend/Recommend.css
+ M src/Recommend/Recommend.jsx
+ M src/Recommend/Total.css
+ M src/Recommend/Total.jsx
+ M src/RouteCreate/RouteCreate.css
+ M src/RouteCreate/RouteCreate.jsx
+ M src/RouteCreate/StartPlaceModal.css
+ M src/RouteCreate/StartPlaceModal.jsx
+ M src/RouteCreate/generation.test.js
+ M src/RouteCreate/useGenerationTask.js
+ M src/RouteResult/RouteResult.css
+ M src/RouteResult/RouteResult.jsx
+ M src/RouteResult/editing.test.jsx
+ M src/RouteResult/mapLifecycle.test.jsx
+ M src/RouteResult/useTripResult.js
+ M src/RouteResult/useTripResult.test.js
+ M src/Schedule/Schedule.css
+ M src/Search/Search.css
+ M src/Search/Search.jsx
+ M src/Search/Search.test.jsx
+ M src/Search/useServerSearch.js
+ M src/SearchPopup/SearchPop.css
+ M src/SearchPopup/SearchPop.jsx
+ M src/ShareModal/ShareModal.css
+ M src/animations/onboardingButtonMotion.css
+ M src/api/authApi.js
+ M src/api/authApi.test.js
+ M src/api/placeApi.js
+ M src/api/responseContract.js
+ M src/components/InputDialog.css
+ M src/components/PlaceCard.css
+ M src/mocks/mockMode.test.jsx
+ M src/mocks/placeMock.js
+ M src/responsive.css
+ M src/utils/pdfTask.js
+ M src/utils/pdfTask.test.js
+ M src/utils/recentPlaces.js
+ M src/utils/useModalFocus.js
+ M src/utils/useMutationTask.js
+ M src/utils/useReadQuery.js
+?? netlify/
+?? output/
+?? public/place-photos/
+?? scripts/build-place-photo-manifest.py
+?? scripts/fetch-place-photos.py
+?? scripts/pdf-map-image.test.cjs
+?? src/Admin/AdminAccessGuard.jsx
+?? src/Header/scheduleActions.test.jsx
+?? src/Loading/RouteErrorBoundary.css
+?? src/Login/authFlow.test.jsx
+?? src/Login/authPaths.js
+?? src/Login/passwordValidation.js
+?? src/Login/passwordValidation.test.js
+?? src/Login/useAuthRequest.js
+?? src/Mypage/inquiryData.js
+?? src/Mypage/inquiryData.test.js
+?? src/Mypage/profileFlows.test.jsx
+?? src/OnBoarding/onboardingTransition.test.js
+?? src/Recommend/listFlows.test.jsx
+?? src/RouteCreate/generationRequest.js
+?? src/RouteCreate/searchFolders.test.jsx
+?? src/RouteCreate/selectionUi.test.jsx
+?? src/RouteCreate/useFavoriteFolders.js
+?? src/RouteCreate/useRoutePlaceSearch.js
+?? src/RouteCreate/validation.test.js
+?? src/RouteResult/keyboardOrder.test.jsx
+?? src/RouteResult/mapCoordinates.test.jsx
+?? src/RouteResult/useResolvedMapCoordinates.js
+?? src/SearchPopup/SearchPop.test.jsx
+?? src/animations/PageTransition.jsx
+?? src/animations/PageTransition.test.jsx
+?? src/api/authApi.mock.test.js
+?? src/components/PlacePhoto.css
+?? src/components/PlacePhoto.jsx
+?? src/components/PlacePhoto.test.jsx
+?? src/components/PlaceSavingFeedback.css
+?? src/components/PlaceSavingFeedback.jsx
+?? src/data/
+?? src/setupProxy.js
+?? src/utils/detailBack.js
+?? src/utils/detailBack.test.js
+?? src/utils/pdfMaps.js
+?? src/utils/placeSaving.test.jsx
+?? src/utils/placeType.js
+?? src/utils/placeType.test.js
+?? src/utils/useFolderSavedPlaces.js
+?? src/utils/useKeyboardRouteFocus.js
+?? src/utils/useKeyboardRouteFocus.test.jsx
+?? src/utils/useModalFocus.test.jsx
+?? src/utils/usePlaceSaving.js

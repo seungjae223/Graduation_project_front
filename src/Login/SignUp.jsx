@@ -1,9 +1,8 @@
 import { logSafeApiError } from "../utils/safeLog";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./SignUp.css";
-import eyeIcon from "../img/눈알.png";
 import PrivacyPolicyModal from "./PrivacyPolicyModal";
 import useModalFocus from "../utils/useModalFocus";
 import { getApiErrorMessage } from "../api/api";
@@ -12,9 +11,13 @@ import {
   signupApi,
   verifyEmailCodeApi,
 } from "../api/authApi";
+import { buildAuthPath, getAuthReturnPath } from "./authPaths";
+import useAuthRequest, { isCanceledAuthRequest } from "./useAuthRequest";
+import useEmailCooldown from "./useEmailCooldown";
+import { getSignupFailure } from "../utils/signupError";
+import { getPasswordIssues, PASSWORD_HELP, PASSWORD_PATTERN } from "./passwordValidation";
 
 const getErrorMessage = getApiErrorMessage;
-const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&#~]).{10,}$/;
 
 const SignUpTopAlert = ({ open, onConfirm }) => {
   const dialogRef = useModalFocus({
@@ -48,11 +51,11 @@ const SignUpTopAlert = ({ open, onConfirm }) => {
             />
             <path
               d="M24 17.2v10.9"
-              stroke="#fff"
+              stroke="var(--color-surface)"
               strokeWidth="3.4"
               strokeLinecap="round"
             />
-            <circle cx="24" cy="34.1" r="2.1" fill="#fff" />
+            <circle cx="24" cy="34.1" r="2.1" fill="var(--color-surface)" />
           </svg>
         </div>
 
@@ -130,16 +133,11 @@ const SignupCompleteModal = ({ open, onStart }) => {
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnPath = getAuthReturnPath(location.search);
+  const task = useAuthRequest(`${location.key}:${location.pathname}${location.search}`);
   const emailAlertReturnFocusRef = useRef(null);
   const verificationVersion = useRef(0);
-  const emailTask = useRef(false);
-  const signupTask = useRef(false);
-  const mounted = useRef(false);
-  useEffect(() => {
-    mounted.current = true;
-    ++verificationVersion.current;
-    return () => { mounted.current = false; };
-  }, []);
 
   const [showPw, setShowPw] = useState(false);
   const [showPwConfirm, setShowPwConfirm] = useState(false);
@@ -150,9 +148,9 @@ const SignUp = () => {
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isCodeVerified, setIsCodeVerified] = useState(false);
 
-  const [isSendingCode, setIsSendingCode] = useState(false);
-  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSendingCode = task.busy === "send";
+  const isVerifyingCode = task.busy === "verify";
+  const isSubmitting = task.busy === "signup";
 
   const [form, setForm] = useState({
     name: "",
@@ -162,6 +160,7 @@ const SignUp = () => {
     passwordConfirm: "",
     agreed: false,
   });
+  const emailCooldown = useEmailCooldown(form.email);
 
   const handleChange = (key, value) => {
     if (key === "email") {
@@ -208,7 +207,7 @@ const SignUp = () => {
   };
 
   const handleSendCode = async (event) => {
-    if (emailTask.current) return;
+    if (task.busy || emailCooldown.remaining > 0) return;
     const normalizedEmail = form.email.trim().toLowerCase();
 
     if (!normalizedEmail || !isValidEmail(normalizedEmail)) {
@@ -217,14 +216,18 @@ const SignUp = () => {
       return;
     }
 
+    const request = task.begin("send");
+    if (!request) return;
     const version = ++verificationVersion.current;
     try {
-      emailTask.current = true;
-      setIsSendingCode(true);
       setIsCodeVerified(false);
 
-      await sendEmailCodeApi(normalizedEmail);
-      if (!mounted.current || version !== verificationVersion.current) return;
+      await sendEmailCodeApi(normalizedEmail, {
+        ...request.options,
+        isCurrent: () => request.isCurrent() && version === verificationVersion.current,
+      });
+      if (!request.isCurrent() || version !== verificationVersion.current) return;
+      emailCooldown.start();
 
       setForm((prev) => ({
         ...prev,
@@ -237,7 +240,8 @@ const SignUp = () => {
 
       alert("인증번호가 발송되었습니다. 이메일을 확인해주세요.");
     } catch (error) {
-      if (!mounted.current || version !== verificationVersion.current) return;
+      if (!request.isCurrent() || version !== verificationVersion.current || isCanceledAuthRequest(error)) return;
+      emailCooldown.blockFromError(error);
       logSafeApiError(error, "SignUp.jsx");
 
       alert(
@@ -247,13 +251,12 @@ const SignUp = () => {
         )
       );
     } finally {
-      emailTask.current = false;
-      if (mounted.current) setIsSendingCode(false);
+      task.end(request);
     }
   };
 
   const handleVerifyCode = async () => {
-    if (emailTask.current) return;
+    if (task.busy) return;
     const normalizedEmail = form.email.trim().toLowerCase();
     const verificationCode = form.code.trim();
 
@@ -268,20 +271,24 @@ const SignUp = () => {
     }
 
     const version = verificationVersion.current;
+    const request = task.begin("verify");
+    if (!request) return;
     try {
-      emailTask.current = true;
-      setIsVerifyingCode(true);
 
-      await verifyEmailCodeApi({
+      const response = await verifyEmailCodeApi({
         email: normalizedEmail,
         code: verificationCode,
+      }, {
+        ...request.options,
+        isCurrent: () => request.isCurrent() && version === verificationVersion.current,
       });
 
-      if (!mounted.current || version !== verificationVersion.current) return;
+      if (!request.isCurrent() || version !== verificationVersion.current) return;
+      if (response?.verified === false) throw new Error("인증번호를 확인해주세요.");
       setIsCodeVerified(true);
       alert("이메일 인증이 완료되었습니다.");
     } catch (error) {
-      if (!mounted.current || version !== verificationVersion.current) return;
+      if (!request.isCurrent() || version !== verificationVersion.current || isCanceledAuthRequest(error)) return;
       logSafeApiError(error, "SignUp.jsx");
 
       setIsCodeVerified(false);
@@ -293,8 +300,7 @@ const SignUp = () => {
         )
       );
     } finally {
-      emailTask.current = false;
-      if (mounted.current) setIsVerifyingCode(false);
+      task.end(request);
     }
   };
 
@@ -310,18 +316,9 @@ const SignUp = () => {
     });
   };
 
-  const handleAgreePrivacyPolicy = () => {
-    setForm((prev) => ({
-      ...prev,
-      agreed: true,
-    }));
-
-    setIsPrivacyModalOpen(false);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (signupTask.current) return;
+    if (task.busy) return;
 
     const trimmedName = form.name.trim();
     const normalizedEmail = form.email.trim().toLowerCase();
@@ -358,21 +355,27 @@ const SignUp = () => {
       return;
     }
 
+    const request = task.begin("signup");
+    if (!request) return;
     try {
-      signupTask.current = true;
-      setIsSubmitting(true);
 
       await signupApi({
         email: normalizedEmail,
         password: form.password,
         nickname: trimmedName,
-      });
+      }, request.options);
 
-      if (mounted.current) setIsCompleteModalOpen(true);
+      if (request.isCurrent()) setIsCompleteModalOpen(true);
     } catch (error) {
-      if (!mounted.current) return;
+      if (!request.isCurrent() || isCanceledAuthRequest(error)) return;
       logSafeApiError(error, "SignUp.jsx");
 
+      if (getSignupFailure(error)?.reason === "email_verification") {
+        ++verificationVersion.current;
+        setIsCodeVerified(false);
+        setIsCodeSent(false);
+        setForm(previous => ({ ...previous, code: "" }));
+      }
       alert(
         getErrorMessage(
           error,
@@ -380,14 +383,13 @@ const SignUp = () => {
         )
       );
     } finally {
-      signupTask.current = false;
-      if (mounted.current) setIsSubmitting(false);
+      task.end(request);
     }
   };
 
   const handleStartAfterSignup = () => {
     setIsCompleteModalOpen(false);
-    navigate("/login");
+    navigate(buildAuthPath("/login", returnPath));
   };
 
   const isFormValid = Boolean(
@@ -400,6 +402,10 @@ const SignUp = () => {
       PASSWORD_PATTERN.test(form.password) &&
       form.agreed
   );
+  const passwordIssues = getPasswordIssues(form.password);
+  const passwordError = form.password ? passwordIssues.join(" ") : "";
+  const confirmError = form.passwordConfirm && form.password !== form.passwordConfirm
+    ? "비밀번호가 일치하지 않습니다." : "";
 
   return (
     <>
@@ -422,6 +428,7 @@ const SignUp = () => {
                 placeholder="이름을 입력하세요"
                 value={form.name}
                 maxLength={20}
+                disabled={isSubmitting}
                 onChange={(e) => handleChange("name", e.target.value)}
               />
             </div>
@@ -436,6 +443,7 @@ const SignUp = () => {
                   placeholder="example@travel.com"
                   value={form.email}
                   maxLength={255}
+                  disabled={isSubmitting}
                   onChange={(e) => handleChange("email", e.target.value)}
                   onBlur={handleEmailBlur}
                 />
@@ -444,9 +452,9 @@ const SignUp = () => {
                   type="button"
                   className="signup-inline-btn signup-code-send-btn"
                   onClick={handleSendCode}
-                  disabled={isSendingCode || isVerifyingCode}
+                  disabled={Boolean(task.busy) || emailCooldown.remaining > 0}
                 >
-                  {isSendingCode ? "발송 중..." : "인증번호 발송"}
+                  {isSendingCode ? "발송 중..." : emailCooldown.remaining > 0 ? `${emailCooldown.remaining}초 후 재발송` : "인증번호 발송"}
                 </button>
               </div>
 
@@ -456,7 +464,7 @@ const SignUp = () => {
                     margin: "10px 4px 0",
                     fontSize: "13px",
                     fontWeight: 700,
-                    color: "#1da1f2",
+                    color: "var(--color-accent-text)",
                   }}
                 >
                   인증번호가 발송되었습니다. 이메일을 확인해주세요.
@@ -469,7 +477,7 @@ const SignUp = () => {
                     margin: "10px 4px 0",
                     fontSize: "13px",
                     fontWeight: 700,
-                    color: "#12b76a",
+                    color: "var(--color-success)",
                   }}
                 >
                   이메일 인증이 완료되었습니다.
@@ -486,6 +494,7 @@ const SignUp = () => {
                   type="text"
                   inputMode="numeric"
                   maxLength={6}
+                  disabled={isSubmitting}
                   placeholder="인증번호 6자리 입력"
                   value={form.code}
                   onChange={(e) => handleChange("code", e.target.value)}
@@ -495,7 +504,7 @@ const SignUp = () => {
                   type="button"
                   className="signup-inline-btn"
                   onClick={handleVerifyCode}
-                  disabled={!isCodeSent || isVerifyingCode || isSendingCode}
+                  disabled={!isCodeSent || Boolean(task.busy)}
                 >
                   {isVerifyingCode ? "확인 중..." : "인증 확인"}
                 </button>
@@ -510,8 +519,12 @@ const SignUp = () => {
                   className="signup-input signup-input--password"
                   type={showPw ? "text" : "password"}
                   placeholder="10자 이상, 대·소문자와 특수문자 포함"
+                  autoComplete="new-password"
                   value={form.password}
                   maxLength={72}
+                  disabled={isSubmitting}
+                  aria-invalid={Boolean(passwordError)}
+                  aria-describedby={`signup-password-help${passwordError ? " signup-password-error" : ""}`}
                   onChange={(e) => handleChange("password", e.target.value)}
                 />
 
@@ -522,9 +535,21 @@ const SignUp = () => {
                   aria-label={showPw ? "비밀번호 숨기기" : "비밀번호 표시"}
                   aria-pressed={showPw}
                 >
-                  <img src={eyeIcon} alt="" />
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
                 </button>
               </div>
+              <p id="signup-password-help" className="signup-field-help">{PASSWORD_HELP}</p>
+              {passwordError && <p id="signup-password-error" className="signup-field-error">{passwordError}</p>}
             </div>
 
             <div className="signup-field">
@@ -535,8 +560,12 @@ const SignUp = () => {
                   className="signup-input signup-input--password"
                   type={showPwConfirm ? "text" : "password"}
                   placeholder="비밀번호를 다시 입력하세요"
+                  autoComplete="new-password"
                   value={form.passwordConfirm}
                   maxLength={72}
+                  disabled={isSubmitting}
+                  aria-invalid={Boolean(confirmError)}
+                  aria-describedby={confirmError ? "signup-password-confirm-error" : undefined}
                   onChange={(e) =>
                     handleChange("passwordConfirm", e.target.value)
                   }
@@ -549,35 +578,34 @@ const SignUp = () => {
                   aria-label={showPwConfirm ? "비밀번호 확인 값 숨기기" : "비밀번호 확인 값 표시"}
                   aria-pressed={showPwConfirm}
                 >
-                  <img src={eyeIcon} alt="" />
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
                 </button>
               </div>
+              {confirmError && <p id="signup-password-confirm-error" className="signup-field-error">{confirmError}</p>}
             </div>
 
-            <div
-              className="signup-agreement"
-              role="button"
-              tabIndex={0}
-              onClick={handleOpenPrivacyModal}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleOpenPrivacyModal();
-                }
-              }}
-            >
+            <div className="signup-agreement">
               <input
+                id="signup-agreed"
                 type="checkbox"
                 checked={form.agreed}
-                readOnly
-                onClick={(e) => e.preventDefault()}
+                disabled={isSubmitting}
+                onChange={(event) => handleChange("agreed", event.target.checked)}
               />
-              <span>
-                <span className="signup-agreement-link">
-                  이용약관 및 개인정보 처리방침
-                </span>
-                에 동의합니다.
-              </span>
+              <div className="signup-agreement-content">
+                <label htmlFor="signup-agreed">이용약관 및 개인정보 처리방침에 동의합니다.</label>
+                <button type="button" className="signup-agreement-link" onClick={handleOpenPrivacyModal}>문서 보기</button>
+              </div>
             </div>
 
             <button
@@ -591,12 +619,12 @@ const SignUp = () => {
 
           <p className="signup-footer-text">
             이미 계정이 있으신가요?{" "}
-            <span
+            <Link
               className="signup-footer-link"
-              onClick={() => navigate("/login")}
+              to={buildAuthPath("/login", returnPath)}
             >
               로그인으로 돌아가기
-            </span>
+            </Link>
           </p>
 
           <div className="signup-bottom-icons">
@@ -615,7 +643,6 @@ const SignUp = () => {
       <PrivacyPolicyModal
         isOpen={isPrivacyModalOpen}
         onClose={() => setIsPrivacyModalOpen(false)}
-        onAgree={handleAgreePrivacyPolicy}
       />
 
       <SignupCompleteModal

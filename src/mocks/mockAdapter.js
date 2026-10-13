@@ -22,6 +22,16 @@ const find = (rows, id) => {
 };
 const folderData = folder => ({ id: folder.id, name: folder.name, count: folder.placeIds.length, placeCount: folder.placeIds.length });
 
+const saveDayOrder = (trip, ordered, startTime = "10:00") => {
+  const planned = ordered.map((row, index) => ({ ...row, visitOrder: index + 1 }));
+  const timeline = buildTimeline(trip, planned, startTime);
+  // Compute everything first so an impossible fixed time leaves storage untouched.
+  ordered.forEach((row, index) => Object.assign(row, {
+    visitOrder: index + 1, arrivalTime: timeline[index].arrivalTime, departureTime: timeline[index].departureTime,
+  }));
+  return ordered;
+};
+
 function handle(method, path, data, params) {
   if (path === "/api/auth/login" && method === "post") return loginMock(data);
   if (path === "/api/auth/signup" && method === "post") return signupMock(data);
@@ -29,12 +39,12 @@ function handle(method, path, data, params) {
   // Accept any nonempty code for offline UI development. No email is sent.
   if (path === "/api/email/verify" && method === "post" && String(data?.code || "").trim()) return { verified: true, message: "인증되었습니다." };
   if (path === "/api/mypage/stats" && method === "get") return {
-    visitedPlacesCount: state.recentPlaceIds.length,
-    savedPlacesCount: new Set(state.folders.flatMap(folder => folder.placeIds)).size,
+    visitedPlacesCount: state.trips.length,
+    savedPlacesCount: state.folders.reduce((count, folder) => count + folder.placeIds.length, 0),
     reviewsCount: state.reviews.filter(review => review.userId === getMockUser()?.id).length,
   };
   if (path === "/api/recommendations" && method === "get") return state.places.filter(place =>
-    (!params.region || searchText(place.region).includes(searchText(params.region))) &&
+    (!params.region || place.region === params.region) &&
     (!params.theme || place.theme === themeKey(params.theme)));
   if (path === "/api/places/search" && method === "get") {
     const keyword = String(params.keyword || "").trim();
@@ -134,7 +144,7 @@ function handle(method, path, data, params) {
       }
     }
     const all = state.tripPlaces.filter(row => row.tripId === trip.id);
-    if (suffix === "/places" && method === "get") return all;
+    if (suffix === "/places" && method === "get") return all.sort((a, b) => a.day - b.day || a.visitOrder - b.visitOrder);
     let part = suffix.match(/^\/places\/(\d+)$/);
     if (part && method === "post") {
       const place = find(state.places, part[1]);
@@ -145,24 +155,43 @@ function handle(method, path, data, params) {
     part = suffix.match(/^\/days\/(\d+)\/(places|timeline|optimize)$/);
     if (part) {
       const dayPlaces = all.filter(row => row.day === Number(part[1]));
-      if (part[2] === "places" && method === "get") return dayPlaces;
+      if (part[2] === "places" && method === "get") return dayPlaces.sort((a, b) => a.visitOrder - b.visitOrder);
       if (part[2] === "timeline" && method === "get") return buildTimeline(trip, dayPlaces, params.startTime);
       if (part[2] === "optimize" && method === "post") {
         // Deterministic demo ordering: selected start first, then existing order.
         dayPlaces.sort((a, b) => Number(b.isStartPoint) - Number(a.isStartPoint) || a.visitOrder - b.visitOrder);
-        dayPlaces.forEach((row, index) => { row.visitOrder = index + 1; });
-        const timeline = buildTimeline(trip, dayPlaces, params.startTime);
-        dayPlaces.forEach((row, index) => { row.arrivalTime = timeline[index].arrivalTime; row.departureTime = timeline[index].departureTime; });
-        return dayPlaces;
+        return saveDayOrder(trip, dayPlaces, params.startTime);
       }
+    }
+    part = suffix.match(/^\/days\/(\d+)\/places\/order$/);
+    if (part && method === "patch") {
+      const dayPlaces = all.filter(row => row.day === Number(part[1]));
+      const ids = data?.tripPlaceIds;
+      if (!Array.isArray(ids) || ids.length !== dayPlaces.length || new Set(ids).size !== ids.length ||
+          ids.some(id => !dayPlaces.some(row => row.id === id)) ||
+          !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(data?.startTime)) {
+        throw Object.assign(new Error("일차의 전체 방문 항목과 시작 시간을 확인해주세요."), { status: 400 });
+      }
+      const ordered = ids.map(id => find(dayPlaces, id));
+      if (ordered.some((row, index) => row.isStartPoint && index !== 0)) {
+        throw Object.assign(new Error("출발 장소는 첫 번째여야 합니다."), { status: 400 });
+      }
+      return saveDayOrder(trip, ordered, data.startTime);
     }
     part = suffix.match(/^\/days\/(\d+)\/places\/(\d+)\/(start|schedule|memo)$/);
     if (part) {
       const dayPlaces = all.filter(row => row.day === Number(part[1]));
       const place = find(dayPlaces, part[2]);
-      if (part[3] === "start" && method === "post") { dayPlaces.forEach(row => { row.isStartPoint = row === place; }); return place; }
+      if (part[3] === "start" && method === "post") {
+        if (place.isFixed) throw Object.assign(new Error("고정 장소는 출발지로 지정할 수 없습니다."), { status: 400 });
+        const ordered = [place, ...dayPlaces.filter(row => row !== place).sort((a, b) => a.visitOrder - b.visitOrder)];
+        ordered.forEach((row, index) => { row.isStartPoint = row === place; row.visitOrder = index + 1; });
+        return place;
+      }
       if (part[3] === "schedule" && method === "patch") {
-        Object.assign(place, data, data.fixed === undefined ? {} : { isFixed: data.fixed });
+        const updates = Object.fromEntries(Object.entries(data || {}).filter(([, value]) => value != null));
+        Object.assign(place, updates, updates.fixed === undefined ? {} : { isFixed: updates.fixed });
+        if (updates.fixed === false) place.isNextDay = false;
         return place;
       }
       if (part[3] === "memo" && method === "patch") { place.memo = data.memo; return place; }
@@ -194,6 +223,12 @@ export async function mockAdapter(config) {
   if (typeof data === "string" && config.headers.getContentType?.()?.includes("application/json")) {
     try { data = JSON.parse(data); } catch { /* text/plain answers stay strings */ }
   }
-  const result = handle(config.method || "get", url.pathname, data, params);
+  let result;
+  try { result = handle(config.method || "get", url.pathname, data, params); }
+  catch (error) {
+    if (!error.status) throw error;
+    throw new axios.AxiosError(error.message, "ERR_BAD_REQUEST", config, undefined,
+      { data: { message: error.message }, status: error.status, headers: {}, config });
+  }
   return { data: result === undefined ? null : JSON.parse(JSON.stringify(result)), status: 200, statusText: "OK", headers: {}, config };
 }

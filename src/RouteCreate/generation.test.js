@@ -15,14 +15,15 @@ beforeEach(() => {
     if (url.includes("/optimize")) return { data: [] };
     return { data: { id: url.endsWith("/12") ? 102 : 101 } };
   });
-  api.patch.mockResolvedValue({ data: { id: 102 } }); api.get.mockResolvedValue({ data: [] });
+  api.patch.mockResolvedValue({ data: { id: 102 } });
+  api.get.mockImplementation(async url => url.startsWith("/api/places/") ? { data: { id: Number(url.split("/").pop()), name: url.endsWith("/11") ? "첫 장소" : "시간 장소" } } : { data: [] });
 });
 test("rapid calls start exactly one operation; uncertain create never retries", async () => {
   let reject; api.post.mockReturnValueOnce(new Promise((_, r) => { reject = r; }));
   const { result } = renderHook(() => useGenerationTask());
   let first;
   act(() => { first = result.current.run(update => saveRouteToServer(draft, {}, update)).catch(() => null); void result.current.run(update => saveRouteToServer(draft, {}, update)); });
-  expect(api.post).toHaveBeenCalledTimes(1);
+  await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1));
   await act(async () => { reject(new Error("timeout")); await first; });
   expect(result.current.status).toBe("failed"); expect(result.current.tripId).toBeNull();
   await act(async () => result.current.run(update => saveRouteToServer(draft, {}, update)));
@@ -64,6 +65,7 @@ test("obsolete time cache is neither read nor written; confirmed visit IDs prese
     { id: "local-a", placeId: 11, name: "같은 장소", isFixedTime: true, timeLabel: "12:30 PM", stayDuration: 45, isNextDay: true },
     { id: "local-b", placeId: 11, name: "같은 장소", isFixedTime: true, timeLabel: "03:00 PM", stayDuration: 90, isNextDay: false },
   ] } };
+  api.get.mockImplementation(async url => url.startsWith("/api/places/") ? { data: { id: Number(url.split("/").pop()), name: url.endsWith("/11") ? "같은 장소" : "출발지" } } : { data: [] });
   let visitId = 100;
   const original = api.post.getMockImplementation();
   api.post.mockImplementation(async (url, ...args) => {

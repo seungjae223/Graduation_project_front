@@ -60,6 +60,9 @@ function Alert({
   onSecondary,
   onClose,
   closeOnBackdrop = true,
+  primaryDisabled = false,
+  secondaryDisabled = false,
+  canClose = true,
 }) {
   const config = useMemo(() => {
     const preset = ALERT_PRESETS[type] || ALERT_PRESETS.logout;
@@ -74,16 +77,17 @@ function Alert({
         secondaryText !== undefined ? secondaryText : preset.secondaryText,
     };
   }, [type, iconSrc, title, description, primaryText, secondaryText]);
-  const dialogRef = useModalFocus({ open, onClose, lockScroll: true });
+  const dialogRef = useModalFocus({ open, onClose, canClose, lockScroll: true });
 
   if (!open) return null;
 
   const handleBackdropClick = () => {
-    if (!closeOnBackdrop) return;
+    if (!closeOnBackdrop || !canClose) return;
     onClose?.();
   };
 
   const handleSecondaryClick = () => {
+    if (secondaryDisabled) return;
     if (onSecondary) {
       onSecondary();
       return;
@@ -146,6 +150,7 @@ function Alert({
                 type="button"
                 className={`alert-btn primary ${config.primaryVariant}`}
                 onClick={onPrimary}
+                disabled={primaryDisabled}
                 data-modal-initial-focus
               >
                 {config.primaryText}
@@ -156,6 +161,7 @@ function Alert({
                   type="button"
                   className={`alert-btn secondary ${config.secondaryVariant}`}
                   onClick={handleSecondaryClick}
+                  disabled={secondaryDisabled}
                 >
                   {config.secondaryText}
                 </button>
@@ -168,6 +174,7 @@ function Alert({
               type="button"
               className={`alert-btn primary ${config.primaryVariant}`}
               onClick={onPrimary}
+                disabled={primaryDisabled}
               data-modal-initial-focus
             >
               {primaryButtonIconSrc ? (
@@ -189,6 +196,7 @@ function Alert({
                   type="button"
                   className={`alert-btn secondary ${config.secondaryVariant}`}
                   onClick={handleSecondaryClick}
+                  disabled={secondaryDisabled}
                 >
                   {config.secondaryText}
                 </button>
@@ -198,6 +206,7 @@ function Alert({
                 type="button"
                 className={`alert-btn primary ${config.primaryVariant}`}
                 onClick={onPrimary}
+                disabled={primaryDisabled}
                 data-modal-initial-focus
               >
                 {config.primaryText}

@@ -1,0 +1,221 @@
+FAIL src/RouteResult/mapCoordinates.test.jsx
+  √ a single place keeps its exact server coordinate instead of falling back to its name (3 ms)
+  √ resolved coordinates reject obsolete owners, dates and visits while retaining visit identity after reordering (20 ms)
+  √ map buttons expose independent keyboard actions and preserve the drag handle (77 ms)
+  √ coordinate association follows stable visits when the order changes (14 ms)
+  √ dynamically resolved coordinates are shared by the real result page and PDF payload (150 ms)
+  × missing server coordinates resolve pure addresses for every day before PDF export and update distances (1016 ms)
+
+  ● missing server coordinates resolve pure addresses for every day before PDF export and update distances
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 4
+    + Received  + 4
+
+      Array [
+    -   "서울특별시 성동구 뚝섬로 273",
+    -   "서울특별시 종로구 계동길 37",
+    -   "서울특별시 종로구 사직로 161",
+    -   "서울특별시 종로구 창경궁로 88",
+    +   "경복궁 서울특별시 종로구 사직로 161",
+    +   "광장시장 서울특별시 종로구 창경궁로 88",
+    +   "북촌한옥마을 서울특별시 종로구 계동길 37",
+    +   "서울숲 서울특별시 성동구 뚝섬로 273",
+      ]
+
+    Ignored nodes: comments, script, style
+    <html>
+      <head />
+      <body>
+        <div>
+          <div
+            class="route-result-page "
+            data-export-context="8:0:[{\"items\":[[\"101\",\"10:00\",\"\",null,null],[\"102\",\"11:00\",\"\",null,null]]},{\"items\":[[\"103\",\"10:00\",\"\",null,null],[\"104\",\"11:00\",\"\",null,null]]}]"
+            data-export-ready="false"
+            id="route-result-pdf"
+          >
+             
+            <div
+              class="route-result-screen"
+            >
+               
+              <div
+                class="route-result-tabs "
+              >
+                 
+                <button
+                  class="route-result-tab active"
+                  type="button"
+                >
+                   
+                  1일차
+                   
+                </button>
+                <button
+                  class="route-result-tab "
+                  type="button"
+                >
+                   
+                  2일차
+                   
+                </button>
+                 
+              </div>
+               
+              <div
+                class="route-result-content"
+              >
+                 
+                <section
+                  class="route-result-summary-card"
+                >
+                   
+                  <div
+                    class="route-result-summary-item"
+                  >
+                     
+                    <div
+                      class="route-result-summary-icon"
+                    >
+                       
+                      <svg
+                        aria-hidden="true"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        width="18"
+                      >
+                         
+                        <circle
+                          cx="12"
+                          cy="12"
+                          fill="none"
+                          r="9"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        />
+                         
+                        <path
+                          d="M12 7.5V12.3L15.4 14.4"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                        />
+                         
+                      </svg>
+                       
+                    </div>
+                     
+                    <div
+                      class="route-result-summary-text"
+                    >
+                       
+                      <span>
+                        출발 시간:
+                      </span>
+                       
+                      <strong>
+                        10:00
+                      </strong>
+                       
+                    </div>
+                     
+                  </div>
+                   
+                  <div
+                    class="route-result-summary-divider"
+                  />
+                  <div
+                    class="route-result-summary-item"
+                  >
+                     
+                    <div
+                      class="route-result-summary-icon"
+                    >
+                       
+                      <svg
+                        aria-hidden="true"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        width="18"
+                      >
+                         
+                        <path
+                          d="M12 20C12 20 6.5 14.9 6.5 10.9C6.5 7.7 9.1 5 12.2 5C15.4 5 18 7.7 18 10.9C18 14.9 12.5 20 12.5 20H12Z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-linejoin="round"
+                          stroke-width="1.8"
+                        />
+                         
+                        <circle
+                          cx="12.2"
+                          cy="10.8"
+                          fill="none"
+                          r="2"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        />
+                         
+                      </svg>
+                       
+                    </div>
+                     
+                    <div
+                      class="route-result-summary-text"
+                    >
+                       
+                      <span>
+                        총 직선거리
+                      </span>
+                       
+                      <strong
+                        class="route-result-summary-distance"
+                      >
+                        0m
+                      </strong>
+                       
+                    </div>
+                     
+                  </div>
+                   
+                </section>
+                 
+                <section
+                  class="route-result-map-section"
+                >
+                   
+                  <div
+                    class="route-map-mock"
+                  >
+                    <div
+                      class="route-map-real"
+                    />
+                    <div
+                      class="route-map-controls"
+                      style="z-index: 2;"
+                    >
+                      <button
+                        aria-label="카카오맵...
+
+      83 |   getTripTimelineApi.mockResolvedValue([{ visitOrder: 1, arrivalTime: "10:00" }, { visitOrder: 2, arrivalTime: "11:00" }]);
+      84 |   render(<MemoryRouter initialEntries={["/route-result?id=8"]}><RouteResult /></MemoryRouter>);
+    > 85 |   await waitFor(() => expect(Object.keys(pending).sort()).toEqual([...addresses].sort()));
+         |                                                           ^
+      86 |   const page = document.getElementById("route-result-pdf");
+      87 |   expect(page.dataset.exportReady).toBe("false");
+      88 |   expect(screen.queryByText("직선거리 0m")).not.toBeInTheDocument();
+
+      at src/RouteResult/mapCoordinates.test.jsx:85:59
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 5 passed, 6 total
+Snapshots:   0 total
+Time:        4.396 s
+Ran all test suites within paths "src/RouteResult/mapCoordinates.test.jsx".

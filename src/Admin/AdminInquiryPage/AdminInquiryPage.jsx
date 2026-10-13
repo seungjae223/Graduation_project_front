@@ -1,9 +1,10 @@
-import { getApiErrorMessage as safeApiErrorMessage } from "../../api/api";
-import { logSafeApiError } from "../../utils/safeLog";
-import React, { useEffect, useState } from "react";
+
+
+import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "./AdminInquiryPage.css";
 import api from "../../api/api";
+import useReadQuery from "../../utils/useReadQuery"; import useSessionKey from "../../utils/useSessionKey"; import { getAuthSnapshot } from "../../utils/authState"; import { readInquiryList, inquiryErrorMessage } from "../../Mypage/inquiryData";
 
 const TABS = [
   { key: "all", label: "전체 문의" },
@@ -39,111 +40,21 @@ const formatListTime = (dateString) => {
   return `${yyyy}.${mm}.${dd}`;
 };
 
-const getInquiryArray = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.inquiries)) return data.inquiries;
-  if (Array.isArray(data?.result)) return data.result;
-  if (Array.isArray(data?.response)) return data.response;
-
-  return [];
-};
-
-const normalizeInquiry = (inquiry) => {
-  const rawStatus = String(inquiry.status || "").toLowerCase();
-
-  const answer =
-    inquiry.answer ||
-    inquiry.reply ||
-    inquiry.answerContent ||
-    inquiry.answerText ||
-    "";
-
-  const isAnswered =
-    inquiry.answered === true ||
-    inquiry.isAnswered === true ||
-    Boolean(answer) ||
-    rawStatus === "answered" ||
-    rawStatus === "complete" ||
-    rawStatus === "completed" ||
-    rawStatus === "done" ||
-    rawStatus === "답변완료" ||
-    rawStatus === "답변 완료";
-
-  return {
-    id: inquiry.id ?? inquiry.inquiryId ?? inquiry.questionId,
-    title: inquiry.title || inquiry.subject || "제목 없음",
-    content: inquiry.content || inquiry.question || inquiry.body || "",
-    userEmail: inquiry.userEmail || inquiry.email || "",
-    uid: inquiry.userEmail || inquiry.email || "-",
-    answer,
-    status: isAnswered ? "answered" : "pending",
-    createdAt:
-      inquiry.createdAt ||
-      inquiry.createdDate ||
-      inquiry.date ||
-      inquiry.updatedAt ||
-      "",
-    originalData: inquiry,
-  };
-};
-
-const getErrorMessage = safeApiErrorMessage;
-
 const AdminInquiryPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [inquiries, setInquiries] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const account = useSessionKey();
+  const query = useReadQuery(account + ":admin-inquiries", async signal => readInquiryList((await api.get("/api/inquiries/admin", { signal })).data), account !== "anonymous", () => getAuthSnapshot().accountKey === account);
+  const inquiries = query.data || [];
+  const isLoading = query.status === "loading" && !query.data;
+  const errorMessage = query.status === "error" ? inquiryErrorMessage(query.cause, "문의 목록을 불러오지 못했습니다. 다시 시도해 주세요.") : "";
 
   const rawTab = searchParams.get("tab");
 
   const selectedTab = TABS.some((tab) => tab.key === rawTab)
     ? rawTab
     : "all";
-
-  useEffect(() => {
-    const fetchAdminInquiries = async () => {
-      try {
-        setIsLoading(true);
-        setErrorMessage("");
-
-        const response = await api.get("/api/inquiries/admin");
-        const inquiryArray = getInquiryArray(response.data);
-
-        setInquiries(inquiryArray.map(normalizeInquiry));
-      } catch (error) {
-        logSafeApiError(error, "AdminInquiryPage.jsx");
-
-        if (error.message.includes("Network Error")) {
-          setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-          return;
-        }
-
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          setErrorMessage(
-            "관리자 권한이 없거나 로그인 정보가 만료되었습니다. 다시 로그인해주세요."
-          );
-          return;
-        }
-
-        setErrorMessage(
-          getErrorMessage(
-            error,
-            "문의 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
-          )
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAdminInquiries();
-  }, []);
 
   const filteredInquiries =
     selectedTab === "all"
@@ -160,7 +71,7 @@ const AdminInquiryPage = () => {
   };
 
   const handleAnswerClick = (item) => {
-    if (item.status === "answered") return;
+
 
     navigate(`/admin/inquiry/write?id=${item.id}`, {
       state: {
@@ -187,7 +98,7 @@ const AdminInquiryPage = () => {
             className={`admin-inquiry-tab ${
               selectedTab === tab.key ? "active" : ""
             }`}
-            onClick={() => handleTabClick(tab.key)}
+            aria-pressed={selectedTab === tab.key} onClick={() => handleTabClick(tab.key)}
           >
             {tab.label}
           </button>
@@ -195,11 +106,11 @@ const AdminInquiryPage = () => {
       </div>
 
       <div className="admin-inquiry-list">
+        {errorMessage && <div className="admin-inquiry-empty" role="alert">{errorMessage}<button type="button" onClick={query.retry}>다시 불러오기</button></div>}
         {isLoading ? (
           <div className="admin-inquiry-empty">문의 목록을 불러오는 중입니다.</div>
-        ) : errorMessage ? (
-          <div className="admin-inquiry-empty">{errorMessage}</div>
-        ) : filteredInquiries.length === 0 ? (
+
+        ) : !errorMessage && filteredInquiries.length === 0 ? (
           <div className="admin-inquiry-empty">표시할 문의가 없습니다.</div>
         ) : (
           filteredInquiries.map((item) => {
@@ -210,11 +121,11 @@ const AdminInquiryPage = () => {
                 <div className="admin-inquiry-card-top">
                   <div className="admin-inquiry-meta">
                     <span className={`admin-inquiry-status ${item.status}`}>
-                      {isAnswered ? "답변 완료" : "대기 중"}
+                      {item.statusText}
                     </span>
 
                     <span className="admin-inquiry-uid">
-                      이메일: {item.uid}
+                      이메일: {item.userEmail || "정보 없음"}
                     </span>
                   </div>
 
@@ -233,9 +144,9 @@ const AdminInquiryPage = () => {
                     isAnswered ? "done" : ""
                   }`}
                   onClick={() => handleAnswerClick(item)}
-                  disabled={isAnswered || item.id === undefined || item.id === null}
+                  disabled={item.id === undefined || item.id === null}
                 >
-                  {isAnswered ? "답변 완료됨" : "↩ 답변하기"}
+                  {isAnswered ? "답변 보기" : "↩ 답변하기"}
                 </button>
               </article>
             );

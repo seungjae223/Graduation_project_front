@@ -1,21 +1,27 @@
-import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
-import { logSafeApiError } from "../utils/safeLog";
+
+
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import AnimatedHeart from "../AnimatedHeart/AnimatedHeart";
-import FolderSelectModal from "../FolderSelectModal/FolderSelectModal";
+import useReadQuery from "../utils/useReadQuery";
+import useSessionKey from "../utils/useSessionKey";
+import { getAuthSnapshot } from "../utils/authState";
+import { requireList } from "../api/responseContract";
+import { toApiTheme } from "../utils/placeTheme";
+import usePlaceSaving from "../utils/usePlaceSaving";
+import PlaceSavingFeedback, { PlaceSaveModal } from "../components/PlaceSavingFeedback";
 import "./Recommend.css";
 import api from "../api/api";
 
-import forestImg from "../img/도쿄.png"; // 기본 이미지(Fallback)로 사용됨
+import PlacePhoto from "../components/PlacePhoto";
+import { getPlacePhoto } from "../data/placePhotos";
 import healingThemeIcon from "../img/흰색 나뭇잎.png";
 import activityThemeIcon from "../img/검은색 액티비티.png";
 import foodThemeIcon from "../img/검은색 맛집.png";
 import photoThemeIcon from "../img/검은색 카메라.png";
 
 const RECOMMENDATIONS_API = "/api/recommendations";
-const FOLDERS_API = "/api/folders";
+
 const PLACES_API = "/api/places";
 const ITEMS_PER_PAGE = 5;
 const PAGE_NUMBER_COUNT = 3; // 이전/다음 버튼까지 합쳐서 한 줄에 총 5개만 표시
@@ -40,7 +46,7 @@ const PinIcon = () => (
   </svg>
 );
 
-// key는 DB에 저장된 theme 값, label은 화면에 보여줄 한글 값
+// key는 UI 상태 값이며 API 요청에서는 현재 서버 테마 값으로 변환합니다.
 const themeCards = [
   { key: "healing", label: "힐링", icon: healingThemeIcon, tone: "light" },
   { key: "activity", label: "액티비티", icon: activityThemeIcon },
@@ -48,81 +54,15 @@ const themeCards = [
   { key: "photo", label: "인스타 감성", icon: photoThemeIcon },
 ];
 
-const cityKeywordAliases = {
-  도쿄: ["도쿄", "동경", "tokyo"],
-  tokyo: ["도쿄", "동경", "tokyo"],
-  오사카: ["오사카", "osaka"],
-  osaka: ["오사카", "osaka"],
-  교토: ["교토", "kyoto"],
-  kyoto: ["교토", "kyoto"],
-  나라: ["나라", "nara"],
-  nara: ["나라", "nara"],
-  후쿠오카: ["후쿠오카", "fukuoka"],
-  fukuoka: ["후쿠오카", "fukuoka"],
-  삿포로: ["삿포로", "sapporo"],
-  sapporo: ["삿포로", "sapporo"],
-};
 
-const normalizeSearchText = (value) =>
-  String(value || "")
-    .toLowerCase()
-    .replace(/\s+/g, "");
 
-const getSearchKeywordCandidates = (keyword) => {
-  const normalizedKeyword = normalizeSearchText(keyword);
-  const aliases = cityKeywordAliases[normalizedKeyword];
 
-  if (!aliases) {
-    return [normalizedKeyword];
-  }
 
-  return aliases.map(normalizeSearchText);
-};
 
-const matchesSearchKeyword = (place, keyword) => {
-  const keywordCandidates = getSearchKeywordCandidates(keyword);
 
-  if (keywordCandidates.length === 0 || !keywordCandidates[0]) {
-    return true;
-  }
 
-  const searchableText = normalizeSearchText(
-    [
-      place.title,
-      place.description,
-      place.address,
-      place.theme,
-      place.badge,
-      place.placeType,
-      place.tabType,
-      ...(place.tags || []),
-    ].join(" ")
-  );
 
-  return keywordCandidates.some((candidate) =>
-    searchableText.includes(candidate)
-  );
-};
 
-const getArrayData = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.places)) return data.places;
-  if (Array.isArray(data?.folders)) return data.folders;
-  if (Array.isArray(data?.recommendations)) return data.recommendations;
-  if (Array.isArray(data?.savedPlaces)) return data.savedPlaces;
-  if (Array.isArray(data?.data?.content)) return data.data.content;
-  if (Array.isArray(data?.data?.items)) return data.data.items;
-  if (Array.isArray(data?.data?.places)) return data.data.places;
-  if (Array.isArray(data?.data?.folders)) return data.data.folders;
-  if (Array.isArray(data?.data?.recommendations)) return data.data.recommendations;
-  if (Array.isArray(data?.result)) return data.result;
-  if (Array.isArray(data?.results)) return data.results;
-
-  return [];
-};
 
 const normalizeTags = (tags) => {
   if (!Array.isArray(tags)) return [];
@@ -190,7 +130,7 @@ const normalizePlace = (place, selectedTheme, index = 0) => {
       "주소 정보 없음",
     latitude: Number(place.latitude ?? 0),
     longitude: Number(place.longitude ?? 0),
-    rating: place.rating || place.score || place.avgRating || 0,
+    rating: optionalNumber(place.rating ?? place.score ?? place.avgRating),
     reviewCount: place.reviewCount || place.reviewsCount || place.reviewCnt || 0,
     badge: place.badge || place.badgeText || placeType || "PLACE",
     placeType,
@@ -201,7 +141,7 @@ const normalizePlace = (place, selectedTheme, index = 0) => {
       place.thumbnail ||
       place.thumbnailUrl ||
       place.photoUrl ||
-      forestImg,
+      "",
     tags: normalizeTags(
       place.tags || place.hashtags || [theme, placeType].filter(Boolean)
     ),
@@ -209,188 +149,40 @@ const normalizePlace = (place, selectedTheme, index = 0) => {
   };
 };
 
-const getSavedPlaceId = (savedPlace) => {
-  const placeData = savedPlace.place || savedPlace.destination || savedPlace;
 
-  return (
-    placeData.id ??
-    placeData.placeId ??
-    savedPlace.placeId ??
-    savedPlace.savedPlaceId ??
-    savedPlace.bookmarkId ??
-    savedPlace.id
-  );
-};
 
-const getFolderId = (folder) => {
-  return folder?.id ?? folder?.folderId ?? folder?.folder_id ?? null;
-};
 
-const getFolderPlacesUrl = (folderId) => {
-  return `${FOLDERS_API}/${encodeURIComponent(folderId)}/places`;
-};
 
-const getFolderPlaceDeleteUrl = (folderId, placeId) => {
-  return `${FOLDERS_API}/${encodeURIComponent(
-    folderId
-  )}/places/${encodeURIComponent(placeId)}`;
-};
 
-const getUniqueTextArray = (values) => {
-  return [...new Set(values.filter(Boolean).map((value) => String(value)))];
-};
 
-const getErrorMessage = safeApiErrorMessage;
+
+
+
+
+
+
+const optionalNumber = value => value === undefined || value === null || value === "" ? null : Number.isFinite(Number(value)) ? Number(value) : null;
 
 function Recommend() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isSaved, toggleSavedPlace } = useSavedPlaces();
+  const account = useSessionKey();
+  const saving = usePlaceSaving();
+  const { isSaved, isSavingId } = saving;
 
   const searchKeyword = (searchParams.get("keyword") || "").trim();
   const isSearchMode = searchKeyword.length > 0;
 
   const [selectedTheme, setSelectedTheme] = useState("healing");
-  const [recommendedPlaces, setRecommendedPlaces] = useState([]);
-  const [serverSavedIds, setServerSavedIds] = useState([]);
-  const [serverSavedFolderMap, setServerSavedFolderMap] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSavingId, setIsSavingId] = useState(null);
-  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
-  const [folderTargetPlace, setFolderTargetPlace] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedTheme, searchKeyword]);
-
-  useEffect(() => {
-    const fetchRecommendedPlaces = async () => {
-      try {
-        setIsLoading(true);
-        setErrorMessage("");
-
-        let response;
-
-        if (isSearchMode) {
-          try {
-            response = await api.get(`${PLACES_API}/search`, {
-              params: {
-                keyword: searchKeyword,
-              },
-            });
-          } catch (placeSearchError) {
-            throw placeSearchError;
-          }
-        } else {
-          response = await api.get(RECOMMENDATIONS_API, {
-            params: {
-              theme: selectedTheme,
-            },
-          });
-        }
-
-        let places = getArrayData(response.data).map((place, index) =>
-          normalizePlace(place, selectedTheme, index)
-        );
-
-        if (isSearchMode) {
-          places = places.filter((place) =>
-            matchesSearchKeyword(place, searchKeyword)
-          );
-        }
-
-        setRecommendedPlaces(places);
-      } catch (error) {
-        logSafeApiError(error, "Recommend.jsx");
-
-        if (error.message.includes("Network Error")) {
-          setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-          return;
-        }
-
-        setErrorMessage(
-          getErrorMessage(
-            error,
-            isSearchMode
-              ? "검색 결과를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
-              : "추천 장소를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
-          )
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchRecommendedPlaces();
-  }, [selectedTheme, searchKeyword, isSearchMode]);
-
-  const loadSavedPlaceState = async () => {
-    try {
-      const folderResponse = await api.get(FOLDERS_API);
-      const folders = getArrayData(folderResponse.data);
-      const savedIds = [];
-      const savedFolderMap = {};
-
-      const placeResponses = await Promise.allSettled(
-        folders
-          .map((folder) => getFolderId(folder))
-          .filter((folderId) => folderId !== null && folderId !== undefined)
-          .map(async (folderId) => {
-            const response = await api.get(getFolderPlacesUrl(folderId));
-
-            return {
-              folderId: String(folderId),
-              places: getArrayData(response.data),
-            };
-          })
-      );
-
-      placeResponses.forEach((result) => {
-        if (result.status !== "fulfilled") return;
-
-        const { folderId, places: folderPlaces } = result.value;
-
-        folderPlaces.forEach((savedPlace) => {
-          const placeId = getSavedPlaceId(savedPlace);
-
-          if (!placeId) return;
-
-          const placeIdText = String(placeId);
-          savedIds.push(placeIdText);
-
-          savedFolderMap[placeIdText] = getUniqueTextArray([
-            ...(savedFolderMap[placeIdText] || []),
-            folderId,
-          ]);
-        });
-      });
-
-      const nextSavedIds = [...new Set(savedIds)];
-
-      setServerSavedIds(nextSavedIds);
-      setServerSavedFolderMap(savedFolderMap);
-
-      return {
-        savedIds: nextSavedIds,
-        savedFolderMap,
-      };
-    } catch (error) {
-      logSafeApiError(error, "Recommend.jsx");
-      setServerSavedIds([]);
-      setServerSavedFolderMap({});
-
-      return {
-        savedIds: [],
-        savedFolderMap: {},
-      };
-    }
-  };
-
-  useEffect(() => {
-    loadSavedPlaceState();
-  }, []);
+  const listing = useReadQuery(`${account}:recommend:${isSearchMode ? "search:" + searchKeyword : "theme:" + selectedTheme}`, async signal => {
+    const response = await api.get(isSearchMode ? `${PLACES_API}/search` : RECOMMENDATIONS_API, { signal, params: isSearchMode ? { keyword: searchKeyword } : { theme: toApiTheme(selectedTheme) } });
+    return requireList(response.data).map((place, index) => normalizePlace(place, selectedTheme, index));
+  }, true, () => getAuthSnapshot().accountKey === account);
+  const recommendedPlaces = listing.data || [];
+  const isLoading = listing.status === "loading" && !listing.data;
+  const errorMessage = listing.status === "error" ? "추천 장소를 불러오지 못했어요." : "";
+  useEffect(() => { setCurrentPage(1); }, [selectedTheme, searchKeyword]);
 
   const totalPages = Math.max(
     1,
@@ -448,167 +240,13 @@ function Recommend() {
     });
   };
 
-  const closeFolderModal = () => {
-    if (isSavingId) return;
-
-    setIsFolderModalOpen(false);
-    setFolderTargetPlace(null);
-  };
-
-  const postPlaceToFolder = async (placeId, folder) => {
-    if (!placeId) {
-      throw new Error("장소 ID가 없습니다.");
-    }
-
-    if (!folder?.id) {
-      throw new Error("폴더 ID가 없습니다.");
-    }
-
-    return api.post(
-      `${getFolderPlacesUrl(folder.id)}/${encodeURIComponent(placeId)}`
-    );
-  };
-
-  const removeSavedPlace = async (place) => {
-    try {
-      setIsSavingId(place.id);
-
-      const placeIdText = String(place.id);
-      let folderIds = serverSavedFolderMap[placeIdText] || [];
-
-      if (folderIds.length === 0) {
-        const latestSavedState = await loadSavedPlaceState();
-        folderIds = latestSavedState.savedFolderMap[placeIdText] || [];
-      }
-
-      if (folderIds.length > 0) {
-        const deleteResults = await Promise.allSettled(
-          getUniqueTextArray(folderIds).map((folderId) =>
-            api.delete(getFolderPlaceDeleteUrl(folderId, place.id))
-          )
-        );
-
-        const failedResult = deleteResults.find(
-          (result) =>
-            result.status === "rejected" && result.reason?.response?.status !== 404
-        );
-
-        if (failedResult) {
-          throw failedResult.reason;
-        }
-      }
-
-      setServerSavedIds((prev) =>
-        prev.filter((savedId) => savedId !== String(place.id))
-      );
-
-      setServerSavedFolderMap((prev) => {
-        const next = { ...prev };
-        delete next[String(place.id)];
-        return next;
-      });
-
-      if (isSaved(place.id)) {
-        toggleSavedPlace(place);
-      }
-    } catch (error) {
-      logSafeApiError(error, "Recommend.jsx");
-
-      if (error.message.includes("Network Error")) {
-        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-        return;
-      }
-
-      alert(
-        getErrorMessage(
-          error,
-          "관심 장소 연동에 실패했습니다. 잠시 후 다시 시도해주세요."
-        )
-      );
-    } finally {
-      setIsSavingId(null);
-    }
-  };
-
-  const savePlaceToFolder = async (place, folder) => {
-    try {
-      setIsSavingId(place.id);
-
-      const registeredPlaceId = place.id;
-
-      if (!registeredPlaceId) {
-        throw new Error("저장할 장소의 서버 ID가 없습니다.");
-      }
-
-      await postPlaceToFolder(registeredPlaceId, folder);
-
-      setServerSavedIds((prev) => {
-        const nextIds = new Set(prev);
-        nextIds.add(String(place.id));
-        nextIds.add(String(registeredPlaceId));
-        return [...nextIds];
-      });
-
-      setServerSavedFolderMap((prev) => ({
-        ...prev,
-        [String(place.id)]: getUniqueTextArray([
-          ...(prev[String(place.id)] || []),
-          folder.id,
-        ]),
-        [String(registeredPlaceId)]: getUniqueTextArray([
-          ...(prev[String(registeredPlaceId)] || []),
-          folder.id,
-        ]),
-      }));
-
-      if (!isSaved(place.id) && !isSaved(registeredPlaceId)) {
-        toggleSavedPlace({ ...place, id: registeredPlaceId, folder });
-      }
-
-      setIsFolderModalOpen(false);
-      setFolderTargetPlace(null);
-    } catch (error) {
-      logSafeApiError(error, "Recommend.jsx");
-
-      if (error.message.includes("Network Error")) {
-        alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-        return;
-      }
-
-      alert(
-        getErrorMessage(
-          error,
-          "관심 장소 연동에 실패했습니다. 잠시 후 다시 시도해주세요."
-        )
-      );
-    } finally {
-      setIsSavingId(null);
-    }
-  };
-
-  const handleSaveFolder = async (folder) => {
-    if (!folderTargetPlace || isSavingId === folderTargetPlace.id) return;
-
-    await savePlaceToFolder(folderTargetPlace, folder);
-  };
-
-  const handleToggleSaved = async (event, place, saved) => {
-    event.stopPropagation();
-
-    if (isSavingId === place.id) return;
-
-    if (saved) {
-      await removeSavedPlace(place);
-      return;
-    }
-
-    setFolderTargetPlace(place);
-    setIsFolderModalOpen(true);
-  };
+  const handleToggleSaved = saving.toggle;
 
   return (
     <>
       <div className="recommend-page">
+        <PlaceSavingFeedback saving={saving} />
+        {errorMessage && <div role="alert"><p>{errorMessage}</p><button type="button" onClick={listing.retry}>추천 다시 조회</button></div>}
         <section className="recommend-hero">
           <h1 className="recommend-title">
             {isSearchMode ? (
@@ -680,24 +318,12 @@ function Recommend() {
             </div>
           ) : (
             <>
-              {errorMessage && (
-                <p
-                  style={{
-                    margin: "0 0 14px",
-                    fontSize: "13px",
-                    color: "#ef4444",
-                  }}
-                >
-                  {errorMessage}
-                </p>
-              )}
-
               {recommendedPlaces.length === 0 && !errorMessage ? (
                 <div className="recommend-card-list">
                   <p
                     style={{
                       textAlign: "center",
-                      color: "#94a3b8",
+                      color: "var(--color-text-muted)",
                       padding: "20px 0",
                     }}
                   >
@@ -711,7 +337,6 @@ function Recommend() {
                   <div className="recommend-card-list">
                     {paginatedPlaces.map((place) => {
                       const saved =
-                        serverSavedIds.includes(String(place.id)) ||
                         isSaved(place.id);
 
                       return (
@@ -720,7 +345,8 @@ function Recommend() {
                           className="recommend-card"
                           onClick={() => handleDetailClick(place)}
                           onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
+                            if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
+                              e.preventDefault();
                               handleDetailClick(place);
                             }
                           }}
@@ -728,11 +354,8 @@ function Recommend() {
                           tabIndex={0}
                         >
                           <div className="recommend-card-image-wrap">
-                            <img
-                              src={place.image}
-                              alt={place.title}
-                              className="recommend-card-image"
-                            />
+                            <PlacePhoto src={place.image} alt={place.title} className="recommend-card-image"
+                              credit={place.image === getPlacePhoto(place.title).image ? getPlacePhoto(place.title).credit : undefined} />
 
                             <button
                               type="button"
@@ -740,7 +363,8 @@ function Recommend() {
                               onClick={(e) =>
                                 handleToggleSaved(e, place, saved)
                               }
-                              disabled={isSavingId === place.id}
+                              disabled={saving.blocked || saving.folders.status === "loading" || isSavingId === place.id}
+                              aria-pressed={saved}
                               aria-label={saved ? "저장 취소" : "저장"}
                             >
                               <AnimatedHeart active={saved} />
@@ -750,10 +374,10 @@ function Recommend() {
                           <div className="recommend-card-body">
                             <div className="recommend-title-row">
                               <h3>{place.title}</h3>
-                              <div className="recommend-rating">
+                              {place.rating !== null && <div className="recommend-rating">
                                 <span className="star">★</span>
                                 <span>{place.rating}</span>
-                              </div>
+                              </div>}
                             </div>
 
                             <div className="recommend-address-row">
@@ -827,12 +451,7 @@ function Recommend() {
         </section>
       </div>
 
-      <FolderSelectModal
-        open={isFolderModalOpen}
-        onClose={closeFolderModal}
-        onSave={handleSaveFolder}
-        isSaving={isSavingId === folderTargetPlace?.id}
-      />
+      <PlaceSaveModal saving={saving} />
     </>
   );
 }

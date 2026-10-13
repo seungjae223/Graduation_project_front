@@ -1,15 +1,20 @@
-import { logSafeApiError } from "../utils/safeLog";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import useModalFocus from "../utils/useModalFocus";
 import "./SearchPop.css";
 import api from "../api/api";
+import { requireList } from "../api/responseContract";
+import { toApiTheme } from "../utils/placeTheme";
+import useReadQuery from "../utils/useReadQuery";
+import useSessionKey from "../utils/useSessionKey";
+import { getAuthSnapshot } from "../utils/authState";
 
 const RECOMMENDATIONS_API = "/api/recommendations";
 const PLACE_SEARCH_API = "/api/places/search";
 
 const THEME_KEYS = ["healing", "activity", "food", "photo"];
+const EMPTY_PLACES = [];
 
 const SearchIcon = () => (
   <svg
@@ -19,10 +24,10 @@ const SearchIcon = () => (
     fill="none"
     aria-hidden="true"
   >
-    <circle cx="11" cy="11" r="6.5" stroke="#1698EC" strokeWidth="2.2" />
+    <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2.2" />
     <path
       d="M16 16L20 20"
-      stroke="#1698EC"
+      stroke="currentColor"
       strokeWidth="2.2"
       strokeLinecap="round"
     />
@@ -39,41 +44,13 @@ const PinIcon = () => (
   >
     <path
       d="M12 21C12 21 18 15.6 18 10.5C18 7.18629 15.3137 4.5 12 4.5C8.68629 4.5 6 7.18629 6 10.5C6 15.6 12 21 12 21Z"
-      stroke="#72839B"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinejoin="round"
     />
-    <circle cx="12" cy="10.5" r="2.2" stroke="#72839B" strokeWidth="2" />
+    <circle cx="12" cy="10.5" r="2.2" stroke="currentColor" strokeWidth="2" />
   </svg>
 );
-
-const getArrayData = (data) => {
-  if (Array.isArray(data)) return data;
-
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.places)) return data.places;
-  if (Array.isArray(data?.recommendations)) return data.recommendations;
-  if (Array.isArray(data?.savedPlaces)) return data.savedPlaces;
-  if (Array.isArray(data?.result)) return data.result;
-  if (Array.isArray(data?.results)) return data.results;
-
-  if (Array.isArray(data?.data?.content)) return data.data.content;
-  if (Array.isArray(data?.data?.items)) return data.data.items;
-  if (Array.isArray(data?.data?.places)) return data.data.places;
-  if (Array.isArray(data?.data?.recommendations)) {
-    return data.data.recommendations;
-  }
-
-  return [];
-};
-
-const normalizeSearchText = (value) => {
-  return String(value || "")
-    .toLowerCase()
-    .replace(/\s+/g, "");
-};
 
 const normalizePlace = (place) => {
   const name =
@@ -120,34 +97,35 @@ const mergeUniquePlaces = (places) => {
   return Array.from(placeMap.values());
 };
 
-const fetchAllRecommendations = async () => {
-  const response = await api.get(RECOMMENDATIONS_API);
-  const directPlaces = getArrayData(response.data);
-
-  if (directPlaces.length > 0) {
-    return directPlaces;
+export async function fetchAllRecommendations(signal, previous) {
+  let directFailed = false;
+  try {
+    const response = await api.get(RECOMMENDATIONS_API, { signal });
+    const places = requireList(response.data);
+    if (places.length) return { places, partial: false };
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    directFailed = true;
   }
-
-  const themeResponses = await Promise.all(
-    THEME_KEYS.map((theme) =>
-      api
-        .get(RECOMMENDATIONS_API, {
-          params: {
-            theme,
-          },
-        })
-        .catch((error) => {
-          logSafeApiError(error, "SearchPop.jsx");
-          return null;
-        })
-    )
-  );
-
-  return themeResponses.flatMap((themeResponse) => {
-    if (!themeResponse) return [];
-    return getArrayData(themeResponse.data);
+  const responses = await Promise.allSettled(THEME_KEYS.map(async theme => {
+    const response = await api.get(RECOMMENDATIONS_API, { signal, params: { theme: toApiTheme(theme) } });
+    return requireList(response.data);
+  }));
+  if (signal?.aborted) throw new DOMException("취소됨", "AbortError");
+  if (responses.every(response => response.status === "rejected")) throw new Error("추천 조회 실패");
+  const batches = {};
+  responses.forEach((response, index) => {
+    const theme = THEME_KEYS[index];
+    batches[theme] = response.status === "fulfilled" ? response.value : previous?.batches?.[theme] || [];
   });
-};
+  return { places: Object.values(batches).flat(), batches, partial: directFailed || responses.some(response => response.status === "rejected") };
+}
+
+const waitForSearch = (signal, delay) => new Promise((resolve, reject) => {
+  const abort = () => { window.clearTimeout(timer); reject(new DOMException("취소됨", "AbortError")); };
+  const timer = window.setTimeout(() => { signal.removeEventListener("abort", abort); resolve(); }, delay);
+  if (signal.aborted) abort(); else signal.addEventListener("abort", abort, { once: true });
+});
 
 const SearchPop = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -158,92 +136,26 @@ const SearchPop = ({ isOpen, onClose }) => {
   });
 
   const [keyword, setKeyword] = useState("");
-  const [places, setPlaces] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const account = useSessionKey();
+  const normalizedKeyword = keyword.trim().replace(/\s+/g, " ");
+  const scope = `${account}:popup:${normalizedKeyword}`;
+  const known = useRef({ scope, data: null });
+  if (known.current.scope !== scope) known.current = { scope, data: null };
+  const query = useReadQuery(scope, async signal => {
+    await waitForSearch(signal, normalizedKeyword ? 250 : 0);
+    const result = normalizedKeyword
+      ? { places: requireList((await api.get(PLACE_SEARCH_API, { signal, params: { keyword: normalizedKeyword } })).data), partial: false }
+      : await fetchAllRecommendations(signal, known.current.data);
+    return { ...result, places: mergeUniquePlaces(result.places.map(normalizePlace)) };
+  }, isOpen, () => getAuthSnapshot().accountKey === account);
+  useEffect(() => { if (query.data) known.current = { scope, data: query.data }; }, [scope, query.data]);
+  const places = query.data?.places || EMPTY_PLACES;
+  const isLoading = query.status === "loading";
+  const errorMessage = query.status === "error" ? "검색 데이터를 불러오지 못했습니다." : "";
 
-  const filteredPlaces = useMemo(() => {
-    const value = normalizeSearchText(keyword);
-
-    if (!value) {
-      return places;
-    }
-
-    return places.filter((place) => {
-      const searchableText = normalizeSearchText(
-        [
-          place.name,
-          place.title,
-          place.address,
-          place.description,
-          place.region,
-          place.theme,
-          place.placeType,
-        ].join(" ")
-      );
-
-      return searchableText.includes(value);
-    });
-  }, [keyword, places]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    let isMounted = true;
-    const normalizedKeyword = keyword.trim().replace(/\s+/g, " ");
-
-    const fetchSearchPlaces = async () => {
-      try {
-        setIsLoading(true);
-        setErrorMessage("");
-
-        const recommendationData = normalizedKeyword
-          ? getArrayData(
-              (
-                await api.get(PLACE_SEARCH_API, {
-                  params: { keyword: normalizedKeyword },
-                })
-              ).data
-            )
-          : await fetchAllRecommendations();
-
-        if (!isMounted) return;
-
-        const nextPlaces = mergeUniquePlaces(
-          recommendationData.map(normalizePlace)
-        );
-
-        setPlaces(nextPlaces);
-      } catch (error) {
-        logSafeApiError(error, "SearchPop.jsx");
-
-        if (!isMounted) return;
-
-        setPlaces([]);
-
-        if (error.message?.includes("Network Error")) {
-          setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-          return;
-        }
-
-        setErrorMessage("검색 데이터를 불러오지 못했습니다.");
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    const timer = window.setTimeout(
-      fetchSearchPlaces,
-      normalizedKeyword ? 250 : 0
-    );
-
-    return () => {
-      isMounted = false;
-      window.clearTimeout(timer);
-    };
-  }, [isOpen, keyword]);
+  // The server owns keyword matching (including tags); do not discard its
+  // confirmed result by running a second, narrower client-side search.
+  const filteredPlaces = places;
 
   if (!isOpen) return null;
 
@@ -305,19 +217,15 @@ const SearchPop = ({ isOpen, onClose }) => {
 
           <div className="search-pop-result-header">
             <h2 id="search-pop-title">검색 결과</h2>
-            <span>{filteredPlaces.length}개 발견</span>
+            <span>{query.data ? `${filteredPlaces.length}개 발견` : isLoading ? "조회 중" : "확인 필요"}</span>
           </div>
 
           <div className="search-pop-list">
-            {isLoading ? (
-              <div className="search-pop-empty">
-                <p>검색 데이터를 불러오는 중입니다.</p>
-              </div>
-            ) : errorMessage ? (
-              <div className="search-pop-empty">
-                <p>{errorMessage}</p>
-              </div>
-            ) : (
+            {isLoading && <div className="search-pop-empty" role="status"><p>검색 데이터를 불러오는 중입니다.</p></div>}
+            {(errorMessage || query.data?.partial) && <div className="search-pop-empty" role="alert">
+              <p>{errorMessage || "일부 추천을 불러오지 못했어요. 확인된 장소는 계속 볼 수 있습니다."}</p>
+              <button type="button" className="search-pop-detail-btn" onClick={query.retry} disabled={isLoading}>다시 조회</button>
+            </div>}
               <>
                 {filteredPlaces.map((place) => (
                   <div key={place.id || place.name} className="search-pop-card">
@@ -340,13 +248,12 @@ const SearchPop = ({ isOpen, onClose }) => {
                   </div>
                 ))}
 
-                {filteredPlaces.length === 0 && (
+                {query.status === "success" && !query.data?.partial && filteredPlaces.length === 0 && (
                   <div className="search-pop-empty">
                     <p>검색 결과가 없습니다.</p>
                   </div>
                 )}
               </>
-            )}
           </div>
         </div>
       </div>

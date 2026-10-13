@@ -1,16 +1,17 @@
-import { savePreparedPdf, waitForPdfImages } from "../utils/pdfTask";
-import { logSafeApiError } from "../utils/safeLog";
-import React, { useEffect, useMemo, useState } from "react";
+import { savePreparedPdf, preparePdfImages, clonePdfContent, removeEmptyPdfPages } from "../utils/pdfTask";
+import { preparePdfMaps } from "../utils/pdfMaps";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./Header.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import html2pdf from "html2pdf.js";
 import { getAuthSnapshot } from "../utils/authState";
 import ShareModal from "../ShareModal/ShareModal";
 import Alert from "../Alert/Alert";
+import { returnFromDetail } from "../utils/detailBack";
 import { navigateWithOnboardingTransition } from "../OnBoarding/onboardingTransition";
-
-const ROUTE_STORAGE_KEY = "mock_saved_route_results";
-const ROUTE_STORAGE_EVENT = "mock-routes-updated";
+import { deleteTripApi } from "../api/tripApi";
+import useMutationTask from "../utils/useMutationTask";
+import useSessionKey from "../utils/useSessionKey";
 
 const BrandWordmark = ({ tone = "default" }) => (
   <span className={`brand-wordmark brand-wordmark--${tone}`}>너만 오면 go</span>
@@ -91,31 +92,6 @@ const BlackTrashIcon = () => (
   </svg>
 );
 
-const deleteSavedRouteById = (routeId) => {
-  if (!routeId || typeof window === "undefined") {
-    return false;
-  }
-
-  try {
-    const raw = window.localStorage.getItem(ROUTE_STORAGE_KEY);
-    const prev = raw ? JSON.parse(raw) : [];
-
-    if (!Array.isArray(prev)) {
-      return false;
-    }
-
-    const next = prev.filter((route) => String(route.id) !== String(routeId));
-
-    window.localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(next));
-    window.dispatchEvent(new CustomEvent(ROUTE_STORAGE_EVENT));
-
-    return prev.length !== next.length;
-  } catch (error) {
-    logSafeApiError(error, "Header.jsx");
-    return false;
-  }
-};
-
 const Header = ({ onSearchClick }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -125,7 +101,12 @@ const Header = ({ onSearchClick }) => {
 
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [isDeleteSuccessOpen, setIsDeleteSuccessOpen] = useState(false);
+  const accountKey = useSessionKey();
+  const currentRouteId = new URLSearchParams(location.search).get("id") || location.state?.savedRoute?.id || location.state?.routeId || "";
+  const deleteKey = `${accountKey}:${location.pathname}:${currentRouteId}`;
+  const currentDeleteKey = useRef(deleteKey);
+  currentDeleteKey.current = deleteKey;
+  const deleteTask = useMutationTask(deleteKey);
 
   const routeShareUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -164,22 +145,20 @@ const Header = ({ onSearchClick }) => {
   };
 
   useEffect(() => {
-    if (!isRouteResultPage) {
-      setIsShareOpen(false);
-      setIsDeleteOpen(false);
-    }
-  }, [isRouteResultPage]);
+    setIsShareOpen(false);
+    setIsDeleteOpen(false);
+  }, [isRouteResultPage, deleteKey]);
 
   const handleBackClick = () => {
     setIsShareOpen(false);
     setIsDeleteOpen(false);
-    setIsDeleteSuccessOpen(false);
 
-    navigate(-1);
+    if (path === "/detail") returnFromDetail(navigate);
+    else navigate(-1);
   };
 
   const handleOnboardingBackClick = () => {
-    navigateWithOnboardingTransition(navigate, -1, "backward");
+    navigateWithOnboardingTransition(navigate, window.history.state?.idx > 0 ? -1 : "/onboarding2", "backward");
   };
 
   const handleSearchClick = () => {
@@ -198,17 +177,18 @@ const Header = ({ onSearchClick }) => {
       throw new Error("PDF로 저장할 내용을 찾지 못했어요.");
     }
 
-    if (target.dataset.exportReady !== "true") throw new Error("일정과 타임라인 조회를 완료한 뒤 출력해 주세요.");
+    if (target.dataset.exportReady !== "true") throw new Error("일정과 타임라인, 지도의 장소 위치를 확인한 뒤 출력해 주세요.");
     const context = target.dataset.exportContext;
     const account = getAuthSnapshot().accountKey;
     const wrapper = document.createElement("div");
     wrapper.style.cssText = "position:fixed;left:-100000px;top:0;width:" + (target.clientWidth || 390) + "px";
-    const clone = target.cloneNode(true); clone.classList.add("is-exporting");
+    const clone = clonePdfContent(target, ".route-result-screen"); clone.classList.add("is-exporting");
     wrapper.appendChild(clone); document.body.appendChild(wrapper);
 
     try {
       await waitForNextPaint();
-      await waitForPdfImages(clone, 'img[data-pdf-asset="true"]');
+      await preparePdfMaps(clone);
+      await preparePdfImages(clone);
       await waitForNextPaint();
 
       const fileDate = buildPdfFileDate();
@@ -220,6 +200,8 @@ const Header = ({ onSearchClick }) => {
         html2canvas: {
           scale: 2,
           useCORS: true,
+          allowTaint: false,
+          logging: false,
           backgroundColor: "#f7f9fc",
         },
         jsPDF: {
@@ -233,6 +215,10 @@ const Header = ({ onSearchClick }) => {
       };
 
       const worker = html2pdf().from(clone).set(options);
+      await worker.toCanvas();
+      const canvas = await worker.get("canvas");
+      const pageSize = await worker.get("pageSize");
+      await worker.set({ canvas: removeEmptyPdfPages(canvas, pageSize.inner.ratio, [247, 249, 252]) });
       await savePreparedPdf(worker, () => isCurrent() && target.isConnected && target.dataset.exportContext === context && target.dataset.exportReady === "true" && getAuthSnapshot().accountKey === account);
     } catch (error) {
       throw error;
@@ -251,11 +237,13 @@ const Header = ({ onSearchClick }) => {
   const handleDeleteClick = () => {
     if (!isRouteResultPage) return;
 
+    deleteTask.reset();
     setIsShareOpen(false);
     setIsDeleteOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
+    if (deleteTask.blocked) return;
     const targetRouteId = getCurrentRouteId();
 
     if (!targetRouteId) {
@@ -264,30 +252,21 @@ const Header = ({ onSearchClick }) => {
       return;
     }
 
-    const deleted = deleteSavedRouteById(targetRouteId);
-
-    if (!deleted) {
-      alert("삭제할 일정을 저장소에서 찾지 못했어요.");
-      setIsDeleteOpen(false);
-      return;
-    }
-
-    setIsDeleteOpen(false);
-    setIsShareOpen(false);
-    setIsDeleteSuccessOpen(true);
-
-    navigate("/my-schedule", {
-      replace: true,
-      state: {
-        deleteSuccess: true,
-        deletedRouteId: targetRouteId,
+    const key = deleteKey;
+    await deleteTask.run(
+      () => deleteTripApi(targetRouteId),
+      async () => {
+        if (currentDeleteKey.current !== key) return;
+        setIsDeleteOpen(false);
+        setIsShareOpen(false);
+        navigate("/my-schedule", { replace: true, state: { deleteSuccess: true, deletedRouteId: targetRouteId } });
       },
-    });
+      { failure: "일정을 삭제하지 못했어요. 다시 시도해 주세요.", success: "일정을 삭제했어요.", refreshFailure: "삭제 응답을 확인했지만 화면을 갱신하지 못했어요." }
+    );
   };
 
-  const handleCloseDeleteSuccess = () => {
-    setIsDeleteSuccessOpen(false);
-  };
+  const closeDelete = () => { if (deleteTask.status !== "running") setIsDeleteOpen(false); };
+  const handleCheckDeletion = () => navigate("/my-schedule");
 
   const renderHeader = () => {
     if (path === "/home") {
@@ -423,7 +402,7 @@ const Header = ({ onSearchClick }) => {
           <BrandWordmark tone="blue" />
           <button
             className="skip-btn onboarding-motion-button onboarding-motion-button--small onboarding-motion-button--header"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/home")}
           >
             Skip
           </button>
@@ -490,22 +469,17 @@ const Header = ({ onSearchClick }) => {
         <Alert
           open={isDeleteOpen}
           type="delete"
-          onClose={() => setIsDeleteOpen(false)}
-          onSecondary={() => setIsDeleteOpen(false)}
-          onPrimary={handleDeleteConfirm}
+          title="일정 삭제"
+          description={deleteTask.message || "이 일정을 삭제할까요?"}
+          primaryText={deleteTask.status === "running" ? "삭제 중..." : deleteTask.status === "unknown" ? "일정 목록에서 확인" : "삭제하기"}
+          primaryDisabled={deleteTask.status === "running"}
+          secondaryDisabled={deleteTask.status === "running"}
+          canClose={deleteTask.status !== "running"}
+          onClose={closeDelete}
+          onSecondary={closeDelete}
+          onPrimary={deleteTask.status === "unknown" ? handleCheckDeletion : handleDeleteConfirm}
         />
       )}
-
-      <Alert
-        open={isDeleteSuccessOpen}
-        type="network"
-        title="삭제되었습니다"
-        description=""
-        primaryText="확인"
-        secondaryText=""
-        onClose={handleCloseDeleteSuccess}
-        onPrimary={handleCloseDeleteSuccess}
-      />
     </>
   );
 };

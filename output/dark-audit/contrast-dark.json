@@ -1,0 +1,140 @@
+[
+  {
+    "name": "home",
+    "checked": 14,
+    "fail": [],
+    "skipped": 5
+  },
+  {
+    "name": "search",
+    "checked": 36,
+    "fail": [],
+    "skipped": 8
+  },
+  {
+    "name": "recommend",
+    "checked": 52,
+    "fail": [],
+    "skipped": 5
+  },
+  {
+    "name": "total",
+    "checked": 76,
+    "fail": [],
+    "skipped": 9
+  },
+  {
+    "name": "detail",
+    "checked": 18,
+    "fail": [],
+    "skipped": 2
+  },
+  {
+    "name": "route-create",
+    "checked": 59,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "route-result",
+    "checked": 25,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "schedule",
+    "checked": 19,
+    "fail": [],
+    "skipped": 3
+  },
+  {
+    "name": "popular-all",
+    "checked": 23,
+    "fail": [],
+    "skipped": 4
+  },
+  {
+    "name": "mypage",
+    "checked": 25,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "saved-places",
+    "checked": 22,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "my-schedule",
+    "checked": 19,
+    "fail": [],
+    "skipped": 3
+  },
+  {
+    "name": "recent-places",
+    "checked": 16,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "inquiry",
+    "checked": 16,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "inquiry-write",
+    "checked": 16,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "admin",
+    "checked": 12,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "admin-inquiry",
+    "checked": 19,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "inquiry-detail",
+    "checked": 21,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "admin-write",
+    "checked": 14,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "signup",
+    "checked": 21,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "login",
+    "checked": 14,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "find-password",
+    "checked": 9,
+    "fail": [],
+    "skipped": 0
+  },
+  {
+    "name": "verify-code",
+    "checked": 14,
+    "fail": [],
+    "skipped": 0
+  }
+]

@@ -7,7 +7,7 @@
   position: fixed;
   inset: 0;
   z-index: 5000;
-  background: rgba(17, 24, 39, 0.62);
+  background: var(--color-backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,10 +19,11 @@
   width: 390px;
   max-width: calc(100vw - 40px);
   max-height: calc(100dvh - 72px);
-  background: #ffffff;
+  background: var(--color-surface);
+  color: var(--color-text);
   border-radius: 44px;
   overflow: hidden;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+  box-shadow: 0 24px 60px var(--color-shadow);
   display: flex;
   flex-direction: column;
 }
@@ -33,7 +34,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #e5eaf0;
+  border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
 }
 
@@ -41,7 +42,7 @@
   margin: 0;
   font-size: 25px;
   font-weight: 800;
-  color: #111827;
+  color: var(--color-text-strong);
   letter-spacing: -0.04em;
 }
 
@@ -51,7 +52,7 @@
   height: 44px;
   border: 0;
   background: transparent;
-  color: #64748b;
+  color: var(--color-text-muted);
   cursor: pointer;
   padding: 0;
   display: inline-flex;
@@ -98,7 +99,7 @@
   width: 100%;
   height: 64px;
   border: 0;
-  background: #ffffff;
+  background: var(--color-surface);
   display: grid;
   grid-template-columns: 62px minmax(0, 1fr) 38px;
   align-items: center;
@@ -113,27 +114,28 @@
 }
 
 .folder-select-option.selected {
-  background: #effaff;
+  background: var(--color-accent-soft);
 }
 
 .folder-select-icon-circle {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #e8f8ff;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
 .folder-select-option.selected .folder-select-icon-circle {
-  background: #c9f0ff;
+  background: var(--color-accent-soft);
 }
 
 .folder-select-option-name {
   min-width: 0;
   overflow: hidden;
-  color: #111827;
+  color: var(--color-text-strong);
   font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -144,7 +146,7 @@
 .folder-select-radio {
   width: 26px;
   height: 26px;
-  border: 3px solid #b6c0cc;
+  border: 3px solid var(--color-border-strong);
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
@@ -153,23 +155,23 @@
 }
 
 .folder-select-option.selected .folder-select-radio {
-  border-color: #1da7e8;
+  border-color: var(--color-accent-text);
 }
 
 .folder-select-radio-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #1da7e8;
+  background: var(--color-accent-text);
 }
 
 .folder-select-create-btn {
   width: 100%;
   height: 54px;
   margin-top: 20px;
-  border: 1.5px dashed #bfeaff;
-  background: #ffffff;
-  color: #17a8e8;
+  border: 1.5px dashed var(--color-accent-text);
+  background: var(--color-surface);
+  color: var(--color-accent-text);
   font-size: 20px;
   font-weight: 800;
   cursor: pointer;
@@ -184,7 +186,7 @@
 .folder-select-footer {
   min-height: 78px;
   padding: 14px 24px;
-  border-top: 1px solid #e5eaf0;
+  border-top: 1px solid var(--color-border);
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -205,14 +207,14 @@
 }
 
 .folder-select-cancel-btn {
-  background: #f1f3f5;
-  color: #64748b;
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
 }
 
 .folder-select-save-btn {
-  background: #1da7e8;
-  color: #ffffff;
-  box-shadow: 0 8px 18px rgba(29, 167, 232, 0.28);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: 0 8px 18px var(--color-shadow);
 }
 
 .folder-select-cancel-btn:disabled,
@@ -225,10 +227,11 @@
   width: 390px;
   max-width: calc(100vw - 40px);
   max-height: calc(100dvh - 72px);
-  background: #ffffff;
+  background: var(--color-surface);
+  color: var(--color-text);
   border-radius: 34px;
   overflow: hidden;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
+  box-shadow: 0 24px 60px var(--color-shadow);
   display: flex;
   flex-direction: column;
 }
@@ -244,7 +247,7 @@
 
 .folder-create-header h2 {
   margin: 0;
-  color: #111827;
+  color: var(--color-text-strong);
   font-size: 28px;
   font-weight: 900;
   letter-spacing: -0.06em;
@@ -272,7 +275,7 @@
 .folder-create-label {
   display: block;
   margin: 0 0 12px;
-  color: #64748b;
+  color: var(--color-text-muted);
   font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -285,11 +288,11 @@
 .folder-create-input-box,
 .folder-create-textarea-box {
   width: 100%;
-  border: 1.5px solid #eaf5fb;
-  background: #ffffff;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+  border: 1.5px solid var(--color-border-strong);
+  background: var(--color-input);
+  box-shadow: 0 4px 10px var(--color-shadow);
   display: flex;
-  color: #a9b4c2;
+  color: var(--color-text-muted);
 }
 
 .folder-create-input-box {
@@ -301,7 +304,7 @@
 }
 
 .folder-create-input-box.error {
-  border-color: #fda4af;
+  border-color: var(--color-danger);
 }
 
 .folder-create-textarea-box {
@@ -331,7 +334,7 @@
   border: 0;
   outline: 0;
   background: transparent;
-  color: #111827;
+  color: var(--color-text-strong);
   font-family: inherit;
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -351,13 +354,13 @@
 
 .folder-create-input-box input::placeholder,
 .folder-create-textarea-box textarea::placeholder {
-  color: #aeb8c6;
+  color: var(--color-placeholder);
   font-weight: 700;
 }
 
 .folder-create-error {
   margin: 6px 0 0 20px;
-  color: #ef4444;
+  color: var(--color-danger);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -366,8 +369,8 @@
 .folder-create-footer {
   min-height: 84px;
   padding: 16px 28px;
-  border-top: 1px solid #edf2f7;
-  background: #f8fafc;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -389,21 +392,56 @@
 .folder-create-cancel-btn {
   min-width: 84px;
   background: transparent;
-  color: #64748b;
+  color: var(--color-text-muted);
 }
 
 .folder-create-submit-btn {
   min-width: 120px;
   padding: 0 24px;
-  background: #1da7e8;
-  color: #ffffff;
-  box-shadow: 0 8px 18px rgba(29, 167, 232, 0.28);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: 0 8px 18px var(--color-shadow);
 }
 
 .folder-create-cancel-btn:disabled,
 .folder-create-submit-btn:disabled {
   cursor: default;
   opacity: 0.65;
+}
+
+.folder-select-modal button:focus-visible,
+.folder-create-modal button:focus-visible,
+.folder-create-input-box:focus-within,
+.folder-create-textarea-box:focus-within {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.folder-select-option:hover {
+  background: var(--color-hover);
+}
+
+.folder-select-option.selected:hover {
+  background: var(--color-accent-soft);
+}
+
+.folder-create-body > button {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  border-color: var(--color-border-strong);
+}
+
+.folder-select-save-btn:not(:disabled):hover,
+.folder-create-submit-btn:not(:disabled):hover {
+  background: var(--color-primary-hover);
+}
+
+.folder-select-save-btn:disabled,
+.folder-create-submit-btn:disabled {
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  box-shadow: none;
+  opacity: 1;
 }
 
 @media (max-width: 480px) {

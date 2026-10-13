@@ -8,13 +8,14 @@
   max-width: 430px;
   min-height: 100vh;
   margin: 0 auto;
-  background: #f7f9fc;
+  background: var(--color-page);
+  color: var(--color-text);
 }
 
 .my-schedule-tabs {
   display: flex;
-  background: #ffffff;
-  border-bottom: 1px solid #e8eef5;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .my-schedule-tab {
@@ -22,7 +23,7 @@
   height: 68px;
   border: none;
   background: transparent;
-  color: #a1afc0;
+  color: var(--color-text-muted);
   font-size: 16px;
   font-weight: 900;
   cursor: pointer;
@@ -30,7 +31,7 @@
 }
 
 .my-schedule-tab.active {
-  color: #19a5f4;
+  color: var(--color-accent-text);
 }
 
 .my-schedule-tab.active::after {
@@ -41,7 +42,7 @@
   bottom: 0;
   height: 3px;
   border-radius: 999px;
-  background: #19a5f4;
+  background: var(--color-primary);
 }
 
 .my-schedule-content {
@@ -51,10 +52,10 @@
 .my-schedule-create-btn {
   width: 100%;
   height: 66px;
-  border: 2px dashed #9fdcff;
+  border: 2px dashed var(--color-accent-text);
   border-radius: 18px;
-  background: #eaf7ff;
-  color: #19a5f4;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
   font-size: 17px;
   font-weight: 900;
   display: flex;
@@ -71,7 +72,7 @@
 
 .my-schedule-section-header h2 {
   margin: 0;
-  color: #1a2233;
+  color: var(--color-text-strong);
   font-size: 19px;
   font-weight: 900;
   display: flex;
@@ -80,7 +81,7 @@
 }
 
 .my-schedule-section-header h2 span {
-  color: #19a5f4;
+  color: var(--color-accent-text);
 }
 
 .my-schedule-list {
@@ -95,9 +96,9 @@
   gap: 14px;
   padding: 14px;
   border-radius: 18px;
-  background: #ffffff;
-  border: 1px solid #e8eef5;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 14px var(--color-shadow);
   cursor: pointer;
 }
 
@@ -125,8 +126,8 @@
   height: 24px;
   padding: 0 10px;
   border-radius: 999px;
-  background: #eaf5ff;
-  color: #19a5f4;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
   font-size: 12px;
   font-weight: 900;
   display: inline-flex;
@@ -136,7 +137,7 @@
 
 .my-schedule-card-body h3 {
   margin: 0;
-  color: #1a2233;
+  color: var(--color-text-strong);
   font-size: 17px;
   font-weight: 900;
   line-height: 1.35;
@@ -145,7 +146,7 @@
 
 .my-schedule-date {
   margin: 8px 0 0;
-  color: #718297;
+  color: var(--color-text-muted);
   font-size: 15px;
   font-weight: 600;
 }
@@ -155,7 +156,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #95a3b4;
+  color: var(--color-text-muted);
   font-size: 14px;
   font-weight: 600;
 }
@@ -167,13 +168,13 @@
 }
 
 .my-schedule-chevron {
-  color: #c3ceda;
+  color: var(--color-text-muted);
   flex-shrink: 0;
 }
 
 .my-schedule-empty {
   padding: 18px 0;
-  color: #111827;
+  color: var(--color-text-strong);
   font-size: 16px;
   font-weight: 500;
 }
@@ -182,12 +183,31 @@
   margin: 0;
 }
 
+.my-schedule-empty [role="alert"] {
+  color: var(--color-danger);
+}
+
+.my-schedule-empty button {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.my-schedule-tab:focus-visible,
+.my-schedule-create-btn:focus-visible,
+.my-schedule-card:focus-visible,
+.my-schedule-empty button:focus-visible,
+.my-schedule-recommend-card button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
 .my-schedule-recommend-card {
   margin-top: 26px;
   padding: 28px 26px;
   border-radius: 22px;
-  background: linear-gradient(135deg, #1f9ff2 0%, #37b4ff 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-primary-hover) 0%, var(--color-primary) 100%);
+  color: var(--color-on-primary);
 }
 
 .my-schedule-recommend-card h3 {
@@ -201,7 +221,7 @@
   margin: 12px 0 0;
   font-size: 16px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--color-on-primary);
   word-break: keep-all;
 }
 
@@ -211,8 +231,8 @@
   height: 50px;
   border: none;
   border-radius: 14px;
-  background: #ffffff;
-  color: #1f9ff2;
+  background: var(--color-surface);
+  color: var(--color-accent-text);
   font-size: 18px;
   font-weight: 900;
   cursor: pointer;

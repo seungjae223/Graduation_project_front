@@ -1,0 +1,10 @@
+PASS src/api/security.test.js
+PASS src/api/apiConfig.test.js
+PASS src/api/api.test.js
+PASS src/api/specSync.test.js
+
+Test Suites: 4 passed, 4 total
+Tests:       34 passed, 34 total
+Snapshots:   0 total
+Time:        5.758 s
+Ran all test suites within paths "src/api/apiConfig.test.js", "src/api/api.test.js", "src/api/security.test.js", "src/api/specSync.test.js".

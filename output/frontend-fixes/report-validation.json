@@ -1,0 +1,17 @@
+{
+  "resultRows": 71,
+  "sourceFileLinksChecked": 67,
+  "screenshotFiles": 73,
+  "testSuites": 60,
+  "passedTests": 357,
+  "failedTests": 0,
+  "lintErrors": 0,
+  "lintWarnings": 0,
+  "productionBuild": "Compiled successfully",
+  "missingLinks": [],
+  "resultCounts": {
+    "completed": 57,
+    "verificationLimited": 6,
+    "contractNeeded": 8
+  }
+}

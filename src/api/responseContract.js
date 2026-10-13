@@ -1,7 +1,7 @@
 // A 200 HTML/login page or malformed body must never become an empty result.
 export function requireList(data) {
   if (Array.isArray(data)) return data;
-  for (const key of ["data", "content", "items", "trips", "places", "tripPlaces", "result"]) {
+  for (const key of ["data", "content", "items", "trips", "places", "tripPlaces", "recommendations", "folders", "reviews", "result"]) {
     if (Array.isArray(data?.[key])) return data[key];
   }
   throw new Error("조회 응답 형식을 확인할 수 없습니다.");

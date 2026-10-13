@@ -1,6 +1,8 @@
 import "./App.css";
 import "./animations/onboardingButtonMotion.css";
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import PageTransition, { RouteContentReady } from "./animations/PageTransition";
+import { cancelOnboardingTransition, syncOnboardingTransitionRoute } from "./OnBoarding/onboardingTransition";
 import {
   BrowserRouter,
   Link,
@@ -8,6 +10,7 @@ import {
   Routes,
   Route,
   useLocation,
+  useNavigationType,
 } from "react-router-dom";
 
 import Header from "./Header/Header";
@@ -22,6 +25,8 @@ import { buildLoginPath } from "./utils/authRedirect";
 import OnBoarding from "./OnBoarding/OnBoarding";
 import OnBoarding2 from "./OnBoarding/OnBoarding2";
 import OnBoarding3 from "./OnBoarding/OnBoarding3";
+import AdminAccessGuard from "./Admin/AdminAccessGuard";
+import useKeyboardRouteFocus from "./utils/useKeyboardRouteFocus";
 
 // 관리자 전용 푸터
 import AdminFooter from "./Admin/AdminFooter/AdminFooter";
@@ -97,7 +102,11 @@ function Layout() {
   useSessionKey();
   const location = useLocation();
   const [isSearchPopOpen, setIsSearchPopOpen] = useState(false);
+  const navigationType = useNavigationType();
+  useKeyboardRouteFocus(location.pathname, navigationType);
   const previousPathRef = useRef(null);
+  useLayoutEffect(() => { syncOnboardingTransitionRoute(location.pathname); }, [location.pathname, location.key]);
+  useEffect(() => () => cancelOnboardingTransition(), []);
 
   useEffect(() => {
     setIsSearchPopOpen(false);
@@ -161,7 +170,7 @@ function Layout() {
           shouldShowDefaultFooter || shouldShowAdminFooter ? "with-footer" : ""
         }`}
       >
-        <div
+        <PageTransition
           key={location.pathname}
           className={`route-transition ${
             pathname === "/" || pathname.startsWith("/onboarding")
@@ -171,6 +180,7 @@ function Layout() {
         >
           <RouteErrorBoundary key={`${location.pathname}${location.search}`}>
           <Suspense fallback={<EarthLoader variant="page" text="화면을 불러오는 중..." />}>
+            <RouteContentReady>
             <Routes>
               <Route path="/" element={<OnBoarding />} />
               <Route path="/onboarding" element={<OnBoarding />} />
@@ -212,20 +222,21 @@ function Layout() {
               <Route path="/inquiry/:id" element={<RequireAuth><InquiryDetail /></RequireAuth>} />
 
               {/* 관리자 메인 페이지 */}
-              <Route path="/admin" element={<RequireAuth><AdminMain /></RequireAuth>} />
+              <Route path="/admin" element={<RequireAuth><AdminAccessGuard><AdminMain /></AdminAccessGuard></RequireAuth>} />
 
               {/* 관리자 문의 페이지 */}
-              <Route path="/admin/inquiry" element={<RequireAuth><AdminInquiry /></RequireAuth>} />
+              <Route path="/admin/inquiry" element={<RequireAuth><AdminAccessGuard><AdminInquiry /></AdminAccessGuard></RequireAuth>} />
               <Route
                 path="/admin/inquiry/write"
-                element={<RequireAuth><AdminInquiryWrite /></RequireAuth>}
+                element={<RequireAuth><AdminAccessGuard><AdminInquiryWrite /></AdminAccessGuard></RequireAuth>}
               />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </RouteContentReady>
           </Suspense>
           </RouteErrorBoundary>
-        </div>
+        </PageTransition>
       </main>
 
       {shouldShowDefaultFooter && <Footer />}

@@ -1,0 +1,334 @@
+:root {
+  color-scheme: light;
+  --app-width: 390px;
+  --footer-height: 70px;
+  --color-page: #f8fbfd;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f4f7fb;
+  --color-surface-raised: #ffffff;
+  --color-text: #182031;
+  --color-text-strong: #111827;
+  --color-text-muted: #65748a;
+  --color-border: #e5e7eb;
+  --color-border-strong: #cbd5e1;
+  --color-hover: #edf4fa;
+  --color-focus: #0da6f2;
+  --color-accent: #0da6f2;
+  --color-on-accent: #ffffff;
+  --color-accent-soft: #e9f6fd;
+  --color-input: #ffffff;
+  --color-placeholder: #8b95a1;
+  --color-shadow: rgba(15, 23, 42, 0.1);
+  --color-backdrop: rgba(15, 23, 42, 0.18);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --color-page: #0f1722;
+  --color-surface: #17212f;
+  --color-surface-muted: #202c3c;
+  --color-surface-raised: #243244;
+  --color-text: #f1f5f9;
+  --color-text-strong: #f8fafc;
+  --color-text-muted: #aebccd;
+  --color-border: #344255;
+  --color-border-strong: #475569;
+  --color-hover: #273649;
+  --color-focus: #55bdf8;
+  --color-accent: #18a8ed;
+  --color-on-accent: #ffffff;
+  --color-accent-soft: #15344a;
+  --color-input: #202c3c;
+  --color-placeholder: #91a2b7;
+  --color-shadow: rgba(2, 6, 12, 0.34);
+  --color-backdrop: rgba(2, 6, 12, 0.68);
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  background: var(--color-page);
+  color: var(--color-text);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html {
+  overflow-x: clip;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--color-page);
+  overflow-x: clip;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+button,
+input,
+textarea,
+select,
+a {
+  outline-color: var(--color-focus);
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+.app {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  background: var(--color-page);
+  position: relative;
+  /*
+   * `overflow-x: hidden` turns the flex item into a vertical scroll
+   * container in mobile browsers.  That traps content below the viewport.
+   * Clip only the horizontal axis while letting the document grow vertically.
+   */
+  overflow-x: clip;
+  overflow-y: visible;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.app::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.app-content {
+  width: 100%;
+  min-width: 0;
+  flex: 1 0 auto;
+  overflow-x: clip;
+  overflow-y: visible;
+  background: var(--color-page);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.app-content::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.app-content.with-footer {
+  padding-bottom: 0;
+}
+
+.route-transition {
+  width: 100%;
+  min-width: 0;
+  min-height: auto;
+  overflow-x: clip;
+  overflow-y: visible;
+  background: var(--color-page);
+  animation: pageFadeUp 0.32s ease both;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.route-transition[data-page-entry="pending"],
+.route-transition[data-page-entry="settled"] {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+.route-transition::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+@keyframes pageFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* PC에서만 모바일 앱처럼 가운데 고정 */
+@media (min-width: 768px) {
+  body {
+    background: var(--color-page);
+  }
+
+  .app {
+    max-width: var(--app-width);
+    margin: 0 auto;
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* Only the route fallback stretches. Resolved pages keep their own layout. */
+.app-content:has(> .route-transition > .earth-loading-screen--page) {
+  display: flex;
+  flex-direction: column;
+}
+
+.route-transition:has(> .earth-loading-screen--page) {
+  display: flex;
+  flex: 1;
+}
+
+html[data-theme="dark"] :where(
+  .header, .footer, .footer-nav, .page-wrap,
+  [class$="-page"], [class$="-card"], [class$="-modal"],
+  [class$="-menu"], [class$="-panel"], [class$="-content"], [class$="-screen"],
+  [class*="-page "], [class*="-card "], [class*="-modal "],
+  [class*="-menu "], [class*="-panel "], [class*="-content "], [class*="-screen "]
+) {
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+html[data-theme="dark"] .app :where(input, textarea, select) {
+  background-color: var(--color-surface-muted);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+html[data-theme="dark"] .app :where(input, textarea)::placeholder {
+  color: var(--color-text-muted);
+}
+
+html[data-theme="dark"] .app :where(h1, h2, h3, h4, h5, h6, p, label, legend, li, dt, dd) {
+  color: var(--color-text);
+}
+
+html[data-theme="dark"] .app :where(
+  [class*="subtitle"], [class*="description"], [class*="caption"],
+  [class*="address"], [class*="meta"], [class*="hint"]
+) {
+  color: var(--color-text-muted);
+}
+
+html[data-theme="dark"] .app :where(
+  [class*="card"], [class*="menu"], [class*="modal"],
+  [class*="panel"], [class*="box"], [class*="item"]
+) {
+  border-color: var(--color-border);
+}
+
+html[data-theme="dark"] :where(.login) {
+  background: var(--color-page);
+}
+
+html[data-theme="dark"] :where(.search-input-wrap, .region-icon-box) {
+  background: var(--color-surface-muted);
+  border-color: var(--color-border);
+  box-shadow: 0 8px 20px var(--color-shadow);
+}
+
+html[data-theme="dark"] .theme-card.active {
+  border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
+  background: var(--color-surface-raised);
+  box-shadow: 0 8px 20px var(--color-shadow);
+}
+
+/* 모션 줄이기 설정 사용자 대응 */
+@media (prefers-reduced-motion: reduce) {
+  .route-transition {
+    animation: none;
+  }
+}
+
+.not-found-page {
+  width: 100%;
+  min-height: calc(100dvh - 152px);
+  padding: 32px 20px;
+  display: grid;
+  place-items: center;
+}
+
+.not-found-card {
+  width: 100%;
+  padding: 32px 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-surface);
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.not-found-code {
+  display: block;
+  margin-bottom: 8px;
+  color: #0da6f2;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.not-found-card h1 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 22px;
+}
+
+.not-found-card p {
+  margin: 12px 0 24px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.not-found-action {
+  min-height: 48px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #0da6f2;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}

@@ -1,8 +1,9 @@
-import { logSafeApiError } from "../utils/safeLog";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../api/api";
 import "./SavedPlaces.css";
+import useReadQuery from "../utils/useReadQuery"; import { requireList } from "../api/responseContract"; import PlacePhoto from "../components/PlacePhoto"; import { getPlaceTypeLabel } from "../utils/placeType"; import { useSavedPlaces } from "../Context/SavedPlacesContext"; import { readSavedFolderSnapshot } from "../utils/useFolderSavedPlaces";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
 import InputDialog from "../components/InputDialog";
@@ -11,11 +12,9 @@ import useMutationTask from "../utils/useMutationTask";
 import folderFilledIcon from "../img/파랑색폴더.png";
 import folderAddIcon from "../img/폴더추가.png";
 
-import tokyoImg from "../img/도쿄.png";
-import kyotoImg from "../img/교토.png";
-import beachImg from "../img/서비스 소개 .png";
 
 const FOLDERS_API = "/api/folders";
+const EMPTY_ITEMS = [];
 const sortTabs = ["전체보기", "최신순", "이름순"];
 
 const ArrowRightIcon = () => (
@@ -23,7 +22,7 @@ const ArrowRightIcon = () => (
     <path
       d="M9 6L15 12L9 18"
       fill="none"
-      stroke="#B9C2D0"
+      stroke="currentColor"
       strokeWidth="2.4"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -110,7 +109,7 @@ const SortTabButtons = ({ activeSort, onChange }) => (
         key={sortName}
         type="button"
         className={`saved-sort-tab ${activeSort === sortName ? "active" : ""}`}
-        onClick={() => onChange(sortName)}
+        aria-pressed={activeSort === sortName} disabled={sortName === "최신순"} title={sortName === "최신순" ? "저장 시각이 제공되지 않아 최신순을 확인할 수 없습니다." : undefined} onClick={() => onChange(sortName)}
       >
         {sortName}
       </button>
@@ -118,25 +117,7 @@ const SortTabButtons = ({ activeSort, onChange }) => (
   </section>
 );
 
-const getArrayData = (data) => {
-  if (Array.isArray(data)) return data;
-
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.folders)) return data.folders;
-  if (Array.isArray(data?.places)) return data.places;
-  if (Array.isArray(data?.result)) return data.result;
-  if (Array.isArray(data?.results)) return data.results;
-
-  if (Array.isArray(data?.data?.content)) return data.data.content;
-  if (Array.isArray(data?.data?.items)) return data.data.items;
-  if (Array.isArray(data?.data?.folders)) return data.data.folders;
-  if (Array.isArray(data?.data?.places)) return data.data.places;
-  if (Array.isArray(data?.result?.content)) return data.result.content;
-
-  return [];
-};
+const getArrayData = requireList;
 
 const getTextValue = (...values) => {
   for (const value of values) {
@@ -172,41 +153,11 @@ const getFolderPlaceDeleteUrl = (folderId, placeId) => {
   )}/places/${encodeURIComponent(placeId)}`;
 };
 
-const getPlaceImage = (place = {}, index = 0) => {
-  const image = getTextValue(
-    place.image,
-    place.imageUrl,
-    place.thumbnail,
-    place.thumbnailUrl,
-    place.photoUrl
-  );
-
-  if (image) return image;
-
-  const text = [
-    place.placeName,
-    place.name,
-    place.title,
-    place.address,
-    place.placeType,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  if (/숲|산림|비자림|사려니|forest|교토|kyoto/i.test(text)) {
-    return kyotoImg;
-  }
-
-  if (/제주|해수욕장|해변|바다|오션|발리|다낭|beach|bali|danang/i.test(text)) {
-    return beachImg;
-  }
-
-  const fallbackImages = [beachImg, kyotoImg, tokyoImg];
-  return fallbackImages[index % fallbackImages.length];
-};
+const getPlaceImage = (place = {}) => getTextValue(place.image, place.imageUrl, place.thumbnail, place.thumbnailUrl, place.photoUrl);
 
 const normalizeFolder = (folder = {}, index = 0) => {
-  const id = folder.id ?? folder.folderId ?? `folder-${index}`;
+  const id = folder.id ?? folder.folderId;
+  if (id === null || id === undefined || !String(id).trim()) throw new Error("폴더 식별자 확인 실패");
   const name =
     getTextValue(folder.name, folder.folderName, folder.title) ||
     "이름 없는 폴더";
@@ -217,14 +168,16 @@ const normalizeFolder = (folder = {}, index = 0) => {
     name,
     title: name,
     description: getTextValue(folder.description, folder.memo) || "나만의 여행 폴더",
-    count: Number(folder.count || folder.placeCount || 0),
+    count: getNumberValue(folder.count, folder.placeCount),
     icon: folderFilledIcon,
     createdAt: folder.createdAt || folder.createdDate || "",
   };
 };
 
-const normalizeFolderPlace = (place = {}, index = 0) => {
-  const id = place.id ?? place.placeId ?? `folder-place-${index}`;
+const normalizeFolderPlace = (record = {}, index = 0) => {
+  const place = record.place ? { ...record.place, placeId: record.placeId ?? record.place.id } : record;
+  const id = place.placeId ?? place.id;
+  if (id === null || id === undefined || !String(id).trim()) throw new Error("장소 식별자 확인 실패");
 
   const title =
     getTextValue(place.placeName, place.name, place.title) || "이름 없는 장소";
@@ -238,7 +191,7 @@ const normalizeFolderPlace = (place = {}, index = 0) => {
     "저장 장소";
 
   const rating =
-    getNumberValue(place.rating, place.score, place.reviewScore, 4.8) ?? 4.8;
+    getNumberValue(place.rating, place.score, place.reviewScore);
 
   const latitude = getNumberValue(place.latitude, place.lat, place.y);
   const longitude = getNumberValue(place.longitude, place.lng, place.lon, place.x);
@@ -252,7 +205,8 @@ const normalizeFolderPlace = (place = {}, index = 0) => {
     placeName: title,
     address,
     placeType,
-    rating: rating % 1 === 0 ? rating.toFixed(1) : String(rating),
+    rating: rating === null ? null : rating % 1 === 0 ? rating.toFixed(1) : String(rating),
+    placeTypeLabel: getPlaceTypeLabel(placeType),
     image: getPlaceImage({ ...place, title, address }, index),
     latitude,
     longitude,
@@ -264,9 +218,7 @@ const normalizeFolderPlace = (place = {}, index = 0) => {
 const sortByTab = (items = [], activeSort, getName) => {
   const copiedItems = [...items];
 
-  if (activeSort === "최신순") {
-    return copiedItems.reverse();
-  }
+
 
   if (activeSort === "이름순") {
     return copiedItems.sort((a, b) => getName(a).localeCompare(getName(b), "ko"));
@@ -283,144 +235,38 @@ function SavedPlacesContent() {
   const folderIdFromUrl = searchParams.get("folderId");
 
   const [activeSort, setActiveSort] = useState("전체보기");
-  const [folders, setFolders] = useState([]);
-  const [openedFolder, setOpenedFolder] = useState(null);
-  const [openedFolderPlaces, setOpenedFolderPlaces] = useState([]);
-  const [isLoadingFolders, setIsLoadingFolders] = useState(false);
-  const [isLoadingPlaces, setIsLoadingPlaces] = useState(false);
-
+  const { syncSavedPlaces } = useSavedPlaces();
+  const counts = useRef({ account, folders: [] });
+  if (counts.current.account !== account) counts.current = { account, folders: [] };
+  const foldersQuery = useReadQuery(account + ":folder-list", async signal => {
+    const rows = getArrayData((await api.get(FOLDERS_API, { signal })).data).map(normalizeFolder);
+    const results = await Promise.allSettled(rows.map(async folder => {
+      if (folder.count !== null) return folder.count;
+      return getArrayData((await api.get(getFolderPlacesUrl(folder.id), { signal })).data).length;
+    }));
+    if (signal.aborted) throw new DOMException("취소됨", "AbortError");
+    return rows.map((folder, index) => ({ ...folder, count: results[index].status === "fulfilled" ? results[index].value : counts.current.folders.find(old => String(old.id) === String(folder.id))?.count ?? null, countUnknown: results[index].status === "rejected" }));
+  }, account !== "anonymous", () => getAuthSnapshot().accountKey === account);
+  const folders = foldersQuery.data || EMPTY_ITEMS;
+  useEffect(() => { if (foldersQuery.data) counts.current = { account, folders: foldersQuery.data }; }, [account, foldersQuery.data]);
+  const openedFolder = folders.find(folder => String(folder.id) === String(folderIdFromUrl)) || null;
+  const placesQuery = useReadQuery(account + ":folder-places:" + folderIdFromUrl, async signal => getArrayData((await api.get(getFolderPlacesUrl(folderIdFromUrl), { signal })).data).map(normalizeFolderPlace), Boolean(folderIdFromUrl) && account !== "anonymous", () => getAuthSnapshot().accountKey === account);
+  const openedFolderPlaces = placesQuery.data || EMPTY_ITEMS;
+  const isLoadingFolders = foldersQuery.status === "loading" && !foldersQuery.data;
+  const isLoadingPlaces = placesQuery.status === "loading" && !placesQuery.data;
   const [createOpen, setCreateOpen] = useState(false);
   const [folderName, setFolderName] = useState("");
   const [validation, setValidation] = useState("");
   const createTask = useMutationTask(account + ":create-folder");
-  const removeTask = useMutationTask(account + ":remove:" + openedFolder?.id);
-  const currentFolder = useRef(openedFolder?.id); currentFolder.current = openedFolder?.id;
-
-  const [listError, setListError] = useState("");
-  const folderVersion = useRef(0);
-  useEffect(() => () => { ++folderVersion.current; currentFolder.current = null; }, []);
-  const loadFolderPlaces = useCallback(async (folderId) => {
-    const response = await api.get(getFolderPlacesUrl(folderId));
-
-    return getArrayData(response.data).map((place, index) =>
-      normalizeFolderPlace(place, index)
-    );
-  }, []);
-
-  const loadFolders = useCallback(async () => {
-    const belongs = () => currentAccount.current === account && getAuthSnapshot().accountKey === account;
-    if (account === "anonymous") return;
-    try {
-      setIsLoadingFolders(true);
-      setListError("");
-
-      const response = await api.get(FOLDERS_API);
-      const nextFolders = getArrayData(response.data).map((folder, index) =>
-        normalizeFolder(folder, index)
-      );
-
-      const countEntries = await Promise.all(
-        nextFolders.map(async (folder) => {
-          try {
-            const places = await loadFolderPlaces(folder.id);
-            return [String(folder.id), places.length];
-          } catch (error) {
-            logSafeApiError(error, "SavedPlaces.jsx");
-            throw error;
-          }
-        })
-      );
-
-      const countMap = Object.fromEntries(countEntries);
-
-      if (!belongs()) return;
-      setFolders(
-        nextFolders.map((folder) => ({
-          ...folder,
-          count: countMap[String(folder.id)] ?? 0,
-        }))
-      );
-    } catch (error) {
-      logSafeApiError(error, "SavedPlaces.jsx");
-      if (belongs()) setListError("폴더 목록을 불러오지 못했어요.");
-      throw error;
-    } finally {
-      if (belongs()) setIsLoadingFolders(false);
-    }
-  }, [loadFolderPlaces, account]);
-
-  useEffect(() => {
-    setFolders([]); setOpenedFolder(null); setOpenedFolderPlaces([]); setCreateOpen(false); setFolderName(""); setListError("");
-    ++folderVersion.current;
-    void loadFolders().catch(() => {});
-  }, [loadFolders]);
-
-  const totalSavedCount = useMemo(() => {
-    return folders.reduce((sum, folder) => sum + Number(folder.count || 0), 0);
-  }, [folders]);
-
-  const sortedFolders = useMemo(() => {
-    return sortByTab(folders, activeSort, (folder) => folder.title);
-  }, [activeSort, folders]);
-
-  const sortedOpenedFolderPlaces = useMemo(() => {
-    return sortByTab(openedFolderPlaces, activeSort, (place) => place.title);
-  }, [activeSort, openedFolderPlaces]);
-
-  const openFolder = useCallback(
-    async (folder, shouldUpdateUrl = true) => {
-      if (!folder?.id) return;
-      const version = ++folderVersion.current;
-
-
-      try {
-        setOpenedFolder(folder);
-        currentFolder.current = folder.id;
-        setIsLoadingPlaces(true);
-        setActiveSort("전체보기");
-
-        if (shouldUpdateUrl) {
-          setSearchParams({ folderId: String(folder.id) });
-        }
-
-        const places = await loadFolderPlaces(folder.id);
-        if (currentAccount.current === account && folderVersion.current === version && String(currentFolder.current) === String(folder.id)) setOpenedFolderPlaces(places);
-      } catch (error) {
-        logSafeApiError(error, "SavedPlaces.jsx");
-        if (currentAccount.current === account && folderVersion.current === version && String(currentFolder.current) === String(folder.id)) setListError("장소 목록을 불러오지 못했어요.");
-      } finally {
-        if (currentAccount.current === account && folderVersion.current === version && String(currentFolder.current) === String(folder.id)) setIsLoadingPlaces(false);
-      }
-    },
-    [loadFolderPlaces, setSearchParams, account]
-  );
-
-  useEffect(() => {
-    if (!folderIdFromUrl || folders.length === 0 || openedFolder) return;
-
-    const matchedFolder = folders.find(
-      (folder) => String(folder.id) === String(folderIdFromUrl)
-    );
-
-    if (matchedFolder) {
-      openFolder(matchedFolder, false);
-    }
-  }, [folderIdFromUrl, folders, openedFolder, openFolder]);
-
-  const handleCloseFolder = () => {
-    ++folderVersion.current; currentFolder.current = null;
-    setOpenedFolder(null);
-    setOpenedFolderPlaces([]);
-    setActiveSort("전체보기");
-    setSearchParams({});
-  };
-
-  const handleArrowClick = (event, folder) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    openFolder(folder);
-  };
+  const removeTask = useMutationTask(account + ":remove:" + folderIdFromUrl);
+  const currentFolder = useRef(folderIdFromUrl); currentFolder.current = folderIdFromUrl;
+  const loadFolders = async () => { const next = await foldersQuery.read(); if (!next) throw new Error("폴더 목록 확인 실패"); return next; };
+  const totalSavedCount = foldersQuery.data && folders.every(folder => folder.count !== null && !folder.countUnknown) ? folders.reduce((sum, folder) => sum + folder.count, 0) : null;
+  const sortedFolders = useMemo(() => sortByTab(folders, activeSort, folder => folder.title), [folders, activeSort]);
+  const sortedOpenedFolderPlaces = useMemo(() => sortByTab(openedFolderPlaces, activeSort, place => place.title), [openedFolderPlaces, activeSort]);
+  const openFolder = folder => { if (folder?.id) { setActiveSort("전체보기"); setSearchParams({ folderId: String(folder.id) }); } };
+  const handleCloseFolder = () => { setActiveSort("전체보기"); setSearchParams({}); };
+  const handleArrowClick = (event, folder) => { event.preventDefault(); event.stopPropagation(); openFolder(folder); };
 
   const handleAddFolderClick = () => { createTask.reset(); setValidation(""); setCreateOpen(true); };
   const submitFolder = async () => {
@@ -448,7 +294,7 @@ function SavedPlacesContent() {
   const handlePlaceMoreClick = async (event, place) => {
     event.stopPropagation();
 
-    if (!openedFolder?.id || !place?.placeId) return;
+    if (removeTask.blocked || !openedFolder?.id || !place?.placeId) return;
 
     const isConfirmed = window.confirm("이 폴더에서 해당 장소를 삭제할까요?");
 
@@ -457,9 +303,13 @@ function SavedPlacesContent() {
     const folderId = openedFolder.id;
     const placeId = place.placeId;
     await removeTask.run(() => api.delete(getFolderPlaceDeleteUrl(folderId, placeId)), async () => {
-      const places = await loadFolderPlaces(folderId);
-      if (currentAccount.current === account && String(currentFolder.current) === String(folderId)) setOpenedFolderPlaces(places);
+      const places = await placesQuery.read();
+      if (!Array.isArray(places) || currentAccount.current !== account || String(currentFolder.current) !== String(folderId)) throw new Error("장소 목록 확인 실패");
       await loadFolders();
+      const snapshot = await readSavedFolderSnapshot();
+      if (getAuthSnapshot().accountKey !== account) throw new Error("계정 변경");
+      syncSavedPlaces?.(snapshot.places, snapshot.complete);
+      return { confirmed: !places.some(item => String(item.placeId) === String(placeId)) };
     }, {
       failure: "이 폴더에서 장소를 제거하지 못했어요.",
       success: "이 폴더에서 장소를 제거했어요.",
@@ -478,7 +328,9 @@ function SavedPlacesContent() {
         onChange={setFolderName} onClose={() => setCreateOpen(false)} onSubmit={submitFolder}
         busy={createTask.status === "running"} blocked={createTask.blocked || createTask.status === "success"} message={validation || createTask.message}
         onRetry={["refreshError", "unknown"].includes(createTask.status) ? createTask.retryRead : null} />
-      {listError && <section role="alert"><p>{listError}</p><button type="button" onClick={() => loadFolders().catch(() => {})}>목록 다시 불러오기</button></section>}
+      {foldersQuery.status === "error" && <section role="alert"><p>폴더 목록을 불러오지 못했어요.</p><button type="button" onClick={foldersQuery.retry}>폴더 목록 다시 불러오기</button></section>}
+      {folders.some(folder => folder.countUnknown) && <section role="status"><p>일부 폴더의 장소 개수를 확인하지 못했어요.</p><button type="button" onClick={foldersQuery.retry}>장소 개수 다시 확인</button></section>}
+      {folderIdFromUrl && placesQuery.status === "error" && <section role="alert"><p>이 폴더의 장소 목록을 불러오지 못했어요.</p><button type="button" onClick={placesQuery.retry}>장소 목록 다시 불러오기</button></section>}
       {removeTask.message && <section role="status"><p>{removeTask.message}</p>
         {["refreshError", "unknown"].includes(removeTask.status) && <button type="button" onClick={removeTask.retryRead}>최신 목록 다시 확인</button>}
       </section>}
@@ -496,7 +348,7 @@ function SavedPlacesContent() {
 
             <div>
               <h1>{openedFolder.title}</h1>
-              <p>{openedFolderPlaces.length}개의 장소</p>
+              <p>{placesQuery.data ? `${openedFolderPlaces.length}개의 장소` : "장소 개수 미확인"}</p>
             </div>
           </section>
 
@@ -514,20 +366,16 @@ function SavedPlacesContent() {
                   tabIndex={0}
                   onClick={() => handlePlaceClick(place)}
                   onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
+                    if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
                       event.preventDefault();
                       handlePlaceClick(place);
                     }
                   }}
                 >
-                  <img
-                    src={place.image}
-                    alt={place.title}
-                    className="saved-place-image"
-                  />
+                  <PlacePhoto src={place.image} alt={place.title} className="saved-place-image" />
 
                   <div className="saved-place-body">
-                    <span className="saved-place-type">{place.placeType}</span>
+                    <span className="saved-place-type">{place.placeTypeLabel}</span>
 
                     <h2>{place.title}</h2>
 
@@ -537,12 +385,12 @@ function SavedPlacesContent() {
                         {place.address}
                       </span>
 
-                      <span className="saved-place-dot">•</span>
+                      {place.rating !== null && <span className="saved-place-dot">•</span>}
 
-                      <span className="saved-place-rating">
+                      {place.rating !== null && <span className="saved-place-rating">
                         <StarIcon />
                         {place.rating}
-                      </span>
+                      </span>}
                     </div>
 
                     <button
@@ -568,7 +416,7 @@ onClick={(event) => handlePlaceMoreClick(event, place)}
               ))
             )}
 
-            {!isLoadingPlaces && sortedOpenedFolderPlaces.length === 0 && (
+            {!isLoadingPlaces && placesQuery.status === "success" && sortedOpenedFolderPlaces.length === 0 && (
               <p className="saved-place-empty-text">
                 이 폴더에 저장된 장소가 없습니다.
               </p>
@@ -590,7 +438,7 @@ onClick={(event) => handlePlaceMoreClick(event, place)}
           <section className="saved-places-header">
             <div className="saved-places-title-box">
               <h1>나만의 컬렉션</h1>
-              <p>총 {totalSavedCount}개의 장소를 저장했습니다</p>
+              <p>{totalSavedCount === null ? "저장한 장소 개수 미확인" : `총 ${totalSavedCount}개의 장소를 저장했습니다`}</p>
             </div>
 
             <button
@@ -631,7 +479,7 @@ onClick={(event) => handlePlaceMoreClick(event, place)}
                     <h2>{folder.title}</h2>
 
                     <p>
-                      <span>{folder.count} 장소</span>
+                      <span>{folder.countUnknown || folder.count === null ? "개수 미확인" : `${folder.count} 장소`}</span>
                       <span className="saved-folder-dot">•</span>
                       <span>{folder.description}</span>
                     </p>
@@ -651,7 +499,7 @@ onClick={(event) => handlePlaceMoreClick(event, place)}
               ))
             )}
 
-            {!isLoadingFolders && sortedFolders.length === 0 && (
+            {!isLoadingFolders && foldersQuery.status === "success" && sortedFolders.length === 0 && (
               <p className="saved-place-empty-text">아직 생성된 폴더가 없습니다.</p>
             )}
 

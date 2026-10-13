@@ -1,0 +1,16 @@
+cbc53be0bd64ac7c2cea5ac766904ec1
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.toApiTheme = void 0;
+// UI keys map to the current backend seed data; other theme values stay usable.
+const toApiTheme = theme => ({
+  healing: "HEALING",
+  activity: "ACTIVITY",
+  food: "FOOD",
+  photo: "PHOTO"
+})[theme] || theme;
+exports.toApiTheme = toApiTheme;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJ0b0FwaVRoZW1lIiwidGhlbWUiLCJoZWFsaW5nIiwiYWN0aXZpdHkiLCJmb29kIiwicGhvdG8iLCJleHBvcnRzIl0sInNvdXJjZXMiOlsicGxhY2VUaGVtZS5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyIvLyBVSSBrZXlzIG1hcCB0byB0aGUgY3VycmVudCBiYWNrZW5kIHNlZWQgZGF0YTsgb3RoZXIgdGhlbWUgdmFsdWVzIHN0YXkgdXNhYmxlLlxuZXhwb3J0IGNvbnN0IHRvQXBpVGhlbWUgPSB0aGVtZSA9PiAoe1xuICBoZWFsaW5nOiBcIkhFQUxJTkdcIiwgYWN0aXZpdHk6IFwiQUNUSVZJVFlcIiwgZm9vZDogXCJGT09EXCIsIHBob3RvOiBcIlBIT1RPXCIsXG59W3RoZW1lXSB8fCB0aGVtZSk7XG4iXSwibWFwcGluZ3MiOiI7Ozs7OztBQUFBO0FBQ08sTUFBTUEsVUFBVSxHQUFHQyxLQUFLLElBQUs7RUFDbENDLE9BQU8sRUFBRSxTQUFTO0VBQUVDLFFBQVEsRUFBRSxVQUFVO0VBQUVDLElBQUksRUFBRSxNQUFNO0VBQUVDLEtBQUssRUFBRTtBQUNqRSxDQUFDLEVBQUNKLEtBQUssQ0FBQyxJQUFJQSxLQUFNO0FBQUNLLE9BQUEsQ0FBQU4sVUFBQSxHQUFBQSxVQUFBIiwiaWdub3JlTGlzdCI6W119

@@ -1,0 +1,20 @@
+TAP version 13
+# Subtest: tile proxy refuses arbitrary hosts, secrets, redirects and non-image responses
+ok 1 - tile proxy refuses arbitrary hosts, secrets, redirects and non-image responses
+  ---
+  duration_ms: 28.4809
+  ...
+# Subtest: tile proxy accepts only the observed PNG02 and PNGSD02 tile formats
+ok 2 - tile proxy accepts only the observed PNG02 and PNGSD02 tile formats
+  ---
+  duration_ms: 2.8249
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 152.985

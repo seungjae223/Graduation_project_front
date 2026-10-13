@@ -2,6 +2,11 @@ import { logSafeApiError } from "./safeLog";
 const RECENT_PLACES_KEY = "recentPlaces";
 const MAX_RECENT_PLACES = 10;
 
+export const isRecentPlaceRecord = place => Boolean(place && typeof place === "object" && !Array.isArray(place) &&
+  Number.isSafeInteger(Number(place.id)) && Number(place.id) > 0 &&
+  ((typeof place.name === "string" && place.name.trim()) || (typeof place.title === "string" && place.title.trim())) &&
+  (!place.viewedAt || Number.isFinite(Date.parse(place.viewedAt))));
+
 // 최근 본 장소 목록 가져오기
 export const getRecentPlaces = () => {
   try {
@@ -11,7 +16,8 @@ export const getRecentPlaces = () => {
       return [];
     }
 
-    return JSON.parse(savedPlaces);
+    const records = JSON.parse(savedPlaces);
+    return Array.isArray(records) ? records.filter(isRecentPlaceRecord).slice(0, MAX_RECENT_PLACES) : [];
   } catch (error) {
     logSafeApiError(error, "recentPlaces.js");
     return [];
@@ -20,7 +26,7 @@ export const getRecentPlaces = () => {
 
 // 최근 본 장소 저장하기
 export const saveRecentPlace = (place) => {
-  if (!place || !place.id) {
+  if (!isRecentPlaceRecord(place)) {
     return;
   }
 

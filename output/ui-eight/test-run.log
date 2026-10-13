@@ -1,0 +1,13 @@
+PASS src/Search/Search.test.jsx
+PASS src/RouteResult/editing.test.jsx
+PASS src/Recommend/Detail.test.jsx
+PASS src/RouteResult/keyboardOrder.test.jsx
+PASS src/components/PlacePhoto.test.jsx
+PASS src/OnBoarding/onboardingTransition.test.js
+PASS src/utils/detailBack.test.js
+PASS src/utils/placeType.test.js
+
+Test Suites: 8 passed, 8 total
+Tests:       34 passed, 34 total
+Snapshots:   0 total
+Time:        4.541 s

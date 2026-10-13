@@ -1,0 +1,62 @@
+PASS src/Mypage/profileFlows.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'InquiryWrite.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/Mypage/InquiryWrite.jsx:53:38
+      at Object.run (src/utils/useMutationTask.js:17:11)
+      at handleSubmit (src/Mypage/InquiryWrite.jsx:51:5)
+
+    console.error
+      Request failed { context: 'MySchedule.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/MySchedule/MySchedule.jsx:372:22
+
+PASS src/Mypage/availableActions.test.jsx
+PASS src/Mypage/inquiryData.test.js
+  ● Console
+
+    console.error
+      Request failed { context: 'recentPlaces.js' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at getRecentPlaces (src/utils/recentPlaces.js:22:20)
+      at src/Mypage/inquiryData.test.js:13:25
+      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)
+
+
+Test Suites: 3 passed, 3 total
+Tests:       31 passed, 31 total
+Snapshots:   0 total
+Time:        4.73 s, estimated 5 s
+Ran all test suites within paths "src/Mypage/profileFlows.test.jsx", "src/Mypage/inquiryData.test.js", "src/Mypage/availableActions.test.jsx".

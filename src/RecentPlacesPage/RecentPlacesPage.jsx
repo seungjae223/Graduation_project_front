@@ -1,91 +1,26 @@
-import { logSafeApiError } from "../utils/safeLog";
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getRecentPlaces } from "../utils/recentPlaces";
+import { useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import useReadQuery from "../utils/useReadQuery"; import useSessionKey from "../utils/useSessionKey"; import { getAuthSnapshot } from "../utils/authState"; import usePlaceSaving from "../utils/usePlaceSaving"; import PlaceSavingFeedback, { PlaceSaveModal } from "../components/PlaceSavingFeedback"; import PlacePhoto from "../components/PlacePhoto"; import { getPlaceTypeLabel } from "../utils/placeType";
 import { getRecentPlacesApi } from "../api/placeApi";
 import "./RecentPlacesPage.css";
 
 function RecentPlacesPage() {
   const navigate = useNavigate();
 
-  const [bookmarkedIds, setBookmarkedIds] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("bookmarkedPlaceIds")) || [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [serverRecentPlaces, setServerRecentPlaces] = useState([]);
-
-  useEffect(() => {
-    let mounted = true;
-
-    getRecentPlacesApi()
-      .then((places) => {
-        if (mounted) setServerRecentPlaces(places);
-      })
-      .catch((error) => logSafeApiError(error, "RecentPlacesPage.jsx"));
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const recentPlaces = useMemo(() => {
-    const places = serverRecentPlaces.length > 0
-      ? serverRecentPlaces
-      : getRecentPlaces();
-
-    return places
-      .map((place) => ({
-        ...place,
-
-        // Detail에서 title로 저장된 경우도 있어서 name으로 맞춰줌
-        name: place.name || place.title || "이름 없는 장소",
-        title: place.title || place.name || "이름 없는 장소",
-
-        // RouteCreate에서 desc/thumb을 쓰는 경우도 있어서 같이 맞춰줌
-        desc: place.desc || place.address || "주소 정보 없음",
-        address: place.address || place.desc || "주소 정보 없음",
-        image: place.image || place.thumb || "",
-        thumb: place.thumb || place.image || "",
-
-        viewedAt: place.viewedAt || new Date().toISOString(),
-      }))
-      .sort((a, b) => new Date(b.viewedAt) - new Date(a.viewedAt));
-  }, [serverRecentPlaces]);
-
-  const groupedPlaces = useMemo(() => {
-    return groupPlacesByDate(recentPlaces);
-  }, [recentPlaces]);
-
-  const handlePlaceClick = (place) => {
-    if (!place?.id) {
-      return;
-    }
-
-    const detailPlace = {
-      id: place.id,
-      title: place.title || place.name || "이름 없는 장소",
-      name: place.name || place.title || "이름 없는 장소",
-      address: place.address || place.desc || "주소 정보 없음",
-      image: place.image || place.thumb || "",
-      rating: place.rating || 4.8,
-      tags: place.tags || [],
-      reviewCount: place.reviewCount || 980,
-      category: place.category || place.type || "장소",
-      type: place.type || place.category || "장소",
-      latitude: place.latitude || place.lat || null,
-      longitude: place.longitude || place.lng || null,
-    };
-
-    navigate(`/detail?id=${detailPlace.id}`, {
-      state: {
-        place: detailPlace,
-      },
-    });
-  };
+  const account = useSessionKey();
+  const query = useReadQuery(account + ":recent-places", signal => getRecentPlacesApi({ signal }), account !== "anonymous", () => getAuthSnapshot().accountKey === account);
+  const saving = usePlaceSaving();
+  const recentPlaces = useMemo(() => (query.data || []).filter(place => place && typeof place === "object" && (place.id ?? place.placeId) != null).map(place => ({
+    ...place, id: place.id ?? place.placeId,
+    name: place.name || place.title || place.placeName || "이름 없는 장소",
+    title: place.title || place.name || place.placeName || "이름 없는 장소",
+    desc: place.desc || place.address || "주소 정보 없음", address: place.address || place.desc || "주소 정보 없음",
+    image: place.image || place.imageUrl || place.thumbnailUrl || place.thumbnail || place.thumb || place.photoUrl || "",
+    placeType: place.placeType || place.category || place.type || "",
+    viewedAt: place.viewedAt && Number.isFinite(Date.parse(place.viewedAt)) ? place.viewedAt : null,
+  })), [query.data]);
+  const groupedPlaces = useMemo(() => groupPlacesByDate(recentPlaces), [recentPlaces]);
+  const handlePlaceClick = place => { if (place?.id) navigate('/detail?id=' + encodeURIComponent(place.id)); };
 
   const handleAddRoute = (e, place) => {
     e.stopPropagation();
@@ -102,7 +37,7 @@ function RecentPlacesPage() {
       thumb: place.thumb || place.image || "",
       category: place.category || place.type || "장소",
       type: place.type || place.category || "장소",
-      rating: place.rating || null,
+      rating: place.rating ?? null,
       tags: place.tags || [],
       latitude: place.latitude || place.lat || null,
       longitude: place.longitude || place.lng || null,
@@ -121,26 +56,12 @@ function RecentPlacesPage() {
     });
   };
 
-  const handleBookmark = (e, placeId) => {
-    e.stopPropagation();
-
-    setBookmarkedIds((prev) => {
-      const isAlreadyBookmarked = prev.some(
-        (id) => String(id) === String(placeId)
-      );
-
-      const next = isAlreadyBookmarked
-        ? prev.filter((id) => String(id) !== String(placeId))
-        : [...prev, placeId];
-
-      localStorage.setItem("bookmarkedPlaceIds", JSON.stringify(next));
-      return next;
-    });
-  };
-
   return (
     <main className="recent-places-page">
-      {groupedPlaces.length === 0 ? (
+      <PlaceSavingFeedback saving={saving} /><PlaceSaveModal saving={saving} />
+      {query.status === "loading" && <p role="status">최근 본 장소를 불러오는 중입니다.</p>}
+      {query.status === "error" && <div role="alert"><p>최근 본 장소를 불러오지 못했습니다.</p><button type="button" onClick={query.retry}>다시 불러오기</button></div>}
+      {query.status === "success" && groupedPlaces.length === 0 ? (
         <div className="recent-places-empty">
           <p>최근 본 장소가 없어요.</p>
         </div>
@@ -151,9 +72,7 @@ function RecentPlacesPage() {
 
             <div className="recent-places-list">
               {group.items.map((place) => {
-                const isBookmarked = bookmarkedIds.some(
-                  (id) => String(id) === String(place.id)
-                );
+                const isBookmarked = saving.isSaved(place.id);
 
                 return (
                   <article
@@ -161,13 +80,13 @@ function RecentPlacesPage() {
                     key={place.id}
                     onClick={() => handlePlaceClick(place)}
                   >
-                    <PlaceThumb src={place.image} name={place.name} />
+                    <PlacePhoto src={place.image} alt={place.name} className="recent-place-thumb" />
 
                     <div className="recent-place-info">
-                      <h3 className="recent-place-name">{place.name}</h3>
+                      <h3 className="recent-place-name"><Link to={`/detail?id=${encodeURIComponent(place.id)}`} onClick={event => event.stopPropagation()}>{place.name}</Link></h3>
 
                       <p className="recent-place-category">
-                        {place.category || place.type || "장소"}
+                        {getPlaceTypeLabel(place.placeType)}
                       </p>
 
                       <div className="recent-place-actions">
@@ -185,8 +104,10 @@ function RecentPlacesPage() {
                           className={`recent-bookmark-button ${
                             isBookmarked ? "active" : ""
                           }`}
-                          onClick={(e) => handleBookmark(e, place.id)}
-                          aria-label="북마크"
+                          onClick={(e) => saving.toggle(e, place)}
+                          aria-label={`${place.name} ${isBookmarked ? "저장 해제" : "저장"}`}
+                          aria-pressed={isBookmarked}
+                          disabled={saving.blocked || saving.folders.status === "loading"}
                         >
                           <BookmarkIcon active={isBookmarked} />
                         </button>
@@ -213,7 +134,7 @@ function groupPlacesByDate(places) {
 
   places.forEach((place) => {
     const viewedDate = new Date(place.viewedAt);
-    const label = getDateLabel(viewedDate, today, yesterday);
+    const label = place.viewedAt ? getDateLabel(viewedDate, today, yesterday) : "조회 시각 미제공";
 
     if (!groups[label]) {
       groups[label] = [];
@@ -248,64 +169,28 @@ function isSameDate(a, b) {
   );
 }
 
-function PlaceThumb({ src, name }) {
-  const [hasError, setHasError] = useState(false);
-
-  if (src && !hasError) {
-    return (
-      <img
-        className="recent-place-thumb"
-        src={src}
-        alt={name}
-        onError={() => setHasError(true)}
-      />
-    );
-  }
-
-  return (
-    <div className="recent-place-thumb recent-place-thumb-fallback">
-      <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
-        <path
-          d="M24.8 42.6C24.8 42.6 23.9 28.5 29.7 19.4"
-          stroke="#A6B38D"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-        />
-        <path
-          d="M30.2 20.4C38.1 13.7 45.7 14.9 45.7 14.9C45.7 14.9 44.8 24.3 37.7 29C32.2 32.6 28.9 29.9 28.9 29.9C28.9 29.9 25.6 24.3 30.2 20.4Z"
-          fill="#9CAB82"
-        />
-        <path
-          d="M23.3 27.5C15.1 20.9 7.5 22.1 7.5 22.1C7.5 22.1 8.4 31.4 15.5 36.1C21 39.7 24.3 37.1 24.3 37.1C24.3 37.1 27.6 30.9 23.3 27.5Z"
-          fill="#B9C2A3"
-        />
-      </svg>
-    </div>
-  );
-}
-
 function RouteIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
       <path
         d="M6.8 2.1C4.7 2.4 3.2 4.2 3.2 6.3C3.2 8.8 5.2 10.8 7.7 10.8H8.5C10.3 10.8 11.8 12.3 11.8 14.1"
-        stroke="white"
+        stroke="currentColor"
         strokeWidth="1.6"
         strokeLinecap="round"
       />
       <path
         d="M11.2 1.9V6.1"
-        stroke="white"
+        stroke="currentColor"
         strokeWidth="1.6"
         strokeLinecap="round"
       />
       <path
         d="M9.1 4H13.3"
-        stroke="white"
+        stroke="currentColor"
         strokeWidth="1.6"
         strokeLinecap="round"
       />
-      <circle cx="7.7" cy="10.8" r="1.3" fill="white" />
+      <circle cx="7.7" cy="10.8" r="1.3" fill="currentColor" />
     </svg>
   );
 }
@@ -315,8 +200,8 @@ function BookmarkIcon({ active }) {
     <svg width="18" height="22" viewBox="0 0 18 22" fill="none">
       <path
         d="M3.2 2.2H14.8C15.5 2.2 16.1 2.8 16.1 3.5V19.1L9 15.1L1.9 19.1V3.5C1.9 2.8 2.5 2.2 3.2 2.2Z"
-        fill={active ? "#16A9F5" : "transparent"}
-        stroke={active ? "#16A9F5" : "#9FB0C5"}
+        fill={active ? "currentColor" : "transparent"}
+        stroke="currentColor"
         strokeWidth="1.8"
         strokeLinejoin="round"
       />

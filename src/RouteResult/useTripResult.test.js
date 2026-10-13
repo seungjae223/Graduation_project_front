@@ -2,9 +2,12 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import useTripResult from "./useTripResult";
 import { getTripByIdApi, getTripPlacesApi, getTripTimelineApi } from "../api/tripApi";
 jest.mock("../api/tripApi", () => ({ getTripByIdApi: jest.fn(), getTripPlacesApi: jest.fn(), getTripTimelineApi: jest.fn() }));
+let mockAccount = "account:A";
+jest.mock("../utils/useSessionKey", () => ({ __esModule: true, default: () => mockAccount }));
+jest.mock("../utils/authState", () => ({ getAuthSnapshot: () => ({ accountKey: mockAccount }) }));
 const trip = { id: 1, title: "실제 여행", startDate: "2026-10-04", endDate: "2026-10-04" };
 const places = [{ id: 91, placeId: 81, day: 1, visitOrder: 1, placeName: "저장 장소" }];
-beforeEach(() => { jest.clearAllMocks(); getTripByIdApi.mockResolvedValue(trip); getTripPlacesApi.mockResolvedValue(places); getTripTimelineApi.mockResolvedValue([{ visitOrder: 1, arrivalTime: "10:00" }]); });
+beforeEach(() => { mockAccount = "account:A"; jest.clearAllMocks(); getTripByIdApi.mockResolvedValue(trip); getTripPlacesApi.mockResolvedValue(places); getTripTimelineApi.mockResolvedValue([{ visitOrder: 1, arrivalTime: "10:00" }]); });
 test("missing/invalid ID does not fetch or use Mock", async () => {
   const { result } = renderHook(() => useTripResult("route-mock"));
   await waitFor(() => expect(result.current.status).toBe("invalid"));
@@ -47,4 +50,32 @@ test("unmatched timeline order is an error, never attached by array index", asyn
   const { result } = renderHook(() => useTripResult("1"));
   await waitFor(() => expect(result.current.timelines[1]?.status).toBe("error"));
   expect(result.current.places[0].id).toBe(91);
+});
+
+test("an old account timeline cannot attach to the new account even for the same trip ID", async () => {
+  let finishOldTimeline;
+  getTripTimelineApi.mockReturnValueOnce(new Promise(resolve => { finishOldTimeline = resolve; }));
+  const { result, rerender } = renderHook(() => useTripResult("1"));
+  await waitFor(() => expect(result.current.timelines[1]?.status).toBe("loading"));
+  mockAccount = "account:B";
+  const newPlaces = [{ ...places[0], id: 92, placeId: 82, placeName: "새 계정 장소" }];
+  getTripPlacesApi.mockResolvedValue(newPlaces);
+  getTripTimelineApi.mockResolvedValue([{ visitOrder: 1, arrivalTime: "12:00" }]);
+  rerender();
+  await waitFor(() => expect(result.current.timelines[1]?.items[0].arrivalTime).toBe("12:00"));
+  await act(async () => finishOldTimeline([{ visitOrder: 1, arrivalTime: "10:00" }]));
+  expect(result.current.places).toEqual(newPlaces);
+  expect(result.current.timelines[1].items[0].arrivalTime).toBe("12:00");
+});
+
+test("order refresh discards an older timeline even when the transport ignores abort", async () => {
+  let finishOld;
+  getTripTimelineApi.mockReturnValueOnce(new Promise(resolve => { finishOld = resolve; }));
+  const { result } = renderHook(() => useTripResult("1"));
+  await waitFor(() => expect(result.current.timelines[1]?.status).toBe("loading"));
+  getTripTimelineApi.mockResolvedValue([{ visitOrder: 1, arrivalTime: "12:00" }]);
+  await act(async () => result.current.refreshDayOrder(1, [91]));
+  expect(result.current.timelines[1].items[0].arrivalTime).toBe("12:00");
+  await act(async () => finishOld([{ visitOrder: 1, arrivalTime: "10:00" }]));
+  expect(result.current.timelines[1].items[0].arrivalTime).toBe("12:00");
 });

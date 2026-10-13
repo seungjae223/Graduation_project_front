@@ -1,0 +1,46 @@
+FAIL src/RouteResult/mapLifecycle.test.jsx
+  √ google attaches markers once, retains the map for callback changes, and releases overlays (46 ms)
+  √ kakao attaches markers once, retains the map for callback changes, and releases overlays (14 ms)
+  × google keeps one SDK layer through coordinate publication, memo updates, reorder and reset (10 ms)
+  × kakao keeps one SDK layer through coordinate publication, memo updates, reorder and reset (9 ms)
+  √ unmounted Kakao consumer ignores SDK completion (6 ms)
+
+  ● google keeps one SDK layer through coordinate publication, memo updates, reorder and reset
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 2
+
+      63 |   view.rerender(<Box {...props} dayData={published} />);
+      64 |   await act(async () => { await Promise.resolve(); });
+    > 65 |   expect(sdk.Map).toHaveBeenCalledTimes(1);
+         |                   ^
+      66 |   view.rerender(<Box {...props} dayData={{ ...published, items: [...published.items].reverse() }} />);
+      67 |   await act(async () => { await Promise.resolve(); });
+      68 |   view.rerender(<Box {...props} dayData={day} />);
+
+      at src/RouteResult/mapLifecycle.test.jsx:65:19
+
+  ● kakao keeps one SDK layer through coordinate publication, memo updates, reorder and reset
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 2
+
+      63 |   view.rerender(<Box {...props} dayData={published} />);
+      64 |   await act(async () => { await Promise.resolve(); });
+    > 65 |   expect(sdk.Map).toHaveBeenCalledTimes(1);
+         |                   ^
+      66 |   view.rerender(<Box {...props} dayData={{ ...published, items: [...published.items].reverse() }} />);
+      67 |   await act(async () => { await Promise.resolve(); });
+      68 |   view.rerender(<Box {...props} dayData={day} />);
+
+      at src/RouteResult/mapLifecycle.test.jsx:65:19
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 3 passed, 5 total
+Snapshots:   0 total
+Time:        3.629 s
+Ran all test suites within paths "src/RouteResult/mapLifecycle.test.jsx".

@@ -1,17 +1,20 @@
 import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
 import { logSafeApiError } from "../utils/safeLog";
+import { validateTripRequest } from "../utils/tripValidation";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./RouteCreate.css";
 
-import searchIcon from "../img/검색.png";
 import heartIcon from "../img/파랑색 하트.png";
 import scheduleIcon from "../img/파랑색 일정.png";
 import blueFolderIcon from "../img/파랑색폴더.png";
 import darkFolderIcon from "../img/검정색폴더.png";
 
-import { useSavedPlaces } from "../Context/SavedPlacesContext";
+import PlacePhoto from "../components/PlacePhoto";
+import useRoutePlaceSearch from "./useRoutePlaceSearch";
+import useFavoriteFolders from "./useFavoriteFolders";
+import { createGenerationRequest } from "./generationRequest";
 import StartPlaceModal from "./StartPlaceModal";
 import useModalFocus from "../utils/useModalFocus";
 import api from "../api/api";
@@ -20,7 +23,6 @@ import useGenerationTask from "./useGenerationTask";
 const ROUTE_SELECTED_PLACE_KEY = "routeSelectedPlace";
 const ROUTE_DRAFT_PLACES_KEY = "routeDraftPlaces";
 const RECENT_PLACES_KEY = "recentPlaces";
-const PLACE_SEARCH_API = "/api/places/search";
 const TRIPS_API = "/api/trips";
 
 const DEFAULT_COORDS = {
@@ -340,281 +342,6 @@ const DEFAULT_TIME_SLOTS = [
   "08:00 PM",
 ];
 
-const getThumb = (seed) => `https://picsum.photos/seed/${seed}/200/200`;
-
-const MOCK_PLACE_RESULTS = [
-  {
-    sourceId: "seoul-gyeongbokgung",
-    name: "경복궁",
-    desc: "서울특별시 종로구 사직로 161",
-    city: "서울",
-    country: "대한민국",
-    mapProvider: "kakao",
-    thumb: getThumb("seoul-gyeongbokgung"),
-  },
-  {
-    sourceId: "seoul-bukchon",
-    name: "북촌한옥마을",
-    desc: "서울특별시 종로구 계동길 37",
-    city: "서울",
-    country: "대한민국",
-    mapProvider: "kakao",
-    thumb: getThumb("seoul-bukchon"),
-  },
-  {
-    sourceId: "seoul-ikseondong",
-    name: "익선동 카페거리",
-    desc: "서울특별시 종로구 익선동",
-    city: "서울",
-    country: "대한민국",
-    mapProvider: "kakao",
-    thumb: getThumb("seoul-ikseondong"),
-  },
-  {
-    sourceId: "seoul-starfield-library",
-    name: "별마당도서관",
-    desc: "서울특별시 강남구 영동대로 513 코엑스몰",
-    city: "서울",
-    country: "대한민국",
-    mapProvider: "kakao",
-    thumb: getThumb("seoul-starfield-library"),
-  },
-  {
-    sourceId: "seoul-namsan-tower",
-    name: "N서울타워",
-    desc: "서울특별시 용산구 남산공원길 105",
-    city: "서울",
-    country: "대한민국",
-    mapProvider: "kakao",
-    thumb: getThumb("seoul-namsan-tower"),
-  },
-  {
-    sourceId: "tokyo-skytree",
-    name: "도쿄 스카이트리",
-    desc: "일본 도쿄도 스미다구 오시아게 1-1-2",
-    city: "도쿄",
-    country: "일본",
-    mapProvider: "google",
-    thumb: getThumb("tokyo-skytree"),
-  },
-  {
-    sourceId: "tokyo-sensoji",
-    name: "센소지",
-    desc: "일본 도쿄도 다이토구 아사쿠사 2-3-1",
-    city: "도쿄",
-    country: "일본",
-    mapProvider: "google",
-    thumb: getThumb("tokyo-sensoji"),
-  },
-  {
-    sourceId: "tokyo-shibuya-scramble",
-    name: "시부야 스크램블 스퀘어",
-    desc: "일본 도쿄도 시부야구 시부야 2-24-12",
-    city: "도쿄",
-    country: "일본",
-    mapProvider: "google",
-    thumb: getThumb("tokyo-shibuya-scramble"),
-  },
-  {
-    sourceId: "busan-haeundae",
-    name: "해운대 해수욕장",
-    desc: "부산광역시 해운대구 우동",
-    city: "부산",
-    country: "대한민국",
-    mapProvider: "kakao",
-    thumb: getThumb("busan-haeundae"),
-  },
-  {
-    sourceId: "busan-gwangalli",
-    name: "광안리 해수욕장",
-    desc: "부산광역시 수영구 광안해변로 219",
-    city: "부산",
-    country: "대한민국",
-    mapProvider: "kakao",
-    thumb: getThumb("busan-gwangalli"),
-  },
-  {
-    sourceId: "busan-gamcheon",
-    name: "감천문화마을",
-    desc: "부산광역시 사하구 감내2로 203",
-    city: "부산",
-    country: "대한민국",
-    mapProvider: "kakao",
-    thumb: getThumb("busan-gamcheon"),
-  },
-  {
-    sourceId: "paris-eiffel-tower",
-    name: "에펠탑",
-    desc: "프랑스 파리 Champ de Mars, 5 Avenue Anatole France",
-    city: "파리",
-    country: "프랑스",
-    mapProvider: "google",
-    thumb: getThumb("paris-eiffel-tower"),
-  },
-  {
-    sourceId: "paris-louvre",
-    name: "루브르 박물관",
-    desc: "프랑스 파리 Rue de Rivoli, 75001",
-    city: "파리",
-    country: "프랑스",
-    mapProvider: "google",
-    thumb: getThumb("paris-louvre"),
-  },
-  {
-    sourceId: "paris-montmartre",
-    name: "몽마르트르",
-    desc: "프랑스 파리 75018",
-    city: "파리",
-    country: "프랑스",
-    mapProvider: "google",
-    thumb: getThumb("paris-montmartre"),
-  },
-  {
-    sourceId: "jeju-seongsan",
-    name: "성산일출봉",
-    desc: "제주특별자치도 서귀포시 성산읍 성산리 1",
-    city: "제주",
-    country: "대한민국",
-    mapProvider: "kakao",
-    thumb: getThumb("jeju-seongsan"),
-  },
-  {
-    sourceId: "jeju-hyeopjae",
-    name: "협재해수욕장",
-    desc: "제주특별자치도 제주시 한림읍 협재리 2497-1",
-    city: "제주",
-    country: "대한민국",
-    mapProvider: "kakao",
-    thumb: getThumb("jeju-hyeopjae"),
-  },
-  {
-    sourceId: "jeju-aewol-cafe-street",
-    name: "애월 카페거리",
-    desc: "제주특별자치도 제주시 애월읍 애월리",
-    city: "제주",
-    country: "대한민국",
-    mapProvider: "kakao",
-    thumb: getThumb("jeju-aewol-cafe-street"),
-  },
-  {
-    sourceId: "newyork-times-square",
-    name: "타임스 스퀘어",
-    desc: "미국 뉴욕 Manhattan, New York, NY 10036",
-    city: "뉴욕",
-    country: "미국",
-    mapProvider: "google",
-    thumb: getThumb("newyork-times-square"),
-  },
-  {
-    sourceId: "newyork-central-park",
-    name: "센트럴 파크",
-    desc: "미국 뉴욕 New York, NY",
-    city: "뉴욕",
-    country: "미국",
-    mapProvider: "google",
-    thumb: getThumb("newyork-central-park"),
-  },
-  {
-    sourceId: "newyork-met-museum",
-    name: "메트로폴리탄 미술관",
-    desc: "미국 뉴욕 1000 5th Ave, New York, NY 10028",
-    city: "뉴욕",
-    country: "미국",
-    mapProvider: "google",
-    thumb: getThumb("newyork-met-museum"),
-  },
-  {
-    sourceId: "gyeongju-donggung",
-    name: "동궁과 월지",
-    desc: "경상북도 경주시 원화로 102",
-    city: "경주",
-    country: "대한민국",
-    mapProvider: "kakao",
-    thumb: getThumb("gyeongju-donggung"),
-  },
-  {
-    sourceId: "gyeongju-hwangridan",
-    name: "황리단길",
-    desc: "경상북도 경주시 포석로 1080 일대",
-    city: "경주",
-    country: "대한민국",
-    mapProvider: "kakao",
-    thumb: getThumb("gyeongju-hwangridan"),
-  },
-  {
-    sourceId: "bangkok-wat-arun",
-    name: "왓 아룬",
-    desc: "태국 방콕 Bangkok Yai, 158 Wang Doem Road",
-    city: "방콕",
-    country: "태국",
-    mapProvider: "google",
-    thumb: getThumb("bangkok-wat-arun"),
-  },
-  {
-    sourceId: "bangkok-iconsiam",
-    name: "아이콘시암",
-    desc: "태국 방콕 Khlong San, 299 Charoen Nakhon Road",
-    city: "방콕",
-    country: "태국",
-    mapProvider: "google",
-    thumb: getThumb("bangkok-iconsiam"),
-  },
-  {
-    sourceId: "bangkok-chatuchak",
-    name: "짜뚜짝 시장",
-    desc: "태국 방콕 Kamphaeng Phet 2 Rd, Chatuchak",
-    city: "방콕",
-    country: "태국",
-    mapProvider: "google",
-    thumb: getThumb("bangkok-chatuchak"),
-  },
-  {
-    sourceId: "osaka-dotonbori",
-    name: "도톤보리",
-    desc: "일본 오사카시 주오구 도톤보리",
-    city: "오사카",
-    country: "일본",
-    mapProvider: "google",
-    thumb: getThumb("osaka-dotonbori"),
-  },
-  {
-    sourceId: "osaka-usj",
-    name: "유니버설 스튜디오 재팬",
-    desc: "일본 오사카시 고노하나구 사쿠라지마 2-1-33",
-    city: "오사카",
-    country: "일본",
-    mapProvider: "google",
-    thumb: getThumb("osaka-usj"),
-  },
-  {
-    sourceId: "singapore-marina-bay-sands",
-    name: "마리나 베이 샌즈",
-    desc: "싱가포르 10 Bayfront Avenue",
-    city: "싱가포르",
-    country: "싱가포르",
-    mapProvider: "google",
-    thumb: getThumb("singapore-marina-bay-sands"),
-  },
-  {
-    sourceId: "singapore-gardens-by-the-bay",
-    name: "가든스 바이 더 베이",
-    desc: "싱가포르 18 Marina Gardens Drive",
-    city: "싱가포르",
-    country: "싱가포르",
-    mapProvider: "google",
-    thumb: getThumb("singapore-gardens-by-the-bay"),
-  },
-  {
-    sourceId: "singapore-merlion-park",
-    name: "멀라이언 파크",
-    desc: "싱가포르 1 Fullerton Road",
-    city: "싱가포르",
-    country: "싱가포르",
-    mapProvider: "google",
-    thumb: getThumb("singapore-merlion-park"),
-  },
-];
-
 const ClockIcon = () => (
   <svg
     viewBox="0 0 24 24"
@@ -666,20 +393,20 @@ const RouteCompleteIcon = () => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <circle cx="40" cy="40" r="40" fill="#EAF7FF" />
+    <circle cx="40" cy="40" r="40" fill="var(--color-accent-soft)" />
     <path
       d="M39.6 20.5L42.8 29.1L51.5 32.3L42.8 35.5L39.6 44.1L36.4 35.5L27.8 32.3L36.4 29.1L39.6 20.5Z"
-      fill="#19A5F4"
+      fill="var(--color-primary)"
     />
     <path
       d="M53.8 34.6L55.7 39.7L60.8 41.6L55.7 43.5L53.8 48.6L51.9 43.5L46.8 41.6L51.9 39.7L53.8 34.6Z"
-      fill="#19A5F4"
+      fill="var(--color-primary)"
     />
-    <circle cx="58" cy="56.5" r="9.5" fill="#19A5F4" />
+    <circle cx="58" cy="56.5" r="9.5" fill="var(--color-primary)" />
     <path
       d="M54 56.5L56.8 59.3L62 53.8"
       fill="none"
-      stroke="#ffffff"
+      stroke="var(--color-on-primary)"
       strokeWidth="2.6"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -916,6 +643,9 @@ const FixPointModal = ({
 
 const FavoritePlacesModal = ({
   open,
+  status,
+  errorMessage,
+  onRetry,
   folders,
   selectedPlaceIds,
   expandedFolderIds,
@@ -1027,6 +757,9 @@ const FavoritePlacesModal = ({
         </div>
 
         <div className="favorite-folder-list">
+          {status === "loading" && <p role="status">관심장소를 불러오는 중이에요.</p>}
+          {errorMessage && <div role="alert"><p>{errorMessage}</p><button type="button" onClick={onRetry}>다시 불러오기</button></div>}
+          {status === "success" && folders.length === 0 && <p>저장한 폴더가 없어요.</p>}
           {folders.map((folder) => {
             const isExpanded = expandedFolderIds.includes(folder.id);
 
@@ -1036,6 +769,7 @@ const FavoritePlacesModal = ({
                   type="button"
                   className="favorite-folder-header"
                   onClick={() => onToggleFolder(folder.id)}
+                  aria-expanded={isExpanded}
                 >
                   <span
                     className={`favorite-folder-icon-circle ${
@@ -1050,7 +784,7 @@ const FavoritePlacesModal = ({
 
                   <span className="favorite-folder-title-box">
                     <strong>{folder.title}</strong>
-                    <small>{folder.places.length}개의 장소</small>
+                    <small>{folder.status === "error" ? "장소 목록 확인 필요" : `${folder.places.length}개의 장소`}</small>
                   </span>
 
                   <span
@@ -1064,6 +798,8 @@ const FavoritePlacesModal = ({
 
                 {isExpanded && (
                   <div className="favorite-place-list">
+                    {folder.status === "error" && <div role="alert"><p>이 폴더의 장소를 다시 확인하지 못했어요. 확인한 장소는 유지됩니다.</p><button type="button" onClick={onRetry}>장소 다시 불러오기</button></div>}
+                    {folder.status === "success" && folder.places.length === 0 && <p>저장한 장소가 없어요.</p>}
                     {folder.places.map((place) => {
                       const isChecked = selectedPlaceIds.includes(
                         place.sourceId
@@ -1077,6 +813,7 @@ const FavoritePlacesModal = ({
                             isChecked ? "is-selected" : ""
                           }`}
                           onClick={() => onTogglePlace(place.sourceId)}
+                          aria-pressed={isChecked}
                         >
                           <span
                             className={`favorite-place-checkbox ${
@@ -1086,7 +823,7 @@ const FavoritePlacesModal = ({
                             {isChecked ? "✓" : ""}
                           </span>
 
-                          <img
+                          <PlacePhoto
                             src={place.thumb}
                             alt={place.name}
                             className="favorite-place-thumb"
@@ -1192,7 +929,7 @@ const formatDateKey = (date) => {
 const getStartPlaceDefaultMap = (dates = [], placeMap = {}) => {
   return dates.reduce((acc, date) => {
     const dateKey = formatDateKey(date);
-    const firstPlace = placeMap[dateKey]?.[0];
+    const firstPlace = placeMap[dateKey]?.find(place => !place.isFixedTime);
 
     if (firstPlace?.id) {
       acc[dateKey] = firstPlace.id;
@@ -1296,7 +1033,7 @@ const createPlaceItem = (place, orderIndex = 0) => {
     city: place.city || place.region || "",
     country: place.country || "",
     mapProvider,
-    thumb: place.thumb || getThumb(sourceId || place.name),
+    thumb: place.thumb || place.imageUrl || place.thumbnailUrl || "",
     rating: place.rating || null,
     tags: place.tags || [],
     latitude: coordinate.latitude,
@@ -1393,12 +1130,7 @@ const normalizeIncomingRoutePlace = (place) => {
     city: place.city || place.region || "",
     country: place.country || "대한민국",
     mapProvider: place.mapProvider || place.provider || "kakao",
-    thumb:
-      place.thumb ||
-      place.image ||
-      place.thumbnail ||
-      place.thumbnailUrl ||
-      getThumb(sourceId || name),
+    thumb: place.thumb || place.image || place.imageUrl || place.thumbnail || place.thumbnailUrl || place.photoUrl || "",
     rating: place.rating || null,
     tags: place.tags || [],
     latitude: place.latitude || place.lat || null,
@@ -1507,7 +1239,7 @@ const normalizeSearchPlace = (place) => {
     "이름 없는 장소";
 
   const sourceId = normalizeSourceId(
-    place.sourceId || place.id || place.placeId || place.destinationId || name
+    place.sourceId || place.placeId || place.id || place.destinationId || name
   );
 
   return {
@@ -1534,7 +1266,7 @@ const normalizeSearchPlace = (place) => {
       place.thumbnail ||
       place.thumbnailUrl ||
       place.photoUrl ||
-      getThumb(sourceId || name),
+      "",
     rating: place.rating || place.score || place.avgRating || null,
     tags: place.tags || place.hashtags || [],
     latitude: place.latitude ?? place.lat ?? null,
@@ -1571,7 +1303,7 @@ const getNumericPlaceId = (place) => {
   for (const value of candidates) {
     const numberValue = Number(value);
 
-    if (Number.isInteger(numberValue) && numberValue > 0) {
+    if (Number.isSafeInteger(numberValue) && numberValue > 0) {
       return numberValue;
     }
   }
@@ -1589,6 +1321,46 @@ const ensureServerPlaceId = async (place) => {
   throw new Error(
     `${place?.name || "장소"}의 서버 placeId가 없습니다. 서버 검색 결과에서 장소를 다시 선택해주세요.`
   );
+};
+
+export const validateRoutePlaces = async (savedRoute, selectedStartPlaces = {}, requestApi = api) => {
+  const confirmed = new Map();
+  try {
+    if (!Array.isArray(savedRoute?.selectedDates) || savedRoute.selectedDates.length === 0) throw new Error("여행 날짜를 선택해 주세요.");
+    let count = 0;
+    let previousDate = "";
+    for (const date of savedRoute.selectedDates) {
+      const key = formatDateKey(date);
+      if (!key) throw new Error("여행 날짜를 확인해 주세요.");
+      if (previousDate && (Date.parse(key) - Date.parse(previousDate)) !== 86400000) {
+        throw new Error("여행 날짜는 시작일부터 연속된 날짜로 선택해주세요.");
+      }
+      previousDate = key;
+      const places = savedRoute.placesByDate?.[key];
+      if (!Array.isArray(places)) throw new Error("선택한 장소 목록을 확인해 주세요.");
+      const startId = selectedStartPlaces[key] || places[0]?.id;
+      const start = places.find(place => String(place.id) === String(startId));
+      if (places.length && !start) throw new Error("출발 장소를 다시 선택해 주세요.");
+      if (start?.isFixedTime) throw new Error("출발 시간은 오전 10시로 제공됩니다. 이 장소의 고정 시간을 해제하거나 다른 출발 장소를 선택해 주세요.");
+      for (const place of places) {
+        if (!place || typeof place.name !== "string" || !place.name.trim() || place.isExample || place.isMockPlaceholder) throw new Error("실제 검색 결과나 관심장소에서 장소를 다시 선택해 주세요.");
+        const id = await ensureServerPlaceId(place);
+        if (!confirmed.has(id)) {
+          const response = await requestApi.get(`/api/places/${id}`);
+          const actual = getResponseData(response.data);
+          if (Number(actual?.id ?? actual?.placeId) !== id || typeof actual?.name !== "string" || !actual.name.trim()) throw new Error("현재 환경에서 장소 정보를 확인할 수 없습니다. 장소를 다시 검색해 주세요.");
+          confirmed.set(id, actual);
+        }
+        const normalizeName = value => value.trim().replace(/\s+/g, " ");
+        if (normalizeName(confirmed.get(id).name) !== normalizeName(place.name)) throw new Error(`${place.name}의 장소 정보가 현재 조회 결과와 다릅니다. 장소를 다시 선택해 주세요.`);
+        count++;
+      }
+    }
+    if (!count) throw new Error("장소를 한 곳 이상 선택해 주세요.");
+  } catch (error) {
+    error.beforeWrite = true;
+    throw error;
+  }
 };
 
 const buildTripPayload = (savedRoute) => {
@@ -1646,7 +1418,7 @@ const getTripPlaceId = (tripPlace) => {
     : null;
 };
 
-const addPlacesToTrip = async (tripId, savedRoute, record) => {
+const addPlacesToTrip = async (tripId, savedRoute, record, requestApi = api) => {
   const tripPlaceMap = {};
   const addedCountByDay = {};
   const serverTripPlaceIdByLocalId = {};
@@ -1661,7 +1433,7 @@ const addPlacesToTrip = async (tripId, savedRoute, record) => {
       const placeId = await ensureServerPlaceId(place);
 
       record?.(`장소 추가: ${day}일차 ${placeIndex + 1}번째`, false);
-      const response = await api.post(
+      const response = await requestApi.post(
         `${TRIPS_API}/${tripId}/places/${placeId}`,
         null,
         {
@@ -1708,6 +1480,7 @@ const setStartPointsToServer = async ({
   tripPlaceMap,
   addedCountByDay,
   record,
+  requestApi = api,
 }) => {
   for (let dayIndex = 0; dayIndex < savedRoute.selectedDates.length; dayIndex++) {
     const day = dayIndex + 1;
@@ -1737,7 +1510,7 @@ const setStartPointsToServer = async ({
     }
 
     record?.(`출발지 설정: ${day}일차`, false);
-    await api.post(
+    await requestApi.post(
       `${TRIPS_API}/${tripId}/days/${day}/places/${tripPlaceId}/start`
     );
     record?.(`출발지 설정: ${day}일차`, true);
@@ -1750,6 +1523,7 @@ const updateFixedSchedulesToServer = async ({
   selectedStartPlaces,
   tripPlaceMap,
   record,
+  requestApi = api,
 }) => {
   for (let dayIndex = 0; dayIndex < savedRoute.selectedDates.length; dayIndex++) {
     const day = dayIndex + 1;
@@ -1764,7 +1538,7 @@ const updateFixedSchedulesToServer = async ({
       if (!tripPlaceId) throw new Error("시간을 설정할 여행 장소 ID를 확인하지 못했습니다.");
 
       record?.(`고정 시간 설정: ${day}일차`, false);
-      await api.patch(
+      await requestApi.patch(
         `${TRIPS_API}/${tripId}/days/${day}/places/${tripPlaceId}/schedule`,
         {
           fixed: true,
@@ -1778,12 +1552,12 @@ const updateFixedSchedulesToServer = async ({
   }
 };
 
-const getOptimizedPlacesByDay = async (tripId, day) => {
-  const response = await api.get(`${TRIPS_API}/${tripId}/days/${day}/places`);
+const getOptimizedPlacesByDay = async (tripId, day, requestApi) => {
+  const response = await requestApi.get(`${TRIPS_API}/${tripId}/days/${day}/places`);
   return getArrayData(response.data);
 };
 
-const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}, record) => {
+const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}, record, requestApi = api) => {
   const optimizedByDay = {};
 
   for (let dayIndex = 0; dayIndex < savedRoute.selectedDates.length; dayIndex++) {
@@ -1792,7 +1566,7 @@ const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}, record
     if (!addedCountByDay[day]) continue;
 
     record?.(`최적화: ${day}일차`, false);
-    const optimizeResponse = await api.post(
+    const optimizeResponse = await requestApi.post(
       `${TRIPS_API}/${tripId}/days/${day}/optimize`,
       null,
       { params: { startTime: "10:00" } }
@@ -1804,7 +1578,7 @@ const optimizeTripDays = async (tripId, savedRoute, addedCountByDay = {}, record
     optimizedByDay[day] =
       optimizedPlaces.length > 0
         ? optimizedPlaces
-        : await getOptimizedPlacesByDay(tripId, day);
+        : await getOptimizedPlacesByDay(tripId, day, requestApi);
   }
 
   return optimizedByDay;
@@ -1873,16 +1647,22 @@ const mapOptimizedPlacesToSavedRoute = (
   };
 };
 
-export const saveRouteToServer = async (savedRoute, startPlaceMap = {}, onProgress = () => {}) => {
+export const saveRouteToServer = async (savedRoute, startPlaceMap = {}, onProgress = () => {}, options = {}) => {
+  const requestApi = createGenerationRequest(options);
   const completed = [];
   const record = (stage, success) => {
     if (success) completed.push(stage);
     onProgress({ stage, completed: [...completed] });
   };
+  record("장소 확인", false);
+  await validateRoutePlaces(savedRoute, startPlaceMap, requestApi);
+  requestApi.check();
   record("여행 생성", false);
-  const tripPayload = buildTripPayload(savedRoute);
+  let tripPayload;
+  try { tripPayload = validateTripRequest(buildTripPayload(savedRoute)); }
+  catch (error) { error.beforeWrite = true; throw error; }
 
-  const tripResponse = await api.post(TRIPS_API, tripPayload);
+  const tripResponse = await requestApi.post(TRIPS_API, tripPayload);
   const tripData = getResponseData(tripResponse.data);
 
   let serverSavedRoute = mergeTripResponseWithSavedRoute(
@@ -1903,7 +1683,7 @@ export const saveRouteToServer = async (savedRoute, startPlaceMap = {}, onProgre
     tripPlaceMap,
     addedCountByDay,
     serverTripPlaceIdByLocalId,
-  } = await addPlacesToTrip(tripId, savedRoute, record);
+  } = await addPlacesToTrip(tripId, savedRoute, record, requestApi);
 
   await updateFixedSchedulesToServer({
     tripId,
@@ -1911,6 +1691,7 @@ export const saveRouteToServer = async (savedRoute, startPlaceMap = {}, onProgre
     selectedStartPlaces: startPlaceMap,
     tripPlaceMap,
     record,
+    requestApi,
   });
 
   await setStartPointsToServer({
@@ -1920,13 +1701,15 @@ export const saveRouteToServer = async (savedRoute, startPlaceMap = {}, onProgre
     tripPlaceMap,
     addedCountByDay,
     record,
+    requestApi,
   });
 
   const optimizedByDay = await optimizeTripDays(
     tripId,
     savedRoute,
     addedCountByDay,
-    record
+    record,
+    requestApi
   );
 
   serverSavedRoute = mapOptimizedPlacesToSavedRoute(
@@ -1966,7 +1749,7 @@ const RouteCreate = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const searchInputRef = useRef(null);
-  const { savedPlaces } = useSavedPlaces();
+
 
   const incomingRoutePlaces = useMemo(() => {
     return getIncomingRoutePlaces(location.state, location.search);
@@ -1983,11 +1766,6 @@ const RouteCreate = () => {
     new Date(INITIAL_START_DATE.getFullYear(), INITIAL_START_DATE.getMonth(), 1)
   );
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [serverSearchResults, setServerSearchResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchErrorMessage, setSearchErrorMessage] = useState("");
-  const [hasServerSearchCompleted, setHasServerSearchCompleted] =
-    useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const isSavingRoute = false;
   const [generatedRoute, setGeneratedRoute] = useState(null);
@@ -2008,7 +1786,7 @@ const RouteCreate = () => {
   const [favoriteModalDayIndex, setFavoriteModalDayIndex] = useState(0);
   const [selectedFavoritePlaceIds, setSelectedFavoritePlaceIds] = useState([]);
   const [expandedFavoriteFolderIds, setExpandedFavoriteFolderIds] = useState([
-    "solo",
+
   ]);
 
   const selectedDates = useMemo(() => {
@@ -2031,202 +1809,12 @@ const RouteCreate = () => {
   const activeDateKey = activeDate ? formatDateKey(activeDate) : "";
   const currentPlaces = activeDate ? placesByDate[activeDateKey] || [] : [];
 
-  const fallbackFavoritePlaces = useMemo(
-    () => [
-      {
-        sourceId: "favorite-seongsan",
-        name: "성산 일출봉",
-        desc: "자연명소 · 제주도",
-        city: "제주",
-        country: "대한민국",
-        mapProvider: "kakao",
-        thumb: getThumb("favorite-seongsan"),
-      },
-      {
-        sourceId: "favorite-osulloc",
-        name: "오설록 티 뮤지엄",
-        desc: "카페/디저트 · 제주도",
-        city: "제주",
-        country: "대한민국",
-        mapProvider: "kakao",
-        thumb: getThumb("favorite-osulloc"),
-      },
-      {
-        sourceId: "favorite-aewol",
-        name: "애월 카페거리",
-        desc: "카페거리 · 제주도",
-        city: "제주",
-        country: "대한민국",
-        mapProvider: "kakao",
-        thumb: getThumb("favorite-aewol"),
-      },
-      {
-        sourceId: "favorite-gyeongbokgung",
-        name: "경복궁",
-        desc: "역사명소 · 서울",
-        city: "서울",
-        country: "대한민국",
-        mapProvider: "kakao",
-        thumb: getThumb("favorite-gyeongbokgung"),
-      },
-      {
-        sourceId: "favorite-bukchon",
-        name: "북촌한옥마을",
-        desc: "전통마을 · 서울",
-        city: "서울",
-        country: "대한민국",
-        mapProvider: "kakao",
-        thumb: getThumb("favorite-bukchon"),
-      },
-    ],
-    []
-  );
-
-  const normalizedSavedFavoritePlaces = useMemo(() => {
-    if (!Array.isArray(savedPlaces) || savedPlaces.length === 0) {
-      return fallbackFavoritePlaces;
-    }
-
-    return savedPlaces.map((place, index) => {
-      const name =
-        place.name ||
-        place.title ||
-        place.placeName ||
-        place.destinationName ||
-        `저장 장소 ${index + 1}`;
-
-      const sourceId = normalizeSourceId(
-        place.sourceId || place.id || place.placeId || name
-      );
-
-      return {
-        sourceId,
-        originalId: place.id || place.placeId || place.destinationId || null,
-        placeId: place.placeId || place.id || null,
-        destinationId: place.destinationId || null,
-        name,
-        desc:
-          place.desc ||
-          place.address ||
-          place.roadAddress ||
-          place.location ||
-          place.description ||
-          "저장한 장소",
-        city: place.city || place.region || "",
-        country: place.country || "대한민국",
-        mapProvider: place.mapProvider || place.provider || "kakao",
-        thumb:
-          place.thumb ||
-          place.image ||
-          place.imageUrl ||
-          place.thumbnail ||
-          place.thumbnailUrl ||
-          getThumb(sourceId || name),
-        rating: place.rating || null,
-        tags: place.tags || [],
-        latitude: place.latitude || place.lat || null,
-        longitude: place.longitude || place.lng || null,
-        placeType: place.placeType || place.type || "",
-      };
-    });
-  }, [savedPlaces, fallbackFavoritePlaces]);
-
-  const favoriteFolders = useMemo(
-    () => [
-      {
-        id: "solo",
-        title: "나홀로 여행",
-        places: normalizedSavedFavoritePlaces.slice(0, 3),
-      },
-      {
-        id: "family",
-        title: "가족 휴가",
-        places: normalizedSavedFavoritePlaces.slice(3, 8),
-      },
-    ],
-    [normalizedSavedFavoritePlaces]
-  );
-
-  useEffect(() => {
-    if (!isSearchOpen) {
-      setServerSearchResults([]);
-      setSearchErrorMessage("");
-      setHasServerSearchCompleted(false);
-      return;
-    }
-
-    const keyword = searchKeyword.trim();
-
-    const timer = setTimeout(async () => {
-      try {
-        setIsSearching(true);
-        setSearchErrorMessage("");
-        setHasServerSearchCompleted(false);
-
-        const response = await api.get(PLACE_SEARCH_API, {
-          params: { keyword },
-        });
-
-        const places = getArrayData(response.data)
-          .map(normalizeSearchPlace)
-          .filter(Boolean);
-
-        setServerSearchResults(places.slice(0, 12));
-        setHasServerSearchCompleted(true);
-      } catch (error) {
-        logSafeApiError(error, "RouteCreate.jsx");
-        setHasServerSearchCompleted(true);
-
-        if (error.message.includes("Network Error")) {
-          setSearchErrorMessage(
-            "네트워크 연결을 확인한 뒤 다시 시도해주세요."
-          );
-          return;
-        }
-
-        setSearchErrorMessage(
-          getErrorMessage(
-            error,
-            "장소 검색에 실패했습니다. 기본 검색 결과를 표시합니다."
-          )
-        );
-      } finally {
-        setIsSearching(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [isSearchOpen, searchKeyword]);
-
-  const filteredSearchResults = useMemo(() => {
-    if (!isSearchOpen) return [];
-
-    const keyword = searchKeyword.trim().toLowerCase();
-
-    if (serverSearchResults.length > 0) {
-      return serverSearchResults;
-    }
-
-    if (hasServerSearchCompleted && !searchErrorMessage) {
-      return [];
-    }
-
-    const baseList = keyword
-      ? MOCK_PLACE_RESULTS.filter((place) =>
-          [place.name, place.desc, place.city, place.country, place.mapProvider]
-            .filter(Boolean)
-            .some((value) => value.toLowerCase().includes(keyword))
-        )
-      : MOCK_PLACE_RESULTS;
-
-    return baseList.slice(0, 12);
-  }, [
-    hasServerSearchCompleted,
-    isSearchOpen,
-    searchErrorMessage,
-    searchKeyword,
-    serverSearchResults,
-  ]);
+  const placeSearch = useRoutePlaceSearch(isSearchOpen, searchKeyword);
+  const isSearching = placeSearch.status === "loading";
+  const searchErrorMessage = placeSearch.status === "error" ? getErrorMessage(placeSearch.cause, "장소 검색에 실패했습니다. 다시 시도해 주세요.") : "";
+  const filteredSearchResults = useMemo(() => (placeSearch.data || []).map(normalizeSearchPlace).filter(Boolean), [placeSearch.data]);
+  const favoriteQuery = useFavoriteFolders(isFavoriteModalOpen);
+  const favoriteFolders = useMemo(() => (favoriteQuery.data || []).map(folder => ({ ...folder, places: folder.places.map(normalizeSearchPlace).filter(Boolean) })), [favoriteQuery.data]);
 
   const monthTitle = `${currentMonth.getFullYear()}년 ${
     currentMonth.getMonth() + 1
@@ -2340,13 +1928,13 @@ const RouteCreate = () => {
 
     setSearchKeyword("");
     setIsSearchOpen(false);
-    setServerSearchResults([]);
-    setSearchErrorMessage("");
-    setHasServerSearchCompleted(false);
+
+
+
   };
 
   const handleSearchKeyDown = (e) => {
-    if (e.key !== "Enter") return;
+    if (e.key !== "Enter" || !isSearchOpen || placeSearch.status !== "success") return;
 
     e.preventDefault();
 
@@ -2367,7 +1955,7 @@ const RouteCreate = () => {
   const handleFavoritePlacesClick = () => {
     setFavoriteModalDayIndex(activeDayIndex);
     setSelectedFavoritePlaceIds([]);
-    setExpandedFavoriteFolderIds(["solo"]);
+    setExpandedFavoriteFolderIds(favoriteFolders.length ? [favoriteFolders[0].id] : []);
     setIsFavoriteModalOpen(true);
   };
 
@@ -2398,7 +1986,7 @@ const RouteCreate = () => {
     if (!targetDate) return;
 
     const targetDateKey = formatDateKey(targetDate);
-    const allFavoritePlaces = favoriteFolders.flatMap((folder) => folder.places);
+    const allFavoritePlaces = Array.from(new Map(favoriteFolders.flatMap(folder => folder.places).map(place => [place.sourceId, place])).values());
 
     const placesToAdd = allFavoritePlaces.filter((place) =>
       selectedFavoritePlaceIds.includes(place.sourceId)
@@ -2573,7 +2161,7 @@ const RouteCreate = () => {
     try {
 
       setStartPlaceErrorMessage("");
-      const result = await generation.run(update => saveRouteToServer(buildRouteDraft(reordered), selectedStartPlaces, update));
+      const result = await generation.run((update, options) => saveRouteToServer(buildRouteDraft(reordered), selectedStartPlaces, update, options));
       if (!result) return;
       setGeneratedRoute(result);
       setPlacesByDate(result.placesByDate || reordered);
@@ -2615,10 +2203,10 @@ const RouteCreate = () => {
           <p>중단 단계: {generation.stage}</p>
           <p>성공 응답을 확인한 작업: {generation.completed.length ? generation.completed.join(" · ") : "없음"}</p>
           {generation.tripId && <p>확인된 여행 ID: {generation.tripId} (전체 저장 완료를 의미하지 않습니다)</p>}
-          <p>일부 내용이 저장되었을 수 있어요. 중복 생성을 피하려면 일정 목록에서 저장 상태를 확인해 주세요.</p>
+          <p>{generation.beforeWrite ? generation.error : "일부 내용이 저장되었을 수 있어요. 중복 생성을 피하려면 일정 목록에서 저장 상태를 확인해 주세요."}</p>
           <button type="button" onClick={() => navigate(generation.tripId ? `/route-result?id=${generation.tripId}` : "/schedule")}>저장 상태 확인</button>
           <button type="button" onClick={() => {
-            if (window.confirm("기존 작업의 저장 여부가 불명확합니다. 일정 목록에서 확인했나요? 새로 생성하면 중복 일정이 생길 수 있습니다. 입력을 유지하고 새 작업을 준비할까요?")) {
+            if (generation.beforeWrite || window.confirm("기존 작업의 저장 여부가 불명확합니다. 일정 목록에서 확인했나요? 새로 생성하면 중복 일정이 생길 수 있습니다. 입력을 유지하고 새 작업을 준비할까요?")) {
               generation.reset(); setStartPlaceErrorMessage(""); setIsStartPlaceModalOpen(false);
             }
           }}>입력을 유지하고 새 작업 준비</button>
@@ -2715,12 +2303,16 @@ const RouteCreate = () => {
         <section className="route-search-area">
           <div className="route-search-top-row">
             <div className="route-search-box">
-              <img src={searchIcon} alt="검색" className="route-search-icon" />
+              <svg className="route-search-icon" viewBox="0 0 30 18" width="30" height="18" aria-hidden="true">
+                <circle cx="7.5" cy="7.5" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                <path d="M11.5 11.5L16.5 16.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
 
               <input
                 ref={searchInputRef}
                 type="text"
                 placeholder="장소 검색 및 추가"
+                aria-label="일정에 추가할 장소 검색"
                 value={searchKeyword}
                 maxLength={100}
                 onFocus={() => setIsSearchOpen(true)}
@@ -2748,13 +2340,14 @@ const RouteCreate = () => {
                 <div className="route-search-empty">검색 중입니다.</div>
               ) : filteredSearchResults.length === 0 ? (
                 <div className="route-search-empty">
-                  {searchErrorMessage || "검색 결과가 없어요."}
+                  {searchErrorMessage || (searchKeyword.trim() ? "검색 결과가 없어요." : "검색어를 입력해 주세요.")}
+                  {searchErrorMessage && <button type="button" onClick={placeSearch.retry}>검색 다시 시도</button>}
                 </div>
               ) : (
                 <>
                   {searchErrorMessage && (
                     <div className="route-search-empty">
-                      {searchErrorMessage}
+                      {searchErrorMessage}<button type="button" onClick={placeSearch.retry}>검색 다시 시도</button>
                     </div>
                   )}
 
@@ -2819,8 +2412,7 @@ const RouteCreate = () => {
                   ? place.isFixedTime
                   : false;
 
-              const thumb =
-                place.thumb || getThumb(place.sourceId || `place-${index}`);
+              const thumb = place.thumb;
 
               return (
                 <div key={place.id} className="place-card schedule-card">
@@ -2834,7 +2426,7 @@ const RouteCreate = () => {
                   </button>
 
                   <div className="place-main schedule-card-main">
-                    <img
+                    <PlacePhoto
                       src={thumb}
                       alt={place.name}
                       className="schedule-place-thumb"
@@ -2935,6 +2527,9 @@ const RouteCreate = () => {
 
       <FavoritePlacesModal
         open={isFavoriteModalOpen}
+        status={favoriteQuery.status}
+        errorMessage={favoriteQuery.status === "error" ? getErrorMessage(favoriteQuery.cause, "관심장소를 불러오지 못했어요.") : ""}
+        onRetry={favoriteQuery.retry}
         folders={favoriteFolders}
         selectedPlaceIds={selectedFavoritePlaceIds}
         expandedFolderIds={expandedFavoriteFolderIds}

@@ -1,0 +1,652 @@
+PASS src/mocks/mockMode.test.jsx (6.35 s)
+  ● Console
+
+    console.error
+      Request failed { context: 'api' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/api/api.js:169:20
+      at Axios.request (node_modules/axios/lib/core/Axios.js:41:14)
+      at getRecentSearchesApi (src/api/placeApi.js:49:16)
+      at Object.retry (src/utils/useReadQuery.js:19:20)
+
+FAIL src/Search/Search.test.jsx
+  ● clear uses the existing API and only removes records after success
+
+    Unable to find role="button" and name "테스트 검색 ×"
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="search-page"
+        >
+          <section
+            class="search-hero"
+          >
+            <h1
+              class="search-title"
+            >
+              어디로 떠나볼까요?
+            </h1>
+            <form
+              class="search-input-wrap"
+            >
+              <button
+                aria-label="검색"
+                class="search-icon-submit"
+                type="submit"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="svg-icon"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    cx="11"
+                    cy="11"
+                    fill="none"
+                    r="6.5"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  />
+                  <path
+                    d="M16 16L21 21"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-width="2"
+                  />
+                </svg>
+              </button>
+              <input
+                aria-label="장소, 도시 또는 테마 검색"
+                maxlength="100"
+                placeholder="장소, 도시 또는 테마 검색"
+                type="text"
+                value=""
+              />
+            </form>
+          </section>
+          <section
+            class="search-section"
+          >
+            <div
+              class="section-top"
+            >
+              <h2>
+                최근 검색어
+              </h2>
+              <button
+                class="clear-btn recent-clear-btn"
+                type="button"
+              >
+                전체 삭제
+              </button>
+            </div>
+            <div
+              class="recent-tags"
+            >
+              <div
+                class="recent-tag"
+              >
+                <button
+                  class="recent-search-action"
+                  type="button"
+                >
+                  테스트 검색
+                </button>
+                <button
+                  aria-label="테스트 검색 최근 검색어 삭제"
+                  class="tag-close"
+                  type="button"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          </section>
+          <section
+            class="search-section"
+          >
+            <h2>
+              인기 검색어
+            </h2>
+            <div
+              class="popular-grid"
+            >
+              <button
+                class="popular-card"
+                type="button"
+              >
+                <span
+                  class="popular-rank"
+                >
+                  1
+                </span>
+                <span
+                  class="popular-text"
+                >
+                  경주 불국사
+                </span>
+              </button>
+              <button
+                class="popular-card"
+                type="button"
+              >
+                <span
+                  class="popular-rank"
+                >
+                  2
+                </span>
+                <span
+                  class="popular-text"
+                >
+                  여수 밤바다
+                </span>
+              </button>
+              <button
+                class="popular-card"
+                type="button"
+              >
+                <span
+                  class="popular-rank"
+                >
+                  3
+                </span>
+                <span
+                  class="popular-text"
+                >
+                  남해 독일마을
+                </span>
+              </button>
+              <button
+                class="popular-card"
+                type="button"
+              >
+                <span
+                  class="popular-rank"
+                >
+                  4
+                </span>
+                <span
+                  class="popular-text"
+                >
+                  양양 서피비치
+                </span>
+              </button>
+              <button
+                class="popular-card"
+                type="button"
+              >
+                <span
+                  class="popular-rank"
+                >
+                  5
+                </span>
+                <span
+                  class="popular-text"
+                >
+                  안동 하회마을
+                </span>
+              </button>
+              <button
+                class="popular-card"
+                type="button"
+              >
+                <span
+                  class="popular-rank"
+                >
+                  6
+                </span>
+                <span
+                  class="popular-text"
+                >
+                  속초 중앙시장
+                </span>
+              </button>
+            </div>
+          </section>
+          <section
+            class="search-section"
+          >
+            <h2>
+              지역별 추천
+            </h2>
+            <div
+              class="region-grid"
+            >
+              <button
+                class="region-card"
+                type="button"
+              >
+                <div
+                  class="region-icon-box"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="svg-icon"
+                    viewBox="0 0 24 24"
+                  >
+                    <rect
+                      fill="none"
+                      height="14"
+                      rx="1.2"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      width="4"
+                      x="4"
+                      y="5"
+                    />
+                    <rect
+                      fill="none"
+                      height="16"
+                      rx="1.2"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      width="4"
+                      x="10"
+                      y="3"
+                    />
+                    <rect
+                      fill="none"
+                      height="11"
+                      rx="1.2"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      width="4"
+                      x="16"
+                      y="8"
+                    />
+                  </svg>
+                </div>
+                <span>
+                  서울
+                </span>
+              </button>
+              <button
+                class="region-card"
+                type="button"
+              >
+                <div
+                  class="region-icon-box"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="svg-icon"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M4 17C6 13 8 10 12 10C16 10 18 13 20 17"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M12 10V6"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M10 7.5L12 5L14 7.5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M3 19H21"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-width="2"
+                    />
+                  </svg>
+                </div>
+                <span>
+                  제주
+                </span>
+              </button>
+              <button
+                class="region-card"
+                type="button"
+              >
+                <div
+                  class="region-icon-box"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="svg-icon"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M4 15H20L18 18H6L4 15Z"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M8 11L12 8L16 11"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M7 20C8 19 9 19 10 20C11 21 13 21 14 20C15 19 16 19 17 20"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-width="2"
+                    />
+                  </svg>
+                </div>
+                <span>
+                  부산
+                </span>
+              </button>
+              <button
+                class="region-card"
+                type="button"
+              >
+                <div
+                  class="region-icon-box"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="svg-icon"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M4 18L9 12L13 16L17 10L20 18H4Z"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                    />
+                  </svg>
+                </div>
+                <span>
+                  강원
+                </span>
+              </button>
+              <button
+                class="region-card"
+                type="button"
+              >
+                <div
+                  class="region-icon-box"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="svg-icon"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M4 18H20"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M6 18V12H18V18"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M4 12L12 7L20 12"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M9 18V14M15 18V14"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-width="2"
+                    />
+                  </svg>
+                </div>
+                <span>
+                  경주
+                </span>
+              </button>
+              <button
+                class="region-card"
+                type="button"
+              >
+                <div
+                  class="region-icon-box"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="svg-icon"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M4 10C5.5 8.5 7 8.5 8.5 10C10 11.5 11.5 11.5 13 10C14.5 8.5 16 8.5 17.5 10C19 11.5 20 11.5 20 11.5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M4 15C5.5 13.5 7 13.5 8.5 15C10 16.5 11.5 16.5 13 15C14.5 13.5 16 13.5 17.5 15C19 16.5 20 16.5 20 16.5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-width="2"
+                    />
+                  </svg>
+                </div>
+                <span>
+                  여수
+                </span>
+              </button>
+              <button
+                class="region-card"
+                type="button"
+              >
+                <div
+                  class="region-icon-box"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="svg-icon"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      fill="none"
+                      r="4"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M12 2V5M12 19V22M2 12H5M19 12H22M4.9 4.9L7 7M17 17L19.1 19.1M19.1 4.9L17 7M7 17L4.9 19.1"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-width="2"
+                    />
+                  </svg>
+                </div>
+                <span>
+                  거제
+                </span>
+              </button>
+            </div>
+          </section>
+          <section
+            class="search-section search-hot-section"
+          >
+            <h2>
+              지금 가장 핫한 곳
+            </h2>
+            <article
+              class="hot-main-card"
+            >
+              <img
+                alt="서울 시티 나이트 투어"
+                class="search-hot-main-photo"
+                src="/place-photos/seoul-night.jpg"
+                style="object-fit: cover;"
+              />
+              <a
+                aria-label="서울 시티 나이트 투어 사진 출처"
+                class="place-photo-credit"
+                href="/place-photos/credits.html#seoul-night"
+                rel="noreferrer"
+                target="_blank"
+              >
+                사진 출처
+              </a>
+              <div
+                class="hot-main-overlay"
+              >
+                <span
+                  class="hot-badge"
+                >
+                  TRENDING
+                </span>
+                <h3>
+                  <button
+                    class="hot-place-action"
+                    type="button"
+                  >
+                    서울 시티 나이트 투어
+                  </button>
+                </h3>
+                <p>
+                  화려한 도심의 야경을 한눈에
+                </p>
+              </div>
+            </article>
+            <div
+              class="hot-sub-grid"
+            >
+              <article
+                class="hot-sub-card"
+              >
+                <img
+                  alt="제주 오설록"
+                  class="search-hot-sub-photo"
+                  src="/place-photos/osulloc.jpg"
+                  style="object-fit: cover;"
+                />
+                <a
+                  aria-label="제주 오설록 사진 출처"
+                  class="place-photo-credit"
+                  href="/place-photos/credits.html#osulloc"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  사진 출처
+                </a>
+                <div
+                  class="hot-sub-overlay"
+                >
+                  <h4>
+                    <button
+                      class="hot-place-action"
+                      type="button"
+                    >
+                      제주 오설록
+                    </button>
+                  </h4>
+                </div>
+              </article>
+              <article
+                class="hot-sub-card"
+              >
+                <img
+                  alt="부산 광안리"
+                  class="search-hot-sub-photo"
+                  src="/place-photos/gwangalli.jpg"
+                  style="object-fit: cover;"
+                />
+                <a
+                  aria-label="부산 광안리 사진 출처"
+                  class="place-photo-credit"
+                  href="/place-photos/credits.html#gwangalli"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  사진 출처
+                </a>
+                <div
+                  class="hot-sub-overlay"
+                >
+                  <h4>
+                    <button
+                      class="hot-place-action"
+                      type="button"
+                    >
+                      부산 광안리
+                    </button>
+                  </h4>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+      </div>
+    </body>
+
+      24 |   getRecentSearchesApi.mockResolvedValue([{ id: 1, keyword: "테스트 검색" }]);
+      25 |   const pending = deferred(); clearRecentSearchesApi.mockReturnValue(pending.promise); setup();
+    > 26 |   await screen.findByRole("button", { name: "테스트 검색 ×" });
+         |                ^
+      27 |   fireEvent.click(screen.getByRole("button", { name: "전체 삭제" }));
+      28 |   expect(clearRecentSearchesApi).toHaveBeenCalledTimes(1);
+      29 |   expect(screen.getByText("테스트 검색")).toBeInTheDocument();
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at findByRole (node_modules/@testing-library/dom/dist/query-helpers.js:86:33)
+      at Object.<anonymous> (src/Search/Search.test.jsx:26:16)
+
+PASS src/FolderSelectModal/FolderSelectModal.test.jsx
+PASS src/Homepage/Home.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'api' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/api/api.js:169:20
+      at Axios.request (node_modules/axios/lib/core/Axios.js:41:14)
+      at getRecommendationsApi (src/api/placeApi.js:38:20)
+      at src/utils/useReadQuery.js:19:20
+
+
+Test Suites: 1 failed, 3 passed, 4 total
+Tests:       1 failed, 28 passed, 29 total
+Snapshots:   0 total
+Time:        12.003 s, estimated 15 s
+Ran all test suites within paths "src/Search/Search.test.jsx", "src/Homepage/Home.test.jsx", "src/FolderSelectModal/FolderSelectModal.test.jsx", "src/mocks/mockMode.test.jsx".
+Test results written to: output\frontend-fixes\root-initial.json

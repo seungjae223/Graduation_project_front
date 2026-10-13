@@ -1,0 +1,31 @@
+PASS src/Login/emailCooldown.test.jsx (11 s)
+PASS src/mocks/mockMode.test.jsx (6.159 s)
+  ● Console
+
+    console.error
+      Request failed { context: 'api' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/api/api.js:170:20
+      at Axios.request (node_modules/axios/lib/core/Axios.js:41:14)
+      at getRecentSearchesApi (src/api/placeApi.js:45:16)
+      at src/utils/useReadQuery.js:19:20
+
+PASS src/Login/authFlow.test.jsx
+PASS src/App.test.js
+PASS src/api/security.test.js
+PASS src/Login/SignUp.test.jsx
+
+Test Suites: 6 passed, 6 total
+Tests:       56 passed, 56 total
+Snapshots:   0 total
+Time:        37.612 s
+Ran all test suites within paths "src/Login/emailCooldown.test.jsx", "src/Login/SignUp.test.jsx", "src/Login/authFlow.test.jsx", "src/api/security.test.js", "src/App.test.js", "src/mocks/mockMode.test.jsx".

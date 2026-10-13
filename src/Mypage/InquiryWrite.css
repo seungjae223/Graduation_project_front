@@ -3,8 +3,8 @@
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  background: #f6faff;
-  color: #111827;
+  background: var(--color-page);
+  color: var(--color-text-strong);
 }
 
 .inquiry-write-screen {
@@ -13,7 +13,7 @@
   min-height: 100vh;
   padding: 28px 18px 120px;
   box-sizing: border-box;
-  background: #f7fbfe;
+  background: var(--color-page);
 }
 
 .inquiry-write-screen.is-modal-open {
@@ -26,7 +26,7 @@
 
 .inquiry-write-header h1 {
   margin: 0;
-  color: #0f172a;
+  color: var(--color-text-strong);
   font-size: 24px;
   font-weight: 900;
   line-height: 1.25;
@@ -35,7 +35,7 @@
 
 .inquiry-write-header p {
   margin: 9px 0 0;
-  color: #64748b;
+  color: var(--color-text-muted);
   font-size: 13px;
   font-weight: 500;
   line-height: 1.45;
@@ -54,7 +54,7 @@
 .inquiry-write-field span {
   display: block;
   margin-bottom: 9px;
-  color: #64748b;
+  color: var(--color-text-muted);
   font-size: 13px;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -66,18 +66,25 @@
   border: 0;
   outline: none;
   box-sizing: border-box;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--color-input);
+  color: var(--color-text-strong);
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
   letter-spacing: -0.04em;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  box-shadow: inset 0 0 0 1px var(--color-border-strong), 0 1px 2px var(--color-shadow);
+}
+
+.inquiry-write-field input:focus-visible,
+.inquiry-write-field textarea:focus-visible,
+.inquiry-write-submit-button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
 }
 
 .inquiry-write-field input::placeholder,
 .inquiry-write-field textarea::placeholder {
-  color: #b5c0ce;
+  color: var(--color-placeholder);
   font-weight: 600;
 }
 
@@ -101,13 +108,24 @@
   margin-top: 4px;
   border: 0;
   border-radius: 999px;
-  background: #18a8ed;
-  color: #ffffff;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   box-shadow: 0 9px 18px rgba(24, 168, 237, 0.28);
   font-size: 16px;
   font-weight: 900;
   letter-spacing: -0.04em;
   cursor: pointer;
+}
+
+.inquiry-write-submit-button:disabled {
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  box-shadow: none;
+  cursor: default;
+}
+
+.inquiry-write-error-message {
+  color: var(--color-danger);
 }
 
 .inquiry-email-card {
@@ -117,9 +135,9 @@
   margin-top: 34px;
   padding: 22px 22px 21px;
   box-sizing: border-box;
-  border: 1px solid #dfeef8;
+  border: 1px solid var(--color-border);
   border-radius: 22px;
-  background: #eef8ff;
+  background: var(--color-accent-soft);
 }
 
 .inquiry-email-icon-wrap {
@@ -130,7 +148,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: #dff5ff;
+  background: var(--color-accent-soft);
 }
 
 .inquiry-email-icon {
@@ -148,7 +166,7 @@
 
 .inquiry-email-text strong {
   display: block;
-  color: #0f172a;
+  color: var(--color-text-strong);
   font-size: 15px;
   font-weight: 900;
   line-height: 1.2;
@@ -157,7 +175,7 @@
 
 .inquiry-email-text p {
   margin: 7px 0 8px;
-  color: #64748b;
+  color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 600;
   line-height: 1.45;
@@ -165,7 +183,7 @@
 }
 
 .inquiry-email-text a {
-  color: #10a7ed;
+  color: var(--color-accent-text);
   font-size: 13px;
   font-weight: 900;
   letter-spacing: -0.04em;
@@ -181,7 +199,7 @@
   justify-content: center;
   padding: 24px;
   box-sizing: border-box;
-  background: rgba(15, 23, 42, 0.42);
+  background: var(--color-backdrop);
   backdrop-filter: blur(1px);
 }
 
@@ -194,8 +212,8 @@
   padding: 34px 28px 27px;
   box-sizing: border-box;
   border-radius: 28px;
-  background: #ffffff;
-  box-shadow: 0 22px 54px rgba(15, 23, 42, 0.22);
+  background: var(--color-surface);
+  box-shadow: 0 22px 54px var(--color-shadow);
   text-align: center;
 }
 
@@ -207,7 +225,7 @@
   justify-content: center;
   margin-bottom: 28px;
   border-radius: 999px;
-  background: #e7f8ff;
+  background: var(--color-accent-soft);
 }
 
 .inquiry-success-check-icon {
@@ -219,7 +237,7 @@
 
 .inquiry-success-modal h2 {
   margin: 0;
-  color: #0f172a;
+  color: var(--color-text-strong);
   font-size: 16px;
   font-weight: 900;
   line-height: 1.35;
@@ -228,7 +246,7 @@
 
 .inquiry-success-modal p {
   margin: 22px 0 27px;
-  color: #64748b;
+  color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 600;
   line-height: 1.45;
@@ -240,8 +258,8 @@
   height: 50px;
   border: 0;
   border-radius: 12px;
-  background: #18a8ed;
-  color: #ffffff;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   box-shadow: 0 8px 16px rgba(24, 168, 237, 0.28);
   font-size: 14px;
   font-weight: 900;

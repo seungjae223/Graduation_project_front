@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import useModalFocus from "../utils/useModalFocus";
+import useReadQuery from "../utils/useReadQuery"; import useSessionKey from "../utils/useSessionKey"; import { getAuthSnapshot } from "../utils/authState";
 import "./MyPage.css";
 import api, { getAccessToken } from "../api/api";
 import { USE_MOCK } from "../config/mockConfig";
@@ -24,16 +25,16 @@ const getCurrentTheme = () => {
 };
 
 const DEFAULT_MYPAGE_STATS = {
-  visitedPlacesCount: 0,
-  savedPlacesCount: 0,
-  reviewsCount: 0,
+  visitedPlacesCount: null,
+  savedPlacesCount: null,
+  reviewsCount: null,
 };
 
 const ArrowIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path
       d="M9 6L15 12L9 18"
-      stroke="#A8B3C3"
+      stroke="currentColor"
       strokeWidth="2.2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -43,18 +44,18 @@ const ArrowIcon = () => (
 
 const CalendarIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M7 2V5" stroke="#179FF4" strokeWidth="2" strokeLinecap="round" />
-    <path d="M17 2V5" stroke="#179FF4" strokeWidth="2" strokeLinecap="round" />
+    <path d="M7 2V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M17 2V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     <rect
       x="4"
       y="5"
       width="16"
       height="15"
       rx="3"
-      stroke="#179FF4"
+      stroke="currentColor"
       strokeWidth="2"
     />
-    <path d="M4 9H20" stroke="#179FF4" strokeWidth="2" />
+    <path d="M4 9H20" stroke="currentColor" strokeWidth="2" />
   </svg>
 );
 
@@ -62,7 +63,7 @@ const BookmarkIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path
       d="M7 4.5C7 3.94772 7.44772 3.5 8 3.5H16C16.5523 3.5 17 3.94772 17 4.5V20L12 16.8L7 20V4.5Z"
-      stroke="#179FF4"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinejoin="round"
     />
@@ -73,20 +74,20 @@ const HistoryIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path
       d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C8.4913 21 5.4518 18.9918 3.96911 16.0645"
-      stroke="#179FF4"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
     />
     <path
       d="M3 7V12H8"
-      stroke="#179FF4"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M12 7V12L15.5 14"
-      stroke="#179FF4"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -98,7 +99,7 @@ const InquiryIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path
       d="M5 6.5C5 5.39543 5.89543 4.5 7 4.5H17C18.1046 4.5 19 5.39543 19 6.5V13.5C19 14.6046 18.1046 15.5 17 15.5H10L6 19V15.5H7C5.89543 15.5 5 14.6046 5 13.5V6.5Z"
-      stroke="#4C5A73"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinejoin="round"
     />
@@ -109,11 +110,11 @@ const LocationIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path
       d="M12 21.5C12 21.5 19 15.1 19 9.8C19 5.93401 15.866 2.8 12 2.8C8.13401 2.8 5 5.93401 5 9.8C5 15.1 12 21.5 12 21.5Z"
-      stroke="#4C5A73"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinejoin="round"
     />
-    <circle cx="12" cy="9.8" r="2.4" stroke="#4C5A73" strokeWidth="2" />
+    <circle cx="12" cy="9.8" r="2.4" stroke="currentColor" strokeWidth="2" />
   </svg>
 );
 
@@ -182,7 +183,7 @@ const LocationPermissionModal = ({ onClose, onAllow }) => {
           position: "relative",
           display: "flex",
           flexDirection: "column",
-          background: "#ffffff",
+          background: "var(--color-surface)",
         }}
       >
         <div className="location-permission-hero">
@@ -602,11 +603,9 @@ const normalizeUserData = (data) => {
 const normalizeMypageStats = (data) => {
   const statsData = data?.data || data?.result || data || {};
 
-  return {
-    visitedPlacesCount: Number(statsData.visitedPlacesCount ?? 0),
-    savedPlacesCount: Number(statsData.savedPlacesCount ?? 0),
-    reviewsCount: Number(statsData.reviewsCount ?? 0),
-  };
+  if (!statsData || typeof statsData !== "object" || Array.isArray(statsData)) throw new Error("통계 응답 확인 실패");
+  const count = value => typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+  return { visitedPlacesCount: count(statsData.visitedPlacesCount), savedPlacesCount: count(statsData.savedPlacesCount), reviewsCount: count(statsData.reviewsCount) };
 };
 
 const getFallbackUser = () => {
@@ -662,7 +661,9 @@ const MyPage = () => {
   const navigate = useNavigate();
 
   const [currentUser, setCurrentUser] = useState(getInitialUser());
-  const [mypageStats, setMypageStats] = useState(DEFAULT_MYPAGE_STATS);
+  const account = useSessionKey();
+  const statsQuery = useReadQuery(account + ":mypage-stats", async signal => normalizeMypageStats((await api.get("/api/mypage/stats", { signal })).data), account !== "anonymous", () => getAuthSnapshot().accountKey === account);
+  const mypageStats = statsQuery.data || DEFAULT_MYPAGE_STATS;
   const [isUserLoading, setIsUserLoading] = useState(false);
   const [locationAllowed, setLocationAllowed] = useState(false);
   const [theme, setTheme] = useState(getCurrentTheme);
@@ -706,40 +707,8 @@ const MyPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [navigate]);
+  }, [navigate, account]);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchMypageStats = async () => {
-      const token = getStoredAccessToken();
-
-      if (!token) {
-        return;
-      }
-
-      try {
-        const response = await api.get("/api/mypage/stats");
-
-
-        if (!isMounted) return;
-
-        setMypageStats(normalizeMypageStats(response.data));
-      } catch (error) {
-        logSafeApiError(error, "MyPage.jsx");
-
-        if (isMounted) {
-          setMypageStats(DEFAULT_MYPAGE_STATS);
-        }
-      }
-    };
-
-    fetchMypageStats();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const saveLocationAllowed = useCallback((isAllowed) => {
     setLocationAllowed(isAllowed);
@@ -902,7 +871,7 @@ const MyPage = () => {
 
   const stats = [
     {
-      label: "다녀온 곳",
+      label: "여행 일정",
       value: mypageStats.visitedPlacesCount,
     },
     {
@@ -1001,10 +970,12 @@ const MyPage = () => {
             </div>
           </div>
 
+          {statsQuery.status === "loading" && <p role="status">활동 통계를 확인하는 중입니다.</p>}
+          {statsQuery.status === "error" && <div role="alert"><p>{statsQuery.data ? "활동 통계를 갱신하지 못했습니다. 마지막으로 확인한 값입니다." : "활동 통계를 불러오지 못했습니다."}</p><button type="button" onClick={statsQuery.retry}>통계 다시 불러오기</button></div>}
           <div className="mypage-stats-grid">
             {stats.map((stat) => (
               <div key={stat.label} className="mypage-stat-card">
-                <strong>{stat.value}</strong>
+                <strong aria-label={stat.value === null ? `${stat.label} 미확인` : undefined}>{stat.value === null ? "—" : stat.value}</strong>
                 <span>{stat.label}</span>
               </div>
             ))}

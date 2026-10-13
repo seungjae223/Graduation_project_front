@@ -1,0 +1,645 @@
+PASS src/Recommend/listFlows.test.jsx
+PASS src/mocks/mockMode.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'api' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/api/api.js:169:20
+      at Axios.request (node_modules/axios/lib/core/Axios.js:41:14)
+      at getRecentSearchesApi (src/api/placeApi.js:49:16)
+      at Object.retry (src/utils/useReadQuery.js:19:20)
+
+PASS src/Footer/Footer.test.js
+PASS src/Search/Search.test.jsx
+PASS src/RouteCreate/selectionUi.test.jsx
+PASS src/Mypage/profileFlows.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'InquiryWrite.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/Mypage/InquiryWrite.jsx:53:38
+      at Object.run (src/utils/useMutationTask.js:17:11)
+      at handleSubmit (src/Mypage/InquiryWrite.jsx:51:5)
+
+    console.error
+      Request failed { context: 'MySchedule.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/MySchedule/MySchedule.jsx:372:22
+
+PASS src/RouteCreate/searchFolders.test.jsx
+PASS src/Login/authFlow.test.jsx
+PASS src/RouteResult/editing.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+PASS src/utils/placeSaving.test.jsx
+PASS src/utils/useModalFocus.test.jsx
+PASS src/OnBoarding/onboardingTransition.test.js
+PASS src/FolderSelectModal/FolderSelectModal.test.jsx
+PASS src/SearchPopup/SearchPop.test.jsx
+PASS src/routeSecurity.test.js
+PASS src/RouteResult/mapCoordinates.test.jsx
+PASS src/Recommend/Detail.test.jsx
+PASS src/Mypage/availableActions.test.jsx
+PASS src/Schedule/Schedule.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'MySchedule.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/MySchedule/MySchedule.jsx:372:22
+
+PASS src/Loading/RouteErrorBoundary.test.jsx
+FAIL src/Login/OAuthCallback.test.js
+  ● google: StrictMode에서도 일치한 state로 한 번만 완료
+
+    TypeError: (0 , _reactRouterDom.useLocation) is not a function
+
+      17 |   const [searchParams] = useSearchParams();
+      18 |   const navigate = useNavigate();
+    > 19 |   const location = useLocation();
+         |                               ^
+      20 |   const scope = `${location.key}:${provider}`;
+      21 |   const task = useAuthRequest(scope);
+      22 |   const { begin, end } = task;
+
+      at OAuthCallback (src/Login/OAuthCallback.jsx:19:31)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at src/Login/OAuthCallback.test.js:25:22
+
+  ● kakao: StrictMode에서도 일치한 state로 한 번만 완료
+
+    TypeError: (0 , _reactRouterDom.useLocation) is not a function
+
+      17 |   const [searchParams] = useSearchParams();
+      18 |   const navigate = useNavigate();
+    > 19 |   const location = useLocation();
+         |                               ^
+      20 |   const scope = `${location.key}:${provider}`;
+      21 |   const task = useAuthRequest(scope);
+      22 |   const { begin, end } = task;
+
+      at OAuthCallback (src/Login/OAuthCallback.jsx:19:31)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at src/Login/OAuthCallback.test.js:25:22
+
+  ● google: 불일치 시 완료 API 호출 금지
+
+    TypeError: (0 , _reactRouterDom.useLocation) is not a function
+
+      17 |   const [searchParams] = useSearchParams();
+      18 |   const navigate = useNavigate();
+    > 19 |   const location = useLocation();
+         |                               ^
+      20 |   const scope = `${location.key}:${provider}`;
+      21 |   const task = useAuthRequest(scope);
+      22 |   const { begin, end } = task;
+
+      at OAuthCallback (src/Login/OAuthCallback.jsx:19:31)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at src/Login/OAuthCallback.test.js:38:9
+
+  ● kakao: 불일치 시 완료 API 호출 금지
+
+    TypeError: (0 , _reactRouterDom.useLocation) is not a function
+
+      17 |   const [searchParams] = useSearchParams();
+      18 |   const navigate = useNavigate();
+    > 19 |   const location = useLocation();
+         |                               ^
+      20 |   const scope = `${location.key}:${provider}`;
+      21 |   const task = useAuthRequest(scope);
+      22 |   const { begin, end } = task;
+
+      at OAuthCallback (src/Login/OAuthCallback.jsx:19:31)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at src/Login/OAuthCallback.test.js:38:9
+
+PASS src/Header/scheduleActions.test.jsx
+PASS src/RouteResult/useTripResult.test.js
+PASS src/RouteResult/mapLifecycle.test.jsx
+FAIL src/utils/useKeyboardRouteFocus.test.jsx
+  ● an open modal keeps keyboard focus during a route PUSH and after returning from it
+
+    expect(element).toHaveFocus()
+
+    Expected element with focus:
+      <button>Keep focus</button>
+    Received element with focus:
+      <h1 tabindex="-1">Search</h1>
+
+      62 |   rerender(<RouteFocus pathname="/search" label="Search" />);
+      63 |   await Promise.resolve();
+    > 64 |   expect(keep).toHaveFocus();
+         |                ^
+      65 | });
+      66 |
+
+      at Object.<anonymous> (src/utils/useKeyboardRouteFocus.test.jsx:64:16)
+
+PASS src/RouteResult/keyboardOrder.test.jsx
+PASS src/Login/SignUp.test.jsx
+PASS src/ShareModal/ShareModal.test.jsx
+PASS src/utils/requestTasks.test.js
+PASS src/RouteResult/RouteResult.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1789:24
+
+PASS src/RouteCreate/validation.test.js
+PASS src/components/PlacePhoto.test.jsx
+PASS src/RouteCreate/generation.test.js
+PASS src/Loading/routeFallback.test.jsx
+PASS src/Homepage/Home.test.jsx
+PASS src/animations/PageTransition.test.jsx
+PASS src/components/InputDialog.test.jsx
+PASS src/api/security.test.js
+PASS src/api/authApi.test.js
+PASS src/utils/authState.test.jsx
+PASS src/utils/authStorage.test.js
+PASS src/api/apiConfig.test.js
+PASS src/utils/pdfTask.test.js
+PASS src/utils/theme.test.js
+PASS src/Mypage/inquiryData.test.js
+  ● Console
+
+    console.error
+      Request failed { context: 'recentPlaces.js' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at getRecentPlaces (src/utils/recentPlaces.js:22:20)
+      at src/Mypage/inquiryData.test.js:13:25
+
+PASS src/utils/oauthSecurity.test.js
+PASS src/App.test.js
+PASS src/api/api.test.js
+PASS src/Login/passwordValidation.test.js
+PASS src/utils/mapUrl.test.js
+PASS src/api/authApi.mock.test.js
+PASS src/utils/iconRendering.test.js
+PASS src/utils/kakaoMapLoader.test.js
+PASS src/api/travelContracts.test.js
+PASS src/utils/mobileResponsive.test.js
+PASS src/utils/securityAssets.test.js
+PASS src/RouteResult/temporaryOrder.test.js
+PASS src/utils/placeType.test.js
+PASS src/utils/safeLog.test.js
+PASS src/utils/detailBack.test.js
+
+Summary of all failing tests
+FAIL src/Login/OAuthCallback.test.js
+  ● google: StrictMode에서도 일치한 state로 한 번만 완료
+
+    TypeError: (0 , _reactRouterDom.useLocation) is not a function
+
+      17 |   const [searchParams] = useSearchParams();
+      18 |   const navigate = useNavigate();
+    > 19 |   const location = useLocation();
+         |                               ^
+      20 |   const scope = `${location.key}:${provider}`;
+      21 |   const task = useAuthRequest(scope);
+      22 |   const { begin, end } = task;
+
+      at OAuthCallback (src/Login/OAuthCallback.jsx:19:31)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at src/Login/OAuthCallback.test.js:25:22
+
+  ● kakao: StrictMode에서도 일치한 state로 한 번만 완료
+
+    TypeError: (0 , _reactRouterDom.useLocation) is not a function
+
+      17 |   const [searchParams] = useSearchParams();
+      18 |   const navigate = useNavigate();
+    > 19 |   const location = useLocation();
+         |                               ^
+      20 |   const scope = `${location.key}:${provider}`;
+      21 |   const task = useAuthRequest(scope);
+      22 |   const { begin, end } = task;
+
+      at OAuthCallback (src/Login/OAuthCallback.jsx:19:31)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at src/Login/OAuthCallback.test.js:25:22
+
+  ● google: 불일치 시 완료 API 호출 금지
+
+    TypeError: (0 , _reactRouterDom.useLocation) is not a function
+
+      17 |   const [searchParams] = useSearchParams();
+      18 |   const navigate = useNavigate();
+    > 19 |   const location = useLocation();
+         |                               ^
+      20 |   const scope = `${location.key}:${provider}`;
+      21 |   const task = useAuthRequest(scope);
+      22 |   const { begin, end } = task;
+
+      at OAuthCallback (src/Login/OAuthCallback.jsx:19:31)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at src/Login/OAuthCallback.test.js:38:9
+
+  ● kakao: 불일치 시 완료 API 호출 금지
+
+    TypeError: (0 , _reactRouterDom.useLocation) is not a function
+
+      17 |   const [searchParams] = useSearchParams();
+      18 |   const navigate = useNavigate();
+    > 19 |   const location = useLocation();
+         |                               ^
+      20 |   const scope = `${location.key}:${provider}`;
+      21 |   const task = useAuthRequest(scope);
+      22 |   const { begin, end } = task;
+
+      at OAuthCallback (src/Login/OAuthCallback.jsx:19:31)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at src/Login/OAuthCallback.test.js:38:9
+
+FAIL src/utils/useKeyboardRouteFocus.test.jsx
+  ● an open modal keeps keyboard focus during a route PUSH and after returning from it
+
+    expect(element).toHaveFocus()
+
+    Expected element with focus:
+      <button>Keep focus</button>
+    Received element with focus:
+      <h1 tabindex="-1">Search</h1>
+
+      62 |   rerender(<RouteFocus pathname="/search" label="Search" />);
+      63 |   await Promise.resolve();
+    > 64 |   expect(keep).toHaveFocus();
+         |                ^
+      65 | });
+      66 |
+
+      at Object.<anonymous> (src/utils/useKeyboardRouteFocus.test.jsx:64:16)
+
+
+Test Suites: 2 failed, 58 passed, 60 total
+Tests:       5 failed, 340 passed, 345 total
+Snapshots:   0 total
+Time:        32.306 s, estimated 51 s
+Ran all test suites.
+Test results written to: output\frontend-fixes\all-tests.json

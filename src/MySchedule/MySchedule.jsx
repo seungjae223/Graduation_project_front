@@ -4,9 +4,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import "./MySchedule.css";
 import { getTripsApi } from "../api/tripApi";
+import useSessionKey from "../utils/useSessionKey"; import { getAuthSnapshot } from "../utils/authState"; import PlacePhoto from "../components/PlacePhoto";
 
 
-import beachImg from "../img/서비스 소개 .png";
+
 
 
 
@@ -233,7 +234,7 @@ const getScheduleDateText = (schedule) => {
 const getScheduleDday = (schedule) => {
   const dates = getScheduleDates(schedule);
 
-  if (dates.length === 0) return "D-Day";
+  if (dates.length === 0) return "날짜 미정";
 
   const today = normalizeDateOnly(new Date())?.getTime() || 0;
   const firstDate = normalizeDateOnly(dates[0])?.getTime() || 0;
@@ -279,7 +280,7 @@ const getScheduleImage = (schedule) => {
     firstPlace?.thumbnailUrl ||
     firstPlace?.image ||
     firstPlace?.imageUrl ||
-    beachImg
+    ""
   );
 };
 
@@ -334,6 +335,8 @@ const getErrorMessage = safeApiErrorMessage;
 
 function MySchedule() {
   const navigate = useNavigate();
+  const account = useSessionKey();
+  const currentAccount = useRef(account); currentAccount.current = account;
 
   const [activeTab, setActiveTab] = useState("upcoming");
   const [scheduleList, setScheduleList] = useState([]);
@@ -351,7 +354,7 @@ function MySchedule() {
       setErrorMessage("");
 
       const serverTrips = await getTripsApi({ signal: request.signal });
-      if (!mountedRef.current || request.signal.aborted) return;
+      if (!mountedRef.current || request.signal.aborted || getAuthSnapshot().accountKey !== account || currentAccount.current !== account || requestRef.current !== request) return;
       const scheduleMap = new Map();
 
       serverTrips
@@ -365,9 +368,9 @@ function MySchedule() {
         [...scheduleMap.values()].sort((a, b) => b.startTime - a.startTime),
       );
     } catch (error) {
-      if (!mountedRef.current || request.signal.aborted || error.code === "ERR_CANCELED") return;
+      if (!mountedRef.current || request.signal.aborted || error.code === "ERR_CANCELED" || getAuthSnapshot().accountKey !== account || currentAccount.current !== account || requestRef.current !== request) return;
       logSafeApiError(error, "MySchedule.jsx");
-      setScheduleList([]);
+
 
       if (error.message?.includes("Network Error")) {
         setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
@@ -389,11 +392,12 @@ function MySchedule() {
       );
     } finally {
       if (requestRef.current === request) requestRef.current = null;
-      if (mountedRef.current && !request.signal.aborted) setIsLoading(false);
+      if (mountedRef.current && !request.signal.aborted && getAuthSnapshot().accountKey === account && currentAccount.current === account) setIsLoading(false);
     }
-  }, []);
+  }, [account]);
 
   useEffect(() => {
+    setScheduleList([]); setErrorMessage("");
     mountedRef.current = true;
     loadSchedules();
     return () => { mountedRef.current = false; requestRef.current?.abort(); requestRef.current = null; };
@@ -411,14 +415,17 @@ function MySchedule() {
     };
   }, [loadSchedules]);
 
-  const { upcomingScheduleList, pastScheduleList } = useMemo(() => {
+  const { upcomingScheduleList, pastScheduleList, undatedScheduleList } = useMemo(() => {
     const today = normalizeDateOnly(new Date())?.getTime() || 0;
 
     const upcoming = [];
     const past = [];
+    const undated = [];
 
     scheduleList.forEach((schedule) => {
-      if (!schedule.endTime || schedule.endTime >= today) {
+      if (!schedule.startTime || !schedule.endTime) {
+        undated.push(schedule);
+      } else if (schedule.endTime >= today) {
         upcoming.push(schedule);
       } else {
         past.push(schedule);
@@ -431,11 +438,12 @@ function MySchedule() {
     return {
       upcomingScheduleList: upcoming,
       pastScheduleList: past,
+      undatedScheduleList: undated,
     };
   }, [scheduleList]);
 
   const currentList =
-    activeTab === "upcoming" ? upcomingScheduleList : pastScheduleList;
+    activeTab === "upcoming" ? upcomingScheduleList : activeTab === "past" ? pastScheduleList : undatedScheduleList;
 
   const handleOpenSchedule = (schedule) => {
     const routeId = schedule.routeId || schedule.id;
@@ -462,7 +470,7 @@ function MySchedule() {
           className={`my-schedule-tab ${
             activeTab === "upcoming" ? "active" : ""
           }`}
-          onClick={() => setActiveTab("upcoming")}
+          aria-pressed={activeTab === "upcoming"} onClick={() => setActiveTab("upcoming")}
         >
           다가오는 일정
         </button>
@@ -470,10 +478,11 @@ function MySchedule() {
         <button
           type="button"
           className={`my-schedule-tab ${activeTab === "past" ? "active" : ""}`}
-          onClick={() => setActiveTab("past")}
+          aria-pressed={activeTab === "past"} onClick={() => setActiveTab("past")}
         >
           지난 일정
         </button>
+        {undatedScheduleList.length > 0 && <button type="button" className={`my-schedule-tab ${activeTab === "undated" ? "active" : ""}`} aria-pressed={activeTab === "undated"} onClick={() => setActiveTab("undated")}>날짜 미정</button>}
       </div>
 
       <div className="my-schedule-content">
@@ -488,21 +497,21 @@ function MySchedule() {
 
         <div className="my-schedule-section-header">
           <h2>
-            {activeTab === "upcoming" ? "다가오는 일정" : "지난 일정"}
-            <span>{currentList.length}</span>
+            {activeTab === "upcoming" ? "다가오는 일정" : activeTab === "past" ? "지난 일정" : "날짜 미정"}
+            <span>{scheduleList.length || (!isLoading && !errorMessage) ? currentList.length : "—"}</span>
           </h2>
         </div>
 
-        {isLoading ? (
+        {errorMessage && <div className="my-schedule-empty">
+          <p role="alert">{errorMessage}{scheduleList.length > 0 && " 마지막으로 확인한 일정을 표시합니다."}</p>
+          <button type="button" onClick={loadSchedules} disabled={isLoading}>다시 불러오기</button>
+        </div>}
+        {isLoading && scheduleList.length > 0 && <p role="status">저장된 일정을 갱신하는 중입니다.</p>}
+        {isLoading && scheduleList.length === 0 ? (
           <div className="my-schedule-empty">
             <p>저장된 일정을 불러오는 중입니다.</p>
           </div>
-        ) : errorMessage ? (
-          <div className="my-schedule-empty">
-            <p role="alert">{errorMessage}</p>
-            <button type="button" onClick={loadSchedules} disabled={isLoading}>다시 불러오기</button>
-          </div>
-        ) : (
+        ) : scheduleList.length > 0 || !errorMessage ? (
           <>
             <div className="my-schedule-list">
               {currentList.map((schedule) => (
@@ -514,11 +523,7 @@ function MySchedule() {
                   className="my-schedule-card"
                   onClick={() => handleOpenSchedule(schedule)}
                 >
-                  <img
-                    src={schedule.image}
-                    alt={schedule.title}
-                    className="my-schedule-thumb"
-                  />
+                  <PlacePhoto src={schedule.image} alt={schedule.title} className="my-schedule-thumb" />
 
                   <div className="my-schedule-card-body">
                     <div className="my-schedule-card-top">
@@ -547,7 +552,7 @@ function MySchedule() {
               </div>
             )}
           </>
-        )}
+        ) : null}
 
         <div className="my-schedule-recommend-card">
           <h3>어디로 떠나볼까요?</h3>

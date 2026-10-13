@@ -84,6 +84,10 @@ body {
 }
 
 .search-icon-frame {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
   width: 20px;
   height: 20px;
   flex: 0 0 20px;
@@ -140,6 +144,7 @@ body {
 
 /* 메뉴 카드 영역 */
 .quick-menu {
+  background: transparent;
   width: 100%;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -148,6 +153,7 @@ body {
 }
 
 .menu-card {
+  font: inherit;
   width: 100%;
   min-width: 0;
   min-height: 140px;
@@ -158,7 +164,7 @@ body {
   align-items: center;
 
   border: 1px solid var(--color-border);
-  background: var(--color-surface-muted);
+  background: var(--color-surface);
   color: var(--color-text);
   box-shadow: 0 8px 20px var(--color-shadow);
   border-radius: 20px;
@@ -168,9 +174,9 @@ body {
 }
 
 .menu-card.active {
-  border-color: var(--color-accent);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
 /* 아이콘 */
@@ -247,7 +253,7 @@ body {
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   font-size: 18px;
   font-weight: 800;
   line-height: 1;
@@ -298,6 +304,7 @@ body {
   bottom: 0;
 
   padding: 14px 16px;
+  background: linear-gradient(transparent, rgba(15, 23, 42, 0.76));
 }
 
 .travel-overlay span {
@@ -335,7 +342,7 @@ body {
   justify-content: center;
 
   border-radius: 50%;
-  background: #18a8ed;
+  background: var(--color-primary);
   box-shadow: 0 8px 16px rgba(24, 168, 237, 0.22);
 }
 
@@ -617,3 +624,6 @@ html[data-theme="dark"] .travel-list {
     font-size: 30px;
   }
 }
+
+.home .travel-card { border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; background: var(--color-surface); }
+.home .menu-card:focus-visible, .home .travel-card:focus-visible, .home .search-icon-frame:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 3px; }

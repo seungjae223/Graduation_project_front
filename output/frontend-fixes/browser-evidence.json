@@ -1,0 +1,488 @@
+{
+  "environment": {
+    "url": "http://localhost:3000",
+    "project": "C:\\Users\\joyfu\\Desktop\\graduation_project\\graduation",
+    "serverPid": 55784,
+    "browser": "Codex IAB",
+    "productionBrowserTested": false
+  },
+  "responsiveWidths": [
+    320,
+    390,
+    768,
+    1366
+  ],
+  "measurementSource": "PNG actual pixel dimensions; interactive DOM and scroll observations are separately described in result.md",
+  "screenshots": [
+    {
+      "name": "admin-inquiry-long-dark-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "admin-inquiry-long-dark-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "admin-inquiry-long-dark-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "admin-inquiry-long-dark-768.png",
+      "width": 768,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "admin-inquiry-long-light-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "admin-inquiry-long-light-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "admin-inquiry-long-light-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "admin-inquiry-long-light-768.png",
+      "width": 768,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "admin-inquiry-write-long-dark-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "admin-inquiry-write-long-light-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "folder-dark-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "folder-dark-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "folder-dark-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "folder-dark-768.png",
+      "width": 768,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "folder-light-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "folder-light-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "folder-light-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "folder-light-768.png",
+      "width": 768,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "home-dark-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "home-dark-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "home-dark-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "home-dark-768.png",
+      "width": 768,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "home-light-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "home-light-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "home-light-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "home-light-768.png",
+      "width": 768,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "inquiry-waiting-dark-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "mypage-dark-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "mypage-light-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "pdf-dynamic-final-page-1.png",
+      "width": 745,
+      "height": 1053,
+      "stage": "final-dynamic-coordinate-pdf-render"
+    },
+    {
+      "name": "pdf-dynamic-final-page-2.png",
+      "width": 745,
+      "height": 1053,
+      "stage": "final-dynamic-coordinate-pdf-render"
+    },
+    {
+      "name": "pdf-dynamic-final-page-3.png",
+      "width": 745,
+      "height": 1053,
+      "stage": "final-dynamic-coordinate-pdf-render"
+    },
+    {
+      "name": "pdf-dynamic-final-page-4.png",
+      "width": 745,
+      "height": 1053,
+      "stage": "final-dynamic-coordinate-pdf-render"
+    },
+    {
+      "name": "pdf-dynamic-page-1.png",
+      "width": 596,
+      "height": 842,
+      "stage": "before-final-pdf-width-fix"
+    },
+    {
+      "name": "pdf-dynamic-page-2.png",
+      "width": 596,
+      "height": 842,
+      "stage": "before-final-pdf-width-fix"
+    },
+    {
+      "name": "pdf-page-1.png",
+      "width": 596,
+      "height": 842,
+      "stage": "original-coordinate-pdf-render"
+    },
+    {
+      "name": "pdf-page-2.png",
+      "width": 596,
+      "height": 842,
+      "stage": "original-coordinate-pdf-render"
+    },
+    {
+      "name": "pdf-page-3.png",
+      "width": 596,
+      "height": 842,
+      "stage": "original-coordinate-pdf-render"
+    },
+    {
+      "name": "pdf-page-4.png",
+      "width": 596,
+      "height": 842,
+      "stage": "original-coordinate-pdf-render"
+    },
+    {
+      "name": "privacy-dark-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "privacy-dark-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "privacy-dark-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "privacy-dark-768.png",
+      "width": 768,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "privacy-light-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "privacy-light-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "privacy-light-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "privacy-light-768.png",
+      "width": 768,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "route-create-favorites-dark-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "route-result-dynamic-coordinates-final-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "route-result-dynamic-coordinates-light-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "before-sdk-svg-width-fix"
+    },
+    {
+      "name": "route-result-light-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "route-result-restored-final-light-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "search-popup-light-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "share-light-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "share-light-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "share-light-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "share-light-768.png",
+      "width": 768,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "signup-dark-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "signup-dark-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "signup-dark-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "signup-dark-768.png",
+      "width": 768,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "signup-light-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "signup-light-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "signup-light-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "signup-light-768.png",
+      "width": 768,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "total-dark-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "total-dark-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "total-dark-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "total-dark-768.png",
+      "width": 768,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "total-light-1366.png",
+      "width": 1366,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "total-light-320.png",
+      "width": 320,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "total-light-390.png",
+      "width": 390,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    },
+    {
+      "name": "total-light-768.png",
+      "width": 768,
+      "height": 844,
+      "stage": "actual-browser-capture"
+    }
+  ],
+  "verifiedFlows": [
+    "Home search -> Seoul -> Busan -> Back/Forward/Reload URL/input/results consistency",
+    "Total save Enter/Space -> folder modal; saved-place delete Space -> confirm/cancel without detail navigation",
+    "Folder create panel cancel -> new folder button focus; modal Tab/Shift+Tab/Escape containment",
+    "Long document scrollY 212 and height 2719 preserved on open, PageDown/wheel and close; popup inner scroll 0 -> 844",
+    "Inquiry waiting detail with no generated answer; completed Mock ADMIN answer read-only",
+    "Mock ADMIN long title/email/body at 320px: viewport/scrollWidth 320; source fixtures restored",
+    "Keyboard itinerary reorder and reset preserve same visit handle focus and memo association",
+    "New onboarding3 tab -> back to onboarding2 -> Skip home; transition class/layer cleaned",
+    "Dynamic address geocoding: both days ready, screen and downloaded final PDF 904m/4.8km match",
+    "Final four PDF pages visually reviewed for maps, markers, green lines, detail content and full output width",
+    "Restored original itinerary: 625m, provider SVG width1780/maxWidth none, viewport and scrollWidth1366"
+  ],
+  "cleanup": {
+    "temporaryMockFixturesRestored": true,
+    "ownMockAccountLoggedOut": true,
+    "themeRestored": "light",
+    "ownTabsClosed": true,
+    "viewportOverrideReset": true,
+    "ownServersStarted": 0,
+    "userServerKept": true
+  },
+  "notTested": [
+    "physical mobile touch",
+    "Safari",
+    "screen reader",
+    "production browser runtime",
+    "forced fallback browser",
+    "external map application display",
+    "production writes",
+    "real OAuth or email delivery"
+  ]
+}

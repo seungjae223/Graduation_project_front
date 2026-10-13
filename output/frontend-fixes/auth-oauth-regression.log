@@ -1,0 +1,7 @@
+PASS src/Login/OAuthCallback.test.js
+PASS src/Login/authFlow.test.jsx
+
+Test Suites: 2 passed, 2 total
+Tests:       22 passed, 22 total
+Snapshots:   0 total
+Time:        6.057 s

@@ -114,7 +114,7 @@ const FolderIcon = ({ width = 30, height = 24 }) => (
   <svg viewBox="0 0 40 32" width={width} height={height} aria-hidden="true">
     <path
       d="M3.5 7.5C3.5 5.57 5.07 4 7 4H16.4C17.42 4 18.38 4.46 19.02 5.25L21.2 8H33C35.21 8 37 9.79 37 12V24.5C37 26.43 35.43 28 33.5 28H6.5C4.57 28 3 26.43 3 24.5V8C3 7.72 3.22 7.5 3.5 7.5Z"
-      fill="#1da7e8"
+      fill="currentColor"
     />
   </svg>
 );
@@ -128,6 +128,10 @@ function FolderSelectModal({
   folders: foldersProp,
   onCreateFolder,
   contextKey = "",
+  title = "폴더 선택",
+  saveText = "저장",
+  allowCreate = true,
+  saveDisabled = false,
 }) {
   const [folders, setFolders] = useState([]);
   const [selectedFolderId, setSelectedFolderId] = useState("");
@@ -153,6 +157,8 @@ function FolderSelectModal({
   useEffect(() => () => { current.current = { open: false, taskKey: null, epoch: current.current.epoch + 1 }; }, []);
   const autoSelect = useRef(true);
   const selectedFolderButtonRef = useRef(null);
+  const createButtonRef = useRef(null);
+  const returnToCreateButton = useRef(false);
   const dialogRef = useModalFocus({
     open,
     onClose,
@@ -213,6 +219,13 @@ function FolderSelectModal({
     });
   }, [folders.length, isCreateFolderOpen, open, selectedFolderId]);
 
+  useEffect(() => {
+    if (open && !showCreate && returnToCreateButton.current) {
+      returnToCreateButton.current = false;
+      createButtonRef.current?.focus();
+    }
+  }, [open, showCreate]);
+
   const selectedFolder = useMemo(() => {
     return (
       visibleFolders.find((folder) => String(folder.id) === String(selectedFolderId)) ||
@@ -241,6 +254,7 @@ function FolderSelectModal({
   const handleCancelCreateFolder = () => {
     if (isSaving || isCreatingFolder) return;
 
+    returnToCreateButton.current = true;
     resetCreateFolderForm();
     setIsCreateFolderOpen(false);
   };
@@ -267,7 +281,7 @@ function FolderSelectModal({
     );
   };
   const handleSaveClick = () => {
-    if (!selectedFolder || isSaving || isCreatingFolder || isLoadingFolders) {
+    if (!selectedFolder || saveDisabled || isSaving || isCreatingFolder || isLoadingFolders) {
       return;
     }
 
@@ -382,7 +396,7 @@ function FolderSelectModal({
           onClick={(event) => event.stopPropagation()}
         >
           <header className="folder-select-header">
-            <h2 id="folder-select-title">폴더 선택</h2>
+            <h2 id="folder-select-title">{title}</h2>
 
             <button
               type="button"
@@ -446,14 +460,15 @@ function FolderSelectModal({
               )}
             </div>
 
-            <button
+            {allowCreate && <button
               type="button"
               className="folder-select-create-btn"
               onClick={handleOpenCreateFolder}
+              ref={createButtonRef}
               disabled={isSaving || isCreatingFolder || isLoadingFolders}
             >
               + 새 폴더 만들기
-            </button>
+            </button>}
           </div>
 
           <footer className="folder-select-footer">
@@ -474,10 +489,11 @@ function FolderSelectModal({
                 isSaving ||
                 isCreatingFolder ||
                 isLoadingFolders ||
+                saveDisabled ||
                 !selectedFolder
               }
             >
-              {isSaving ? "저장 중..." : "저장"}
+              {isSaving ? "처리 중..." : saveText}
             </button>
           </footer>
         </section>

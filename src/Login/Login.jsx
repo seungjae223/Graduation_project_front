@@ -1,28 +1,27 @@
 import React, { useState } from "react";
 import { logSafeApiError } from "../utils/safeLog";
 import { beginOAuth } from "../utils/oauthSecurity";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getApiErrorMessage } from "../api/api";
 import { getSocialAuthorizationApi, loginApi } from "../api/authApi";
-import {
-  getReturnPathFromSearch,
-  saveSocialLoginReturnPath,
-} from "../utils/authRedirect";
+import { saveSocialLoginReturnPath } from "../utils/authRedirect";
+import { buildAuthPath, getAuthReturnPath } from "./authPaths";
+import useAuthRequest, { isCanceledAuthRequest } from "./useAuthRequest";
 import "./Login.css";
 
 // 아이콘 이미지 추가
 import logoIcon from "../img/지구본.png";
-import eyeIcon from "../img/눈알.png";
 import kakaoIcon from "../img/카카오.png";
 import googleIcon from "../img/google.png";
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const returnPath = getReturnPathFromSearch(location.search);
+  const returnPath = getAuthReturnPath(location.search);
+  const task = useAuthRequest(`${location.key}:${location.pathname}${location.search}`);
 
   const [showPw, setShowPw] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const isLoading = Boolean(task.busy);
   const [fieldErrors, setFieldErrors] = useState({});
   const [loginError, setLoginError] = useState("");
 
@@ -31,14 +30,6 @@ const Login = () => {
     password: "",
     keepLogin: false,
   });
-
-  const handleSignupClick = () => {
-    navigate("/signup");
-  };
-
-  const handleFindPasswordClick = () => {
-    navigate("/find-password");
-  };
 
   const handleChange = (key, value) => {
     setLoginForm((prev) => ({
@@ -65,13 +56,13 @@ const Login = () => {
       return;
     }
 
+    const request = task.begin("login");
+    if (!request) return;
     try {
-      setIsLoading(true);
-
-      await loginApi({ email, password, keepLogin: loginForm.keepLogin });
-
-      navigate(returnPath, { replace: true });
+      await loginApi({ email, password, keepLogin: loginForm.keepLogin }, request.options);
+      if (request.isCurrent()) navigate(returnPath, { replace: true });
     } catch (error) {
+      if (!request.isCurrent() || isCanceledAuthRequest(error)) return;
       logSafeApiError(error, "login");
 
       setLoginError(
@@ -81,26 +72,30 @@ const Login = () => {
           : getApiErrorMessage(error, "이메일 또는 비밀번호를 확인해주세요.")
       );
     } finally {
-      setIsLoading(false);
+      task.end(request);
     }
   };
 
   const handleSocialLogin = async (provider) => {
+    const request = task.begin("social");
+    if (!request) return;
     try {
-      setIsLoading(true);
-      saveSocialLoginReturnPath(returnPath);
-      const result = await getSocialAuthorizationApi(provider);
+      const result = await getSocialAuthorizationApi(provider, request.options);
+      if (!request.isCurrent()) return;
       if (result.authenticated) {
         sessionStorage.removeItem("socialLoginReturnTo");
         navigate(returnPath, { replace: true });
         return;
       }
       const { authorizationUrl, state } = result;
+      saveSocialLoginReturnPath(returnPath);
       window.location.assign(beginOAuth(provider, authorizationUrl, state));
     } catch (error) {
+      if (!request.isCurrent() || isCanceledAuthRequest(error)) return;
       logSafeApiError(error, "oauth-start");
       alert(getApiErrorMessage(error, "소셜 로그인을 시작하지 못했습니다."));
-      setIsLoading(false);
+    } finally {
+      task.end(request);
     }
   };
 
@@ -115,7 +110,7 @@ const Login = () => {
           <p>준비 됐어? 너만 오면 돼!</p>
         </div>
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} aria-label="로그인">
           <div className="input-group">
             <label htmlFor="login-email">이메일</label>
             <input
@@ -125,6 +120,7 @@ const Login = () => {
               placeholder="이메일을 입력해주세요"
               value={loginForm.email}
               maxLength={255}
+              disabled={isLoading}
               onChange={(e) => handleChange("email", e.target.value)}
               aria-invalid={Boolean(fieldErrors.email)}
               aria-describedby={fieldErrors.email ? "login-email-error" : undefined}
@@ -145,6 +141,7 @@ const Login = () => {
                 autoComplete="current-password"
                 placeholder="비밀번호를 입력해주세요"
                 value={loginForm.password}
+                disabled={isLoading}
                 onChange={(e) => handleChange("password", e.target.value)}
                 aria-invalid={Boolean(fieldErrors.password)}
                 aria-describedby={fieldErrors.password ? "login-password-error" : undefined}
@@ -156,7 +153,17 @@ const Login = () => {
                 aria-label={showPw ? "비밀번호 숨기기" : "비밀번호 표시"}
                 aria-pressed={showPw}
               >
-                <img src={eyeIcon} alt="" />
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
               </button>
             </div>
             {fieldErrors.password && (
@@ -171,24 +178,18 @@ const Login = () => {
               <input
                 type="checkbox"
                 checked={loginForm.keepLogin}
+                disabled={isLoading}
                 onChange={(e) => handleChange("keepLogin", e.target.checked)}
               />{" "}
               로그인 상태 유지
             </label>
 
-            <span
+            <Link
               className="link"
-              onClick={handleFindPasswordClick}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  handleFindPasswordClick();
-                }
-              }}
+              to={buildAuthPath("/find-password", returnPath)}
             >
               비밀번호 찾기
-            </span>
+            </Link>
           </div>
 
           <button type="submit" className="login-btn" disabled={isLoading}>
@@ -203,18 +204,11 @@ const Login = () => {
 
           <p className="signup">
             아직 회원이 아니신가요?{" "}
-            <span
-              onClick={handleSignupClick}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  handleSignupClick();
-                }
-              }}
+            <Link
+              to={buildAuthPath("/signup", returnPath)}
             >
               회원가입
-            </span>
+            </Link>
           </p>
         </form>
 

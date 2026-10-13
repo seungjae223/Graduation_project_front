@@ -1,0 +1,812 @@
+PASS src/RouteCreate/generation.test.js
+FAIL src/RouteResult/mapCoordinates.test.jsx
+  ● Console
+
+    console.error
+      ReferenceError: MemoInputIcon is not defined
+          at TimelineMemo (C:\Users\joyfu\Desktop\graduation_project\graduation\src\RouteResult\RouteResult.jsx:1227:47)
+          at Object.react_stack_bottom_frame (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+          at renderWithHooks (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+          at updateFunctionComponent (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+          at beginWork (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+          at runWithFiberInDEV (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+          at performUnitOfWork (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+          at workLoopSync (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+          at renderRootSync (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+          at performWorkOnRoot (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+          at performWorkOnRootViaSchedulerTask (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:18957:7)
+          at performWorkUntilDeadline (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\scheduler\cjs\scheduler.development.js:45:48)
+          at Timeout.task [as _onTimeout] (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\jsdom\lib\jsdom\browser\Window.js:516:19)
+          at listOnTimeout (node:internal/timers:594:17)
+          at processTimers (node:internal/timers:529:7)
+
+      at Object.<anonymous>.process.env.NODE_ENV.reportGlobalError (node_modules/react-dom/cjs/react-dom-client.development.js:25513:23)
+      at defaultOnUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9361:7)
+      at logUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9431:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at lane.callback (node_modules/react-dom/cjs/react-dom-client.development.js:9461:9)
+      at callCallback (node_modules/react-dom/cjs/react-dom-client.development.js:7423:16)
+      at commitCallbacks (node_modules/react-dom/cjs/react-dom-client.development.js:7443:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at commitLayoutEffectOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:14047:15)
+      at flushLayoutEffects (node_modules/react-dom/cjs/react-dom-client.development.js:18138:15)
+      at commitRoot (node_modules/react-dom/cjs/react-dom-client.development.js:17954:9)
+      at commitRootWhenReady (node_modules/react-dom/cjs/react-dom-client.development.js:16824:7)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16722:15)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at performWorkUntilDeadline (node_modules/scheduler/cjs/scheduler.development.js:45:48)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+    console.warn
+      An error occurred in the <TimelineMemo> component.
+      
+      Consider adding an error boundary to your tree to customize error handling behavior.
+      Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+      at defaultOnUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9362:15)
+      at logUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9431:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at lane.callback (node_modules/react-dom/cjs/react-dom-client.development.js:9461:9)
+      at callCallback (node_modules/react-dom/cjs/react-dom-client.development.js:7423:16)
+      at commitCallbacks (node_modules/react-dom/cjs/react-dom-client.development.js:7443:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at commitLayoutEffectOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:14047:15)
+      at flushLayoutEffects (node_modules/react-dom/cjs/react-dom-client.development.js:18138:15)
+      at commitRoot (node_modules/react-dom/cjs/react-dom-client.development.js:17954:9)
+      at commitRootWhenReady (node_modules/react-dom/cjs/react-dom-client.development.js:16824:7)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16722:15)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at performWorkUntilDeadline (node_modules/scheduler/cjs/scheduler.development.js:45:48)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+  ● map buttons expose independent keyboard actions and preserve the drag handle
+
+    ReferenceError: MemoInputIcon is not defined
+
+      1225 |     ? "route-result-memo-card"
+      1226 |     : "route-result-memo-input";
+    > 1227 |   const icon = isSaved ? <MemoSavedIcon /> : <MemoInputIcon />;
+           |                                               ^
+      1228 |   const text = isSaved ? displayTitle : "메모를 입력하세요...";
+      1229 |   const handleClick = (event) => {
+      1230 |     event.stopPropagation();
+
+      at TimelineMemo (src/RouteResult/RouteResult.jsx:1227:47)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at Object.<anonymous> (src/RouteResult/mapCoordinates.test.jsx:28:36)
+
+  ● dynamically resolved coordinates are shared by the real result page and PDF payload
+
+    ReferenceError: MemoInputIcon is not defined
+
+      1225 |     ? "route-result-memo-card"
+      1226 |     : "route-result-memo-input";
+    > 1227 |   const icon = isSaved ? <MemoSavedIcon /> : <MemoInputIcon />;
+           |                                               ^
+      1228 |   const text = isSaved ? displayTitle : "메모를 입력하세요...";
+      1229 |   const handleClick = (event) => {
+      1230 |     event.stopPropagation();
+
+      at TimelineMemo (src/RouteResult/RouteResult.jsx:1227:47)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at performWorkUntilDeadline (node_modules/scheduler/cjs/scheduler.development.js:45:48)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+  ● dynamically resolved coordinates are shared by the real result page and PDF payload
+
+    Unable to find role="button" and name "새로운 지역 장소 카카오맵에서 열기"
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div />
+    </body>
+
+      45 |   getTripTimelineApi.mockResolvedValue([{ visitOrder: 1, arrivalTime: "10:00" }]);
+      46 |   render(<MemoryRouter initialEntries={["/route-result?id=7"]}><RouteResult /></MemoryRouter>);
+    > 47 |   await screen.findByRole("button", { name: "새로운 지역 장소 카카오맵에서 열기" });
+         |                ^
+      48 |   await waitFor(() => {
+      49 |     const payload = JSON.parse(document.querySelector("[data-pdf-kakao-map]").dataset.pdfKakaoMap);
+      50 |     expect(payload.markers[0]).toMatchObject({ title: "새로운 지역 장소", lat: 37.5, lng: 127 });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at findByRole (node_modules/@testing-library/dom/dist/query-helpers.js:86:33)
+      at Object.<anonymous> (src/RouteResult/mapCoordinates.test.jsx:47:16)
+
+PASS src/Header/scheduleActions.test.jsx
+  ● Console
+
+    console.warn
+      No routes matched location "/route-result?id=7"
+
+      14 |   </Routes></>;
+      15 | };
+    > 16 | const setup = (path = "/route-result?id=7") => render(<MemoryRouter initialEntries={[path]}><Harness /></MemoryRouter>);
+         |                                                      ^
+      17 | beforeEach(() => jest.clearAllMocks());
+      18 | test("cancel does not delete; repeated confirm sends one server deletion then opens the list", async () => {
+      19 |   const pending = deferred(); deleteTripApi.mockReturnValue(pending.promise); setup();
+
+      at warning (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:204:49)
+      at useRoutesImpl (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6958:5)
+      at useRoutes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6911:10)
+      at Routes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:9471:10)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16504:11)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at setup (src/Header/scheduleActions.test.jsx:16:54)
+      at Object.<anonymous> (src/Header/scheduleActions.test.jsx:19:79)
+
+    console.warn
+      No routes matched location "/route-result?id=7"
+
+      14 |   </Routes></>;
+      15 | };
+    > 16 | const setup = (path = "/route-result?id=7") => render(<MemoryRouter initialEntries={[path]}><Harness /></MemoryRouter>);
+         |                                                      ^
+      17 | beforeEach(() => jest.clearAllMocks());
+      18 | test("cancel does not delete; repeated confirm sends one server deletion then opens the list", async () => {
+      19 |   const pending = deferred(); deleteTripApi.mockReturnValue(pending.promise); setup();
+
+      at warning (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:204:49)
+      at useRoutesImpl (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6958:5)
+      at useRoutes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6911:10)
+      at Routes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:9471:10)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16504:11)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at setup (src/Header/scheduleActions.test.jsx:16:54)
+      at Object.<anonymous> (src/Header/scheduleActions.test.jsx:27:64)
+
+    console.warn
+      No routes matched location "/route-result?id=7"
+
+      14 |   </Routes></>;
+      15 | };
+    > 16 | const setup = (path = "/route-result?id=7") => render(<MemoryRouter initialEntries={[path]}><Harness /></MemoryRouter>);
+         |                                                      ^
+      17 | beforeEach(() => jest.clearAllMocks());
+      18 | test("cancel does not delete; repeated confirm sends one server deletion then opens the list", async () => {
+      19 |   const pending = deferred(); deleteTripApi.mockReturnValue(pending.promise); setup();
+
+      at warning (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:204:49)
+      at useRoutesImpl (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6958:5)
+      at useRoutes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6911:10)
+      at Routes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:9471:10)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16504:11)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at setup (src/Header/scheduleActions.test.jsx:16:54)
+      at Object.<anonymous> (src/Header/scheduleActions.test.jsx:32:79)
+
+    console.warn
+      No routes matched location "/"
+
+      14 |   </Routes></>;
+      15 | };
+    > 16 | const setup = (path = "/route-result?id=7") => render(<MemoryRouter initialEntries={[path]}><Harness /></MemoryRouter>);
+         |                                                      ^
+      17 | beforeEach(() => jest.clearAllMocks());
+      18 | test("cancel does not delete; repeated confirm sends one server deletion then opens the list", async () => {
+      19 |   const pending = deferred(); deleteTripApi.mockReturnValue(pending.promise); setup();
+
+      at warning (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:204:49)
+      at useRoutesImpl (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6958:5)
+      at useRoutes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6911:10)
+      at Routes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:9471:10)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16504:11)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at setup (src/Header/scheduleActions.test.jsx:16:54)
+      at src/Header/scheduleActions.test.jsx:37:3
+
+    console.warn
+      No routes matched location "/onboarding"
+
+      14 |   </Routes></>;
+      15 | };
+    > 16 | const setup = (path = "/route-result?id=7") => render(<MemoryRouter initialEntries={[path]}><Harness /></MemoryRouter>);
+         |                                                      ^
+      17 | beforeEach(() => jest.clearAllMocks());
+      18 | test("cancel does not delete; repeated confirm sends one server deletion then opens the list", async () => {
+      19 |   const pending = deferred(); deleteTripApi.mockReturnValue(pending.promise); setup();
+
+      at warning (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:204:49)
+      at useRoutesImpl (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6958:5)
+      at useRoutes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6911:10)
+      at Routes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:9471:10)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16504:11)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at setup (src/Header/scheduleActions.test.jsx:16:54)
+      at src/Header/scheduleActions.test.jsx:37:3
+
+    console.warn
+      No routes matched location "/onboarding2"
+
+      14 |   </Routes></>;
+      15 | };
+    > 16 | const setup = (path = "/route-result?id=7") => render(<MemoryRouter initialEntries={[path]}><Harness /></MemoryRouter>);
+         |                                                      ^
+      17 | beforeEach(() => jest.clearAllMocks());
+      18 | test("cancel does not delete; repeated confirm sends one server deletion then opens the list", async () => {
+      19 |   const pending = deferred(); deleteTripApi.mockReturnValue(pending.promise); setup();
+
+      at warning (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:204:49)
+      at useRoutesImpl (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6958:5)
+      at useRoutes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6911:10)
+      at Routes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:9471:10)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16504:11)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at setup (src/Header/scheduleActions.test.jsx:16:54)
+      at src/Header/scheduleActions.test.jsx:37:3
+
+    console.warn
+      No routes matched location "/onboarding3"
+
+      14 |   </Routes></>;
+      15 | };
+    > 16 | const setup = (path = "/route-result?id=7") => render(<MemoryRouter initialEntries={[path]}><Harness /></MemoryRouter>);
+         |                                                      ^
+      17 | beforeEach(() => jest.clearAllMocks());
+      18 | test("cancel does not delete; repeated confirm sends one server deletion then opens the list", async () => {
+      19 |   const pending = deferred(); deleteTripApi.mockReturnValue(pending.promise); setup();
+
+      at warning (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:204:49)
+      at useRoutesImpl (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6958:5)
+      at useRoutes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:6911:10)
+      at Routes (node_modules/react-router/dist/development/chunk-XOLAXE2Z.js:9471:10)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16504:11)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at setup (src/Header/scheduleActions.test.jsx:16:54)
+      at Object.<anonymous> (src/Header/scheduleActions.test.jsx:40:45)
+
+PASS src/RouteCreate/searchFolders.test.jsx
+PASS src/RouteCreate/validation.test.js
+PASS src/RouteResult/useTripResult.test.js
+FAIL src/RouteResult/keyboardOrder.test.jsx
+  ● real keyboard sensor picks up, moves and drops the same visit without opening a map
+
+    ReferenceError: MemoSavedIcon is not defined
+
+      1225 |     ? "route-result-memo-card"
+      1226 |     : "route-result-memo-input";
+    > 1227 |   const icon = isSaved ? <MemoSavedIcon /> : <MemoInputIcon />;
+           |                           ^
+      1228 |   const text = isSaved ? displayTitle : "메모를 입력하세요...";
+      1229 |   const handleClick = (event) => {
+      1230 |     event.stopPropagation();
+
+      at TimelineMemo (src/RouteResult/RouteResult.jsx:1227:27)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at setup (src/RouteResult/keyboardOrder.test.jsx:30:9)
+      at Object.<anonymous> (src/RouteResult/keyboardOrder.test.jsx:35:19)
+
+  ● Enter picks up and Escape cancels without changing order or focus
+
+    ReferenceError: MemoSavedIcon is not defined
+
+      1225 |     ? "route-result-memo-card"
+      1226 |     : "route-result-memo-input";
+    > 1227 |   const icon = isSaved ? <MemoSavedIcon /> : <MemoInputIcon />;
+           |                           ^
+      1228 |   const text = isSaved ? displayTitle : "메모를 입력하세요...";
+      1229 |   const handleClick = (event) => {
+      1230 |     event.stopPropagation();
+
+      at TimelineMemo (src/RouteResult/RouteResult.jsx:1227:27)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at setup (src/RouteResult/keyboardOrder.test.jsx:30:9)
+      at Object.<anonymous> (src/RouteResult/keyboardOrder.test.jsx:56:19)
+
+FAIL src/RouteResult/editing.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1709:24
+
+    console.error
+      ReferenceError: MemoInputIcon is not defined
+          at TimelineMemo (C:\Users\joyfu\Desktop\graduation_project\graduation\src\RouteResult\RouteResult.jsx:1227:47)
+          at Object.react_stack_bottom_frame (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+          at renderWithHooks (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+          at updateFunctionComponent (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+          at beginWork (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+          at runWithFiberInDEV (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+          at performUnitOfWork (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+          at workLoopSync (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+          at renderRootSync (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+          at performWorkOnRoot (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+          at performWorkOnRootViaSchedulerTask (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:18957:7)
+          at performWorkUntilDeadline (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\scheduler\cjs\scheduler.development.js:45:48)
+          at Timeout.task [as _onTimeout] (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\jsdom\lib\jsdom\browser\Window.js:516:19)
+          at listOnTimeout (node:internal/timers:594:17)
+          at processTimers (node:internal/timers:529:7)
+
+      at Object.<anonymous>.process.env.NODE_ENV.reportGlobalError (node_modules/react-dom/cjs/react-dom-client.development.js:25513:23)
+      at defaultOnUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9361:7)
+      at logUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9431:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at lane.callback (node_modules/react-dom/cjs/react-dom-client.development.js:9461:9)
+      at callCallback (node_modules/react-dom/cjs/react-dom-client.development.js:7423:16)
+      at commitCallbacks (node_modules/react-dom/cjs/react-dom-client.development.js:7443:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at commitLayoutEffectOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:14047:15)
+      at flushLayoutEffects (node_modules/react-dom/cjs/react-dom-client.development.js:18138:15)
+      at commitRoot (node_modules/react-dom/cjs/react-dom-client.development.js:17954:9)
+      at commitRootWhenReady (node_modules/react-dom/cjs/react-dom-client.development.js:16824:7)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16722:15)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at performWorkUntilDeadline (node_modules/scheduler/cjs/scheduler.development.js:45:48)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+    console.warn
+      An error occurred in the <TimelineMemo> component.
+      
+      Consider adding an error boundary to your tree to customize error handling behavior.
+      Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+      at defaultOnUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9362:15)
+      at logUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9431:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at lane.callback (node_modules/react-dom/cjs/react-dom-client.development.js:9461:9)
+      at callCallback (node_modules/react-dom/cjs/react-dom-client.development.js:7423:16)
+      at commitCallbacks (node_modules/react-dom/cjs/react-dom-client.development.js:7443:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at commitLayoutEffectOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:14047:15)
+      at flushLayoutEffects (node_modules/react-dom/cjs/react-dom-client.development.js:18138:15)
+      at commitRoot (node_modules/react-dom/cjs/react-dom-client.development.js:17954:9)
+      at commitRootWhenReady (node_modules/react-dom/cjs/react-dom-client.development.js:16824:7)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16722:15)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at performWorkUntilDeadline (node_modules/scheduler/cjs/scheduler.development.js:45:48)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1709:24
+
+    console.error
+      ReferenceError: MemoInputIcon is not defined
+          at TimelineMemo (C:\Users\joyfu\Desktop\graduation_project\graduation\src\RouteResult\RouteResult.jsx:1227:47)
+          at Object.react_stack_bottom_frame (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+          at renderWithHooks (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+          at updateFunctionComponent (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+          at beginWork (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+          at runWithFiberInDEV (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+          at performUnitOfWork (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+          at workLoopSync (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+          at renderRootSync (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+          at performWorkOnRoot (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+          at performWorkOnRootViaSchedulerTask (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:18957:7)
+          at performWorkUntilDeadline (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\scheduler\cjs\scheduler.development.js:45:48)
+          at Timeout.task [as _onTimeout] (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\jsdom\lib\jsdom\browser\Window.js:516:19)
+          at listOnTimeout (node:internal/timers:594:17)
+          at processTimers (node:internal/timers:529:7)
+
+      at Object.<anonymous>.process.env.NODE_ENV.reportGlobalError (node_modules/react-dom/cjs/react-dom-client.development.js:25513:23)
+      at defaultOnUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9361:7)
+      at logUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9431:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at lane.callback (node_modules/react-dom/cjs/react-dom-client.development.js:9461:9)
+      at callCallback (node_modules/react-dom/cjs/react-dom-client.development.js:7423:16)
+      at commitCallbacks (node_modules/react-dom/cjs/react-dom-client.development.js:7443:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at commitLayoutEffectOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:14047:15)
+      at flushLayoutEffects (node_modules/react-dom/cjs/react-dom-client.development.js:18138:15)
+      at commitRoot (node_modules/react-dom/cjs/react-dom-client.development.js:17954:9)
+      at commitRootWhenReady (node_modules/react-dom/cjs/react-dom-client.development.js:16824:7)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16722:15)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at performWorkUntilDeadline (node_modules/scheduler/cjs/scheduler.development.js:45:48)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+    console.warn
+      An error occurred in the <TimelineMemo> component.
+      
+      Consider adding an error boundary to your tree to customize error handling behavior.
+      Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+      at defaultOnUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9362:15)
+      at logUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9431:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at lane.callback (node_modules/react-dom/cjs/react-dom-client.development.js:9461:9)
+      at callCallback (node_modules/react-dom/cjs/react-dom-client.development.js:7423:16)
+      at commitCallbacks (node_modules/react-dom/cjs/react-dom-client.development.js:7443:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at commitLayoutEffectOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:14047:15)
+      at flushLayoutEffects (node_modules/react-dom/cjs/react-dom-client.development.js:18138:15)
+      at commitRoot (node_modules/react-dom/cjs/react-dom-client.development.js:17954:9)
+      at commitRootWhenReady (node_modules/react-dom/cjs/react-dom-client.development.js:16824:7)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16722:15)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at performWorkUntilDeadline (node_modules/scheduler/cjs/scheduler.development.js:45:48)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1709:24
+
+    console.error
+      ReferenceError: MemoInputIcon is not defined
+          at TimelineMemo (C:\Users\joyfu\Desktop\graduation_project\graduation\src\RouteResult\RouteResult.jsx:1227:47)
+          at Object.react_stack_bottom_frame (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+          at renderWithHooks (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+          at updateFunctionComponent (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+          at beginWork (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+          at runWithFiberInDEV (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+          at performUnitOfWork (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+          at workLoopSync (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+          at renderRootSync (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+          at performWorkOnRoot (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+          at performWorkOnRootViaSchedulerTask (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\react-dom\cjs\react-dom-client.development.js:18957:7)
+          at performWorkUntilDeadline (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\scheduler\cjs\scheduler.development.js:45:48)
+          at Timeout.task [as _onTimeout] (C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\jsdom\lib\jsdom\browser\Window.js:516:19)
+          at listOnTimeout (node:internal/timers:594:17)
+          at processTimers (node:internal/timers:529:7)
+
+      at Object.<anonymous>.process.env.NODE_ENV.reportGlobalError (node_modules/react-dom/cjs/react-dom-client.development.js:25513:23)
+      at defaultOnUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9361:7)
+      at logUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9431:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at lane.callback (node_modules/react-dom/cjs/react-dom-client.development.js:9461:9)
+      at callCallback (node_modules/react-dom/cjs/react-dom-client.development.js:7423:16)
+      at commitCallbacks (node_modules/react-dom/cjs/react-dom-client.development.js:7443:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at commitLayoutEffectOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:14047:15)
+      at flushLayoutEffects (node_modules/react-dom/cjs/react-dom-client.development.js:18138:15)
+      at commitRoot (node_modules/react-dom/cjs/react-dom-client.development.js:17954:9)
+      at commitRootWhenReady (node_modules/react-dom/cjs/react-dom-client.development.js:16824:7)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16722:15)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at performWorkUntilDeadline (node_modules/scheduler/cjs/scheduler.development.js:45:48)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+    console.warn
+      An error occurred in the <TimelineMemo> component.
+      
+      Consider adding an error boundary to your tree to customize error handling behavior.
+      Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+      at defaultOnUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9362:15)
+      at logUncaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9431:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at lane.callback (node_modules/react-dom/cjs/react-dom-client.development.js:9461:9)
+      at callCallback (node_modules/react-dom/cjs/react-dom-client.development.js:7423:16)
+      at commitCallbacks (node_modules/react-dom/cjs/react-dom-client.development.js:7443:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at commitLayoutEffectOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:14047:15)
+      at flushLayoutEffects (node_modules/react-dom/cjs/react-dom-client.development.js:18138:15)
+      at commitRoot (node_modules/react-dom/cjs/react-dom-client.development.js:17954:9)
+      at commitRootWhenReady (node_modules/react-dom/cjs/react-dom-client.development.js:16824:7)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16722:15)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at performWorkUntilDeadline (node_modules/scheduler/cjs/scheduler.development.js:45:48)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+  ● category labels and distance wording are shared by the visible and PDF content without mutating API types
+
+    ReferenceError: MemoInputIcon is not defined
+
+      1225 |     ? "route-result-memo-card"
+      1226 |     : "route-result-memo-input";
+    > 1227 |   const icon = isSaved ? <MemoSavedIcon /> : <MemoInputIcon />;
+           |                                               ^
+      1228 |   const text = isSaved ? displayTitle : "메모를 입력하세요...";
+      1229 |   const handleClick = (event) => {
+      1230 |     event.stopPropagation();
+
+      at TimelineMemo (src/RouteResult/RouteResult.jsx:1227:47)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at performWorkUntilDeadline (node_modules/scheduler/cjs/scheduler.development.js:45:48)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+  ● category labels and distance wording are shared by the visible and PDF content without mutating API types
+
+    Unable to find an element with the text: 방문 92. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div />
+    </body>
+
+      19 |   const categorized = places.map(p => ({ ...p, isFixed: false, placeType: p.id === 92 ? "ATTRACTION" : "RESTAURANT" }));
+      20 |   getTripPlacesApi.mockResolvedValue(categorized);
+    > 21 |   setup(); await screen.findAllByText("방문 92");
+         |                         ^
+      22 |   expect(document.querySelector("#route-result-pdf")).toHaveTextContent("관광지");
+      23 |   expect(document.querySelector("#route-result-pdf")).toHaveTextContent("총 직선거리");
+      24 |   expect(document.querySelector("#route-result-pdf")).not.toHaveTextContent("ATTRACTION");
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at findAllByText (node_modules/@testing-library/dom/dist/query-helpers.js:86:33)
+      at Object.<anonymous> (src/RouteResult/editing.test.jsx:21:25)
+      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● drag keeps the moved visit handle and memo association; reset restores confirmed times
+
+    ReferenceError: MemoInputIcon is not defined
+
+      1225 |     ? "route-result-memo-card"
+      1226 |     : "route-result-memo-input";
+    > 1227 |   const icon = isSaved ? <MemoSavedIcon /> : <MemoInputIcon />;
+           |                                               ^
+      1228 |   const text = isSaved ? displayTitle : "메모를 입력하세요...";
+      1229 |   const handleClick = (event) => {
+      1230 |     event.stopPropagation();
+
+      at TimelineMemo (src/RouteResult/RouteResult.jsx:1227:47)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at performWorkUntilDeadline (node_modules/scheduler/cjs/scheduler.development.js:45:48)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+  ● drag keeps the moved visit handle and memo association; reset restores confirmed times
+
+    Unable to find an element with the text: 방문 92. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div />
+    </body>
+
+      26 | });
+      27 | test("drag keeps the moved visit handle and memo association; reset restores confirmed times", async () => {
+    > 28 |   setup(); await screen.findAllByText("방문 92");
+         |                         ^
+      29 |   const handle = screen.getByRole("button", { name: "방문 91 일정 순서 변경" });
+      30 |   handle.focus();
+      31 |   fireEvent.click(screen.getByRole("button", { name: "테스트 순서 변경" }));
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at findAllByText (node_modules/@testing-library/dom/dist/query-helpers.js:86:33)
+      at Object.<anonymous> (src/RouteResult/editing.test.jsx:28:25)
+      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● memo success + read failure retries only GET, cancel order retains saved memo
+
+    ReferenceError: MemoInputIcon is not defined
+
+      1225 |     ? "route-result-memo-card"
+      1226 |     : "route-result-memo-input";
+    > 1227 |   const icon = isSaved ? <MemoSavedIcon /> : <MemoInputIcon />;
+           |                                               ^
+      1228 |   const text = isSaved ? displayTitle : "메모를 입력하세요...";
+      1229 |   const handleClick = (event) => {
+      1230 |     event.stopPropagation();
+
+      at TimelineMemo (src/RouteResult/RouteResult.jsx:1227:47)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at performWorkUntilDeadline (node_modules/scheduler/cjs/scheduler.development.js:45:48)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+  ● memo success + read failure retries only GET, cancel order retains saved memo
+
+    Unable to find an element with the text: 방문 92. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div />
+    </body>
+
+      43 |
+      44 | test("memo success + read failure retries only GET, cancel order retains saved memo", async () => {
+    > 45 |   setup(); await screen.findAllByText("방문 92");
+         |                         ^
+      46 |   fireEvent.click(screen.getAllByRole("button", { name: "메모를 입력하세요..." })[0]);
+      47 |   fireEvent.change(screen.getByRole("textbox"), { target: { value: "새 메모" } });
+      48 |   api.patch.mockResolvedValue({ data: {} }); getTripPlacesApi.mockRejectedValueOnce(new Error("read timeout"));
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at findAllByText (node_modules/@testing-library/dom/dist/query-helpers.js:86:33)
+      at Object.<anonymous> (src/RouteResult/editing.test.jsx:45:25)
+      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)
+
+Test Suites: 3 failed, 5 passed, 8 total
+Tests:       7 failed, 35 passed, 42 total
+Snapshots:   0 total
+Time:        14.466 s
+Ran all test suites within paths "src/RouteCreate/generation.test.js", "src/RouteCreate/validation.test.js", "src/RouteCreate/searchFolders.test.jsx", "src/Header/scheduleActions.test.jsx", "src/RouteResult/mapCoordinates.test.jsx", "src/RouteResult/editing.test.jsx", "src/RouteResult/keyboardOrder.test.jsx", "src/RouteResult/useTripResult.test.js".

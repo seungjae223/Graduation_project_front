@@ -1,0 +1,896 @@
+[
+  {
+    "name": "home-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "어디로든 떠나볼까요?",
+      "인기 급상승 여행지"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "search-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "어디로 떠나볼까요?",
+      "최근 검색어",
+      "인기 검색어",
+      "지역별 추천",
+      "지금 가장 핫한 곳"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "recommend-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "테마 선택",
+      "어떤 여행을 꿈꾸시나요?취향에 딱 맞는 장소를 찾아드릴게요.",
+      "당신만을 위한 추천 장소"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "total-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "healing 추천 장소"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "detail-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "서울숲",
+      "장소 소개",
+      "방문자 리뷰"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "route-create-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "경로 만들기",
+      "일정 리스트"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "route-result-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "최적 경로 결과",
+      "상세 일정",
+      "상세 일정",
+      "상세 일정"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "schedule-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "다가오는 일정2"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "popular-all-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "이달의 추천지"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "mypage-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "테스트 사용자",
+      "나의 활동",
+      "화면 설정",
+      "고객지원 & 정보"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "saved-places-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "나만의 컬렉션",
+      "가고 싶은 서울",
+      "제주 여행",
+      "새 폴더 만들기"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "my-schedule-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "다가오는 일정2"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "recent-places-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "오늘"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "inquiry-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "궁금한 점이해결되었나요?",
+      "여행 일정 저장 문의",
+      "장소 추천 문의"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "inquiry-write-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "문의 내용을 작성해주세요"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "admin-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "시스템 통계"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "admin-inquiry-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "1:1 문의 목록"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "admin-write-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "문의 정보를 찾을 수 없습니다."
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "inquiry-detail-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "여행 일정 저장 문의",
+      "나의 문의 내용",
+      "너만 오면 go 운영팀"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "landing-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "너만 오면 go!"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "signup-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "너만 오면 go"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "find-password-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "가입하신 이메일 주소를입력해 주세요."
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "login-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "너만 오면 go !"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "verify-code-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "이메일로 발송된6자리 인증번호를입력해 주세요."
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "admin-write-390-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "장소 추천 문의"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "name": "home-320-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "어디로든 떠나볼까요?",
+      "인기 급상승 여행지"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "search-320-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "어디로 떠나볼까요?",
+      "최근 검색어",
+      "인기 검색어",
+      "지역별 추천",
+      "지금 가장 핫한 곳"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "recommend-320-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "테마 선택",
+      "어떤 여행을 꿈꾸시나요?취향에 딱 맞는 장소를 찾아드릴게요.",
+      "당신만을 위한 추천 장소"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "total-320-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "healing 추천 장소"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "detail-320-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "서울숲",
+      "장소 소개",
+      "방문자 리뷰"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "route-create-320-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "경로 만들기",
+      "일정 리스트"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "route-result-320-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "최적 경로 결과",
+      "상세 일정",
+      "상세 일정",
+      "상세 일정"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "schedule-320-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "다가오는 일정2"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "popular-all-320-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "이달의 추천지"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "name": "home-768-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "어디로든 떠나볼까요?",
+      "인기 급상승 여행지"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "search-768-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "어디로 떠나볼까요?",
+      "최근 검색어",
+      "인기 검색어",
+      "지역별 추천",
+      "지금 가장 핫한 곳"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "recommend-768-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "테마 선택",
+      "어떤 여행을 꿈꾸시나요?취향에 딱 맞는 장소를 찾아드릴게요.",
+      "당신만을 위한 추천 장소"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "total-768-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "healing 추천 장소"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "detail-768-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "서울숲",
+      "장소 소개",
+      "방문자 리뷰"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "route-create-768-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "경로 만들기",
+      "일정 리스트"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "route-result-768-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "최적 경로 결과",
+      "상세 일정",
+      "상세 일정",
+      "상세 일정"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "schedule-768-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "다가오는 일정2"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "popular-all-768-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "이달의 추천지"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "name": "home-1366-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "어디로든 떠나볼까요?",
+      "인기 급상승 여행지"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "search-1366-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "어디로 떠나볼까요?",
+      "최근 검색어",
+      "인기 검색어",
+      "지역별 추천",
+      "지금 가장 핫한 곳"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "recommend-1366-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "테마 선택",
+      "어떤 여행을 꿈꾸시나요?취향에 딱 맞는 장소를 찾아드릴게요.",
+      "당신만을 위한 추천 장소"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "total-1366-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "healing 추천 장소"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "detail-1366-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "서울숲",
+      "장소 소개",
+      "방문자 리뷰"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "route-create-1366-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "경로 만들기",
+      "일정 리스트"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "route-result-1366-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "최적 경로 결과",
+      "상세 일정",
+      "상세 일정",
+      "상세 일정"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "schedule-1366-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "다가오는 일정2"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 1366
+  },
+  {
+    "name": "popular-all-1366-dark",
+    "body": "rgb(15, 23, 34)",
+    "headings": [
+      "이달의 추천지"
+    ],
+    "overflow": false,
+    "surfaces": [
+      {
+        "bg": "rgb(15, 23, 34)",
+        "class": "route-transition "
+      }
+    ],
+    "theme": "dark",
+    "width": 1366
+  }
+]

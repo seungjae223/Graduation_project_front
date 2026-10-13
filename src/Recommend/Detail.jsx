@@ -1,4 +1,4 @@
-import { savePreparedPdf, waitForPdfImages } from "../utils/pdfTask";
+import { savePreparedPdf, preparePdfImages, clonePdfContent } from "../utils/pdfTask";
 import { logSafeApiError } from "../utils/safeLog";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -6,39 +6,25 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import { saveRecentPlace } from "../utils/recentPlaces";
 import html2pdf from "html2pdf.js";
 import ShareModal from "../ShareModal/ShareModal";
-import FolderSelectModal from "../FolderSelectModal/FolderSelectModal";
 import EarthLoader from "../Loading/EarthLoader";
 import "./Detail.css";
 import api from "../api/api";
 import useReadQuery from "../utils/useReadQuery";
-import useMutationTask from "../utils/useMutationTask";
+import usePlaceSaving from "../utils/usePlaceSaving";
+import PlaceSavingFeedback, { PlaceSaveModal } from "../components/PlaceSavingFeedback";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
 import { buildLoginPath } from "../utils/authRedirect";
 import { requireList } from "../api/responseContract";
 
-import forestImg from "../img/도쿄.png";
+import PlacePhoto from "../components/PlacePhoto";
+import { getPlacePhoto } from "../data/placePhotos";
 
 const PLACES_API = "/api/places";
-const FOLDERS_API = "/api/folders";
 const RECENT_PLACES_API = "/api/recent-places";
-
-const BackIcon = () => (
-  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-    <path
-      d="M15 5L8 12L15 19"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 const ShareIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -276,7 +262,8 @@ const createPdfClone = (target) => {
   wrapper.style.opacity = "1";
   wrapper.style.overflow = "visible";
 
-  const clone = target.cloneNode(true);
+  const clone = clonePdfContent(target);
+  clone.classList.add("is-exporting");
   clone.style.width = `${pageWidthPx}px`;
   clone.style.maxWidth = `${pageWidthPx}px`;
   clone.style.minHeight = "auto";
@@ -311,39 +298,6 @@ const getResponseData = (data) => {
   if (data?.response) return data.response;
 
   return data;
-};
-
-const getFolderId = (folder) => {
-  return folder?.id ?? folder?.folderId ?? folder?.folder_id ?? null;
-};
-
-const getSavedPlaceId = (savedPlace) => {
-  const placeData = savedPlace?.place || savedPlace?.destination || savedPlace;
-
-  return (
-    placeData?.id ??
-    placeData?.placeId ??
-    savedPlace?.placeId ??
-    savedPlace?.destinationId ??
-    savedPlace?.id ??
-    null
-  );
-};
-
-const getFolderPlacesUrl = (folderId) => {
-  return `${FOLDERS_API}/${encodeURIComponent(folderId)}/places`;
-};
-
-const getFolderPlaceDeleteUrl = (folderId, placeId) => {
-  return `${FOLDERS_API}/${encodeURIComponent(
-    folderId
-  )}/places/${encodeURIComponent(placeId)}`;
-};
-
-const registerPlace = async (place) => {
-  const numericPlaceId = Number(place.id);
-  if (Number.isInteger(numericPlaceId) && numericPlaceId > 0) return numericPlaceId;
-  throw new Error("저장할 장소의 서버 ID가 없습니다.");
 };
 
 const normalizeTags = (tags) => {
@@ -454,7 +408,7 @@ const normalizePlaceDetail = (place, fallbackPlace) => {
     place?.thumbnailUrl ||
     place?.photoUrl ||
     fallbackPlace.image ||
-    (serverOnly ? "" : forestImg);
+    "";
 
   const region = place?.region || fallbackPlace.region || "";
   const theme = place?.theme || place?.themeName || fallbackPlace.theme || "";
@@ -538,7 +492,7 @@ function Detail() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { isSaved, toggleSavedPlace } = useSavedPlaces();
+  const saving = usePlaceSaving();
 
   const idParam = Number(searchParams.get("id"));
 
@@ -557,18 +511,6 @@ function Detail() {
     const response = await api.get(PLACES_API + "/" + idParam + "/reviews", { signal });
     return requireList(response.data);
   }, validPlace, identityMatches);
-  const savedQuery = useReadQuery(requestKey, async signal => {
-    const response = await api.get(FOLDERS_API, { signal });
-    const folders = requireList(response.data);
-    const responses = await Promise.all(folders.map(folder => api.get(getFolderPlacesUrl(getFolderId(folder)), { signal })));
-    let found = null;
-    responses.forEach((response, index) => {
-      const places = requireList(response.data);
-      const matched = places.find(place => String(getSavedPlaceId(place)) === String(idParam));
-      if (matched && !found) found = { folderId: String(getFolderId(folders[index])), placeId: String(getSavedPlaceId(matched)) };
-    });
-    return found;
-  }, validPlace && sessionKey !== "anonymous", identityMatches);
   const [visibleReviews, setVisibleReviews] = useState(3);
   useEffect(() => { setVisibleReviews(3); }, [requestKey]);
   const detailPlace = {
@@ -581,14 +523,9 @@ function Detail() {
   const hasResolvedDetail = basicQuery.data !== null;
   const isLoading = basicQuery.status === "loading";
   const loadError = validPlace ? "장소 상세 정보를 불러오지 못했습니다." : "장소 정보가 없거나 주소가 올바르지 않습니다.";
-  const saveTask = useMutationTask(requestKey);
-  const isSavingPlace = saveTask.status === "running";
-  const [pageNotice, setPageNotice] = useState("");
-  const serverSaved = savedQuery.status === "success" && Boolean(savedQuery.data);
-  const serverSavedFolderInfo = savedQuery.data;
-  const [folderModalOpen, setFolderModalOpen] = useState(false);
+  const isSavingPlace = saving.busy;
   const [shareModalOpen, setShareModalOpen] = useState(false);
-  useEffect(() => { setPageNotice(""); setFolderModalOpen(false); setShareModalOpen(false); }, [requestKey]);
+  useEffect(() => { setShareModalOpen(false); }, [requestKey]);
   useEffect(() => {
     if (!detailPlace?.id) {
       return;
@@ -637,8 +574,8 @@ function Detail() {
     detailPlace.reviewCount,
   ]);
 
-  const contextSaved = isSaved(detailPlace.id);
-  const saved = serverSaved;
+  const saved = saving.isSaved(detailPlace.id);
+  const saveDisabled = saving.blocked || saving.folders.status !== "success";
 
   const shareUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -646,74 +583,8 @@ function Detail() {
     return `${window.location.origin}${location.pathname}?id=${detailPlace.id}`;
   }, [location.pathname, detailPlace.id]);
 
-  const buildSavedPlacePayload = (folder) => ({
-    id: detailPlace.id,
-    title: detailPlace.title,
-    name: detailPlace.name,
-    region: detailPlace.region,
-    theme: detailPlace.theme,
-    description: detailPlace.description,
-    address: detailPlace.address,
-    latitude: detailPlace.latitude,
-    longitude: detailPlace.longitude,
-    placeType: detailPlace.placeType,
-    rating: detailPlace.rating,
-    image: detailPlace.image,
-    tags: detailPlace.tags,
-    folder,
-  });
-
-  const closeFolderModal = () => {
-    if (saveTask.blocked || savedQuery.status !== "success") return;
-    setFolderModalOpen(false);
-  };
-
-  const postFolderPlace = async (folder, placeId) => {
-    return api.post(
-      `${getFolderPlacesUrl(folder.id)}/${encodeURIComponent(placeId)}`
-    );
-  };
-
-  const refreshSaved = async () => {
-    if (!await savedQuery.retry()) throw new Error("저장 여부 재조회 실패");
-  };
-  const removeSavedPlace = async () => {
-    if (!serverSavedFolderInfo?.folderId) return;
-    const operationKey = requestKey;
-    await saveTask.run(async () => {
-      await api.delete(getFolderPlaceDeleteUrl(serverSavedFolderInfo.folderId, serverSavedFolderInfo.placeId));
-      if (currentTarget.current === operationKey && identityMatches() && contextSaved) toggleSavedPlace(buildSavedPlacePayload());
-    }, refreshSaved, {
-      failure: "관심 장소 해제에 실패했어요.",
-      success: "관심 장소 해제와 최신 상태 확인을 완료했어요.",
-      refreshFailure: "관심 장소는 해제됐지만 최신 저장 상태를 확인하지 못했어요.",
-    });
-  };
-  const savePlaceToFolder = async folder => {
-    const operationKey = requestKey;
-    if (savedQuery.status !== "success") return;
-    await saveTask.run(async () => {
-      const id = await registerPlace(detailPlace);
-      await postFolderPlace(folder, id);
-      if (currentTarget.current === operationKey && identityMatches()) {
-        if (!contextSaved) toggleSavedPlace(buildSavedPlacePayload(folder));
-        setFolderModalOpen(false);
-      }
-    }, refreshSaved, {
-      failure: "관심 장소 저장에 실패했어요.",
-      success: "관심 장소 저장과 최신 상태 확인을 완료했어요.",
-      refreshFailure: "관심 장소는 저장됐지만 최신 저장 상태를 확인하지 못했어요.",
-    });
-  };
-  const handleToggleSaved = async () => {
-    if (saveTask.blocked || savedQuery.status !== "success") return;
-
-    if (saved) {
-      await removeSavedPlace();
-      return;
-    }
-
-    setFolderModalOpen(true);
+  const handleToggleSaved = event => {
+    if (!saveDisabled) saving.toggle(event, detailPlace);
   };
 
   const handleOpenShareModal = () => {
@@ -732,7 +603,7 @@ function Detail() {
 
     try {
       await waitForNextPaint();
-      await waitForPdfImages(clone);
+      await preparePdfImages(clone);
       await waitForNextPaint();
 
       const today = new Date();
@@ -751,6 +622,8 @@ function Detail() {
         html2canvas: {
           scale: 2,
           useCORS: true,
+          allowTaint: false,
+          logging: false,
           backgroundColor: "#ffffff",
           windowWidth: pageWidthPx,
           windowHeight: Math.ceil(clone.scrollHeight),
@@ -802,18 +675,10 @@ function Detail() {
     <>
       <div id="detail-pdf" className="detail-page">
         <section className="detail-hero">
-          {detailPlace.image ? <img src={detailPlace.image} alt={detailPlace.title} className="detail-hero-image" /> : <div className="detail-image-placeholder">사진 정보 없음</div>}
+          <PlacePhoto src={detailPlace.image} alt={detailPlace.title} className="detail-hero-image"
+            credit={detailPlace.image === getPlacePhoto(detailPlace.title).image ? getPlacePhoto(detailPlace.title).credit : undefined} />
 
           <div className="detail-top-actions">
-            <button
-              type="button"
-              className="detail-action-btn"
-              onClick={() => navigate(-1)}
-              aria-label="뒤로가기"
-            >
-              <BackIcon />
-            </button>
-
             <div className="detail-action-group">
               <button
                 type="button"
@@ -828,7 +693,8 @@ function Detail() {
                 type="button"
                 className="detail-action-btn"
                 onClick={handleToggleSaved}
-                disabled={saveTask.blocked || savedQuery.status !== "success"}
+                disabled={saveDisabled}
+                aria-pressed={saved}
                 aria-label={saved ? "관심 장소 해제" : "관심 장소 추가"}
               >
                 <HeartIcon active={saved} />
@@ -910,7 +776,8 @@ function Detail() {
             type="button"
             className={`detail-save-btn ${saved ? "saved" : ""}`}
             onClick={handleToggleSaved}
-            disabled={saveTask.blocked || savedQuery.status !== "success"}
+            disabled={saveDisabled}
+            aria-pressed={saved}
           >
             <SavePlaceIcon active={saved} />
             <span>
@@ -924,13 +791,8 @@ function Detail() {
         </div>
       </div>
 
-      {saveTask.message && <section className="detail-query-notice" role="status"><p>{saveTask.message}</p>{["refreshError", "unknown"].includes(saveTask.status) && <button type="button" onClick={saveTask.retryRead}>최신 저장 상태 다시 확인</button>}</section>}
-      {pageNotice && <p className="detail-query-notice" role="status">{pageNotice}</p>}
+      <PlaceSavingFeedback saving={saving} />
       {sessionKey === "anonymous" && <button type="button" className="detail-query-notice" onClick={() => navigate(buildLoginPath(location.pathname + location.search))}>관심 장소를 저장하려면 로그인해 주세요</button>}
-      {sessionKey !== "anonymous" && savedQuery.status !== "success" && <section className="detail-query-notice" role="status">
-        <p>{savedQuery.status === "loading" ? "저장 여부 확인 중..." : "저장 여부를 확인하지 못했어요."}</p>
-        {savedQuery.status === "error" && <button type="button" onClick={savedQuery.retry}>저장 여부 다시 확인</button>}
-      </section>}
       <ShareModal
         open={shareModalOpen}
         onClose={() => setShareModalOpen(false)}
@@ -944,12 +806,7 @@ function Detail() {
         exportBlockedReason={basicQuery.status !== "success" || reviewQuery.status !== "success" ? "상세 정보와 리뷰 조회가 완료된 뒤 PDF를 생성할 수 있습니다." : ""}
       />
 
-      <FolderSelectModal key={requestKey} contextKey={requestKey}
-        open={folderModalOpen}
-        onClose={closeFolderModal}
-        onSave={savePlaceToFolder}
-        isSaving={isSavingPlace}
-      />
+      <PlaceSaveModal saving={saving} />
     </>
   );
 }

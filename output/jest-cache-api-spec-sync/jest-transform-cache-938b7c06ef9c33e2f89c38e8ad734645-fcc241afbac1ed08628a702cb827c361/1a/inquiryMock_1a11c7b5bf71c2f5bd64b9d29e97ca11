@@ -1,0 +1,30 @@
+b82f82493ffaf8666916e6278130d833
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.seedInquiries = seedInquiries;
+function seedInquiries() {
+  return [{
+    id: 1,
+    title: "여행 일정 저장 문의",
+    content: "저장한 일정은 어디에서 확인할 수 있나요?",
+    answer: "마이페이지의 내 일정에서 확인하실 수 있습니다.",
+    answered: true,
+    status: "answered"
+  }, {
+    id: 2,
+    title: "장소 추천 문의",
+    content: "제주도의 산책 장소를 추천받고 싶어요.",
+    answer: "",
+    answered: false,
+    status: "waiting"
+  }].map(inquiry => ({
+    ...inquiry,
+    userEmail: "test@example.com",
+    nickname: "테스트 사용자",
+    createdAt: "2026-10-01T10:00:00"
+  }));
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJzZWVkSW5xdWlyaWVzIiwiaWQiLCJ0aXRsZSIsImNvbnRlbnQiLCJhbnN3ZXIiLCJhbnN3ZXJlZCIsInN0YXR1cyIsIm1hcCIsImlucXVpcnkiLCJ1c2VyRW1haWwiLCJuaWNrbmFtZSIsImNyZWF0ZWRBdCJdLCJzb3VyY2VzIjpbImlucXVpcnlNb2NrLmpzIl0sInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBmdW5jdGlvbiBzZWVkSW5xdWlyaWVzKCkge1xuICByZXR1cm4gW1xuICAgIHsgaWQ6IDEsIHRpdGxlOiBcIuyXrO2WiSDsnbzsoJUg7KCA7J6lIOusuOydmFwiLCBjb250ZW50OiBcIuyggOyepe2VnCDsnbzsoJXsnYAg7Ja065SU7JeQ7IScIO2ZleyduO2VoCDsiJgg7J6I64KY7JqUP1wiLCBhbnN3ZXI6IFwi66eI7J207Y6Y7J207KeA7J2YIOuCtCDsnbzsoJXsl5DshJwg7ZmV7J247ZWY7IukIOyImCDsnojsirXri4jri6QuXCIsIGFuc3dlcmVkOiB0cnVlLCBzdGF0dXM6IFwiYW5zd2VyZWRcIiB9LFxuICAgIHsgaWQ6IDIsIHRpdGxlOiBcIuyepeyGjCDstpTsspwg66y47J2YXCIsIGNvbnRlbnQ6IFwi7KCc7KO864+E7J2YIOyCsOyxhSDsnqXshozrpbwg7LaU7LKc67Cb6rOgIOyLtuyWtOyalC5cIiwgYW5zd2VyOiBcIlwiLCBhbnN3ZXJlZDogZmFsc2UsIHN0YXR1czogXCJ3YWl0aW5nXCIgfSxcbiAgXS5tYXAoaW5xdWlyeSA9PiAoeyAuLi5pbnF1aXJ5LCB1c2VyRW1haWw6IFwidGVzdEBleGFtcGxlLmNvbVwiLCBuaWNrbmFtZTogXCLthYzsiqTtirgg7IKs7Jqp7J6QXCIsIGNyZWF0ZWRBdDogXCIyMDI2LTEwLTAxVDEwOjAwOjAwXCIgfSkpO1xufVxuIl0sIm1hcHBpbmdzIjoiOzs7Ozs7QUFBTyxTQUFTQSxhQUFhQSxDQUFBLEVBQUc7RUFDOUIsT0FBTyxDQUNMO0lBQUVDLEVBQUUsRUFBRSxDQUFDO0lBQUVDLEtBQUssRUFBRSxhQUFhO0lBQUVDLE9BQU8sRUFBRSx5QkFBeUI7SUFBRUMsTUFBTSxFQUFFLDRCQUE0QjtJQUFFQyxRQUFRLEVBQUUsSUFBSTtJQUFFQyxNQUFNLEVBQUU7RUFBVyxDQUFDLEVBQzdJO0lBQUVMLEVBQUUsRUFBRSxDQUFDO0lBQUVDLEtBQUssRUFBRSxVQUFVO0lBQUVDLE9BQU8sRUFBRSx1QkFBdUI7SUFBRUMsTUFBTSxFQUFFLEVBQUU7SUFBRUMsUUFBUSxFQUFFLEtBQUs7SUFBRUMsTUFBTSxFQUFFO0VBQVUsQ0FBQyxDQUMvRyxDQUFDQyxHQUFHLENBQUNDLE9BQU8sS0FBSztJQUFFLEdBQUdBLE9BQU87SUFBRUMsU0FBUyxFQUFFLGtCQUFrQjtJQUFFQyxRQUFRLEVBQUUsU0FBUztJQUFFQyxTQUFTLEVBQUU7RUFBc0IsQ0FBQyxDQUFDLENBQUM7QUFDMUgiLCJpZ25vcmVMaXN0IjpbXX0=

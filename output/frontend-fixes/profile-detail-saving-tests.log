@@ -1,0 +1,8 @@
+PASS src/Recommend/Detail.test.jsx
+PASS src/utils/placeSaving.test.jsx
+
+Test Suites: 2 passed, 2 total
+Tests:       19 passed, 19 total
+Snapshots:   0 total
+Time:        4.487 s
+Ran all test suites within paths "src/Recommend/Detail.test.jsx", "src/utils/placeSaving.test.jsx".

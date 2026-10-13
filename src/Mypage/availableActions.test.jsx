@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import SavedPlaces from "./SavedPlaces";
+import { SavedPlacesProvider } from "../Context/SavedPlacesContext";
 import MyPage from "./MyPage";
 import ShareModal from "../ShareModal/ShareModal";
 import api from "../api/api";
@@ -13,7 +14,7 @@ beforeEach(() => {
   api.get.mockImplementation(async url => ({ data: url === "/api/folders" ? [{ id: 3, name: "내 폴더" }] : url.includes("/places") ? [{ id: 71, name: "저장 장소", address: "주소" }] : {} }));
 });
 test("unsupported folder menu is absent; folder creation and place removal still work", async () => {
-  render(<MemoryRouter><SavedPlaces /></MemoryRouter>);
+  render(<MemoryRouter><SavedPlacesProvider><SavedPlaces /></SavedPlacesProvider></MemoryRouter>);
   const folder = await screen.findByText("내 폴더");
   expect(screen.queryByRole("button", { name: "폴더 관리 열기" })).not.toBeInTheDocument();
   api.post.mockResolvedValue({ data: "폴더 생성 완료" });
@@ -37,7 +38,7 @@ test("friend invitation banner is not actionable or visible", async () => {
   expect(screen.queryByText("친구 초대하고 포인트 받기!")).not.toBeInTheDocument();
 });
 test("folder create is single flight; read retry never repeats a successful POST", async () => {
-  render(<MemoryRouter><SavedPlaces /></MemoryRouter>);
+  render(<MemoryRouter><SavedPlacesProvider><SavedPlaces /></SavedPlacesProvider></MemoryRouter>);
   await screen.findByText("내 폴더");
   let complete; const pending = new Promise(resolve => { complete = resolve; });
   api.post.mockImplementation(() => pending);
@@ -52,7 +53,7 @@ test("folder create is single flight; read retry never repeats a successful POST
   await screen.findByText(/폴더가 생성됐어요/); expect(api.post).toHaveBeenCalledTimes(1);
 });
 test("definite folder create failure preserves input", async () => {
-  render(<MemoryRouter><SavedPlaces /></MemoryRouter>); await screen.findByText("내 폴더");
+  render(<MemoryRouter><SavedPlacesProvider><SavedPlaces /></SavedPlacesProvider></MemoryRouter>); await screen.findByText("내 폴더");
   api.post.mockRejectedValue({ response: { status: 400 } });
   fireEvent.click(screen.getByRole("button", { name: /새 폴더 만들기/ }));
   fireEvent.change(screen.getByLabelText("폴더명"), { target: { value: "다시 쓸 이름" } });

@@ -1,44 +1,27 @@
-import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
-import { logSafeApiError } from "../utils/safeLog";
-import React, { useEffect, useMemo, useState } from "react";
+
+
+import React, { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useSavedPlaces } from "../Context/SavedPlacesContext";
 import AnimatedHeart from "../AnimatedHeart/AnimatedHeart";
-import FolderSelectModal from "../FolderSelectModal/FolderSelectModal";
+import useReadQuery from "../utils/useReadQuery";
+import useSessionKey from "../utils/useSessionKey";
+import { getAuthSnapshot } from "../utils/authState";
+import { requireList } from "../api/responseContract";
+import { toApiTheme } from "../utils/placeTheme";
+import usePlaceSaving from "../utils/usePlaceSaving";
+import PlaceSavingFeedback, { PlaceSaveModal } from "../components/PlaceSavingFeedback";
 import "./Total.css";
 import api from "../api/api";
+import PlacePhoto from "../components/PlacePhoto";
+import { getPlacePhoto } from "../data/placePhotos";
 
 const RECOMMENDATIONS_API = "/api/recommendations";
-const FOLDERS_API = "/api/folders";
+const EMPTY_PLACES = [];
 
-const getPlaceArray = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.places)) return data.places;
-  if (Array.isArray(data?.recommendations)) return data.recommendations;
-  if (Array.isArray(data?.data?.places)) return data.data.places;
-  if (Array.isArray(data?.data?.content)) return data.data.content;
-  if (Array.isArray(data?.data?.items)) return data.data.items;
-  if (Array.isArray(data?.data?.recommendations)) {
-    return data.data.recommendations;
-  }
 
-  return [];
-};
 
-const getIntroText = (data) => {
-  return (
-    data?.intro ||
-    data?.message ||
-    data?.description ||
-    data?.data?.intro ||
-    data?.data?.message ||
-    data?.data?.description ||
-    ""
-  );
-};
+
+
 
 const normalizeTags = (tags) => {
   if (!Array.isArray(tags)) return [];
@@ -85,10 +68,8 @@ const normalizePlace = (place) => {
     longitude: Number(place.longitude ?? 0),
     placeType,
     theme: place.theme || place.themeName || "",
-    rating: Number(place.rating || place.score || place.avgRating) || 0,
-    distance: Number(
-      place.distance || place.distanceKm || place.km || place.range || 0
-    ),
+    rating: optionalNumber(place.rating ?? place.score ?? place.avgRating),
+    distance: null,
     image:
       place.image ||
       place.imageUrl ||
@@ -101,167 +82,39 @@ const normalizePlace = (place) => {
   };
 };
 
-const getFolderArray = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.folders)) return data.folders;
-  if (Array.isArray(data?.result)) return data.result;
-  if (Array.isArray(data?.results)) return data.results;
-  if (Array.isArray(data?.data?.folders)) return data.data.folders;
-  if (Array.isArray(data?.data?.content)) return data.data.content;
-  if (Array.isArray(data?.data?.items)) return data.data.items;
 
-  return [];
-};
 
-const getFolderId = (folder) => {
-  return folder?.id ?? folder?.folderId ?? folder?.folder_id ?? null;
-};
 
-const getSavedPlaceId = (savedPlace) => {
-  const placeData = savedPlace?.place || savedPlace?.destination || savedPlace;
 
-  return (
-    placeData?.placeId ??
-    placeData?.id ??
-    savedPlace?.placeId ??
-    savedPlace?.destinationId ??
-    savedPlace?.id ??
-    null
-  );
-};
 
-const getFolderPlacesUrl = (folderId) => {
-  return `${FOLDERS_API}/${encodeURIComponent(folderId)}/places`;
-};
 
-const getFolderPlaceDeleteUrl = (folderId, placeId) => {
-  return `${FOLDERS_API}/${encodeURIComponent(
-    folderId
-  )}/places/${encodeURIComponent(placeId)}`;
-};
 
-const registerPlace = async (place) => {
-  const numericPlaceId = Number(place.id);
-  if (Number.isInteger(numericPlaceId) && numericPlaceId > 0) return numericPlaceId;
-  throw new Error("저장할 장소의 서버 ID가 없습니다.");
-};
 
-const getErrorMessage = safeApiErrorMessage;
+
+
+
+
+
+
+const optionalNumber = value => value === undefined || value === null || value === "" ? null : Number.isFinite(Number(value)) ? Number(value) : null;
 
 function Total() {
   const navigate = useNavigate();
-  const { isSaved, toggleSavedPlace } = useSavedPlaces();
+  const account = useSessionKey();
+  const saving = usePlaceSaving();
+  const { isSaved, isSavingId } = saving;
   const [searchParams] = useSearchParams();
 
   const [sortBy, setSortBy] = useState("인기순");
-  const [places, setPlaces] = useState([]);
-  const [serverSavedIds, setServerSavedIds] = useState([]);
-  const [serverSavedFolderMap, setServerSavedFolderMap] = useState({});
-  const [introText, setIntroText] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSavingId, setIsSavingId] = useState(null);
-  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
-  const [folderTargetPlace, setFolderTargetPlace] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const selectedTheme = searchParams.get("theme") || "힐링";
-
-  useEffect(() => {
-    const fetchTotalPlaces = async () => {
-      try {
-        setIsLoading(true);
-        setErrorMessage("");
-
-        const response = await api.get(RECOMMENDATIONS_API, {
-          params: {
-            theme: selectedTheme,
-          },
-        });
-
-        const nextPlaces = getPlaceArray(response.data)
-          .map(normalizePlace)
-          .filter((place) => place.id !== undefined && place.id !== null);
-
-        setPlaces(nextPlaces);
-        setIntroText(getIntroText(response.data));
-      } catch (error) {
-        logSafeApiError(error, "Total.jsx");
-        setPlaces([]);
-        setIntroText("");
-
-        if (error.message.includes("Network Error")) {
-          setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-          return;
-        }
-
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          setErrorMessage("로그인 정보가 만료되었거나 권한이 없습니다.");
-          return;
-        }
-
-        setErrorMessage(
-          getErrorMessage(
-            error,
-            "추천 장소를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
-          )
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTotalPlaces();
-  }, [selectedTheme]);
-
-  useEffect(() => {
-    const fetchSavedPlaces = async () => {
-      try {
-        const folderResponse = await api.get(FOLDERS_API);
-        const folderList = getFolderArray(folderResponse.data).filter(
-          (folder) => getFolderId(folder) !== null && getFolderId(folder) !== undefined
-        );
-
-        const placeResponses = await Promise.allSettled(
-          folderList.map((folder) => api.get(getFolderPlacesUrl(getFolderId(folder))))
-        );
-
-        const savedIds = new Set();
-        const savedFolderMap = {};
-
-        placeResponses.forEach((result, index) => {
-          if (result.status !== "fulfilled") return;
-
-          const folderId = getFolderId(folderList[index]);
-          const savedPlaces = getPlaceArray(result.value.data);
-
-          savedPlaces.forEach((savedPlace) => {
-            const placeId = getSavedPlaceId(savedPlace);
-
-            if (placeId === null || placeId === undefined) return;
-
-            const placeIdText = String(placeId);
-            savedIds.add(placeIdText);
-            savedFolderMap[placeIdText] = {
-              folderId: String(folderId),
-              placeId: placeIdText,
-            };
-          });
-        });
-
-        setServerSavedIds([...savedIds]);
-        setServerSavedFolderMap(savedFolderMap);
-      } catch (error) {
-        logSafeApiError(error, "Total.jsx");
-        setServerSavedIds([]);
-        setServerSavedFolderMap({});
-      }
-    };
-
-    fetchSavedPlaces();
-  }, []);
+  const selectedTheme = searchParams.get("theme") || "healing";
+  const searchKeyword = (searchParams.get("keyword") || "").trim();
+  const listing = useReadQuery(`${account}:total:${searchKeyword ? "search:" + searchKeyword : "theme:" + selectedTheme}`, async signal => {
+    const response = await api.get(searchKeyword ? "/api/places/search" : RECOMMENDATIONS_API, { signal, params: searchKeyword ? { keyword: searchKeyword } : { theme: toApiTheme(selectedTheme) } });
+    return requireList(response.data).map(normalizePlace);
+  }, true, () => getAuthSnapshot().accountKey === account);
+  const places = listing.data || EMPTY_PLACES;
+  const isLoading = listing.status === "loading" && !listing.data;
+  const errorMessage = listing.status === "error" ? "장소 목록을 불러오지 못했어요." : "";
 
   const sortedPlaces = useMemo(() => {
     const copied = [...places];
@@ -271,7 +124,7 @@ function Total() {
     }
 
     if (sortBy === "별점순") {
-      return copied.sort((a, b) => b.rating - a.rating);
+      return copied.sort((a, b) => (b.rating ?? -Infinity) - (a.rating ?? -Infinity));
     }
 
     return copied;
@@ -283,148 +136,15 @@ function Total() {
     });
   };
 
-  const closeFolderModal = () => {
-    if (isSavingId) return;
-
-    setIsFolderModalOpen(false);
-    setFolderTargetPlace(null);
-  };
-
-  const postFolderPlace = async (folder, placeId) => {
-    return api.post(
-      `${getFolderPlacesUrl(folder.id)}/${encodeURIComponent(placeId)}`
-    );
-  };
-
-  const showSaveError = (error) => {
-    logSafeApiError(error, "Total.jsx");
-
-    if (error.message.includes("Network Error")) {
-      alert("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-      return;
-    }
-
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      alert("로그인 정보가 만료되었거나 권한이 없습니다.");
-      return;
-    }
-
-    alert(
-      getErrorMessage(
-        error,
-        "관심 장소 변경에 실패했습니다. 잠시 후 다시 시도해주세요."
-      )
-    );
-  };
-
-  const removeSavedPlace = async (place) => {
-    try {
-      setIsSavingId(place.id);
-
-      const savedInfo = serverSavedFolderMap[String(place.id)];
-
-      if (savedInfo?.folderId) {
-        await api.delete(
-          getFolderPlaceDeleteUrl(
-            savedInfo.folderId,
-            savedInfo.placeId || place.id
-          )
-        );
-      }
-
-      setServerSavedIds((prev) =>
-        prev.filter(
-          (savedId) =>
-            savedId !== String(place.id) &&
-            savedId !== String(savedInfo?.placeId || "")
-        )
-      );
-
-      setServerSavedFolderMap((prev) => {
-        const next = { ...prev };
-        delete next[String(place.id)];
-
-        if (savedInfo?.placeId) {
-          delete next[String(savedInfo.placeId)];
-        }
-
-        return next;
-      });
-
-      if (isSaved(place.id)) {
-        toggleSavedPlace(place);
-      }
-    } catch (error) {
-      showSaveError(error);
-    } finally {
-      setIsSavingId(null);
-    }
-  };
-
-  const savePlaceToFolder = async (place, folder) => {
-    try {
-      setIsSavingId(place.id);
-
-      const registeredPlaceId = await registerPlace(place);
-
-      await postFolderPlace(folder, registeredPlaceId);
-
-      const savedInfo = {
-        folderId: String(folder.id),
-        placeId: String(registeredPlaceId),
-      };
-
-      setServerSavedIds((prev) => {
-        const nextIds = new Set(prev);
-        nextIds.add(String(place.id));
-        nextIds.add(String(registeredPlaceId));
-        return [...nextIds];
-      });
-
-      setServerSavedFolderMap((prev) => ({
-        ...prev,
-        [String(place.id)]: savedInfo,
-        [String(registeredPlaceId)]: savedInfo,
-      }));
-
-      if (!isSaved(place.id)) {
-        toggleSavedPlace({ ...place, folder });
-      }
-
-      setIsFolderModalOpen(false);
-      setFolderTargetPlace(null);
-    } catch (error) {
-      showSaveError(error);
-    } finally {
-      setIsSavingId(null);
-    }
-  };
-
-  const handleSaveFolder = async (folder) => {
-    if (!folderTargetPlace || isSavingId === folderTargetPlace.id) return;
-
-    await savePlaceToFolder(folderTargetPlace, folder);
-  };
-
-  const handleToggleSaved = async (event, place, saved) => {
-    event.stopPropagation();
-
-    if (!place.id || isSavingId === place.id) return;
-
-    if (saved) {
-      await removeSavedPlace(place);
-      return;
-    }
-
-    setFolderTargetPlace(place);
-    setIsFolderModalOpen(true);
-  };
-
-  const pageTitle = introText || `${selectedTheme} 추천 장소`;
+  const handleToggleSaved = saving.toggle;
+  const themeLabel = { healing: "힐링", activity: "액티비티", food: "맛집 탐방", photo: "인스타 감성" }[selectedTheme] || selectedTheme;
+  const pageTitle = searchKeyword ? `"${searchKeyword}" 검색 결과` : `${themeLabel} 추천 장소`;
 
   return (
     <>
       <div className="total-page">
+      <PlaceSavingFeedback saving={saving} />
+      {errorMessage && <div role="alert"><p>{errorMessage}</p><button type="button" onClick={listing.retry}>목록 다시 조회</button></div>}
       <section className="total-intro">
         <h1>{isLoading ? "추천 장소를 불러오는 중입니다." : pageTitle}</h1>
       </section>
@@ -442,7 +162,7 @@ function Total() {
         <button
           type="button"
           className={`sort-chip ${sortBy === "거리순" ? "active" : ""}`}
-          onClick={() => setSortBy("거리순")}
+          disabled title="거리 기준 정보가 제공되지 않습니다"
         >
           거리순
           <span>⌄</span>
@@ -458,24 +178,12 @@ function Total() {
         </button>
       </div>
 
-      {errorMessage && (
-        <p
-          style={{
-            margin: "0 20px 14px",
-            fontSize: "13px",
-            color: "#ef4444",
-          }}
-        >
-          {errorMessage}
-        </p>
-      )}
-
       {!isLoading && !errorMessage && sortedPlaces.length === 0 && (
         <p
           style={{
             margin: "0 20px 14px",
             fontSize: "13px",
-            color: "#6b7280",
+            color: "var(--color-text-muted)",
           }}
         >
           추천 장소가 없습니다.
@@ -485,39 +193,24 @@ function Total() {
       <section className="theme-total-list">
         {sortedPlaces.map((place) => {
           const saved =
-            serverSavedIds.includes(String(place.id)) || isSaved(place.id);
+            isSaved(place.id);
 
           return (
             <article key={place.id} className="theme-total-card">
               <div className="theme-total-image-wrap">
-                {place.image ? (
-                  <img
-                    src={place.image}
-                    alt={place.title}
-                    className="theme-total-image"
-                  />
-                ) : (
-                  <div
-                    className="theme-total-image"
-                    aria-label={`${place.title} 이미지 없음`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      background: "#e5f4ff",
-                      color: "#6b7280",
-                      fontSize: "13px",
-                    }}
-                  >
-                    이미지 없음
-                  </div>
-                )}
+                <PlacePhoto
+                  src={place.image}
+                  alt={place.title}
+                  className="theme-total-image"
+                  credit={place.image === getPlacePhoto(place.title).image ? getPlacePhoto(place.title).credit : undefined}
+                />
 
                 <button
                   type="button"
                   className="theme-total-save-btn"
                   onClick={(event) => handleToggleSaved(event, place, saved)}
-                  disabled={isSavingId === place.id}
+                  disabled={saving.blocked || saving.folders.status === "loading" || isSavingId === place.id}
+                  aria-pressed={saved}
                   aria-label={saved ? "저장 취소" : "저장"}
                 >
                   <AnimatedHeart active={saved} />
@@ -527,10 +220,10 @@ function Total() {
               <div className="theme-total-body">
                 <div className="theme-total-title-row">
                   <h3>{place.title}</h3>
-                  <div className="theme-total-rating">
+                  {place.rating !== null && <div className="theme-total-rating">
                     <span>★</span>
                     <span>{place.rating}</span>
-                  </div>
+                  </div>}
                 </div>
 
                 <p className="theme-total-address">{place.address}</p>
@@ -559,12 +252,7 @@ function Total() {
       </section>
       </div>
 
-      <FolderSelectModal
-        open={isFolderModalOpen}
-        onClose={closeFolderModal}
-        onSave={handleSaveFolder}
-        isSaving={isSavingId === folderTargetPlace?.id}
-      />
+      <PlaceSaveModal saving={saving} />
     </>
   );
 }

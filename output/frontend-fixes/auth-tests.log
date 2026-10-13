@@ -1,0 +1,12 @@
+PASS src/Login/authFlow.test.jsx
+PASS src/Login/SignUp.test.jsx
+PASS src/api/authApi.mock.test.js
+PASS src/api/authApi.test.js
+PASS src/OnBoarding/onboardingTransition.test.js
+PASS src/utils/oauthSecurity.test.js
+PASS src/Login/passwordValidation.test.js
+
+Test Suites: 7 passed, 7 total
+Tests:       61 passed, 61 total
+Snapshots:   0 total
+Time:        5.756 s

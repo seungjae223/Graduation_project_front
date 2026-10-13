@@ -35,10 +35,6 @@
   --onboarding-button-delay: 100ms;
 }
 
-.onboarding-motion-button--settled {
-  animation: none;
-}
-
 .onboarding-motion-button:active:not(:disabled) {
   translate: 0 0;
   scale: var(--onboarding-button-pressed-scale);

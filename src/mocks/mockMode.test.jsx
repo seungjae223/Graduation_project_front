@@ -52,7 +52,8 @@ test.each(["구글 로그인", "카카오 로그인"])("%s uses existing return 
   window.history.replaceState({}, "", "/login?returnTo=%2Fmy-schedule");
   render(<App />);
   fireEvent.click(await screen.findByRole("button", { name: button }));
-  expect(await screen.findByText("서울 주말 여행")).toBeInTheDocument();
+  // Return routing is independent of whether a fixed fixture trip is still upcoming.
+  expect(await screen.findByRole("heading", { name: /다가오는 일정/ })).toBeInTheDocument();
   expect(window.location.pathname).toBe("/my-schedule");
   expect(sessionStorage.getItem("oauth_state_google")).toBeNull();
   expect(sessionStorage.getItem("oauth_state_kakao")).toBeNull();
@@ -97,7 +98,6 @@ test("signup form enables submission after verification, matching password and p
   const submit = screen.getByRole("button", { name: "회원가입 하기" });
   expect(submit).toBeDisabled();
   userEvent.click(screen.getByRole("checkbox"));
-  userEvent.click(await screen.findByRole("button", { name: "확인하고 동의하기" }));
   expect(screen.getByRole("checkbox")).toBeChecked();
   expect(submit).toBeEnabled();
   userEvent.click(submit);

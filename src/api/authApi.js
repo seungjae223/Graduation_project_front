@@ -2,7 +2,23 @@ import api from "./api";
 import { USE_MOCK } from "../config/mockConfig";
 import { loginMock, signupMock } from "../mocks/authMock";
 import { ACCESS_TOKEN_KEY, clearAuthenticatedUserStorage } from "../utils/authStorage";
-import { notifyAuthChange } from "../utils/authState";
+import { getAuthSnapshot, notifyAuthChange } from "../utils/authState";
+
+const createResponseGuard = ({ signal, isCurrent } = {}) => {
+  notifyAuthChange();
+  const version = getAuthSnapshot().credentialVersion;
+  return () => {
+    notifyAuthChange();
+    if (signal?.aborted || (isCurrent && !isCurrent()) ||
+        getAuthSnapshot().credentialVersion !== version) {
+      const error = new Error("인증 요청이 취소되었습니다.");
+      error.code = "ERR_CANCELED";
+      throw error;
+    }
+  };
+};
+
+const requestConfig = (options = {}) => options.signal ? { signal: options.signal } : undefined;
 
 const extractToken = (response) => {
   const headers = response.headers || {};
@@ -143,7 +159,9 @@ const saveToken = (token, { persistent = true } = {}) => {
   return normalizedToken;
 };
 
-export const loginApi = async ({ email, password, keepLogin = true }) => {
+export const loginApi = async ({ email, password, keepLogin = true }, options = {}) => {
+  const assertCurrent = createResponseGuard(options);
+  assertCurrent();
   const normalizedEmail = normalizeEmail(email);
   if (USE_MOCK) {
     const result = loginMock({ email: normalizedEmail, keepLogin });
@@ -159,8 +177,11 @@ export const loginApi = async ({ email, password, keepLogin = true }) => {
     },
     {
       responseType: "text",
+      ...requestConfig(options),
     }
   );
+
+  assertCurrent();
 
   const token = extractToken(response);
   const cachedNickname = getCachedNickname(normalizedEmail);
@@ -201,7 +222,9 @@ export const loginApi = async ({ email, password, keepLogin = true }) => {
 
 export const logoutApi = clearAuthenticatedUserStorage;
 
-export const signupApi = async ({ email, password, nickname }) => {
+export const signupApi = async ({ email, password, nickname }, options = {}) => {
+  const assertCurrent = createResponseGuard(options);
+  assertCurrent();
   const normalizedEmail = normalizeEmail(email);
   const normalizedNickname = normalizeNickname(nickname);
   if (USE_MOCK) return signupMock({ email: normalizedEmail, nickname: normalizedNickname });
@@ -210,7 +233,9 @@ export const signupApi = async ({ email, password, nickname }) => {
     email: normalizedEmail,
     password,
     nickname: normalizedNickname,
-  });
+  }, requestConfig(options));
+
+  assertCurrent();
 
   // 회원가입 성공 후 nickname을 저장해야 로그인 후 마이페이지에서 바로 표시 가능
   saveUserCache({
@@ -221,7 +246,9 @@ export const signupApi = async ({ email, password, nickname }) => {
   return response.data;
 };
 
-export const getSocialAuthorizationApi = async (provider) => {
+export const getSocialAuthorizationApi = async (provider, options = {}) => {
+  const assertCurrent = createResponseGuard(options);
+  assertCurrent();
   if (!['kakao', 'google'].includes(provider)) {
     throw new Error("지원하지 않는 소셜 로그인입니다.");
   }
@@ -232,7 +259,8 @@ export const getSocialAuthorizationApi = async (provider) => {
     return { ...result, authenticated: true };
   }
 
-  const response = await api.get(`/api/auth/${provider}/authorize`);
+  const response = await api.get(`/api/auth/${provider}/authorize`, requestConfig(options));
+  assertCurrent();
   const authorizationUrl = response.data?.authorizationUrl;
   const state = response.data?.state;
 
@@ -243,7 +271,9 @@ export const getSocialAuthorizationApi = async (provider) => {
   return response.data;
 };
 
-export const completeSocialLoginApi = async ({ provider, code, state }) => {
+export const completeSocialLoginApi = async ({ provider, code, state }, options = {}) => {
+  const assertCurrent = createResponseGuard(options);
+  assertCurrent();
   if (!['kakao', 'google'].includes(provider)) {
     throw new Error("지원하지 않는 소셜 로그인입니다.");
   }
@@ -261,7 +291,9 @@ export const completeSocialLoginApi = async ({ provider, code, state }) => {
   const response = await api.post(`/api/auth/${provider}/login`, {
     code,
     state,
-  });
+  }, requestConfig(options));
+
+  assertCurrent();
 
   const token = saveToken(response.data?.token, { persistent: true });
   localStorage.setItem("tokenType", response.data?.tokenType || "Bearer");
@@ -270,20 +302,32 @@ export const completeSocialLoginApi = async ({ provider, code, state }) => {
   return { ...response.data, token };
 };
 
-export const sendEmailCodeApi = async (email) => {
+export const sendEmailCodeApi = async (email, options = {}) => {
+  const assertCurrent = createResponseGuard(options);
+  assertCurrent();
   const response = await api.post("/api/email/send", {
     email: normalizeEmail(email),
-  });
+  }, requestConfig(options));
+
+  assertCurrent();
 
   return response.data;
 };
 
-export const verifyEmailCodeApi = async ({ email, code }) => {
+export const verifyEmailCodeApi = async ({ email, code }, options = {}) => {
+  const assertCurrent = createResponseGuard(options);
+  assertCurrent();
   const response = await api.post("/api/email/verify", {
     email: normalizeEmail(email),
     code,
-  });
+  }, requestConfig(options));
 
+  assertCurrent();
+
+  const data = response.data;
+  if (!(typeof data === "string" && data.trim() === "인증 성공!") && data?.verified !== true) {
+    throw new Error("이메일 인증 결과를 확인하지 못했습니다. 인증번호를 다시 확인해주세요.");
+  }
   return response.data;
 };
 

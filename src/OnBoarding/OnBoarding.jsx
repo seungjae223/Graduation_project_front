@@ -20,7 +20,7 @@ const OnBoarding = () => {
         <h2>가고 싶은 곳만 묶으세요.</h2>
         <p>
           복잡한 여행 계획의 시작,
-          <br />
+          <br className="onboarding-copy-break" />{" "}
           장소 계획부터 시작해 보세요.
         </p>
       </div>

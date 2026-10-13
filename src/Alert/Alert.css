@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(15, 23, 42, 0.38);
+  background: var(--color-backdrop);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
@@ -17,10 +17,10 @@
   max-height: calc(100dvh - 40px);
   overflow-y: auto;
   border-radius: 26px;
-  background: #ffffff;
+  background: var(--color-surface);
   padding: 32px 22px 22px;
   text-align: center;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 24px 60px var(--color-shadow);
 }
 
 .alert-icon-wrap {
@@ -34,11 +34,11 @@
 }
 
 .alert-icon-wrap.blue {
-  background: #eaf7ff;
+  background: var(--color-accent-soft);
 }
 
 .alert-icon-wrap.red {
-  background: #fdeeef;
+  background: var(--color-danger-soft);
 }
 
 .alert-icon-image {
@@ -52,7 +52,7 @@
   font-size: 21px;
   font-weight: 900;
   line-height: 1.35;
-  color: #17212f;
+  color: var(--color-text-strong);
   word-break: keep-all;
 }
 
@@ -61,7 +61,7 @@
   font-size: 15px;
   font-weight: 500;
   line-height: 1.65;
-  color: #7c8aa0;
+  color: var(--color-text-muted);
   word-break: keep-all;
 }
 
@@ -107,20 +107,20 @@
 }
 
 .alert-btn.primary.blue {
-  background: #1da1f2;
-  color: #ffffff;
-  box-shadow: 0 8px 18px rgba(29, 161, 242, 0.2);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: 0 8px 18px var(--color-shadow);
 }
 
 .alert-btn.primary.red {
-  background: #d71919;
-  color: #ffffff;
-  box-shadow: 0 8px 18px rgba(215, 25, 25, 0.18);
+  background: var(--color-danger-fill);
+  color: var(--color-on-danger);
+  box-shadow: 0 8px 18px var(--color-shadow);
 }
 
 .alert-btn.secondary.gray {
-  background: #eef2f7;
-  color: #94a3b8;
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
 }
 
 .alert-btn-icon {
@@ -131,13 +131,21 @@
 
 .alert-trash-icon {
   fill: none;
-  stroke: #e5484d;
+  stroke: var(--color-danger);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .alert-btn:focus-visible {
-  outline: 3px solid rgba(29, 161, 242, 0.3);
+  outline: 3px solid var(--color-focus);
   outline-offset: 3px;
+}
+
+.alert-btn.primary.blue:hover {
+  background: var(--color-primary-hover);
+}
+
+.alert-btn.secondary.gray:hover {
+  background: var(--color-hover);
 }

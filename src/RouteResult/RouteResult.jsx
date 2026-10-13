@@ -1,5 +1,5 @@
 import { loadKakaoMapsScript } from "../utils/kakaoMapLoader";
-import { getApiErrorMessage as safeApiErrorMessage } from "../api/api";
+import { getPlaceTypeLabel } from "../utils/placeType";
 import { logSafeApiError } from "../utils/safeLog";
 import { isMapUrlForProvider } from "../utils/mapUrl";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -8,6 +8,7 @@ import {
   closestCenter,
   DndContext,
   PointerSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -16,97 +17,27 @@ import {
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../api/api";
 import useTripResult from "./useTripResult";
+import useResolvedMapCoordinates, { coordinateDayKey, mapVisitKey } from "./useResolvedMapCoordinates";
+import useSessionKey from "../utils/useSessionKey";
+import { getAuthSnapshot } from "../utils/authState";
 import { editDayOrder, sameOrder, visitKey } from "./temporaryOrder";
 import useMutationTask from "../utils/useMutationTask";
-import { getTripPlacesApi } from "../api/tripApi";
+import { getTripPlacesApi, updateTripPlaceOrderApi } from "../api/tripApi";
 import useModalFocus from "../utils/useModalFocus";
 import "./RouteResult.css";
 
 let mapsConfigured = false;
 
 const runtimeCoordinateCache = new Map();
+const coordinateRequests = new Map();
 const TIMELINE_ITEM_BUTTON_STYLE = { cursor: "pointer" };
-const DELETE_ROUTE_EVENT = "route-result-delete-schedule";
-
-
-const getApiErrorMessage = safeApiErrorMessage;
-
-const deleteTripById = async (tripId) => {
-  if (!tripId) {
-    throw new Error("삭제할 일정 정보를 찾지 못했어요.");
-  }
-
-  await api.delete(`/api/trips/${tripId}`);
-  return true;
-};
-
-const getDeleteEventDetail = (event) => {
-  if (!event || typeof event !== "object") {
-    return {};
-  }
-
-  return event.detail && typeof event.detail === "object" ? event.detail : {};
-};
-
-const getTripPlaceTargetFromDeleteDetail = (detail = {}) => {
-  const place =
-    detail.place ||
-    detail.item ||
-    detail.targetPlace ||
-    detail.selectedPlace ||
-    detail.tripPlace ||
-    {};
-
-  return {
-    tripPlaceId:
-      detail.tripPlaceId ??
-      detail.tripPlace?.id ??
-      place.tripPlaceId ??
-      place.id ??
-      "",
-    placeId:
-      detail.placeId ??
-      detail.place?.id ??
-      place.placeId ??
-      "",
-    day:
-      detail.day ??
-      detail.dayNumber ??
-      place.day ??
-      place.dayNumber ??
-      "",
-  };
-};
-
-const isPlaceDeleteDetail = (detail = {}) => {
-  const target = getTripPlaceTargetFromDeleteDetail(detail);
-
-  return Boolean(
-    detail.type === "place" ||
-      detail.deleteType === "place" ||
-      detail.mode === "place" ||
-      detail.place ||
-      detail.item ||
-      detail.targetPlace ||
-      detail.selectedPlace ||
-      target.tripPlaceId ||
-      target.placeId,
-  );
-};
-
-
-const deleteTripPlaceById = async () => {
-  throw new Error(
-    "현재 백엔드 Swagger에는 여행 장소 개별 삭제 API가 없습니다. 일정 전체 삭제만 가능합니다."
-  );
-};
-
 const ClockIcon = () => (
   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
     {" "}
@@ -148,42 +79,9 @@ const PinIcon = () => (
     />{" "}
   </svg>
 );
-const GearIcon = () => (
+const ExternalMapIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    {" "}
-    <path
-      d="M12 8.7A3.3 3.3 0 1 0 12 15.3A3.3 3.3 0 1 0 12 8.7Z"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    />{" "}
-    <path
-      d="M19 12C19 11.5 18.95 11 18.82 10.53L21 8.8L19.2 5.7L16.56 6.5C15.84 5.9 14.99 5.45 14.06 5.21L13.5 2.5H10.5L9.94 5.21C9.01 5.45 8.16 5.9 7.44 6.5L4.8 5.7L3 8.8L5.18 10.53C5.05 11 5 11.5 5 12C5 12.5 5.05 13 5.18 13.47L3 15.2L4.8 18.3L7.44 17.5C8.16 18.1 9.01 18.55 9.94 18.79L10.5 21.5H13.5L14.06 18.79C14.99 18.55 15.84 18.1 16.56 17.5L19.2 18.3L21 15.2L18.82 13.47C18.95 13 19 12.5 19 12Z"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-    />{" "}
-  </svg>
-);
-const LayersIcon = () => (
-  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    {" "}
-    <path
-      d="M12 5L19 9L12 13L5 9L12 5Z"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-    />{" "}
-    <path
-      d="M5 13L12 17L19 13"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-      strokeLinecap="round"
-    />{" "}
+    <path d="M14 4h6v6M20 4l-9 9M10 5H5v14h14v-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 const MemoInputIcon = () => (
@@ -775,7 +673,7 @@ const buildKakaoMapsPlaceUrl = (title = "", itemOrCoord = null) => {
 
   return `https://map.kakao.com/link/search/${encodeURIComponent(name)}`;
 };
-const buildKakaoMapsRouteUrl = (day) => {
+export const buildKakaoMapsRouteUrl = (day) => {
   const placeInfos = (day?.items || [])
     .map((item) => {
       const name = normalizeTitle(item.title);
@@ -792,7 +690,7 @@ const buildKakaoMapsRouteUrl = (day) => {
     return firstTitle ? buildKakaoMapsPlaceUrl(firstTitle) : "";
   }
   if (placeInfos.length === 1) {
-    return buildKakaoMapsPlaceUrl(placeInfos[0].name);
+    return buildKakaoMapsPlaceUrl(placeInfos[0].name, placeInfos[0]);
   }
   const movementType = (day?.items || []).every(
     (item, index, array) =>
@@ -808,7 +706,7 @@ const buildKakaoMapsRouteUrl = (day) => {
 const buildMapDataFromResolvedPoints = (sourceItems, resolvedPoints) => {
   const filteredPoints = filterResolvedPointsForMap(resolvedPoints);
   if (!filteredPoints.length) {
-    return { center: FALLBACK_CENTER, markers: [], lines: [] };
+    return { center: FALLBACK_CENTER, markers: [], lines: [], resolvedPoints: [] };
   }
   const colors = ["#22C55E", "#21A0F6", "#A45CFF", "#F59E0B", "#EF4444"];
   const markers = filteredPoints.map((point, index) => ({
@@ -833,6 +731,7 @@ const buildMapDataFromResolvedPoints = (sourceItems, resolvedPoints) => {
     });
   }
   return {
+    resolvedPoints: filteredPoints.map(point => ({ ...point, visitKey: mapVisitKey(sourceItems[point.sourceIndex], point.sourceIndex) })),
     center: { lat: filteredPoints[0].lat, lng: filteredPoints[0].lng },
     markers,
     lines,
@@ -843,7 +742,7 @@ const buildMapDataFromDay = (day, dayIndex) => {
   const points = sourceItems
     .map((item, index) => {
       const itemCoord = getCoordFromItem(item);
-      const staticCoord = getCoordByTitle(item.title);
+      const staticCoord = item.address || item.desc ? null : getCoordByTitle(item.title);
       const coord = itemCoord || staticCoord;
       if (!coord) return null;
       return {
@@ -862,12 +761,12 @@ const resolveMapDataForDay = async (day, dayIndex, resolveDynamicCoord) => {
     await Promise.all(
       sourceItems.map(async (item, index) => {
         const itemCoord = getCoordFromItem(item);
-        const staticCoord = getCoordByTitle(item.title);
+        const staticCoord = item.address || item.desc ? null : getCoordByTitle(item.title);
         const coord =
           itemCoord ||
           staticCoord ||
           (typeof resolveDynamicCoord === "function"
-            ? await resolveDynamicCoord(item.title)
+            ? await resolveDynamicCoord([normalizeTitle(item.title), item.address || item.desc].filter(Boolean).join(" "), item.address || item.desc || "")
             : null);
         if (!coord) return null;
         return {
@@ -883,7 +782,22 @@ const resolveMapDataForDay = async (day, dayIndex, resolveDynamicCoord) => {
   return buildMapDataFromResolvedPoints(sourceItems, resolvedPoints);
 };
 
-const resolveKakaoCoordinate = (kakao, title, placesService, geocoder) =>
+const resolveDayCoordinates = async (provider, day, index) => {
+  if (provider === "kakao") {
+    const kakao = await loadKakaoMapsScript();
+    const places = new kakao.maps.services.Places();
+    const geocoder = new kakao.maps.services.Geocoder();
+    return resolveMapDataForDay(day, index, (query, address) => resolveKakaoCoordinate(kakao, query, places, geocoder, address));
+  }
+  const apiKey = process.env.REACT_APP_GOOGLE_MAPS_BROWSER_KEY;
+  if (!apiKey) throw new Error("지도 준비를 완료하지 못했습니다.");
+  if (!mapsConfigured) { setOptions({ key: apiKey, v: "weekly" }); mapsConfigured = true; }
+  const { Geocoder } = await importLibrary("geocoding");
+  const geocoder = new Geocoder();
+  return resolveMapDataForDay(day, index, (query, address) => resolveGoogleCoordinate(window.google.maps, query, geocoder, address));
+};
+
+const resolveKakaoCoordinateRequest = (kakao, title, placesService, geocoder, address = "") =>
   new Promise((resolve) => {
     const keyword = normalizeTitle(title);
     if (!keyword) {
@@ -904,7 +818,7 @@ const resolveKakaoCoordinate = (kakao, title, placesService, geocoder) =>
         finish({ lat: Number(data[0].y), lng: Number(data[0].x) });
         return;
       }
-      geocoder.addressSearch(keyword, (addressData, addressStatus) => {
+      geocoder.addressSearch(address || keyword, (addressData, addressStatus) => {
         if (
           addressStatus === kakao.maps.services.Status.OK &&
           addressData?.[0]
@@ -919,7 +833,7 @@ const resolveKakaoCoordinate = (kakao, title, placesService, geocoder) =>
       });
     });
   });
-const resolveGoogleCoordinate = (gm, title, geocoder) =>
+const resolveGoogleCoordinateRequest = (gm, title, geocoder, address = "") =>
   new Promise((resolve) => {
     const keyword = normalizeTitle(title);
     if (!keyword) {
@@ -931,7 +845,7 @@ const resolveGoogleCoordinate = (gm, title, geocoder) =>
       resolve(runtimeCoordinateCache.get(cacheKey));
       return;
     }
-    geocoder.geocode({ address: keyword }, (results, status) => {
+    geocoder.geocode({ address: address || keyword }, (results, status) => {
       const isOk =
         status === "OK" ||
         status === gm.GeocoderStatus?.OK ||
@@ -960,6 +874,16 @@ const resolveGoogleCoordinate = (gm, title, geocoder) =>
       resolve(null);
     });
   });
+const sharedCoordinateRequest = (provider, title, lookup) => {
+  const key = getRuntimeCoordinateCacheKey(provider, title);
+  if (runtimeCoordinateCache.has(key)) return Promise.resolve(runtimeCoordinateCache.get(key));
+  if (coordinateRequests.has(key)) return coordinateRequests.get(key);
+  const request = lookup().finally(() => { if (coordinateRequests.get(key) === request) coordinateRequests.delete(key); });
+  coordinateRequests.set(key, request);
+  return request;
+};
+const resolveKakaoCoordinate = (kakao, title, placesService, geocoder, address) => sharedCoordinateRequest("kakao", title, () => resolveKakaoCoordinateRequest(kakao, title, placesService, geocoder, address));
+const resolveGoogleCoordinate = (gm, title, geocoder, address) => sharedCoordinateRequest("google", title, () => resolveGoogleCoordinateRequest(gm, title, geocoder, address));
 const STATIC_MAP_WIDTH = 640;
 const STATIC_MAP_HEIGHT = 320;
 const toStaticMarkerColor = (hex = "#21A0F6") => {
@@ -1074,7 +998,7 @@ const getDistanceKm = (from = {}, to = {}) => {
 };
 
 const formatStraightDistance = (distanceKm) => {
-  const value = Number(distanceKm);
+  const value = getNumberValue(distanceKm);
 
   if (!Number.isFinite(value)) {
     return "";
@@ -1092,12 +1016,21 @@ const getStraightDistanceText = (from, to) => {
 };
 
 const getTotalStraightDistanceKm = (items = []) => {
-  return items.reduce((sum, item, index) => {
-    if (index >= items.length - 1) return sum;
+  let total = 0;
+  for (let index = 0; index < items.length - 1; index++) {
+    const distance = getDistanceKm(items[index], items[index + 1]);
+    if (!Number.isFinite(distance)) return null;
+    total += distance;
+  }
+  return total;
+};
 
-    const distance = getDistanceKm(item, items[index + 1]);
-    return Number.isFinite(distance) ? sum + distance : sum;
-  }, 0);
+const refreshDayDistances = day => {
+  const items = day.items.map((item, index) => ({ ...item,
+    move: index === day.items.length - 1 ? "" : getStraightDistanceText(item, day.items[index + 1]),
+  }));
+  const distance = formatStraightDistance(getTotalStraightDistanceKm(items)).replace("직선거리 ", "");
+  return { ...day, items, totalDistance: distance || "거리 정보 없음", sectionDistance: distance ? `총 직선거리 ${distance}` : "직선거리 정보 없음" };
 };
 
 const getTripDaysCount = (trip = {}) => {
@@ -1169,6 +1102,7 @@ const normalizeServerTripPlace = (place = {}, fallbackDay = 1) => {
     departureTime: place.departureTime || "",
     stayDuration: place.stayDuration ?? place.stayMinutes ?? 0,
     isFixed: Boolean(place.isFixed || place.fixed),
+    isNextDay: Boolean(place.isNextDay),
     memo: place.memo || place.memoText || place.note || place.notes || "",
     mapProvider: normalizeMapProvider(place.mapProvider || place.provider || place.mapType),
     countryCode: normalizeCountryCode(place.countryCode || place.country || place.nationCode),
@@ -1233,15 +1167,9 @@ const buildDaysFromServerData = (trip, places = []) => {
       const displayTime =
         formatTimelineTime(place.arrivalTime, place.arrivalDayOffset) ||
         fixedTimeValue;
-      const isFixedSchedule = index !== 0 && Boolean(fixedTimeValue);
+      const isFixedSchedule = Boolean(place.isFixed);
 
-      const hasCoordinate =
-        Number.isFinite(Number(place.latitude)) &&
-        Number.isFinite(Number(place.longitude));
-
-      const placeCoordinate = hasCoordinate
-        ? { lat: place.latitude, lng: place.longitude }
-        : null;
+      const placeCoordinate = getCoordFromItem(place);
 
       const coordinateProvider = getMapProviderByCoordinate(placeCoordinate);
       const coordinateCountryCode = getCountryCodeByCoordinate(placeCoordinate);
@@ -1270,11 +1198,11 @@ const buildDaysFromServerData = (trip, places = []) => {
         title: place.placeName || "이름 없는 장소",
         desc: place.address || "",
         badge:
-          index === 0
+          place.isStartPoint
             ? "출발"
             : isFixedSchedule
               ? "고정 일정"
-              : place.placeType || "",
+              : getPlaceTypeLabel(place.placeType),
         move: isLast ? "" : getStraightDistanceText(place, nextPlace),
         moveType: "distance",
         lat: place.latitude,
@@ -1285,8 +1213,9 @@ const buildDaysFromServerData = (trip, places = []) => {
         placeType: place.placeType || "",
         day: place.day,
         visitOrder: place.visitOrder,
-        isStartPoint: index === 0,
+        isStartPoint: Boolean(place.isStartPoint),
         isFixed: isFixedSchedule,
+        isNextDay: place.isNextDay,
         isFixedTime: Boolean(fixedTimeValue),
         stayDuration: place.stayDuration,
         countryCode: coordinateCountryCode || place.countryCode,
@@ -1298,12 +1227,12 @@ const buildDaysFromServerData = (trip, places = []) => {
     const totalStraightDistance = getTotalStraightDistanceKm(items);
     const totalDistanceText = Number.isFinite(totalStraightDistance)
       ? formatStraightDistance(totalStraightDistance).replace("직선거리 ", "")
-      : "0km";
+      : "";
 
     days.push({
       label: `${i}일차`,
       totalDuration: "",
-      totalDistance: totalDistanceText || "0km",
+      totalDistance: totalDistanceText || "거리 정보 없음",
       sectionDistance: totalDistanceText
         ? `총 직선거리 ${totalDistanceText}`
         : "직선거리 정보 없음",
@@ -1348,7 +1277,7 @@ const RouteTabs = ({ resultDays, activeIndex, onChange, isStatic = false }) => {
 const SummaryCard = ({ day }) => (
   <section className="route-result-summary-card">
     {" "}
-    <div className="route-result-summary-item">
+    {!day.isCustomOrder && <><div className="route-result-summary-item">
       {" "}
       <div className="route-result-summary-icon">
         {" "}
@@ -1357,10 +1286,10 @@ const SummaryCard = ({ day }) => (
       <div className="route-result-summary-text">
         {" "}
         <span>출발 시간:</span>{" "}
-        <strong>{day.isCustomOrder ? "재계산 필요" : day.startTime || day.items?.[0]?.time || "시간 정보 없음"}</strong>{" "}
+        <strong>{day.startTime || day.items?.[0]?.time || "시간 정보 없음"}</strong>{" "}
       </div>{" "}
     </div>{" "}
-    <div className="route-result-summary-divider" />{" "}
+    <div className="route-result-summary-divider" /></>}
     <div className="route-result-summary-item">
       {" "}
       <div className="route-result-summary-icon">
@@ -1369,7 +1298,7 @@ const SummaryCard = ({ day }) => (
       </div>{" "}
       <div className="route-result-summary-text">
         {" "}
-        <span>장소 간 직선거리 합계:</span> <strong>{day.totalDistance}</strong>{" "}
+        <span>총 직선거리</span> <strong className="route-result-summary-distance">{day.totalDistance}</strong>{" "}
       </div>{" "}
     </div>{" "}
   </section>
@@ -1494,21 +1423,21 @@ const rebuildDayWithItems = (day, nextItems = []) => {
     ...item, move: index === edited.items.length - 1 ? "" : getStraightDistanceText(item, edited.items[index + 1]),
     moveType: "distance",
   }));
-  const distance = formatStraightDistance(getTotalStraightDistanceKm(items)).replace("직선거리 ", "");
-  return { ...edited, items, routeUrl: "", totalDistance: distance, sectionDistance: "총 직선거리 " + distance };
+  return refreshDayDistances({ ...edited, items, routeUrl: "" });
 };
 const SortableTimelineItem = ({
   id,
   children,
   isClickable,
   onClick,
-  onKeyDown,
   ariaLabel,
+  title,
 }) => {
   const {
     attributes,
     listeners,
     setNodeRef,
+    setActivatorNodeRef,
     transform,
     transition,
     isDragging,
@@ -1521,9 +1450,7 @@ const SortableTimelineItem = ({
         isDragging ? "is-dragging" : ""
       }`}
       role={isClickable ? "group" : undefined}
-      tabIndex={isClickable ? 0 : undefined}
       onClick={onClick}
-      onKeyDown={onKeyDown}
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
@@ -1533,12 +1460,12 @@ const SortableTimelineItem = ({
     >
       <button
         type="button"
+        ref={setActivatorNodeRef}
         className="route-result-drag-handle"
-        aria-label="일정 순서 변경"
+        {...attributes}
+        aria-label={`${title} 일정 순서 변경`}
         title="드래그해서 순서 변경"
         onClick={(event) => event.stopPropagation()}
-        onKeyDown={(event) => event.stopPropagation()}
-        {...attributes}
         {...listeners}
       >
         ⋮⋮
@@ -1549,7 +1476,7 @@ const SortableTimelineItem = ({
   );
 };
 
-const DetailSection = ({
+export const DetailSection = ({
   day,
   dayIndex,
   memoValues = {},
@@ -1569,7 +1496,8 @@ const DetailSection = ({
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
   const sortableIds = useMemo(
@@ -1583,15 +1511,6 @@ const DetailSection = ({
     }
   };
 
-  const handleKeyDown = (event, item) => {
-    if (!isClickable) return;
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      handleOpen(item);
-    }
-  };
-
   const handleMenuClick = (event, itemIndex) => {
     event.stopPropagation();
 
@@ -1600,23 +1519,17 @@ const DetailSection = ({
     }
   };
 
-  const [moveNotice, setMoveNotice] = useState("");
-  const buttons = useRef(new Map());
-  const pendingFocus = useRef(null);
-  useEffect(() => {
-    const pending = pendingFocus.current;
-    if (!pending) return;
-    const preferred = buttons.current.get(pending.id + ":" + pending.direction);
-    const fallback = buttons.current.get(pending.id + ":" + (pending.direction === "up" ? "down" : "up"));
-    (preferred && !preferred.disabled ? preferred : fallback)?.focus();
-    pendingFocus.current = null;
-  }, [day.items]);
-  const moveVisit = (item, index, direction) => {
-    const next = index + (direction === "up" ? -1 : 1);
-    if (next < 0 || next >= day.items.length) return;
-    pendingFocus.current = { id: visitKey(item), direction };
-    onReorderItems(dayIndex, arrayMove(day.items, index, next));
-    setMoveNotice(item.title + "을 " + (next + 1) + "번째 방문 위치로 이동했어요.");
+  const visitTitle = id => day.items[sortableIds.indexOf(id)]?.title || "방문 항목";
+  const accessibility = {
+    screenReaderInstructions: {
+      draggable: "Enter 또는 Space로 항목을 선택하고, 위·아래 방향키로 이동합니다. Enter 또는 Space로 놓고 Escape로 취소합니다.",
+    },
+    announcements: {
+      onDragStart: ({ active }) => `${visitTitle(active.id)} 선택.`,
+      onDragOver: ({ active, over }) => over ? `${visitTitle(active.id)}, ${sortableIds.indexOf(over.id) + 1}번째 위치.` : undefined,
+      onDragEnd: ({ active, over }) => over ? `${visitTitle(active.id)}, ${sortableIds.indexOf(over.id) + 1}번째 위치에 놓았습니다.` : "순서 변경을 취소했습니다.",
+      onDragCancel: () => "순서 변경을 취소했습니다.",
+    },
   };
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -1649,12 +1562,14 @@ const DetailSection = ({
         </div>
 
         <div className="route-result-item-body">
-          {item.time ? (
+          {item.time && (!item.needsRecalculation || item.fixedTime) ? (
             <div className="route-result-item-time">{item.time}</div>
           ) : null}
 
           <div className="route-result-item-title-row">
-            <h3>{item.title}</h3>
+            <h3>{isClickable ? <button type="button" className="route-result-place-action"
+              aria-label={`${normalizeTitle(item.title)} ${providerLabel}에서 열기`}
+              onClick={event => { event.stopPropagation(); handleOpen(item); }}>{item.title}</button> : item.title}</h3>
             {item.badge ? (
               <span className="route-result-item-badge">{item.badge}</span>
             ) : isMemoEditable && index === 1 ? (
@@ -1674,16 +1589,6 @@ const DetailSection = ({
             <p className="route-result-item-desc">{item.desc}</p>
           ) : null}
 
-          {isReorderable && <div className="route-order-buttons">
-            {["up", "down"].map(direction => <button key={direction} type="button"
-              ref={node => { const key = visitKey(item) + ":" + direction; if (node) buttons.current.set(key, node); else buttons.current.delete(key); }}
-              aria-label={item.title + " 방문 순서 " + (direction === "up" ? "위로 이동" : "아래로 이동")}
-              disabled={direction === "up" ? index === 0 : index === day.items.length - 1}
-              onKeyDown={event => event.stopPropagation()}
-              onClick={event => { event.stopPropagation(); moveVisit(item, index, direction); }}>
-              {direction === "up" ? "↑ 위로" : "↓ 아래로"}
-            </button>)}
-          </div>}
           <TimelineMemo
             memo={memo}
             onClick={
@@ -1717,11 +1622,7 @@ const DetailSection = ({
             key={`${day.label}-${item.title}-${index}`}
             className="route-result-timeline-item"
             role={isClickable ? "group" : undefined}
-            tabIndex={isClickable ? 0 : undefined}
             onClick={isClickable ? () => handleOpen(item) : undefined}
-            onKeyDown={
-              isClickable ? (event) => handleKeyDown(event, item) : undefined
-            }
             style={isClickable ? TIMELINE_ITEM_BUTTON_STYLE : undefined}
             aria-label={ariaLabel}
           >
@@ -1734,11 +1635,9 @@ const DetailSection = ({
         <SortableTimelineItem
           key={sortableId}
           id={sortableId}
+          title={item.title}
           isClickable={isClickable}
           onClick={isClickable ? () => handleOpen(item) : undefined}
-          onKeyDown={
-            isClickable ? (event) => handleKeyDown(event, item) : undefined
-          }
           ariaLabel={ariaLabel}
         >
           {renderTimelineItemContent(item, index)}
@@ -1748,7 +1647,6 @@ const DetailSection = ({
 
   return (
     <section className="route-result-detail-section">
-      {day.isCustomOrder && <p>임시 순서 변경 · 예상 시간 재계산 필요 · 서버에 저장되지 않음</p>}
       <div className="route-result-detail-header">
         <h2>상세 일정</h2>
         <span className="route-result-distance-pill">
@@ -1756,15 +1654,10 @@ const DetailSection = ({
         </span>
       </div>
 
-      <p role="status" aria-live="polite">{moveNotice}</p>
-      <p className="route-result-detail-sub">
-        {isReorderable
-          ? "카드를 드래그하거나 위·아래 이동 버튼으로 방문 순서를 조정할 수 있습니다. 거리는 직선거리 기준입니다."
-          : "동선 미리보기입니다. 거리는 장소 간 직선거리 기준입니다."}
-      </p>
 
       {isReorderable ? (
         <DndContext
+          accessibility={accessibility}
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
@@ -1782,14 +1675,30 @@ const DetailSection = ({
     </section>
   );
 };
-export const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
+const useMapDayData = (day, index) => {
+  // Times and memos do not change the map. Normalize coordinate aliases so
+  // publishing the same resolved position also leaves its viewport alone.
+  const input = JSON.stringify({ label: day?.label, items: getSourceItemsForDay(day, index).map((item, position) => ({
+    tripPlaceId: mapVisitKey(item, position), title: item.title,
+    address: item.address || item.desc || "",
+    ...getCoordFromItem(item),
+    moveType: item.moveType, moveTypeToNext: item.moveTypeToNext,
+  })) });
+  return useMemo(() => JSON.parse(input), [input]);
+};
+
+export const GoogleMapBox = ({ dayData, dayIndex, onOpenMap, coordinateOwner, onResolvedCoordinates }) => {
   const mapRef = useRef(null);
+  const mapInstance = useRef(null);
+  const mapDayData = useMapDayData(dayData, dayIndex);
+  const coordinateKey = coordinateDayKey(dayData, dayIndex);
+  const resolvedCallback = useRef(onResolvedCoordinates); resolvedCallback.current = onResolvedCoordinates;
   const onOpenMapRef = useRef(onOpenMap);
   onOpenMapRef.current = onOpenMap;
   const [mapError, setMapError] = useState("");
   const fallbackMapData = useMemo(
-    () => buildMapDataFromDay(dayData, dayIndex),
-    [dayData, dayIndex],
+    () => buildMapDataFromDay(mapDayData, dayIndex),
+    [mapDayData, dayIndex],
   );
   useEffect(() => {
     const apiKey = process.env.REACT_APP_GOOGLE_MAPS_BROWSER_KEY;
@@ -1831,9 +1740,9 @@ export const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
         const gm = window.google.maps;
         const geocoder = new Geocoder();
         const resolvedMapData = await resolveMapDataForDay(
-          dayData,
+          mapDayData,
           dayIndex,
-          (title) => resolveGoogleCoordinate(gm, title, geocoder),
+          (title, address) => resolveGoogleCoordinate(gm, title, geocoder, address),
         );
         if (!mounted || !mapRef.current) return;
         const mapData =
@@ -1841,7 +1750,11 @@ export const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
             ? resolvedMapData
             : fallbackMapData;
 
-        map = new Map(mapRef.current, {
+        resolvedCallback.current?.({ owner: coordinateOwner, dayIndex, key: coordinateKey, points: mapData.resolvedPoints });
+        if (mapInstance.current?.owner !== coordinateOwner || !mapInstance.current) {
+          mapInstance.current?.map.unbindAll?.();
+          mapRef.current.replaceChildren();
+          mapInstance.current = { owner: coordinateOwner, host: mapRef.current, map: new Map(mapRef.current, {
           center: mapData.center,
           zoom: 11,
           gestureHandling: "greedy",
@@ -1853,7 +1766,9 @@ export const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
           streetViewControl: false,
           fullscreenControl: false,
           mapTypeControl: false,
-        });
+          }) };
+        }
+        map = mapInstance.current.map;
         mapClickListener = map.addListener("click", () => {
           if (typeof onOpenMapRef.current === "function") {
             onOpenMapRef.current();
@@ -1891,8 +1806,11 @@ export const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
         } else if (mapData.markers.length === 1) {
           map.setCenter(mapData.center);
           map.setZoom(13);
+        } else {
+          map.setCenter(mapData.center);
+          map.setZoom(11);
         }
-        setMapError("");
+        setMapError(mapData.markers.length < mapDayData.items.length ? "일부 장소의 지도 위치를 확인하지 못했어요." : "");
       } catch (error) {
         if (!mounted) return;
         logSafeApiError(error, "RouteResult.jsx");
@@ -1910,48 +1828,42 @@ export const GoogleMapBox = ({ dayData, dayIndex, onOpenMap }) => {
       markers.forEach((marker) => marker.setMap(null));
       polylines.forEach((polyline) => polyline.setMap(null));
     };
-  }, [dayData, dayIndex, fallbackMapData]);
+  }, [mapDayData, dayIndex, fallbackMapData, coordinateOwner, coordinateKey]);
+  useEffect(() => () => {
+    mapInstance.current?.map.unbindAll?.();
+    mapInstance.current?.host.replaceChildren();
+    mapInstance.current = null;
+  }, []);
   return (
     <div className="route-map-mock">
       {" "}
       <div ref={mapRef} className="route-map-real" />{" "}
       {mapError && <div className="route-map-error-overlay">{mapError}</div>}{" "}
       <div className="route-map-controls" style={{ zIndex: 2 }}>
-        {" "}
-        <button
-          type="button"
-          className="route-map-control-btn"
-          onClick={onOpenMap}
-        >
-          {" "}
-          <GearIcon />{" "}
-        </button>{" "}
-        <button
-          type="button"
-          className="route-map-control-btn"
-          onClick={onOpenMap}
-        >
-          {" "}
-          <LayersIcon />{" "}
-        </button>{" "}
+        <button type="button" className="route-map-control-btn" onClick={onOpenMap} aria-label="구글맵에서 경로 열기"><ExternalMapIcon /></button>
       </div>{" "}
     </div>
   );
 };
-export const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
+export const KakaoMapBox = ({ dayData, dayIndex, onOpenMap, coordinateOwner, onResolvedCoordinates }) => {
   const mapRef = useRef(null);
+  const mapInstance = useRef(null);
+  const mapDayData = useMapDayData(dayData, dayIndex);
+  const coordinateKey = coordinateDayKey(dayData, dayIndex);
+  const resolvedCallback = useRef(onResolvedCoordinates); resolvedCallback.current = onResolvedCoordinates;
   const onOpenMapRef = useRef(onOpenMap);
   onOpenMapRef.current = onOpenMap;
   const [mapError, setMapError] = useState("");
 
   const fallbackMapData = useMemo(
-    () => buildMapDataFromDay(dayData, dayIndex),
-    [dayData, dayIndex]
+    () => buildMapDataFromDay(mapDayData, dayIndex),
+    [mapDayData, dayIndex]
   );
 
   useEffect(() => {
     let mounted = true;
     let map = null;
+    let sdk = null;
     let clickHandler = null;
     let resizeTimer = null;
     const markers = [];
@@ -1960,15 +1872,16 @@ export const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
     loadKakaoMapsScript()
       .then(async (kakao) => {
         if (!mounted || !mapRef.current) return;
+        sdk = kakao;
 
         const placesService = new kakao.maps.services.Places();
         const geocoder = new kakao.maps.services.Geocoder();
 
         const resolvedMapData = await resolveMapDataForDay(
-          dayData,
+          mapDayData,
           dayIndex,
-          (title) =>
-            resolveKakaoCoordinate(kakao, title, placesService, geocoder)
+          (title, address) =>
+            resolveKakaoCoordinate(kakao, title, placesService, geocoder, address)
         );
 
         if (!mounted || !mapRef.current) return;
@@ -1979,13 +1892,18 @@ export const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
             : fallbackMapData;
 
 
-        map = new kakao.maps.Map(mapRef.current, {
+        resolvedCallback.current?.({ owner: coordinateOwner, dayIndex, key: coordinateKey, points: mapData.resolvedPoints });
+        if (mapInstance.current?.owner !== coordinateOwner || !mapInstance.current) {
+          mapRef.current.replaceChildren();
+          mapInstance.current = { owner: coordinateOwner, host: mapRef.current, map: new kakao.maps.Map(mapRef.current, {
           center: new kakao.maps.LatLng(
             Number(mapData.center.lat),
             Number(mapData.center.lng)
           ),
           level: 7,
-        });
+          }) };
+        }
+        map = mapInstance.current.map;
 
         clickHandler = () => {
           if (typeof onOpenMapRef.current === "function") {
@@ -2080,9 +1998,12 @@ export const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
             )
           );
           map.setLevel(4);
+        } else {
+          map.setCenter(new kakao.maps.LatLng(Number(mapData.center.lat), Number(mapData.center.lng)));
+          map.setLevel(7);
         }
 
-        setMapError("");
+        setMapError(mapData.markers.length < mapDayData.items.length ? "일부 장소의 지도 위치를 확인하지 못했어요." : "");
       })
       .catch((error) => {
         if (!mounted) return;
@@ -2098,14 +2019,18 @@ export const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
         clearTimeout(resizeTimer);
       }
 
-      if (window.kakao?.maps && map && clickHandler) {
-        window.kakao.maps.event.removeListener(map, "click", clickHandler);
+      if (sdk?.maps && map && clickHandler) {
+        sdk.maps.event.removeListener(map, "click", clickHandler);
       }
 
       markers.forEach((marker) => marker.setMap(null));
       polylines.forEach((polyline) => polyline.setMap(null));
     };
-  }, [dayData, dayIndex, fallbackMapData]);
+  }, [mapDayData, dayIndex, fallbackMapData, coordinateOwner, coordinateKey]);
+  useEffect(() => () => {
+    mapInstance.current?.host.replaceChildren();
+    mapInstance.current = null;
+  }, []);
 
   return (
     <div className="route-map-mock">
@@ -2114,38 +2039,24 @@ export const KakaoMapBox = ({ dayData, dayIndex, onOpenMap }) => {
       {mapError && <div className="route-map-error-overlay">{mapError}</div>}
 
       <div className="route-map-controls" style={{ zIndex: 2 }}>
-        <button
-          type="button"
-          className="route-map-control-btn"
-          onClick={onOpenMap}
-        >
-          <GearIcon />
-        </button>
-
-        <button
-          type="button"
-          className="route-map-control-btn"
-          onClick={onOpenMap}
-        >
-          <LayersIcon />
-        </button>
+        <button type="button" className="route-map-control-btn" onClick={onOpenMap} aria-label="카카오맵에서 경로 열기"><ExternalMapIcon /></button>
       </div>
     </div>
   );
 };
-const PdfMapPreview = ({ dayData, dayIndex }) => {
-  const [imageFailed, setImageFailed] = useState(false);
+const PdfMapPreview = ({ dayData, dayIndex, mapProvider }) => {
   const mapData = useMemo(
     () => buildMapDataFromDay(dayData, dayIndex),
     [dayData, dayIndex],
   );
-  const staticMapUrl = useMemo(() => buildStaticMapUrl(mapData), [mapData]);
-  useEffect(() => {
-    setImageFailed(false);
-  }, [staticMapUrl]);
-  if (!staticMapUrl || imageFailed) {
+  const staticMapUrl = useMemo(() => mapProvider === "google" ? buildStaticMapUrl(mapData) : "", [mapData, mapProvider]);
+  if (mapProvider === "kakao") {
+    return <div className="route-map-static-preview" data-pdf-kakao-map={JSON.stringify(mapData)}
+      data-pdf-map-label={`${dayData.label} 경로 지도`} />;
+  }
+  if (!staticMapUrl) {
     return (
-      <div className="route-map-static-fallback">
+      <div className="route-map-static-fallback" data-pdf-map-error="true">
         {" "}
         PDF용 지도 이미지를 불러오지 못했어요.{" "}
       </div>
@@ -2161,7 +2072,6 @@ const PdfMapPreview = ({ dayData, dayIndex }) => {
         crossOrigin="anonymous"
         loading="eager"
         data-pdf-asset="true"
-        onError={() => setImageFailed(true)}
       />{" "}
     </div>
   );
@@ -2176,6 +2086,8 @@ const RouteDayContent = ({
   onOpenPlaceMap,
   onOpenMemo,
   onReorderItems,
+  coordinateOwner,
+  onResolvedCoordinates,
 }) => {
   return (
     <div className="route-result-content">
@@ -2184,18 +2096,22 @@ const RouteDayContent = ({
       <section className="route-result-map-section">
         {" "}
         {useStaticMap ? (
-          <PdfMapPreview dayData={day} dayIndex={dayIndex} />
+          <PdfMapPreview dayData={day} dayIndex={dayIndex} mapProvider={mapProvider} />
         ) : mapProvider === "kakao" ? (
           <KakaoMapBox
             dayData={day}
             dayIndex={dayIndex}
             onOpenMap={onOpenRouteMap}
+            coordinateOwner={coordinateOwner}
+            onResolvedCoordinates={onResolvedCoordinates}
           />
         ) : (
           <GoogleMapBox
             dayData={day}
             dayIndex={dayIndex}
             onOpenMap={onOpenRouteMap}
+            coordinateOwner={coordinateOwner}
+            onResolvedCoordinates={onResolvedCoordinates}
           />
         )}{" "}
       </section>{" "}
@@ -2215,6 +2131,7 @@ const RouteDayContent = ({
 function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const accountKey = useSessionKey();
   const [searchParams] = useSearchParams();
   const routeId = searchParams.get("id") || initialSavedRoute?.id || null;
   const mockMode = searchParams.get("mock");
@@ -2228,96 +2145,17 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   const currentRoute = useRef(routeId); currentRoute.current = routeId;
   const queryResult = useTripResult(routeId, isDomesticMock || isOverseasMock);
   const serverTrip = queryResult.trip;
-  const [serverTripPlaces, setServerTripPlaces] = useState([]);
   const isLoading = queryResult.status === "loading";
-  useEffect(() => {
+  const serverTripPlaces = useMemo(() => {
     const timelines = queryResult.timelines;
-    setServerTripPlaces(queryResult.places.map(place => {
+    return queryResult.places.map(place => {
       const timeline = timelines[place.day]?.items?.find(item =>
         Number(item.visitOrder) === Number(place.visitOrder));
-      return { ...place, ...(timeline || {}), fixedArrivalTime: place.isFixed ? place.arrivalTime : "", fixedArrivalDayOffset: place.arrivalDayOffset, id: place.id,
+      return { ...place, ...(timeline || {}), fixedArrivalTime: place.isFixed ? place.arrivalTime : "", fixedArrivalDayOffset: place.isNextDay ? 1 : 0, id: place.id,
         tripPlaceId: place.tripPlaceId, placeId: place.placeId, day: place.day };
-    }));
+    });
   }, [queryResult.places, queryResult.timelines]);
-  useEffect(() => {
-    if (isEmbedded) return undefined;
 
-    const handleDeleteSchedule = async (event) => {
-      const detail = getDeleteEventDetail(event);
-
-      const targetRouteId =
-        detail.tripId ||
-        detail.routeId ||
-        detail.scheduleId ||
-        routeId ||
-        serverTrip?.id ||
-        savedRoute?.id;
-
-      if (!targetRouteId) {
-        setPageNotice("삭제할 일정 정보를 찾지 못했어요.");
-        return;
-      }
-
-      const shouldDeletePlace = isPlaceDeleteDetail(detail);
-      const { tripPlaceId, placeId, day } =
-        getTripPlaceTargetFromDeleteDetail(detail);
-
-      try {
-        if (shouldDeletePlace) {
-          await deleteTripPlaceById({
-            tripId: targetRouteId,
-            tripPlaceId,
-            placeId,
-            day,
-          });
-
-          setServerTripPlaces((prevPlaces) =>
-            prevPlaces.filter((place) => {
-              const placeKeys = [
-                place.id,
-                place.tripPlaceId,
-                place.placeId,
-              ].map((value) => String(value || ""));
-
-              return (
-                !placeKeys.includes(String(tripPlaceId || "")) &&
-                !placeKeys.includes(String(placeId || ""))
-              );
-            }),
-          );
-
-          return;
-        }
-
-        await deleteTripById(targetRouteId);
-
-        navigate("/my-schedule", { replace: true });
-      } catch (error) {
-        logSafeApiError(error, "RouteResult.jsx");
-
-        setPageNotice(
-          getApiErrorMessage(
-            error,
-            shouldDeletePlace
-              ? "장소 삭제에 실패했습니다."
-              : "일정 삭제에 실패했습니다.",
-          ),
-        );
-      }
-    };
-
-    window.addEventListener(DELETE_ROUTE_EVENT, handleDeleteSchedule);
-
-    return () => {
-      window.removeEventListener(DELETE_ROUTE_EVENT, handleDeleteSchedule);
-    };
-  }, [
-    routeId,
-    savedRoute?.id,
-    serverTrip?.id,
-    navigate,
-    isEmbedded,
-  ]);
 
   const resultDays = useMemo(() => {
     if (isOverseasMock) {
@@ -2331,7 +2169,8 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     return buildDaysFromServerData(serverTrip, serverTripPlaces);
   }, [isOverseasMock, isDomesticMock, serverTrip, serverTripPlaces]);
   const [orderEdits, setOrderEdits] = useState({ tripId: routeId, days: {} });
-  useEffect(() => { setOrderEdits({ tripId: routeId, days: {} }); }, [routeId]);
+  const lastReorderHandle = useRef(null);
+  useEffect(() => { setOrderEdits({ tripId: routeId, days: {} }); }, [routeId, accountKey]);
   const displayResultDays = useMemo(() => resultDays.map((day, index) => {
     const keys = orderEdits.tripId === routeId ? orderEdits.days[index] : null;
     if (!keys) return day;
@@ -2347,7 +2186,9 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     }
   }, [activeDayIndex, displayResultDays.length]);
 
-  const activeDay = displayResultDays[activeDayIndex] || displayResultDays[0];
+  const coordinateOwner = `${accountKey}:${routeId}:${serverTrip?.startDate || ""}:${serverTrip?.endDate || ""}`;
+  const { days: resolvedDays, publish: publishCoordinates } = useResolvedMapCoordinates(coordinateOwner, displayResultDays, refreshDayDistances);
+  const activeDay = resolvedDays[activeDayIndex] || resolvedDays[0];
   const [memoValues, setMemoValues] = useState({});
   const [memoModal, setMemoModal] = useState({
     isOpen: false,
@@ -2355,6 +2196,10 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     itemIndex: null,
     value: "",
   });
+  useEffect(() => {
+    setMemoValues({});
+    setMemoModal({ isOpen: false, dayIndex: null, itemIndex: null, value: "" });
+  }, [routeId, accountKey]);
 
   const closeMemoModal = () => {
     if (memoTask.status === "running") return;
@@ -2375,7 +2220,8 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     setMemoModal((prev) => ({ ...prev, value }));
   };
   const memoItem = displayResultDays[memoModal.dayIndex]?.items?.[memoModal.itemIndex];
-  const memoTask = useMutationTask(String(routeId) + ":" + (memoItem?.tripPlaceId ?? memoItem?.id));
+  const memoTask = useMutationTask(accountKey + ":" + String(routeId) + ":" + (memoItem?.tripPlaceId ?? memoItem?.id));
+  const orderTask = useMutationTask(accountKey + ":" + String(routeId) + ":order");
   const handleSaveMemo = async () => {
     if (!memoItem || memoTask.blocked) return;
     const targetTrip = routeId || serverTrip?.id;
@@ -2390,20 +2236,47 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
         const places = await getTripPlacesApi(targetTrip);
         const updated = places.find(place => String(place.tripPlaceId ?? place.id) === String(targetId));
         if (!updated || updated.memo !== submitted) throw new Error("메모 확인 실패");
-        if (String(currentRoute.current) !== String(targetTrip)) return;
+        if (String(currentRoute.current) !== String(targetTrip) || getAuthSnapshot().accountKey !== accountKey) return;
         setMemoValues(previous => ({ ...previous, [key]: updated.memo }));
-        setServerTripPlaces(previous => previous.map(place => String(place.tripPlaceId ?? place.id) === String(targetId) ? { ...place, memo: updated.memo } : place));
       },
       { failure: "메모를 저장하지 못했어요. 입력은 유지됩니다.", success: "메모를 저장하고 최신 내용을 확인했어요.", refreshFailure: "메모는 저장됐지만 최신 내용을 확인하지 못했어요." }
     );
   };
   const handleReorderItems = (dayIndex, nextItems) => {
+    if (orderTask.blocked || memoTask.blocked) return;
+    if (nextItems.some((item, index) => item.isStartPoint && index !== 0)) {
+      setPageNotice("출발 장소는 첫 번째 방문 순서로 유지해주세요.");
+      return;
+    }
+    setPageNotice("");
+    orderTask.reset();
     setOrderEdits(previous => {
       const days = previous.tripId === routeId ? { ...previous.days } : {};
       if (sameOrder(resultDays[dayIndex].items, nextItems)) delete days[dayIndex];
       else days[dayIndex] = nextItems.map(visitKey);
       return { tripId: routeId, days };
     });
+  };
+  const handleSaveOrder = async () => {
+    if (!routeId || orderTask.blocked || memoTask.blocked || !activeDay?.isCustomOrder) return;
+    const targetTrip = routeId;
+    const dayIndex = activeDayIndex;
+    const ids = activeDay.items.map(item => item.tripPlaceId ?? item.id);
+    await orderTask.run(
+      () => updateTripPlaceOrderApi({ tripId: targetTrip, day: dayIndex + 1, tripPlaceIds: ids, startTime: "10:00" }),
+      async () => {
+        const result = await queryResult.refreshDayOrder(dayIndex + 1, ids);
+        if (String(currentRoute.current) !== String(targetTrip) || getAuthSnapshot().accountKey !== accountKey) return;
+        setOrderEdits(previous => {
+          const days = { ...previous.days }; delete days[dayIndex];
+          return { tripId: targetTrip, days };
+        });
+        return result;
+      },
+      { failure: "방문 순서를 저장하지 못했어요. 출발지와 고정 시간을 확인해주세요.",
+        success: "방문 순서를 저장하고 시간을 다시 계산했어요.",
+        refreshFailure: "방문 순서는 저장됐지만 최신 일정 확인에 실패했어요." }
+    );
   };
   const hasTemporaryOrder = displayResultDays.some(day => day.isCustomOrder);
   useEffect(() => {
@@ -2427,6 +2300,19 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     isDomesticMock,
     isOverseasMock,
   ]);
+
+  useEffect(() => {
+    if (queryResult.status !== "success") return undefined;
+    let current = true;
+    displayResultDays.forEach((day, index) => {
+      if (day.items.every(item => getCoordFromItem(item))) return;
+      const key = coordinateDayKey(day, index);
+      void resolveDayCoordinates(getMapProviderForDay(day, index, tripLevelMapProvider), day, index)
+        .then(data => { if (current) publishCoordinates({ owner: coordinateOwner, dayIndex: index, key, points: data.resolvedPoints }); })
+        .catch(error => { if (current) logSafeApiError(error, "RouteResult coordinates"); });
+    });
+    return () => { current = false; };
+  }, [coordinateOwner, displayResultDays, queryResult.status, tripLevelMapProvider, publishCoordinates]);
 
   const activeMapProvider = useMemo(
     () => getMapProviderForDay(activeDay, activeDayIndex, tripLevelMapProvider),
@@ -2501,7 +2387,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   if (isLoading) {
     return (
       <div className={`route-result-page ${isEmbedded ? "embedded" : ""}`}>
-        <div className="route-result-screen" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#6b7788' }}>
+        <div className="route-result-screen" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'var(--color-text-muted)' }}>
           <p>일정 정보를 불러오는 중입니다...</p>
         </div>
       </div>
@@ -2525,12 +2411,14 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
   return (
     <div
       id={!isEmbedded ? "route-result-pdf" : undefined}
-      data-export-ready={queryResult.status === "success" && Object.values(queryResult.timelines).every(timeline => timeline.status === "success")}
-      data-export-context={String(routeId) + ":" + activeDayIndex + ":" + JSON.stringify(displayResultDays.map(day => ({ temporary: day.isCustomOrder, items: day.items.map(item => [visitKey(item), item.time, item.departureTime]) })))}
+      data-export-ready={queryResult.status === "success" && !hasTemporaryOrder && !orderTask.blocked && Object.values(queryResult.timelines).every(timeline => timeline.status === "success") && resolvedDays.every(day => day.items.every(item => getCoordFromItem(item)))}
+      data-export-context={String(routeId) + ":" + activeDayIndex + ":" + JSON.stringify(resolvedDays.map(day => ({ temporary: day.isCustomOrder, items: day.items.map(item => [visitKey(item), item.time, item.departureTime, item.lat, item.lng]) })))}
       className={`route-result-page ${isEmbedded ? "embedded" : ""}`}
     >
       {" "}
-      <div className="route-result-screen">
+      <div className="route-result-screen" onFocusCapture={event => {
+        if (event.target.classList.contains("route-result-drag-handle")) lastReorderHandle.current = event.target;
+      }}>
         {" "}
         <RouteTabs
           resultDays={displayResultDays}
@@ -2551,15 +2439,23 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
           memoValues={memoValues}
           onOpenRouteMap={handleOpenRouteMap}
           onOpenPlaceMap={handleOpenPlaceMap}
-          onOpenMemo={handleOpenMemo}
-          onReorderItems={handleReorderItems}
+          onOpenMemo={orderTask.blocked ? undefined : handleOpenMemo}
+          onReorderItems={orderTask.blocked || memoTask.blocked ? undefined : handleReorderItems}
+          coordinateOwner={coordinateOwner}
+          onResolvedCoordinates={publishCoordinates}
         />{" "}
+      {activeDay?.isCustomOrder && <div className="route-order-reset">
+        {routeId && <button type="button" disabled={orderTask.blocked || memoTask.blocked} onClick={handleSaveOrder}>순서 저장</button>}
+        <button type="button" disabled={orderTask.blocked} onClick={() => {
+          setOrderEdits(previous => { const days = { ...previous.days }; delete days[activeDayIndex]; return { tripId: routeId, days }; });
+          if (lastReorderHandle.current?.isConnected) lastReorderHandle.current.focus();
+        }}>저장된 순서로 되돌리기</button>
+      </div>}
+      {orderTask.status !== "idle" && <div className="route-query-status" role={orderTask.status === "success" || orderTask.status === "running" ? "status" : "alert"}>
+        <p>{orderTask.status === "running" ? "방문 순서를 저장하는 중입니다..." : orderTask.message}</p>
+        {["refreshError", "unknown"].includes(orderTask.status) && <button type="button" onClick={orderTask.retryRead}>저장된 순서 다시 확인</button>}
+      </div>}
       </div>{" "}
-      {activeDay?.isCustomOrder && <section className="route-query-status" role="status">
-        <p>임시 순서 변경 중이에요. 서버에는 저장되지 않으며, 새로고침하거나 화면을 이동하면 저장된 순서로 돌아갑니다.</p>
-        <p>예상 시간은 재계산이 필요합니다. 고정 시간의 준수 여부와 시간 충돌은 확인되지 않았습니다.</p>
-        <button type="button" onClick={() => setOrderEdits(previous => { const days = { ...previous.days }; delete days[activeDayIndex]; return { tripId: routeId, days }; })}>저장된 순서로 되돌리기</button>
-      </section>}
       {pageNotice && <p className="route-query-status" role="status">{pageNotice}</p>}
       <MemoModal
         isOpen={memoModal.isOpen}
@@ -2572,7 +2468,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
       {!isEmbedded && (
         <div className="route-result-pdf-root" aria-hidden="true">
           {" "}
-          {displayResultDays.map((day, index) => (
+          {resolvedDays.map((day, index) => (
             <section
               key={`${day.label}-${index}`}
               className="route-result-pdf-day"

@@ -10,6 +10,7 @@ test("rejected page chunk displays recovery while the shell remains visible", as
   expect(await screen.findByRole("alert")).toHaveTextContent("화면을 불러오지 못했어요");
   expect(screen.getByText("헤더")).toBeVisible();
   expect(screen.getByRole("button", { name: "화면 다시 불러오기" })).toBeEnabled();
+  expect(screen.getByRole("link", { name: "홈으로 돌아가기" })).toHaveAttribute("href", "/home");
   expect(log).toHaveBeenCalled();
   log.mockRestore();
 });

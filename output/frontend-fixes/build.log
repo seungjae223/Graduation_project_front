@@ -1,0 +1,131 @@
+Creating an optimized production build...
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Compiled with warnings.
+
+[eslint] 
+src\Admin\AdminFooter\AdminFooter.jsx
+  Line 14:6:  React Hook useMemo has an unnecessary dependency: 'location.search'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\Homepage\PopularAll.jsx
+  Line 167:9:  The 'places' logical expression could make the dependencies of useMemo Hook (at line 176) change on every render. Move it inside the useMemo callback. Alternatively, wrap the initialization of 'places' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+src\Recommend\Total.jsx
+  Line 2:10:   'logSafeApiError' is defined but never used                                                                                                                                                                                          no-unused-vars
+  Line 3:17:   'useEffect' is defined but never used                                                                                                                                                                                                no-unused-vars
+  Line 20:7:   'getPlaceArray' is assigned a value but never used                                                                                                                                                                                   no-unused-vars
+  Line 37:7:   'getIntroText' is assigned a value but never used                                                                                                                                                                                    no-unused-vars
+  Line 108:7:  'getFolderArray' is assigned a value but never used                                                                                                                                                                                  no-unused-vars
+  Line 123:7:  'getFolderId' is assigned a value but never used                                                                                                                                                                                     no-unused-vars
+  Line 127:7:  'getSavedPlaceId' is assigned a value but never used                                                                                                                                                                                 no-unused-vars
+  Line 140:7:  'getFolderPlacesUrl' is assigned a value but never used                                                                                                                                                                              no-unused-vars
+  Line 144:7:  'getFolderPlaceDeleteUrl' is assigned a value but never used                                                                                                                                                                         no-unused-vars
+  Line 150:7:  'registerPlace' is assigned a value but never used                                                                                                                                                                                   no-unused-vars
+  Line 156:7:  'getErrorMessage' is assigned a value but never used                                                                                                                                                                                 no-unused-vars
+  Line 174:9:  The 'places' logical expression could make the dependencies of useMemo Hook (at line 190) change on every render. Move it inside the useMemo callback. Alternatively, wrap the initialization of 'places' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+src\SearchPopup\SearchPop.jsx
+  Line 156:9:  The 'places' logical expression could make the dependencies of useMemo Hook (at line 182) change on every render. Move it inside the useMemo callback. Alternatively, wrap the initialization of 'places' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+src\Search\Search.jsx
+  Line 275:6:  React Hook useEffect has a missing dependency: 'search'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 278:6:  React Hook useEffect has a missing dependency: 'recent'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\Search\useServerSearch.js
+  Line 12:111:  The ref value 'version.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'version.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+File sizes after gzip:
+
+  386.96 kB (+4.35 kB)  build\static\js\main.990dd677.js
+  24.3 kB               build\static\js\96.f6f8126d.chunk.js
+  16.81 kB              build\static\js\661.3414ceb3.chunk.js
+  16.07 kB              build\static\js\58.7d3a7143.chunk.js
+  11.24 kB              build\static\js\514.d0dcc4e4.chunk.js
+  11.22 kB (+292 B)     build\static\js\705.231100cf.chunk.js
+  11.17 kB (+812 B)     build\static\js\675.431ab22a.chunk.js
+  9.24 kB (+580 B)      build\static\css\main.515cb258.css
+  8.29 kB (+837 B)      build\static\js\645.fe193477.chunk.js
+  7.18 kB (+700 B)      build\static\js\321.2130e23c.chunk.js
+  6.1 kB                build\static\js\129.f9d3b932.chunk.js
+  6 kB                  build\static\js\795.d0a510da.chunk.js
+  5.51 kB (+2.27 kB)    build\static\js\513.a5005a15.chunk.js
+  5.48 kB               build\static\js\131.83f53427.chunk.js
+  5.36 kB               build\static\css\96.d8ce949f.chunk.css
+  5.16 kB (+1.04 kB)    build\static\js\278.7442d4cf.chunk.js
+  4.63 kB (+482 B)      build\static\js\109.cd4ab018.chunk.js
+  4.17 kB (+615 B)      build\static\js\686.b738b665.chunk.js
+  3.94 kB (+913 B)      build\static\js\718.32acf340.chunk.js
+  3.68 kB (+1.58 kB)    build\static\js\296.a43d8f6d.chunk.js
+  3.65 kB               build\static\css\690.94fb8058.chunk.css
+  3.63 kB (+922 B)      build\static\js\613.b01124b3.chunk.js
+  3.51 kB               build\static\js\199.b8aad067.chunk.js
+  3.23 kB (+743 B)      build\static\js\821.1e4ffcd2.chunk.js
+  3.15 kB               build\static\css\705.08ae4388.chunk.css
+  3.14 kB               build\static\css\795.d9640803.chunk.css
+  3.08 kB (+166 B)      build\static\css\321.0f978330.chunk.css
+  2.97 kB               build\static\css\661.9451e66b.chunk.css
+  2.96 kB               build\static\css\131.ac51e616.chunk.css
+  2.92 kB               build\static\css\406.6ffd90bf.chunk.css
+  2.88 kB               build\static\js\406.056dba99.chunk.js
+  2.77 kB               build\static\css\514.6f5b70b7.chunk.css
+  2.74 kB (+523 B)      build\static\js\741.5452104e.chunk.js
+  2.57 kB               build\static\js\690.22dc202e.chunk.js
+  2.41 kB (+488 B)      build\static\js\23.930d05b3.chunk.js
+  2.37 kB (+231 B)      build\static\css\278.a34ac1fa.chunk.css
+  2.3 kB                build\static\js\721.f5f50900.chunk.js
+  2.28 kB               build\static\css\721.4ce2d08e.chunk.css
+  2.18 kB               build\static\js\782.0d8172cf.chunk.js
+  1.72 kB               build\static\js\206.bfa153a5.chunk.js
+  1.53 kB (+92 B)       build\static\css\109.ab83f1c2.chunk.css
+  1.39 kB               build\static\css\296.9bc54284.chunk.css
+  1.3 kB (-2 B)         build\static\css\675.dd668603.chunk.css
+  1.3 kB (-2 B)         build\static\css\821.dd668603.chunk.css
+  1.22 kB               build\static\css\741.7af0e374.chunk.css
+  1.2 kB (+43 B)        build\static\css\513.898808a1.chunk.css
+  1.19 kB               build\static\css\50.a4798179.chunk.css
+  1.19 kB               build\static\css\689.a4798179.chunk.css
+  1.18 kB (+31 B)       build\static\css\613.40133c5c.chunk.css
+  1.1 kB                build\static\css\199.944d62bd.chunk.css
+  1.08 kB (-1.93 kB)    build\static\css\645.db2ee81c.chunk.css
+  897 B (+30 B)         build\static\css\23.0b3b417b.chunk.css
+  875 B (+38 B)         build\static\css\718.2d3a4922.chunk.css
+  179 B                 build\static\js\689.6aa32f33.chunk.js
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  npm install -g serve
+  serve -s build
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+
