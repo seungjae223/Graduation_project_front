@@ -56,7 +56,7 @@ const FOCUSABLE_SELECTOR = [
 
 const getFocusableElements = (dialog) => {
   return Array.from(dialog?.querySelectorAll(FOCUSABLE_SELECTOR) || []).filter(
-    (element) => !element.closest('[hidden], [aria-hidden="true"]') && getComputedStyle(element).display !== "none" && getComputedStyle(element).visibility !== "hidden"
+    (element) => !element.disabled && !element.closest('[hidden], [aria-hidden="true"]') && getComputedStyle(element).display !== "none" && getComputedStyle(element).visibility !== "hidden"
   );
 };
 
@@ -68,6 +68,7 @@ export default function useModalFocus({
 }) {
   const dialogRef = useRef(null);
   const previousFocusRef = useRef(null);
+  const tokenRef = useRef(null);
   const onCloseRef = useRef(onClose);
   const canCloseRef = useRef(canClose);
 
@@ -80,6 +81,7 @@ export default function useModalFocus({
     const dialog = dialogRef.current;
     previousFocusRef.current = document.activeElement;
     const token = {};
+    tokenRef.current = token;
     modals.push(token);
     if (modals.length === 1) followVisualViewport();
     const unlock = lockScroll ? lockDocument(token) : () => {};
@@ -138,11 +140,22 @@ export default function useModalFocus({
       const wasTop = modals[modals.length - 1] === token;
       const index = modals.indexOf(token);
       if (index >= 0) modals.splice(index, 1);
+      if (tokenRef.current === token) tokenRef.current = null;
       if (!modals.length) releaseVisualViewport?.();
       unlock();
       if (wasTop && previousFocusRef.current?.isConnected) previousFocusRef.current.focus?.({ preventScroll: true });
     };
   }, [lockScroll, open]);
+
+  // A disabled/removed submit control can silently leave focus on the body.
+  // Keep the current top dialog in control as its async content changes.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!open || !dialog || modals[modals.length - 1] !== tokenRef.current) return;
+    const active = document.activeElement;
+    if (dialog.contains(active) && !active.disabled && !active.closest('[hidden], [aria-hidden="true"]')) return;
+    (getFocusableElements(dialog)[0] || dialog).focus({ preventScroll: true });
+  });
 
   return dialogRef;
 }

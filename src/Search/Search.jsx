@@ -15,7 +15,7 @@ import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
 
 import { getApiErrorMessage } from "../api/api";
-import { getPaginationItems } from "../utils/pagination";
+import { getPageNumberGroup } from "../utils/pagination";
 import { filterSearchPlaces, getSearchRegions, requireSearchPlaces, SEARCH_PAGE_SIZE } from "./searchCatalog";
 
 
@@ -404,9 +404,13 @@ function Search() {
           </button>)}
         </div>
         {totalPages > 1 && <nav className="search-pagination" aria-label="장소 목록 페이지">
-          <button type="button" disabled={currentPage === 1} onClick={() => changePage(currentPage - 1)}>이전</button>
-          {getPaginationItems(currentPage, totalPages).map(page => typeof page === "number" ? <button type="button" key={page} aria-label={page + "페이지"} aria-current={page === currentPage ? "page" : undefined} onClick={() => changePage(page)}>{page}</button> : <span key={page} aria-hidden="true">…</span>)}
-          <button type="button" disabled={currentPage === totalPages} onClick={() => changePage(currentPage + 1)}>다음</button>
+          <div className="search-pagination-numbers">
+            {getPageNumberGroup(currentPage, totalPages).map(page => <button type="button" key={page} aria-label={page + "페이지"} aria-current={page === currentPage ? "page" : undefined} onClick={() => changePage(page)}>{page}</button>)}
+          </div>
+          <div className="search-pagination-navigation">
+            <button type="button" disabled={currentPage === 1} onClick={() => changePage(currentPage - 1)}>이전</button>
+            <button type="button" disabled={currentPage === totalPages} onClick={() => changePage(currentPage + 1)}>다음</button>
+          </div>
         </nav>}
       </>}
     </section>

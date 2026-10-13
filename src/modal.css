@@ -1,0 +1,255 @@
+/* Shared dialog constraints take precedence over lazy-loaded page styles. */
+html :is(
+  .alert-modal, .input-dialog, .login-alert-sheet, .signup-alert-card,
+  .signup-complete-modal, .inquiry-success-modal-box, .admin-success-modal,
+  .route-complete-modal, .share-modal-sheet, .folder-select-modal,
+  .folder-create-modal, .start-place-modal, .favorite-place-modal,
+  .fix-point-modal, .route-result-memo-modal, .location-permission-modal,
+  .privacy-modal
+) {
+  width: min(92vw, var(--dialog-width, var(--modal-width)));
+  max-width: min(92vw, var(--dialog-width, var(--modal-width)));
+  max-height: calc(var(--modal-viewport-height, 100dvh) - 32px);
+  min-width: 0;
+  box-sizing: border-box;
+  border-radius: var(--radius-dialog);
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+}
+
+/* Lists and forms keep their own scrolling bodies and enough content space. */
+html :is(.folder-select-modal, .folder-create-modal, .start-place-modal, .favorite-place-modal, .route-result-memo-modal) {
+  --dialog-width: 480px;
+}
+
+html .privacy-modal:not(.privacy-modal--unavailable) {
+  --dialog-width: 560px;
+}
+
+html :is(
+  .alert-overlay, .input-dialog-backdrop, .login-alert-overlay,
+  .signup-alert-overlay, .signup-complete-overlay, .inquiry-success-modal-overlay,
+  .admin-success-modal-overlay, .route-complete-overlay, .share-modal-overlay,
+  .folder-select-backdrop, .start-place-overlay, .favorite-place-overlay,
+  .fix-point-portal, .route-result-memo-backdrop, .location-permission-overlay,
+  .privacy-modal-overlay
+) {
+  box-sizing: border-box;
+  padding: max(16px, env(safe-area-inset-top)) 4vw max(16px, env(safe-area-inset-bottom));
+}
+
+html :is(
+  .alert-modal, .input-dialog, .login-alert-sheet, .signup-alert-card,
+  .signup-complete-modal, .inquiry-success-modal-box, .admin-success-modal,
+  .route-complete-modal, .share-modal-sheet, .fix-point-modal,
+  .route-result-memo-modal, .location-permission-modal
+) {
+  padding: var(--modal-padding);
+  height: auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Do not shrink flex children to fit a short viewport: scroll the notice. */
+html :is(.signup-alert-card, .inquiry-success-modal-box, .location-permission-modal) > * {
+  flex-shrink: 0;
+}
+
+html :is(.login-alert-overlay, .share-modal-overlay) {
+  align-items: center;
+}
+
+html .login-alert-handle {
+  display: none;
+}
+
+html .login-alert-sheet {
+  animation: modal-notice-in 0.2s ease-out;
+}
+
+@keyframes modal-notice-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+html :is(
+  .login-alert-icon-wrap, .signup-alert-icon-wrap, .signup-complete-icon-circle,
+  .inquiry-success-modal-icon-wrap, .admin-success-icon-wrap
+) {
+  width: var(--modal-icon-size);
+  height: var(--modal-icon-size);
+  margin: 0 auto var(--space-4);
+}
+
+html :is(
+  .login-alert-icon, .signup-alert-icon, .signup-complete-icon,
+  .inquiry-success-modal-check-icon, .admin-success-icon
+) {
+  width: 26px;
+  height: 26px;
+}
+
+html .route-complete-icon {
+  margin-bottom: var(--space-4);
+}
+
+html .route-complete-icon svg {
+  width: var(--modal-icon-size);
+  height: var(--modal-icon-size);
+}
+
+html :is(
+  .login-alert-title, .signup-alert-card h2, .signup-complete-text h2,
+  .inquiry-success-modal-box h2, .admin-success-title, .route-complete-title,
+  .share-modal-title, .input-dialog h2, .route-result-memo-modal h3,
+  .location-permission-title, .privacy-modal-header h2
+) {
+  font-size: var(--font-section-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+html :is(
+  .login-alert-message, .signup-alert-card p, .signup-complete-text p,
+  .inquiry-success-modal-box p, .admin-success-message, .route-complete-desc
+) {
+  margin: var(--space-3) 0 var(--space-5);
+  font-size: var(--font-body);
+  font-weight: 400;
+  line-height: var(--line-body);
+  color: var(--color-text-muted);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+html :is(
+  .login-alert-confirm-btn, .signup-alert-confirm-btn, .signup-complete-button,
+  .inquiry-success-modal-confirm-button, .admin-success-confirm-button,
+  .route-complete-confirm-btn, .route-complete-later-btn,
+  .input-dialog-actions button, .folder-select-cancel-btn, .folder-select-save-btn,
+  .folder-select-create-btn, .folder-create-cancel-btn, .folder-create-submit-btn,
+  .start-place-cancel-btn, .start-place-confirm-btn,
+  .favorite-cancel-button, .favorite-add-button, .fix-point-actions button,
+  .route-result-memo-actions button, .route-result-memo-retry,
+  .location-permission-allow, .location-permission-later,
+  .privacy-modal-bottom button, .share-modal-status button
+) {
+  height: auto;
+  min-height: var(--modal-button-height);
+  min-width: 0;
+  padding: 10px 12px;
+  font-size: var(--font-body);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  flex-shrink: 0;
+}
+
+html :is(.login-alert-confirm-btn, .route-complete-confirm-btn) {
+  margin-top: 0;
+}
+
+html .route-complete-later-btn {
+  margin-top: var(--space-2);
+}
+
+html .share-modal-header {
+  min-height: var(--touch-target);
+  padding-inline: var(--touch-target);
+  margin-bottom: var(--space-4);
+}
+
+html .share-modal-action-card {
+  min-height: 96px;
+  padding: var(--space-3);
+  gap: var(--space-2);
+}
+
+html .share-modal-action-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+html :is(.share-modal-copy-icon, .share-modal-pdf-icon) {
+  width: 24px;
+  height: 24px;
+}
+
+html .share-modal-action-label {
+  font-size: var(--font-body);
+  line-height: 1.4;
+}
+
+html .share-modal-status input {
+  font-size: var(--font-control);
+}
+
+html .location-permission-hero {
+  width: 54px;
+  height: var(--modal-icon-size);
+}
+
+html .location-permission-pin-glow {
+  width: var(--modal-icon-size);
+  height: var(--modal-icon-size);
+}
+
+html .location-permission-title {
+  margin-top: var(--space-4);
+}
+
+html .location-permission-features {
+  margin-top: var(--space-4);
+}
+
+html .location-permission-privacy {
+  white-space: normal;
+}
+
+html .privacy-notice-card p {
+  font-size: var(--font-body);
+  font-weight: 400;
+}
+
+html .fix-point-period-tabs {
+  height: 50px;
+}
+
+html :is(.fix-point-period-tabs button, .fix-point-time-muted, .favorite-day-tab) {
+  min-height: var(--touch-target);
+  height: auto;
+  line-height: 1.4;
+}
+
+html .fix-point-time-muted {
+  padding: 6px 0;
+}
+
+html .favorite-add-button:disabled {
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+}
+
+/* A short landscape/keyboard viewport needs more than a single visible list row. */
+@media (max-height: 420px) {
+  html .favorite-place-modal {
+    display: block;
+    overflow-y: auto;
+  }
+
+  html .favorite-folder-list {
+    overflow-y: visible;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html .login-alert-sheet {
+    animation: none;
+  }
+}

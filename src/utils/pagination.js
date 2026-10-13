@@ -10,3 +10,9 @@ export function getPaginationItems(currentPage, totalPages) {
   });
   return items;
 }
+
+// Search shows consecutive groups of five without skipping page numbers.
+export function getPageNumberGroup(currentPage, totalPages) {
+  const start = Math.floor((currentPage - 1) / 5) * 5 + 1;
+  return Array.from({ length: Math.max(0, Math.min(5, totalPages - start + 1)) }, (_, index) => start + index);
+}

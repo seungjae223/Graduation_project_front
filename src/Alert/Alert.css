@@ -13,21 +13,21 @@
 
 .alert-modal {
   width: 100%;
-  max-width: 360px;
+  max-width: var(--modal-width);
   max-height: calc(100dvh - 40px);
   overflow-y: auto;
-  border-radius: 26px;
+  border-radius: var(--radius-dialog);
   background: var(--color-surface);
-  padding: 32px 22px 22px;
+  padding: var(--modal-padding);
   text-align: center;
   box-shadow: 0 24px 60px var(--color-shadow);
 }
 
 .alert-icon-wrap {
-  width: 58px;
-  height: 58px;
+  width: var(--modal-icon-size);
+  height: var(--modal-icon-size);
   border-radius: 999px;
-  margin: 0 auto 26px;
+  margin: 0 auto var(--space-4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -41,9 +41,21 @@
   background: var(--color-danger-soft);
 }
 
+.alert-icon-wrap.warning {
+  background: var(--color-warning-soft);
+}
+
+.alert-status-icon {
+  fill: none;
+  stroke: var(--color-warning);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .alert-icon-image {
-  width: 34px;
-  height: 34px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
 }
 
@@ -57,22 +69,24 @@
 }
 
 .alert-description {
-  margin: 18px 0 0;
+  margin: var(--space-3) 0 0;
   font-size: var(--font-body);
   font-weight: 400;
   line-height: var(--line-body);
   color: var(--color-text-muted);
   word-break: keep-all;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
 
 .alert-actions {
-  margin-top: 28px;
+  margin-top: var(--space-5);
 }
 
 .alert-actions.stack {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-3);
 }
 
 .alert-actions.single {
@@ -85,11 +99,17 @@
 }
 
 .alert-btn {
-  height: 50px;
+  min-width: 0;
+  min-height: var(--modal-button-height);
+  height: auto;
+  padding: 10px 12px;
   border: none;
   border-radius: 999px;
-  font-size: 16px;
-  font-weight: 800;
+  font-size: var(--font-body);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
   display: inline-flex;
   align-items: center;
   justify-content: center;

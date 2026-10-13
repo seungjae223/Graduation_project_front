@@ -1,0 +1,81 @@
+{
+  "scrollBefore": {
+    "background": 26,
+    "client": 536,
+    "content": 3506,
+    "dialog": 0
+  },
+  "scrollAfter": {
+    "background": 26,
+    "client": 536,
+    "content": 3506,
+    "dialog": 2970.666748046875
+  },
+  "backgroundStayed": true,
+  "darkDelete": {
+    "buttons": [
+      {
+        "bg": "rgb(32, 44, 60)",
+        "clipped": false,
+        "color": "rgb(174, 188, 205)",
+        "font": "14px",
+        "height": 48,
+        "label": null,
+        "overflow": false,
+        "text": "닫기",
+        "width": 121.19792175292967
+      },
+      {
+        "bg": "rgb(8, 121, 185)",
+        "clipped": false,
+        "color": "rgb(255, 255, 255)",
+        "font": "14px",
+        "height": 48,
+        "label": null,
+        "overflow": false,
+        "text": "일정 목록 확인",
+        "width": 121.19792175292967
+      }
+    ],
+    "dialog": {
+      "bg": "rgb(23, 33, 47)",
+      "height": 255.7916717529297,
+      "padding": "20px",
+      "width": 294.3958435058594,
+      "x": 12.802083969116213,
+      "y": 156.1041717529297
+    },
+    "focusInside": true,
+    "height": 568,
+    "horizontalOverflow": false,
+    "outside": false,
+    "scrollLocked": true,
+    "scrollable": 0,
+    "text": [
+      {
+        "color": "rgb(248, 250, 252)",
+        "font": "20px",
+        "tag": "H2",
+        "text": "삭제 결과 확인 필요"
+      },
+      {
+        "color": "rgb(174, 188, 205)",
+        "font": "14px",
+        "tag": "P",
+        "text": "일정 삭제 여부를 확인하지 못했어요. 목록에서 최신 상태를 확인해 주세요."
+      }
+    ],
+    "title": "삭제 결과 확인 필요",
+    "width": 320
+  },
+  "checks": [
+    "uncertain deletion is not resent on reopen or navigation",
+    "folder create/save and memo save keep focus inside the dialog",
+    "link copy succeeds",
+    "PDF error shows failure, with no success message",
+    "Tab and Shift+Tab wrap; Escape restores focus and scrolling"
+  ],
+  "testSuites": 71,
+  "tests": 517,
+  "build": "Compiled successfully"
+}

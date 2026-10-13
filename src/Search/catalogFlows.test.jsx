@@ -55,6 +55,24 @@ test("the complete API list paginates 5/5/5/5/4 and preserves original IDs on la
   expect(getPlacesApi).toHaveBeenCalledTimes(1);
 });
 
+test("page numbers stay in consecutive groups of five without ellipses at group boundaries", async () => {
+  getPlacesApi.mockResolvedValue(rows(375, "서울"));
+  render(view()); await screen.findByText("총 375개 · 1/75 페이지");
+  const nav = within(screen.getByRole("navigation", { name: "장소 목록 페이지" }));
+  const numbers = () => nav.getAllByRole("button", { name: /^\d+페이지$/ }).map(button => button.textContent);
+  expect(numbers()).toEqual(["1", "2", "3", "4", "5"]);
+  expect(nav.queryByText("…")).not.toBeInTheDocument();
+  fireEvent.click(nav.getByRole("button", { name: "5페이지", exact: true }));
+  fireEvent.click(nav.getByRole("button", { name: "다음", exact: true }));
+  expect(numbers()).toEqual(["6", "7", "8", "9", "10"]);
+  expect(nav.getByRole("button", { name: "6페이지", exact: true })).toHaveAttribute("aria-current", "page");
+  expect(screen.getByText("총 375개 · 6/75 페이지")).toBeInTheDocument();
+  fireEvent.click(nav.getByRole("button", { name: "이전", exact: true }));
+  expect(numbers()).toEqual(["1", "2", "3", "4", "5"]);
+  expect(nav.getByRole("button", { name: "5페이지", exact: true })).toHaveAttribute("aria-current", "page");
+  expect(getPlacesApi).toHaveBeenCalledTimes(1);
+});
+
 test("legacy country URLs no longer hide regions or restrict the complete place list", async () => {
   render(view("/search?country=일본")); await screen.findByText("총 24개 · 1/5 페이지");
   expect(regionButtons().map(button => button.textContent)).toEqual(["도쿄", "부산", "서울", "오사카", "제주"]);

@@ -35,6 +35,16 @@ const ALERT_PRESETS = {
     secondaryVariant: "gray",
     buttonLayout: "row",
   },
+  deleteUnknown: {
+    title: "삭제 결과 확인 필요",
+    description: "일정 삭제 여부를 확인하지 못했어요. 목록에서 최신 상태를 확인해 주세요.",
+    iconTone: "warning",
+    primaryText: "일정 목록 확인",
+    secondaryText: "닫기",
+    primaryVariant: "blue",
+    secondaryVariant: "gray",
+    buttonLayout: "row",
+  },
   success: {
     title: "삭제되었습니다",
     description: "",
@@ -112,10 +122,14 @@ function Alert({
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
-        {config.iconSrc || type === "delete" ? (
+        {config.iconSrc || type === "delete" || type === "deleteUnknown" ? (
           <div className={`alert-icon-wrap ${config.iconTone}`}>
             {config.iconSrc ? (
               <img src={config.iconSrc} alt="" className="alert-icon-image" />
+            ) : type === "deleteUnknown" ? (
+              <svg className="alert-icon-image alert-status-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M10.3 4.1a2 2 0 0 1 3.4 0l7.1 12.3a2 2 0 0 1-1.7 3H4.9a2 2 0 0 1-1.7-3zM12 9v4M12 16h.01" />
+              </svg>
             ) : (
               <svg
                 className="alert-icon-image alert-trash-icon"
@@ -197,6 +211,7 @@ function Alert({
                   className={`alert-btn secondary ${config.secondaryVariant}`}
                   onClick={handleSecondaryClick}
                   disabled={secondaryDisabled}
+                  data-modal-initial-focus={type === "delete" || undefined}
                 >
                   {config.secondaryText}
                 </button>
@@ -207,7 +222,7 @@ function Alert({
                 className={`alert-btn primary ${config.primaryVariant}`}
                 onClick={onPrimary}
                 disabled={primaryDisabled}
-                data-modal-initial-focus
+                data-modal-initial-focus={type !== "delete" || undefined}
               >
                 {config.primaryText}
               </button>

@@ -1,0 +1,12 @@
+PASS src/utils/useModalFocus.test.jsx
+PASS src/ShareModal/ShareModal.test.jsx
+PASS src/FolderSelectModal/FolderSelectModal.test.jsx
+PASS src/Header/scheduleActions.test.jsx
+PASS src/utils/requestTasks.test.js
+PASS src/Login/LoginAlert.test.jsx
+
+Test Suites: 6 passed, 6 total
+Tests:       29 passed, 29 total
+Snapshots:   0 total
+Time:        17.974 s
+Ran all test suites matching /src\\Header\\scheduleActions.test.jsx|src\\Login\\LoginAlert.test.jsx|src\\utils\\useModalFocus.test.jsx|src\\utils\\requestTasks.test.js|src\\ShareModal\\ShareModal.test.jsx|src\\FolderSelectModal\\FolderSelectModal.test.jsx/i.

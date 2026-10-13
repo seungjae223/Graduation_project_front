@@ -435,9 +435,7 @@ button {
   .location-permission-modal,
   .inquiry-success-modal
 ) {
-  max-width: min(92vw, 560px) !important;
-  max-height: calc(var(--modal-viewport-height, 100dvh) - 48px) !important;
-  overflow-y: auto !important;
+  max-height: calc(var(--modal-viewport-height, 100dvh) - 32px) !important;
   overscroll-behavior: contain;
 }
 

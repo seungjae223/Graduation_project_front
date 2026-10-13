@@ -261,7 +261,7 @@ const Header = ({ onSearchClick }) => {
         setIsShareOpen(false);
         navigate("/my-schedule", { replace: true, state: { deleteSuccess: true, deletedRouteId: targetRouteId } });
       },
-      { failure: "일정을 삭제하지 못했어요. 다시 시도해 주세요.", success: "일정을 삭제했어요.", refreshFailure: "삭제 응답을 확인했지만 화면을 갱신하지 못했어요." }
+      { failure: "일정을 삭제하지 못했어요. 다시 시도해 주세요.", unknown: "일정 삭제 여부를 확인하지 못했어요. 목록에서 최신 상태를 확인해 주세요.", success: "일정을 삭제했어요.", refreshFailure: "삭제 응답을 확인했지만 화면을 갱신하지 못했어요." }
     );
   };
 
@@ -468,10 +468,11 @@ const Header = ({ onSearchClick }) => {
       {isRouteResultPage && (
         <Alert
           open={isDeleteOpen}
-          type="delete"
-          title="일정 삭제"
+          type={deleteTask.status === "unknown" ? "deleteUnknown" : "delete"}
+          title={deleteTask.status === "unknown" ? "삭제 결과 확인 필요" : "일정 삭제"}
           description={deleteTask.message || "이 일정을 삭제할까요?"}
-          primaryText={deleteTask.status === "running" ? "삭제 중..." : deleteTask.status === "unknown" ? "일정 목록에서 확인" : "삭제하기"}
+          primaryText={deleteTask.status === "running" ? "삭제 중..." : deleteTask.status === "unknown" ? "일정 목록 확인" : "삭제하기"}
+          secondaryText={deleteTask.status === "unknown" ? "닫기" : "취소"}
           primaryDisabled={deleteTask.status === "running"}
           secondaryDisabled={deleteTask.status === "running"}
           canClose={deleteTask.status !== "running"}

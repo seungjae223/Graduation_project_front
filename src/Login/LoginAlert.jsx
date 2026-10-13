@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
+import { createPortal } from "react-dom";
+import useModalFocus from "../utils/useModalFocus";
 import "./LoginAlert.css";
 
 const LOGIN_ALERT_PRESETS = {
@@ -43,25 +45,7 @@ function LoginAlert({
     };
   }, [type, title, message, confirmText]);
 
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
-        onClose?.();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open, onClose]);
+  const dialogRef = useModalFocus({ open, onClose, lockScroll: true });
 
   if (!open) return null;
 
@@ -80,9 +64,11 @@ function LoginAlert({
     onClose?.();
   };
 
-  return (
+  return createPortal(
     <div className="login-alert-overlay" onClick={handleBackdropClick}>
-      <div className="login-alert-sheet" onClick={(e) => e.stopPropagation()}>
+      <div ref={dialogRef} className="login-alert-sheet" role="alertdialog" aria-modal="true"
+        aria-labelledby="login-alert-title" aria-describedby={messageLines.length ? "login-alert-message" : undefined}
+        tabIndex={-1} onClick={(e) => e.stopPropagation()}>
         <div className="login-alert-handle" />
 
         {iconSrc ? (
@@ -91,10 +77,10 @@ function LoginAlert({
           </div>
         ) : null}
 
-        <h2 className="login-alert-title">{config.title}</h2>
+        <h2 id="login-alert-title" className="login-alert-title">{config.title}</h2>
 
         {messageLines.length > 0 && (
-          <p className="login-alert-message">
+          <p id="login-alert-message" className="login-alert-message">
             {messageLines.map((line, index) => (
               <React.Fragment key={`${line}-${index}`}>
                 {line}
@@ -108,6 +94,7 @@ function LoginAlert({
           type="button"
           className="login-alert-confirm-btn"
           onClick={handleConfirm}
+          data-modal-initial-focus
         >
           {confirmIconSrc ? (
             <img
@@ -119,7 +106,8 @@ function LoginAlert({
           {config.confirmText}
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

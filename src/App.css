@@ -25,6 +25,10 @@
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
+  --modal-width: 440px;
+  --modal-padding: clamp(var(--space-5), 4vw, var(--space-6));
+  --modal-icon-size: 48px;
+  --modal-button-height: var(--control-height);
   --color-page: #f8fbfd;
   --color-canvas: #f2f4f7;
   --color-surface: #ffffff;

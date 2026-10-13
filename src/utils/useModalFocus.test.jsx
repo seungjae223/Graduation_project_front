@@ -98,6 +98,29 @@ test("an empty modal traps focus on the dialog and unmount restores document scr
   expect(document.body.style.overflowY).toBe("");
 });
 
+test("async control changes retain focus inside the dialog without stealing an active input", () => {
+  function ChangingDialog({ busy = false, done = false }) {
+    const ref = useModalFocus({ open: true, lockScroll: true, canClose: !busy });
+    return <section ref={ref} role="dialog" aria-label="Saving" tabIndex={-1}>
+      <input aria-label="Draft" disabled={busy || done} data-modal-initial-focus />
+      <button disabled={busy}>Close</button>
+      <button disabled={busy || done}>Save</button>
+    </section>;
+  }
+  const view = render(<ChangingDialog />);
+  const input = screen.getByLabelText("Draft");
+  userEvent.type(input, "preserved input");
+  view.rerender(<ChangingDialog />);
+  expect(input).toHaveFocus();
+  view.rerender(<ChangingDialog busy />);
+  expect(screen.getByRole("dialog", { name: "Saving" })).toHaveFocus();
+  view.rerender(<ChangingDialog />);
+  userEvent.click(screen.getByRole("button", { name: "Save" }));
+  view.rerender(<ChangingDialog done />);
+  expect(screen.getByRole("button", { name: "Close" })).toHaveFocus();
+  expect(input).toHaveValue("preserved input");
+});
+
 test("nested dialogs follow keyboard viewport changes and restore previous styles after closing", () => {
   const previousViewport = window.visualViewport;
   const viewport = new EventTarget();

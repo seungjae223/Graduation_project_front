@@ -1,0 +1,9 @@
+[32m✔[0m [33mConsole Ninja[0m extension is connected to [33mWebpack[0m, see [36mhttps://tinyurl.com/2vt8jxzw[0m
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+WARNING in ./node_modules/html2pdf.js/dist/html2pdf.js
+Module Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+Failed to parse source map from 'C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\html2pdf.js\dist\SVGPathData.module.js.map' file: Error: ENOENT: no such file or directory, open 'C:\Users\joyfu\Desktop\graduation_project\graduation\node_modules\html2pdf.js\dist\SVGPathData.module.js.map'
+
+MODAL_PREVIEW http://127.0.0.1:3011
