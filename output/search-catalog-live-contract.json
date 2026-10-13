@@ -1,0 +1,174 @@
+{
+  "checkedAtKst": "2026-10-14 02:06:06",
+  "operationCount": 46,
+  "relevant": [
+    {
+      "path": "/api/trips/{tripId}/places/{placeId}",
+      "method": "post",
+      "parameters": [
+        "tripId",
+        "placeId",
+        "day",
+        "visitOrder"
+      ]
+    },
+    {
+      "path": "/api/trips/{tripId}/days/{day}/places/{tripPlaceId}/start",
+      "method": "post",
+      "parameters": [
+        "tripId",
+        "day",
+        "tripPlaceId"
+      ]
+    },
+    {
+      "path": "/api/places",
+      "method": "get",
+      "parameters": [
+        null
+      ]
+    },
+    {
+      "path": "/api/places",
+      "method": "post",
+      "parameters": [
+        null
+      ]
+    },
+    {
+      "path": "/api/places/{placeId}/reviews",
+      "method": "get",
+      "parameters": [
+        "placeId"
+      ]
+    },
+    {
+      "path": "/api/places/{placeId}/reviews",
+      "method": "post",
+      "parameters": [
+        "placeId"
+      ]
+    },
+    {
+      "path": "/api/folders/{folderId}/places/{placeId}",
+      "method": "post",
+      "parameters": [
+        "folderId",
+        "placeId"
+      ]
+    },
+    {
+      "path": "/api/folders/{folderId}/places/{placeId}",
+      "method": "delete",
+      "parameters": [
+        "folderId",
+        "placeId"
+      ]
+    },
+    {
+      "path": "/api/trips/{tripId}/days/{day}/places/{tripPlaceId}/schedule",
+      "method": "patch",
+      "parameters": [
+        "tripId",
+        "day",
+        "tripPlaceId"
+      ]
+    },
+    {
+      "path": "/api/trips/{tripId}/days/{day}/places/{tripPlaceId}/memo",
+      "method": "patch",
+      "parameters": [
+        "tripId",
+        "day",
+        "tripPlaceId"
+      ]
+    },
+    {
+      "path": "/api/trips/{tripId}/days/{day}/places/order",
+      "method": "patch",
+      "parameters": [
+        "tripId",
+        "day"
+      ]
+    },
+    {
+      "path": "/api/trips/{tripId}/places",
+      "method": "get",
+      "parameters": [
+        "tripId"
+      ]
+    },
+    {
+      "path": "/api/trips/{tripId}/days/{day}/places",
+      "method": "get",
+      "parameters": [
+        "tripId",
+        "day"
+      ]
+    },
+    {
+      "path": "/api/recommendations",
+      "method": "get",
+      "parameters": [
+        "region",
+        "theme"
+      ]
+    },
+    {
+      "path": "/api/recent-searches",
+      "method": "get",
+      "parameters": [
+        null
+      ]
+    },
+    {
+      "path": "/api/recent-searches",
+      "method": "delete",
+      "parameters": [
+        null
+      ]
+    },
+    {
+      "path": "/api/recent-places",
+      "method": "get",
+      "parameters": [
+        null
+      ]
+    },
+    {
+      "path": "/api/places/{id}",
+      "method": "get",
+      "parameters": [
+        "id"
+      ]
+    },
+    {
+      "path": "/api/places/{id}",
+      "method": "delete",
+      "parameters": [
+        "id"
+      ]
+    },
+    {
+      "path": "/api/places/search",
+      "method": "get",
+      "parameters": [
+        "keyword"
+      ]
+    },
+    {
+      "path": "/api/folders/{folderId}/places",
+      "method": "get",
+      "parameters": [
+        "folderId"
+      ]
+    },
+    {
+      "path": "/api/recent-searches/{id}",
+      "method": "delete",
+      "parameters": [
+        "id"
+      ]
+    }
+  ]
+}

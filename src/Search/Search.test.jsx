@@ -2,8 +2,8 @@ import userEvent from "@testing-library/user-event";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Search from "./Search";
-import { searchPlacesApi, getRecentSearchesApi, clearRecentSearchesApi, deleteRecentSearchApi } from "../api/placeApi";
-jest.mock("../api/placeApi", () => ({ searchPlacesApi: jest.fn(), getRecentSearchesApi: jest.fn(), deleteRecentSearchApi: jest.fn(), clearRecentSearchesApi: jest.fn() }));
+import { searchPlacesApi, getPlacesApi, getRecommendationsApi, getRecentSearchesApi, clearRecentSearchesApi, deleteRecentSearchApi } from "../api/placeApi";
+jest.mock("../api/placeApi", () => ({ searchPlacesApi: jest.fn(), getPlacesApi: jest.fn(), getRecommendationsApi: jest.fn(), getRecentSearchesApi: jest.fn(), deleteRecentSearchApi: jest.fn(), clearRecentSearchesApi: jest.fn() }));
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
 const place = { id: 781, name: "서버 장소", address: "서버 주소", latitude: 37, longitude: 127 };
 function Destination() { const location = useLocation(); return <p>{location.search} / {location.state.place.id}</p>; }
@@ -11,14 +11,15 @@ function setup() {
   render(<MemoryRouter initialEntries={["/search"]}><Routes><Route path="/search" element={<Search />} /><Route path="/detail" element={<Destination />} /></Routes></MemoryRouter>);
   return screen.getByPlaceholderText("장소, 도시 또는 테마 검색");
 }
-beforeEach(() => { jest.clearAllMocks(); getRecentSearchesApi.mockResolvedValue([]); });
+beforeEach(() => { jest.clearAllMocks(); getRecentSearchesApi.mockResolvedValue([]); getPlacesApi.mockResolvedValue([{ ...place, region: "부산" }]); getRecommendationsApi.mockResolvedValue([{ ...place, region: "부산" }]); });
 
-test("region search remains available without the unimplemented more button", async () => {
+test("region selection uses the supported exact-match recommendation API", async () => {
   searchPlacesApi.mockResolvedValue([place]); setup();
   expect(screen.queryByRole("button", { name: "더보기", exact: true })).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "부산", exact: true }));
+  fireEvent.click(await screen.findByRole("button", { name: "부산", exact: true }));
   expect(await screen.findByText("서버 장소")).toBeInTheDocument();
-  expect(searchPlacesApi.mock.calls[0][0]).toBe("부산");
+  await waitFor(() => expect(getRecommendationsApi).toHaveBeenCalledWith({ region: "부산" }, expect.objectContaining({ signal: expect.any(AbortSignal) })));
+  expect(searchPlacesApi).not.toHaveBeenCalled();
 });
 test("clear uses the existing API and only removes records after success", async () => {
   getRecentSearchesApi.mockResolvedValue([{ id: 1, keyword: "테스트 검색" }]);

@@ -1,0 +1,66 @@
+{
+  "source": "places_insert.sql (seed, not current production data)",
+  "places": 600,
+  "regions": [
+    {
+      "region": "경주",
+      "count": 25
+    },
+    {
+      "region": "뉴욕",
+      "count": 25
+    },
+    {
+      "region": "다낭",
+      "count": 25
+    },
+    {
+      "region": "도쿄",
+      "count": 100
+    },
+    {
+      "region": "로스앤젤레스",
+      "count": 25
+    },
+    {
+      "region": "마닐라",
+      "count": 25
+    },
+    {
+      "region": "방콕",
+      "count": 25
+    },
+    {
+      "region": "부산",
+      "count": 25
+    },
+    {
+      "region": "서울",
+      "count": 100
+    },
+    {
+      "region": "세부",
+      "count": 25
+    },
+    {
+      "region": "오사카",
+      "count": 25
+    },
+    {
+      "region": "제주",
+      "count": 25
+    },
+    {
+      "region": "치앙마이",
+      "count": 25
+    },
+    {
+      "region": "푸꾸옥",
+      "count": 25
+    },
+    {
+      "region": "홍콩",
+      "count": 100
+    }
+  ]
+}

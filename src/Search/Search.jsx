@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   clearRecentSearchesApi,
   deleteRecentSearchApi,
   getRecentSearchesApi,
+  getPlacesApi,
+  getRecommendationsApi,
 } from "../api/placeApi";
 import "./Search.css";
 import useServerSearch from "./useServerSearch";
@@ -12,8 +14,10 @@ import useMutationTask from "../utils/useMutationTask";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
 
-import PlacePhoto from "../components/PlacePhoto";
-import { getPlacePhoto } from "../data/placePhotos";
+import { getApiErrorMessage } from "../api/api";
+import { getAvailableCountries, getPlaceCountry } from "../utils/placeCountry";
+import { getPaginationItems } from "../utils/pagination";
+import { filterSearchPlaces, getSearchRegions, requireSearchPlaces, SEARCH_PAGE_SIZE } from "./searchCatalog";
 
 
 
@@ -37,7 +41,7 @@ const SearchIcon = () => (
   </svg>
 );
 
-const SeoulIcon = () => (
+const CityIcon = () => (
   <svg viewBox="0 0 24 24" className="svg-icon" aria-hidden="true">
     <rect
       x="4"
@@ -72,7 +76,7 @@ const SeoulIcon = () => (
   </svg>
 );
 
-const JejuIcon = () => (
+const IslandIcon = () => (
   <svg viewBox="0 0 24 24" className="svg-icon" aria-hidden="true">
     <path
       d="M4 17C6 13 8 10 12 10C16 10 18 13 20 17"
@@ -105,7 +109,7 @@ const JejuIcon = () => (
   </svg>
 );
 
-const BusanIcon = () => (
+const HarborIcon = () => (
   <svg viewBox="0 0 24 24" className="svg-icon" aria-hidden="true">
     <path
       d="M4 15H20L18 18H6L4 15Z"
@@ -131,7 +135,7 @@ const BusanIcon = () => (
   </svg>
 );
 
-const GangwonIcon = () => (
+const MountainIcon = () => (
   <svg viewBox="0 0 24 24" className="svg-icon" aria-hidden="true">
     <path
       d="M4 18L9 12L13 16L17 10L20 18H4Z"
@@ -143,7 +147,7 @@ const GangwonIcon = () => (
   </svg>
 );
 
-const GyeongjuIcon = () => (
+const TempleIcon = () => (
   <svg viewBox="0 0 24 24" className="svg-icon" aria-hidden="true">
     <path
       d="M4 18H20"
@@ -175,7 +179,7 @@ const GyeongjuIcon = () => (
   </svg>
 );
 
-const YeosuIcon = () => (
+const WavesIcon = () => (
   <svg viewBox="0 0 24 24" className="svg-icon" aria-hidden="true">
     <path
       d="M4 10C5.5 8.5 7 8.5 8.5 10C10 11.5 11.5 11.5 13 10C14.5 8.5 16 8.5 17.5 10C19 11.5 20 11.5 20 11.5"
@@ -194,7 +198,7 @@ const YeosuIcon = () => (
   </svg>
 );
 
-const GeojeIcon = () => (
+const SunIcon = () => (
   <svg viewBox="0 0 24 24" className="svg-icon" aria-hidden="true">
     <circle
       cx="12"
@@ -214,78 +218,111 @@ const GeojeIcon = () => (
   </svg>
 );
 
-const regionItems = [
-  { id: 1, name: "서울", Icon: SeoulIcon },
-  { id: 2, name: "제주", Icon: JejuIcon },
-  { id: 3, name: "부산", Icon: BusanIcon },
-  { id: 4, name: "강원", Icon: GangwonIcon },
-  { id: 5, name: "경주", Icon: GyeongjuIcon },
-  { id: 6, name: "여수", Icon: YeosuIcon },
-  { id: 7, name: "거제", Icon: GeojeIcon },
-];
-
-const popularKeywords = [
-  "경주 불국사",
-  "여수 밤바다",
-  "남해 독일마을",
-  "양양 서피비치",
-  "안동 하회마을",
-  "속초 중앙시장",
-];
-
-const hotPlaces = [
-  {
-    id: 1,
-    title: "서울 시티 나이트 투어",
-    subtitle: "화려한 도심의 야경을 한눈에",
-    ...getPlacePhoto("서울 시티 나이트 투어"),
-    badge: "TRENDING",
-  },
-  {
-    id: 2,
-    title: "제주 오설록",
-    ...getPlacePhoto("제주 오설록"),
-  },
-  {
-    id: 3,
-    title: "부산 광안리",
-    ...getPlacePhoto("부산 광안리"),
-  },
-];
+// Icons are display metadata, never a list of supported regions.
+const iconsByRegion = new Map([
+  ["서울", CityIcon], ["도쿄", CityIcon], ["홍콩", CityIcon], ["뉴욕", CityIcon], ["로스앤젤레스", CityIcon],
+  ["제주", IslandIcon], ["부산", HarborIcon], ["마닐라", HarborIcon],
+  ["경주", TempleIcon], ["오사카", TempleIcon], ["방콕", TempleIcon],
+  ["치앙마이", MountainIcon], ["세부", WavesIcon], ["푸꾸옥", WavesIcon], ["다낭", SunIcon],
+]);
+const RegionIcon = () => <svg viewBox="0 0 24 24" className="svg-icon" aria-hidden="true">
+  <path d="M12 21S5 14 5 9a7 7 0 0 1 14 0c0 5-7 12-7 12Z" fill="none" stroke="currentColor" strokeWidth="2" />
+  <circle cx="12" cy="9" r="2" fill="none" stroke="currentColor" strokeWidth="2" />
+</svg>;
+const EMPTY_PLACES = [];
 
 function Search() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const account = useSessionKey();
-
-  const keywordFromUrl = searchParams.get("keyword") || "";
-  const locationState = location.state || {};
-
+  const keywordFromUrl = (searchParams.get("keyword") || "").trim().replace(/\s+/g, " ");
+  const country = searchParams.get("country") || "전체";
+  const regionName = searchParams.get("region") || "";
   const [query, setQuery] = useState(keywordFromUrl);
+  const [inputError, setInputError] = useState("");
+  const catalog = useReadQuery(account + ":search-catalog", async signal => requireSearchPlaces(await getPlacesApi({ signal })), true, () => getAuthSnapshot().accountKey === account);
+  const places = catalog.data || EMPTY_PLACES;
+  const countries = useMemo(() => getAvailableCountries(places), [places]);
+  const regions = useMemo(() => getSearchRegions(places, country), [places, country]);
+  const selectedRegion = regions.find(region => region.name === regionName);
+  const unsupportedCountry = Boolean(catalog.data && country !== "전체" && !countries.includes(country));
+  const unsupportedRegion = Boolean(catalog.data && regionName && !selectedRegion);
+  const regionPlaces = useReadQuery(account + ":search-region:" + JSON.stringify(selectedRegion?.values || []), async signal => {
+    const lists = await Promise.all(selectedRegion.values.map(async region => {
+      const items = requireSearchPlaces(await getRecommendationsApi({ region }, { signal }));
+      if (items.some(place => place.region !== region)) throw new Error("지역별 장소 응답을 확인할 수 없습니다.");
+      return items;
+    }));
+    return [...new Map(lists.flat().map(place => [String(place.id), place])).values()];
+  }, Boolean(selectedRegion) && !unsupportedCountry, () => getAuthSnapshot().accountKey === account);
   const search = useServerSearch();
-  const { submit: submitSearch, status: searchStatus, revision: searchRevision } = search;
-  const searchedKeyword = search.keyword;
-  const recent = useReadQuery(`${account}:recent-searches`, signal => getRecentSearchesApi({ signal }), true, () => getAuthSnapshot().accountKey === account);
+  const { submit: submitSearch, clear: clearSearch, status: searchStatus, revision: searchRevision } = search;
+  const recent = useReadQuery(account + ":recent-searches", signal => getRecentSearchesApi({ signal }), true, () => getAuthSnapshot().accountKey === account);
   const recentSearches = (recent.data || []).slice(0, 10);
-  const recentTask = useMutationTask(`${account}:recent-searches`);
+  const recentTask = useMutationTask(account + ":recent-searches");
   const retryRecents = recent.retry;
   useEffect(() => {
-    const keyword = keywordFromUrl.trim().replace(/\s+/g, " ");
-    setQuery(keyword);
-    if (keyword) void submitSearch(keyword);
-  }, [keywordFromUrl, submitSearch]);
+    setQuery(keywordFromUrl); setInputError("");
+    if (keywordFromUrl) void submitSearch(keywordFromUrl);
+    else clearSearch();
+  }, [keywordFromUrl, submitSearch, clearSearch]);
   useEffect(() => {
     if (searchStatus === "success") void retryRecents();
   }, [searchStatus, searchRevision, retryRecents]);
 
+  const selectionKey = JSON.stringify([account, country, regionName, keywordFromUrl]);
+  const [pagination, setPagination] = useState({ key: selectionKey, page: 1 });
+  const resultsHeading = useRef(null);
+  const scrollRequested = useRef(false);
+  const filtersReady = (country === "전체" && !regionName) || Boolean(catalog.data);
+  const resultSource = keywordFromUrl ? search : regionName ? regionPlaces : catalog;
+  const resultStatus = unsupportedCountry || unsupportedRegion ? "error" : !filtersReady ? catalog.status :
+    keywordFromUrl && search.keyword !== keywordFromUrl ? "loading" : resultSource.status;
+  const rawResults = keywordFromUrl ? search.items : resultSource.data || EMPTY_PLACES;
+  const results = resultStatus === "success" ? filterSearchPlaces(rawResults, country, selectedRegion) : EMPTY_PLACES;
+  const totalPages = Math.ceil(results.length / SEARCH_PAGE_SIZE);
+  const currentPage = Math.max(1, Math.min(pagination.key === selectionKey ? pagination.page : 1, totalPages || 1));
+  const pagePlaces = results.slice((currentPage - 1) * SEARCH_PAGE_SIZE, currentPage * SEARCH_PAGE_SIZE);
+  useEffect(() => {
+    if (!scrollRequested.current) return;
+    scrollRequested.current = false;
+    resultsHeading.current?.focus({ preventScroll: true });
+    resultsHeading.current?.scrollIntoView?.({ behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  }, [currentPage, selectionKey]);
+
+  const updateFilters = changes => {
+    scrollRequested.current = false;
+    const params = new URLSearchParams(searchParams);
+    for (const [key, value] of Object.entries(changes)) {
+      if (!value || (key === "country" && value === "전체")) params.delete(key);
+      else params.set(key, value);
+    }
+    setPagination({ key: "", page: 1 });
+    setSearchParams(params);
+  };
   const runSearch = value => {
     const keyword = String(value || "").trim().replace(/\s+/g, " ");
     setQuery(keyword);
-    if (!keyword || keyword.length > 100 || keyword === keywordFromUrl) { void search.submit(keyword); return; }
-    setSearchParams({ keyword });
+    if (!keyword || keyword.length > 100) {
+      setInputError(keyword ? "검색어는 100자 이하로 입력해주세요." : "검색어를 입력해주세요."); return;
+    }
+    setInputError(""); setPagination({ key: selectionKey, page: 1 });
+    if (keyword === keywordFromUrl) void submitSearch(keyword);
+    else updateFilters({ keyword });
   };
-  const handleSearchSubmit = event => { event.preventDefault(); runSearch(query); };
+  const selectCountry = value => {
+    setInputError(""); setQuery(keywordFromUrl);
+    updateFilters({ country: value, region: "" });
+  };
+  const selectRegion = name => {
+    setQuery(""); setInputError("");
+    updateFilters({ region: name, keyword: "" });
+  };
+  const changePage = page => {
+    if (page === currentPage || page < 1 || page > totalPages) return;
+    scrollRequested.current = true; setPagination({ key: selectionKey, page });
+  };
   const mutateRecent = async id => {
     if (recentTask.blocked) return;
     await recentTask.run(
@@ -299,175 +336,88 @@ function Search() {
       }, { failure: "최근 검색어를 삭제하지 못했어요. 목록은 유지됩니다.", success: "최근 검색어를 삭제했습니다.", refreshFailure: "삭제 요청 후 최신 목록을 확인하지 못했어요." }
     );
   };
-  const handleRemoveRecent = (event, item) => { event.stopPropagation(); void mutateRecent(item.id); };
-  const handleClearRecent = () => { void mutateRecent(null); };
+  const handleResultClick = place => navigate("/detail?id=" + encodeURIComponent(place.id) + "&source=server-search", {
+    state: { place: { ...place, placeId: place.id, originalId: place.id, title: place.name, desc: place.address }, source: "server-search" },
+  });
+  const resultsError = unsupportedCountry ? "선택한 국가의 등록된 장소를 확인할 수 없습니다. 전체 국가를 선택해주세요." :
+    unsupportedRegion ? "선택한 지역의 등록된 장소를 확인할 수 없습니다. 다른 지역을 선택해주세요." :
+    !filtersReady ? getApiErrorMessage(catalog.cause, "지역 정보를 불러오지 못했어요. 지역 목록을 다시 조회해주세요.") :
+    keywordFromUrl ? search.error : getApiErrorMessage(resultSource.cause, "장소를 불러오지 못했어요. 다시 조회해주세요.");
+  const retryResults = () => keywordFromUrl ? submitSearch(keywordFromUrl) : regionName ? regionPlaces.retry() : catalog.retry();
+  const resultTitle = keywordFromUrl ? '"' + keywordFromUrl + '" 검색 결과' : regionName ? regionName + " 지역의 장소" : "장소 둘러보기";
+  const locationState = location.state || {};
+  const hasCoordinates = Number.isFinite(locationState.currentLocation?.lat) && Number.isFinite(locationState.currentLocation?.lng);
 
-  const handleRegionClick = (name) => {
-    runSearch(name);
-  };
-
-  const handleResultClick = (place) => {
-    navigate(`/detail?id=${encodeURIComponent(place.id)}&source=server-search`, {
-      state: { place: { ...place, placeId: place.id, originalId: place.id,
-        title: place.name, desc: place.address }, source: "server-search" },
-    });
-  };
-
-  const isNearbyMode = locationState.mode === "nearby";
-  const coordinates = locationState.currentLocation;
-  const hasCoordinates = Number.isFinite(coordinates?.lat) && Number.isFinite(coordinates?.lng);
-
-  return (
-    <div className="search-page">
-      <section className="search-hero">
-        <h1 className="search-title">어디로 떠나볼까요?</h1>
-
-        <form className="search-input-wrap" onSubmit={handleSearchSubmit}>
-          <button type="submit" className="search-icon-submit" aria-label="검색" disabled={search.status === "loading" && query.trim() === searchedKeyword}>
-            <SearchIcon />
-          </button>
-
-          <input
-            type="text"
-            value={query}
-            maxLength={100}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label="장소, 도시 또는 테마 검색"
-            placeholder="장소, 도시 또는 테마 검색"
-          />
-        </form>
-      </section>
-
-      {isNearbyMode && !searchedKeyword && (
-        <section className="search-section">
-          <h2>내 주변 탐색</h2>
-          <p className="empty-text">
-            {hasCoordinates ? `현재 위치: ${locationState.locationLabel || "위치 확인 완료"}. 주변 장소 조회는 아직 지원되지 않습니다. 검색어로 장소를 찾아주세요.` : "위치 정보를 확인하지 못했어요. 홈에서 위치 권한을 확인해 주세요."}
-          </p>
-        </section>
-      )}
-
-      {search.status !== "idle" && (
-        <section className="search-section" aria-live="polite">
-          <h2>{searchedKeyword ? `"${searchedKeyword}" 검색 결과` : "장소 검색"}</h2>
-          {search.status === "loading" && <p className="empty-text" role="status">장소를 검색하는 중입니다...</p>}
-          {search.status === "error" && <div className="empty-text" role="alert">
-            <p>{search.error}</p>
-            <button type="button" className="clear-btn" onClick={() => runSearch(query)}>다시 검색</button>
-          </div>}
-          {search.items.length > 0 ? (
-            <div className="popular-grid">
-              {search.items.map(place => (
-                <button type="button" key={place.id} className="popular-card" onClick={() => handleResultClick(place)}>
-                  <span className="popular-rank">{place.region || place.placeType || "장소"}</span>
-                  <span className="popular-text">{place.name}</span>
-                  <span className="search-result-address">{place.address || "주소 정보 없음"}</span>
-                </button>
-              ))}
-            </div>
-          ) : search.status === "success" && <p className="empty-text">검색 결과가 없어요.</p>}
-        </section>
-      )}
-      <section className="search-section">
-        <div className="section-top">
-          <h2>최근 검색어</h2>
-
-          <button
-            type="button"
-            className="clear-btn recent-clear-btn"
-            onClick={handleClearRecent}
-            disabled={recentTask.blocked}
-          >
-            전체 삭제
-          </button>
-        </div>
-
-        {recent.status === "loading" && <p role="status">최근 검색어를 불러오는 중...</p>}
-        {recent.status === "error" && <div role="alert"><p>최근 검색어를 불러오지 못했어요.</p><button type="button" className="clear-btn" onClick={recent.retry}>최근 검색어 다시 조회</button></div>}
-        {recentTask.message && <p role="status">{recentTask.message}</p>}
-        {["unknown", "refreshError"].includes(recentTask.status) && <button type="button" className="clear-btn" onClick={recentTask.retryRead}>삭제 결과 확인</button>}
-        <div className="recent-tags">
-          {recentSearches.map(item => <div className="recent-tag" key={item.id}>
-            <button type="button" className="recent-search-action" onClick={() => runSearch(item.keyword)}>{item.keyword}</button>
-            <button type="button" className="tag-close" aria-label={`${item.keyword} 최근 검색어 삭제`} onClick={event => handleRemoveRecent(event, item)} disabled={recentTask.blocked}>×</button>
-          </div>)}
-          {recent.status === "success" && !recentSearches.length && <p className="empty-text">최근 검색어가 없어요.</p>}
-        </div>
-      </section>
-
-      <section className="search-section">
-        <h2>인기 검색어</h2>
-
-        <div className="popular-grid">
-          {popularKeywords.map((keyword, index) => (
-            <button
-              type="button"
-              key={keyword}
-              className="popular-card"
-              onClick={() => runSearch(keyword)}
-            >
-              <span className="popular-rank">{index + 1}</span>
-              <span className="popular-text">{keyword}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="search-section">
-        <h2>지역별 추천</h2>
-
-        <div className="region-grid">
-          {regionItems.map(({ id, name, Icon }) => (
-            <button
-              type="button"
-              key={id}
-              className="region-card"
-              onClick={() => handleRegionClick(name)}
-            >
-              <div className="region-icon-box">
-                <Icon />
-              </div>
-
-              <span>{name}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="search-section search-hot-section">
-        <h2>지금 가장 핫한 곳</h2>
-
-        <article
-          className="hot-main-card"
-
-        >
-          <PlacePhoto src={hotPlaces[0].image} alt={hotPlaces[0].title} className="search-hot-main-photo" credit={hotPlaces[0].credit} />
-
-          <div className="hot-main-overlay">
-            <span className="hot-badge">{hotPlaces[0].badge}</span>
-            <h3><button type="button" className="hot-place-action" onClick={() => runSearch(hotPlaces[0].title)}>{hotPlaces[0].title}</button></h3>
-            <p>{hotPlaces[0].subtitle}</p>
-          </div>
-        </article>
-
-        <div className="hot-sub-grid">
-          {hotPlaces.slice(1).map((place) => (
-            <article
-              key={place.id}
-              className="hot-sub-card"
-
-            >
-              <PlacePhoto src={place.image} alt={place.title} className="search-hot-sub-photo" credit={place.credit} />
-
-              <div className="hot-sub-overlay">
-                <h4><button type="button" className="hot-place-action" onClick={() => runSearch(place.title)}>{place.title}</button></h4>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+  return <div className="search-page">
+    <section className="search-hero">
+      <h1 className="search-title">어디로 떠나볼까요?</h1>
+      <form className="search-input-wrap" onSubmit={event => { event.preventDefault(); runSearch(query); }}>
+        <button type="submit" className="search-icon-submit" aria-label="검색" disabled={search.status === "loading" && query.trim() === search.keyword}><SearchIcon /></button>
+        <input type="text" value={query} maxLength={100} onChange={event => { setQuery(event.target.value); setInputError(""); }}
+          aria-label="장소, 도시 또는 테마 검색" aria-invalid={Boolean(inputError)} aria-describedby={inputError ? "search-input-error" : undefined} placeholder="장소, 도시 또는 테마 검색" />
+      </form>
+      {inputError && <p id="search-input-error" className="empty-text" role="alert">{inputError}</p>}
+    </section>
+    {locationState.mode === "nearby" && !keywordFromUrl && <section className="search-section"><h2>내 주변 탐색</h2><p className="empty-text">
+      {hasCoordinates ? "주변 장소 조회는 아직 지원되지 않습니다. 검색어로 장소를 찾아주세요." : "위치 정보를 확인하지 못했어요. 홈에서 위치 권한을 확인해 주세요."}
+    </p></section>}
+    <div className="search-country-filters" role="group" aria-label="국가별 장소 필터">
+      {["전체", ...countries].map(value => <button type="button" key={value} className="search-country-button" aria-pressed={country === value} onClick={() => selectCountry(value)}>{value}</button>)}
     </div>
-  );
+    {country === "전체" && places.some(place => !getPlaceCountry(place)) && <p className="empty-text search-country-notice">국가를 확인할 수 없는 장소와 지역은 전체에서 확인할 수 있어요.</p>}
+    <section className="search-section">
+      <div className="section-top"><h2>최근 검색어</h2><button type="button" className="clear-btn recent-clear-btn" onClick={() => void mutateRecent(null)} disabled={recentTask.blocked}>전체 삭제</button></div>
+      {recent.status === "loading" && <p role="status">최근 검색어를 불러오는 중...</p>}
+      {recent.status === "error" && <div role="alert"><p>최근 검색어를 불러오지 못했어요.</p><button type="button" className="clear-btn" onClick={recent.retry}>최근 검색어 다시 조회</button></div>}
+      {recentTask.message && <p role="status">{recentTask.message}</p>}
+      {["unknown", "refreshError"].includes(recentTask.status) && <button type="button" className="clear-btn" onClick={recentTask.retryRead}>삭제 결과 확인</button>}
+      <div className="recent-tags">
+        {recentSearches.map(item => <div className="recent-tag" key={item.id}>
+          <button type="button" className="recent-search-action" onClick={() => runSearch(item.keyword)}>{item.keyword}</button>
+          <button type="button" className="tag-close" aria-label={item.keyword + " 최근 검색어 삭제"} onClick={() => void mutateRecent(item.id)} disabled={recentTask.blocked}>×</button>
+        </div>)}
+        {recent.status === "success" && !recentSearches.length && <p className="empty-text">최근 검색어가 없어요.</p>}
+      </div>
+    </section>
+    <section className="search-section" aria-labelledby="search-region-title">
+      <div className="section-top"><h2 id="search-region-title">지역별 추천</h2>{regionName && <button type="button" className="clear-btn" onClick={() => updateFilters({ region: "" })}>전체 지역 보기</button>}</div>
+      {catalog.status === "loading" && <p className="empty-text" role="status">등록된 지역을 확인하는 중...</p>}
+      {catalog.status === "error" && <div className="empty-text" role="alert"><p>지역 목록을 불러오지 못했어요.</p><button type="button" className="clear-btn" onClick={catalog.retry}>지역 목록 다시 조회</button></div>}
+      {catalog.status === "success" && !regions.length && !unsupportedCountry && <p className="empty-text">등록된 장소가 있는 지역이 없어요.</p>}
+      <div className="region-grid">
+        {regions.map(region => {
+          const Icon = iconsByRegion.get(region.name) || RegionIcon;
+          return <button type="button" key={region.name} className="region-card" aria-pressed={regionName === region.name} onClick={() => selectRegion(region.name)}>
+            <div className="region-icon-box"><Icon /></div><span>{region.name}</span>
+          </button>;
+        })}
+      </div>
+    </section>
+    <section className="search-section search-results-section" aria-labelledby="search-results-title" aria-live="polite">
+      <h2 id="search-results-title" ref={resultsHeading} tabIndex={-1}>{resultTitle}</h2>
+      {resultStatus === "loading" && <p className="empty-text" role="status">장소를 불러오는 중입니다...</p>}
+      {resultStatus === "error" && <div className="empty-text" role="alert"><p>{resultsError}</p>
+        {!unsupportedCountry && !unsupportedRegion && <button type="button" className="clear-btn" onClick={retryResults}>{keywordFromUrl ? "다시 검색" : "장소 다시 조회"}</button>}
+        {unsupportedCountry && <button type="button" className="clear-btn" onClick={() => selectCountry("전체")}>전체 국가 보기</button>}
+        {!unsupportedCountry && unsupportedRegion && <button type="button" className="clear-btn" onClick={() => updateFilters({ region: "" })}>지역 선택 초기화</button>}
+      </div>}
+      {resultStatus === "success" && !results.length && <p className="empty-text">{keywordFromUrl ? "검색 결과가 없어요." : "등록된 장소가 없어요."}</p>}
+      {resultStatus === "success" && results.length > 0 && <>
+        <p className="search-page-summary" role="status">총 {results.length}개 · {currentPage}/{totalPages} 페이지</p>
+        <div className="popular-grid search-results-grid">
+          {pagePlaces.map(place => <button type="button" key={place.id} className="popular-card search-result-card" onClick={() => handleResultClick(place)}>
+            <span className="search-result-region">{place.region || place.placeType || "장소"}</span><span className="popular-text">{place.name}</span>
+            <span className="search-result-address">{place.address || "주소 정보 없음"}</span>
+          </button>)}
+        </div>
+        {totalPages > 1 && <nav className="search-pagination" aria-label="장소 목록 페이지">
+          <button type="button" disabled={currentPage === 1} onClick={() => changePage(currentPage - 1)}>이전</button>
+          {getPaginationItems(currentPage, totalPages).map(page => typeof page === "number" ? <button type="button" key={page} aria-label={page + "페이지"} aria-current={page === currentPage ? "page" : undefined} onClick={() => changePage(page)}>{page}</button> : <span key={page} aria-hidden="true">…</span>)}
+          <button type="button" disabled={currentPage === totalPages} onClick={() => changePage(currentPage + 1)}>다음</button>
+        </nav>}
+      </>}
+    </section>
+  </div>;
 }
 
 export default Search;
