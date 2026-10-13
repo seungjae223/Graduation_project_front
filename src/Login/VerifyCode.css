@@ -3,13 +3,6 @@
   box-sizing: border-box;
 }
 
-.verify-code-service-notice {
-  margin: 12px 0 0;
-  color: var(--color-text-muted);
-  font-size: 14px;
-  line-height: 1.6;
-}
-
 .verify-code-page {
   width: 100%;
   max-width: 452px;
@@ -213,3 +206,41 @@
   font-weight: 700;
   line-height: 1.5;
 }
+
+.reset-password-fields {
+  display: flex;
+  flex-direction: column;
+  margin-top: 28px;
+  gap: 10px;
+}
+
+.reset-password-fields label {
+  color: var(--color-text-strong);
+  font-weight: var(--weight-semibold);
+}
+
+.reset-password-fields input {
+  width: 100%;
+  min-width: 0;
+  height: var(--control-height);
+  padding: 12px 14px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-input);
+  color: var(--color-text-strong);
+  font: inherit;
+}
+
+.reset-password-fields input:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.reset-password-fields p {
+  margin: 0 0 10px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.reset-password-fields .verify-code-error { color: var(--color-danger); }

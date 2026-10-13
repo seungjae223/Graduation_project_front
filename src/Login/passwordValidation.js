@@ -1,4 +1,4 @@
-// Preserve the existing signup rule until the server publishes its policy.
+// Signup and password reset share the server's published password policy.
 export const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&#~]).{10,}$/;
 export const PASSWORD_HELP = "10자 이상, 영문 대문자·소문자와 특수문자(@$!%*?&#~)를 각각 1개 이상 포함해 주세요.";
 

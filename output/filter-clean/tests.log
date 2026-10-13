@@ -1,0 +1,8 @@
+PASS src/Homepage/PopularAll.test.jsx (8.987 s)
+PASS src/Recommend/listFlows.test.jsx
+
+Test Suites: 2 passed, 2 total
+Tests:       23 passed, 23 total
+Snapshots:   0 total
+Time:        15.077 s
+Ran all test suites within paths "src/Homepage/PopularAll.test.jsx", "src/Recommend/listFlows.test.jsx".

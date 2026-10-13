@@ -21,6 +21,7 @@ beforeEach(() => {
   Element.prototype.scrollIntoView = jest.fn();
   window.matchMedia = jest.fn(() => ({ matches: false }));
 });
+afterEach(() => jest.restoreAllMocks());
 
 test("23 more places paginate 5/5/5/5/3 without repeating featured cards or re-requesting", async () => {
   api.get.mockResolvedValue({ data: rows(27).reverse() });
@@ -120,4 +121,106 @@ test("the saved-place button still uses the original ID on later pages", async (
   fireEvent.click(screen.getByRole("button", { name: "2페이지", exact: true }));
   fireEvent.click(within(more()).getAllByRole("button", { name: "저장", exact: true })[0]);
   expect(mockToggle).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ id: "10", region: "도쿄" }), false);
+});
+
+test("country strip omits arrows and captions while keeping full accessible names and filtering", async () => {
+  api.get.mockResolvedValue({ data: ["뉴욕", "다낭", "도쿄", "홍콩", "방콕", "마닐라", "서울"].flatMap((region, index) => rows(10, region, index * 10)) });
+  setup(); await screen.findByRole("button", { name: "한국", exact: true });
+  expect(screen.queryByRole("button", { name: "이전 국가 보기" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "다음 국가 보기" })).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "전체", exact: true })).toHaveAttribute("aria-pressed", "true");
+  fireEvent.click(screen.getByRole("button", { name: "2페이지", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "중국(홍콩)", exact: true }));
+  expect(screen.queryByText(/선택한 국가:/)).not.toBeInTheDocument();
+  expect(screen.queryByText("마우스로 끌기 · 손가락으로 밀기")).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "중국(홍콩)", exact: true })).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("button", { name: "중국(홍콩)", exact: true })).toHaveAttribute("title", "중국(홍콩)");
+  expect(screen.getByRole("button", { name: "1페이지", exact: true })).toHaveAttribute("aria-current", "page");
+  expect(moreLinks().map(link => link.textContent)).toEqual(rows(10, "홍콩", 30).slice(4, 9).map(place => place.name));
+  expect(api.get).toHaveBeenCalledTimes(1);
+});
+
+test("short country lists omit unnecessary navigation", async () => {
+  api.get.mockResolvedValue({ data: rows(10) });
+  setup(); await screen.findByRole("button", { name: "일본", exact: true });
+  expect(screen.queryByRole("group", { name: "국가 필터 이동" })).not.toBeInTheDocument();
+  expect(screen.queryByText("마우스로 끌기 · 손가락으로 밀기")).not.toBeInTheDocument();
+});
+
+const pointer = (target, type, options = {}) => {
+  const event = new MouseEvent(type, { bubbles: true, cancelable: true, button: 0, clientX: 250, clientY: 20, ...options });
+  Object.defineProperties(event, {
+    pointerId: { value: options.pointerId ?? 1 },
+    pointerType: { value: options.pointerType ?? "mouse" },
+  });
+  fireEvent(target, event);
+  return event;
+};
+const dragSetup = async () => {
+  api.get.mockResolvedValue({ data: ["뉴욕", "다낭", "도쿄", "홍콩", "방콕", "마닐라", "서울"].flatMap((region, index) => rows(10, region, index * 10)) });
+  setup(); await screen.findByRole("button", { name: "한국", exact: true });
+  const strip = screen.getByRole("group", { name: "국가별 장소 필터" });
+  Object.defineProperties(strip, {
+    clientWidth: { configurable: true, value: 288 },
+    scrollWidth: { configurable: true, value: 584 },
+    scrollLeft: { configurable: true, writable: true, value: 0 },
+    setPointerCapture: { configurable: true, value: jest.fn() },
+    hasPointerCapture: { configurable: true, value: () => true },
+    releasePointerCapture: { configurable: true, value: jest.fn() },
+  });
+  return strip;
+};
+
+test("mouse dragging scrolls countries without selecting them; a subsequent click still filters and resets the page", async () => {
+  const strip = await dragSetup();
+  const japan = screen.getByRole("button", { name: "일본", exact: true });
+  pointer(japan, "pointerdown");
+  pointer(strip, "pointermove", { clientX: 100 });
+  expect(strip.scrollLeft).toBe(150);
+  expect(strip).toHaveClass("is-dragging");
+  expect(strip.setPointerCapture).toHaveBeenCalledWith(1);
+  pointer(strip, "pointerup", { clientX: 100 });
+  expect(strip).not.toHaveClass("is-dragging");
+  expect(strip.releasePointerCapture).toHaveBeenCalledWith(1);
+  fireEvent.click(japan, { detail: 1 });
+  expect(screen.getByRole("button", { name: "전체", exact: true })).toHaveAttribute("aria-pressed", "true");
+  fireEvent.click(screen.getByRole("button", { name: "2페이지", exact: true }));
+  pointer(japan, "pointerdown");
+  pointer(strip, "pointermove", { clientX: 247 });
+  pointer(japan, "pointerup", { clientX: 247 });
+  fireEvent.click(japan, { detail: 1 });
+  expect(japan).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("button", { name: "1페이지", exact: true })).toHaveAttribute("aria-current", "page");
+  expect(moreLinks().map(link => link.textContent)).toEqual(rows(10, "도쿄", 20).slice(4, 9).map(place => place.name));
+  expect(api.get).toHaveBeenCalledTimes(1);
+});
+
+test.each(["pointercancel", "lostpointercapture"])("%s ends a drag, scroll stays within bounds and keyboard activation works", async type => {
+  const strip = await dragSetup();
+  pointer(strip, "pointerdown");
+  pointer(strip, "pointermove", { clientX: -300 });
+  expect(strip.scrollLeft).toBe(296);
+  pointer(strip, "pointermove", { clientX: 500 });
+  expect(strip.scrollLeft).toBe(0);
+  pointer(strip, type);
+  expect(strip).not.toHaveClass("is-dragging");
+  fireEvent.click(screen.getByRole("button", { name: "한국", exact: true }), { detail: 0 });
+  expect(screen.getByRole("button", { name: "한국", exact: true })).toHaveAttribute("aria-pressed", "true");
+});
+
+test("native touch scrolling and vertical gestures are not captured or prevented", async () => {
+  const strip = await dragSetup();
+  pointer(strip, "pointerdown", { pointerType: "touch" });
+  const touchMove = pointer(strip, "pointermove", { pointerType: "touch", clientX: 100 });
+  pointer(strip, "pointerup", { pointerType: "touch", clientX: 100 });
+  expect(touchMove.defaultPrevented).toBe(false);
+  expect(strip.setPointerCapture).not.toHaveBeenCalled();
+  expect(strip).not.toHaveClass("is-dragging");
+  pointer(strip, "pointerdown");
+  const verticalMove = pointer(strip, "pointermove", { clientX: 235, clientY: 100 });
+  expect(verticalMove.defaultPrevented).toBe(false);
+  expect(strip.scrollLeft).toBe(0);
+  pointer(strip, "pointerout", { clientX: 235, clientY: 100 });
+  pointer(strip, "pointermove", { clientX: 100 });
+  expect(strip.setPointerCapture).not.toHaveBeenCalled();
 });

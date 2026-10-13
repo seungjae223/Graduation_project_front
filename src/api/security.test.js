@@ -30,6 +30,15 @@ test("공개 API는 소문자 Authorization도 제거한다", async () => {
   });
   expect(JSON.stringify(response.data)).not.toMatch(/secret|[Aa]uthorization/);
 });
+
+test("password reset is public even when old credentials are stored", async () => {
+  localStorage.setItem("accessToken", "stored-secret");
+  const response = await api.patch("/api/auth/password/reset", { email: "test@example.com", newPassword: "ValidPassword!" }, {
+    headers: { authorization: "Bearer stale-secret" },
+    adapter: async config => ({ data: config.headers.toJSON(), status: 200, headers: {}, config }),
+  });
+  expect(JSON.stringify(response.data)).not.toMatch(/secret|[Aa]uthorization/);
+});
 test("다른 origin에는 토큰을 보내지 않는다", async () => {
   const adapter = jest.fn();
   const spy = jest.spyOn(console, "error").mockImplementation(() => {});

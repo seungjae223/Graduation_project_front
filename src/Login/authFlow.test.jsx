@@ -8,11 +8,12 @@ import SignUp from "./SignUp";
 import OAuthCallback from "./OAuthCallback";
 import { beginOAuth } from "../utils/oauthSecurity";
 import { saveSocialLoginReturnPath } from "../utils/authRedirect";
-import { completeSocialLoginApi, getSocialAuthorizationApi, loginApi, sendEmailCodeApi, signupApi, verifyEmailCodeApi } from "../api/authApi";
+import { completeSocialLoginApi, getSocialAuthorizationApi, loginApi, resetPasswordApi, sendEmailCodeApi, signupApi, verifyEmailCodeApi } from "../api/authApi";
 
 jest.mock("../api/authApi", () => ({
   loginApi: jest.fn(), getSocialAuthorizationApi: jest.fn(), completeSocialLoginApi: jest.fn(),
   sendEmailCodeApi: jest.fn(), signupApi: jest.fn(), verifyEmailCodeApi: jest.fn(),
+  resetPasswordApi: jest.fn(),
 }));
 jest.mock("../utils/safeLog", () => ({ logSafeApiError: jest.fn() }));
 
@@ -126,11 +127,80 @@ test("verification and resend share a lock; real failure allows retry and retain
   expect(screen.getByRole("button", { name: "확인", exact: true })).toBeEnabled();
   fireEvent.click(screen.getByRole("button", { name: "확인", exact: true }));
   await screen.findByText("이메일 인증이 완료되었습니다.");
-  expect(screen.getByRole("button", { name: "인증 완료" })).toBeDisabled();
-  expect(screen.getByText("현재 비밀번호 변경 기능은 준비 중입니다.")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "비밀번호 변경" })).toBeDisabled();
+  expect(screen.getByLabelText("새 비밀번호", { exact: true })).toHaveFocus();
   expect(verifyEmailCodeApi).toHaveBeenCalledTimes(2);
   expect(screen.getByTestId("location")).toHaveTextContent("/verify-code");
   expect(alert).not.toHaveBeenCalled();
+});
+
+const readyReset = async (path = "/verify-code?email=test%40example.com&returnTo=%2Fmypage") => {
+  verifyEmailCodeApi.mockResolvedValue("인증 성공!");
+  setup(path); typeCode("012345");
+  fireEvent.click(screen.getByRole("button", { name: "확인", exact: true }));
+  await screen.findByLabelText("새 비밀번호", { exact: true });
+};
+const typePassword = (password = "ValidPassword!") => {
+  fireEvent.change(screen.getByLabelText("새 비밀번호", { exact: true }), { target: { value: password } });
+  fireEvent.change(screen.getByLabelText("새 비밀번호 확인"), { target: { value: password } });
+};
+
+test("verification then reset uses the same email, locks duplicate submits and returns to login", async () => {
+  const result = deferred(); resetPasswordApi.mockReturnValue(result.promise);
+  await readyReset(); typePassword();
+  expect(verifyEmailCodeApi.mock.calls[0][0]).toEqual({ email: "test@example.com", code: "012345" });
+  fireEvent.submit(screen.getByRole("form", { name: "비밀번호 재설정" }));
+  fireEvent.submit(screen.getByRole("form", { name: "비밀번호 재설정" }));
+  expect(resetPasswordApi).toHaveBeenCalledTimes(1);
+  expect(resetPasswordApi.mock.calls[0][0]).toEqual({ email: "test@example.com", newPassword: "ValidPassword!" });
+  expect(screen.getByRole("button", { name: "변경 중..." })).toBeDisabled();
+  await act(async () => result.resolve("비밀번호가 변경되었습니다."));
+  expect(screen.getByText("비밀번호가 변경되었습니다. 새 비밀번호로 로그인해주세요.")).toBeInTheDocument();
+  expect(screen.queryByLabelText("새 비밀번호", { exact: true })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("link", { name: "로그인으로 돌아가기" }));
+  expect(screen.getByTestId("location")).toHaveTextContent("/login?returnTo=%2Fmypage");
+  expect(loginApi).not.toHaveBeenCalled();
+});
+
+test("reset requires the shared policy and matching passwords, without requiring a digit", async () => {
+  await readyReset(); typePassword("short");
+  expect(screen.getByRole("button", { name: "비밀번호 변경" })).toBeDisabled();
+  expect(screen.getByLabelText("새 비밀번호", { exact: true })).toHaveAttribute("aria-invalid", "true");
+  typePassword("ValidPassword!");
+  expect(screen.getByRole("button", { name: "비밀번호 변경" })).toBeEnabled();
+  fireEvent.change(screen.getByLabelText("새 비밀번호 확인"), { target: { value: "different" } });
+  expect(screen.getByRole("button", { name: "비밀번호 변경" })).toBeDisabled();
+  expect(screen.getByLabelText("새 비밀번호 확인")).toHaveAccessibleDescription("비밀번호가 일치하지 않습니다.");
+});
+
+test("expired verification returns to email verification without claiming password success", async () => {
+  resetPasswordApi.mockRejectedValue({ response: { status: 400, data: { message: "이메일 인증을 먼저 완료해주세요." } } });
+  await readyReset(); typePassword();
+  fireEvent.click(screen.getByRole("button", { name: "비밀번호 변경" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("인증번호를 다시 발송");
+  expect(screen.getByLabelText("1번째 인증번호")).toHaveValue("");
+  expect(screen.queryByLabelText("새 비밀번호", { exact: true })).not.toBeInTheDocument();
+  expect(screen.queryByText("비밀번호가 변경되었습니다.")).not.toBeInTheDocument();
+});
+
+test("social account rejection explains the correct login method and keeps the password draft", async () => {
+  resetPasswordApi.mockRejectedValue({ response: { status: 400, data: { message: "소셜 로그인 계정은 해당 로그인 제공자를 이용해주세요." } } });
+  await readyReset(); typePassword();
+  fireEvent.click(screen.getByRole("button", { name: "비밀번호 변경" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("카카오 또는 구글로 로그인");
+  expect(screen.getByLabelText("새 비밀번호", { exact: true })).toHaveValue("ValidPassword!");
+});
+
+test("late reset completion cannot change another email's verification screen", async () => {
+  const result = deferred(); resetPasswordApi.mockReturnValue(result.promise);
+  await readyReset(); typePassword();
+  fireEvent.click(screen.getByRole("button", { name: "비밀번호 변경" }));
+  const options = resetPasswordApi.mock.calls[0][1];
+  fireEvent.click(screen.getByRole("button", { name: "다른 이메일 인증" }));
+  await act(async () => result.resolve("비밀번호가 변경되었습니다."));
+  expect(options.signal.aborted).toBe(true);
+  expect(screen.getByLabelText("1번째 인증번호")).toHaveValue("");
+  expect(screen.queryByText("비밀번호가 변경되었습니다.")).not.toBeInTheDocument();
 });
 
 test("resend failure retains code, success clears only its own current code", async () => {

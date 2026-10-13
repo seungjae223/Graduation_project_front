@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getMockUser, loginMock, signupMock } from "./authMock";
+import { getMockUser, loginMock, signupMock, resetPasswordMock } from "./authMock";
 import { seedPlaces, searchText, themeKey } from "./placeMock";
 import { seedReviews } from "./reviewMock";
 import { seedSchedules, makeTripPlace, buildTimeline } from "./scheduleMock";
@@ -8,7 +8,7 @@ import { seedInquiries } from "./inquiryMock";
 let state;
 export function resetMockData() {
   const places = seedPlaces();
-  state = { places, reviews: seedReviews(places), ...seedSchedules(places),
+  state = { places, verifiedEmails: new Map(), reviews: seedReviews(places), ...seedSchedules(places),
     folders: [{ id: 1, name: "가고 싶은 서울", placeIds: [1, 3] }, { id: 2, name: "제주 여행", placeIds: [7, 8] }],
     recentSearches: [{ id: 1, keyword: "서울" }, { id: 2, keyword: "제주" }],
     recentPlaceIds: [1, 7, 10], inquiries: seedInquiries() };
@@ -35,9 +35,29 @@ const saveDayOrder = (trip, ordered, startTime = "10:00") => {
 function handle(method, path, data, params) {
   if (path === "/api/auth/login" && method === "post") return loginMock(data);
   if (path === "/api/auth/signup" && method === "post") return signupMock(data);
-  if (path === "/api/email/send" && method === "post") return { message: "인증번호가 발송되었습니다." };
+  if (path === "/api/email/send" && method === "post") {
+    state.verifiedEmails.delete(String(data?.email || "").trim().toLowerCase());
+    return { message: "인증번호가 발송되었습니다." };
+  }
   // Accept any nonempty code for offline UI development. No email is sent.
-  if (path === "/api/email/verify" && method === "post" && String(data?.code || "").trim()) return { verified: true, message: "인증되었습니다." };
+  if (path === "/api/email/verify" && method === "post" && String(data?.code || "").trim()) {
+    state.verifiedEmails.set(String(data?.email || "").trim().toLowerCase(), Date.now() + 10 * 60 * 1000);
+    return { verified: true, message: "인증되었습니다." };
+  }
+  if (path === "/api/auth/password/reset" && method === "patch") {
+    const email = String(data?.email || "").trim().toLowerCase();
+    if (!email) throw Object.assign(new Error("이메일을 입력해주세요."), { status: 400 });
+    if (!(state.verifiedEmails.get(email) > Date.now())) throw Object.assign(new Error("이메일 인증을 먼저 완료해주세요."), { status: 400 });
+    const result = resetPasswordMock({ ...data, email });
+    state.verifiedEmails.delete(email);
+    return result;
+  }
+  if (path === "/api/mypage/profile" && method === "get") {
+    const user = getMockUser();
+    if (!user) throw Object.assign(new Error("인증이 필요합니다."), { status: 403 });
+    const emailAvailable = Boolean(user.email) && !/@nomango\.local$/i.test(user.email);
+    return { nickname: user.nickname || user.name || "여행자", email: emailAvailable ? user.email : null, emailAvailable, provider: user.provider || "LOCAL" };
+  }
   if (path === "/api/mypage/stats" && method === "get") return {
     visitedPlacesCount: state.trips.length,
     savedPlacesCount: state.folders.reduce((count, folder) => count + folder.placeIds.length, 0),

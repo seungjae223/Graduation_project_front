@@ -3,6 +3,7 @@ import { USE_MOCK } from "../config/mockConfig";
 import { loginMock, signupMock } from "../mocks/authMock";
 import { ACCESS_TOKEN_KEY, clearAuthenticatedUserStorage } from "../utils/authStorage";
 import { getAuthSnapshot, notifyAuthChange } from "../utils/authState";
+import { getMyProfileApi } from "./profileApi";
 
 const createResponseGuard = ({ signal, isCurrent } = {}) => {
   notifyAuthChange();
@@ -90,14 +91,6 @@ const getNicknameKey = (email) => {
   return `nickname:${normalizeEmail(email)}`;
 };
 
-const getCachedNickname = (email) => {
-  const normalizedEmail = normalizeEmail(email);
-
-  if (!normalizedEmail) return "";
-
-  return normalizeNickname(localStorage.getItem(getNicknameKey(normalizedEmail)));
-};
-
 const saveUserCache = ({ email, nickname }) => {
   const normalizedEmail = normalizeEmail(email);
   const normalizedNickname = normalizeNickname(nickname);
@@ -131,6 +124,32 @@ const clearCurrentUserCache = () => {
   sessionStorage.removeItem("currentUser");
   sessionStorage.removeItem("userNickname");
   sessionStorage.removeItem("userName");
+  localStorage.removeItem("userEmail");
+  sessionStorage.removeItem("userEmail");
+};
+
+// The login token is already installed, so this read owns the new credential version.
+const refreshLoginProfile = async (options) => {
+  const assertCurrent = createResponseGuard(options);
+  let profile;
+  try {
+    profile = await getMyProfileApi(options);
+  } catch (error) {
+    assertCurrent();
+    if (error?.code === "ERR_CANCELED" || error?.name === "AbortError") throw error;
+    // A profile outage must not undo a successful login. MyPage offers a read retry.
+    return null;
+  }
+  assertCurrent();
+  if (!USE_MOCK) {
+    const storage = localStorage.getItem(ACCESS_TOKEN_KEY) ? localStorage : sessionStorage;
+    storage.setItem("currentUser", JSON.stringify(profile));
+    storage.setItem("userNickname", profile.nickname);
+    storage.setItem("userName", profile.nickname);
+    if (profile.emailAvailable) storage.setItem("userEmail", profile.email);
+    else storage.removeItem("userEmail");
+  }
+  return profile;
 };
 
 const saveToken = (token, { persistent = true } = {}) => {
@@ -164,9 +183,9 @@ export const loginApi = async ({ email, password, keepLogin = true }, options = 
   assertCurrent();
   const normalizedEmail = normalizeEmail(email);
   if (USE_MOCK) {
-    const result = loginMock({ email: normalizedEmail, keepLogin });
+    const result = loginMock({ email: normalizedEmail, password, keepLogin });
     notifyAuthChange();
-    return result;
+    return { ...result, profile: await refreshLoginProfile(options) };
   }
 
   const response = await api.post(
@@ -184,39 +203,20 @@ export const loginApi = async ({ email, password, keepLogin = true }, options = 
   assertCurrent();
 
   const token = extractToken(response);
-  const cachedNickname = getCachedNickname(normalizedEmail);
-
+  clearCurrentUserCache();
   const storage = keepLogin ? localStorage : sessionStorage;
   storage.setItem("userEmail", normalizedEmail);
   saveToken(token, { persistent: keepLogin });
   localStorage.setItem("keepLogin", String(keepLogin));
 
-  // 같은 브라우저에서 회원가입했던 계정이면 저장해둔 nickname을 마이페이지에서 바로 사용
-  if (cachedNickname) {
-    saveUserCache({
-      email: normalizedEmail,
-      nickname: cachedNickname,
-    });
-  } else {
-    // 다른 계정의 이전 닉네임이 남아있으면 잘못 표시될 수 있으므로 제거
-    clearCurrentUserCache();
-
-    localStorage.setItem(
-      "currentUser",
-      JSON.stringify({
-        email: normalizedEmail,
-        nickname: "",
-        name: "",
-        username: "",
-      })
-    );
-  }
+  const profile = await refreshLoginProfile(options);
 
   return {
     token,
     message: response.data,
     email: normalizedEmail,
-    nickname: cachedNickname,
+    nickname: profile?.nickname || "",
+    profile,
   };
 };
 
@@ -254,9 +254,9 @@ export const getSocialAuthorizationApi = async (provider, options = {}) => {
   }
 
   if (USE_MOCK) {
-    const result = loginMock();
+    const result = loginMock({ provider: provider.toUpperCase() });
     notifyAuthChange();
-    return { ...result, authenticated: true };
+    return { ...result, profile: await refreshLoginProfile(options), authenticated: true };
   }
 
   const response = await api.get(`/api/auth/${provider}/authorize`, requestConfig(options));
@@ -283,9 +283,9 @@ export const completeSocialLoginApi = async ({ provider, code, state }, options 
   }
 
   if (USE_MOCK) {
-    const result = loginMock();
+    const result = loginMock({ provider: provider.toUpperCase() });
     notifyAuthChange();
-    return result;
+    return { ...result, profile: await refreshLoginProfile(options) };
   }
 
   const response = await api.post(`/api/auth/${provider}/login`, {
@@ -295,11 +295,27 @@ export const completeSocialLoginApi = async ({ provider, code, state }, options 
 
   assertCurrent();
 
+  clearCurrentUserCache();
   const token = saveToken(response.data?.token, { persistent: true });
   localStorage.setItem("tokenType", response.data?.tokenType || "Bearer");
   localStorage.setItem("keepLogin", "true");
 
-  return { ...response.data, token };
+  const profile = await refreshLoginProfile(options);
+  return { ...response.data, token, profile };
+};
+
+export const resetPasswordApi = async ({ email, newPassword }, options = {}) => {
+  const assertCurrent = createResponseGuard(options);
+  assertCurrent();
+  const response = await api.patch("/api/auth/password/reset", {
+    email: normalizeEmail(email),
+    newPassword,
+  }, requestConfig(options));
+  assertCurrent();
+  if (typeof response.data !== "string" || response.data.trim() !== "비밀번호가 변경되었습니다.") {
+    throw new Error("비밀번호 변경 결과를 확인하지 못했습니다. 로그인 화면에서 새 비밀번호를 확인해주세요.");
+  }
+  return response.data;
 };
 
 export const sendEmailCodeApi = async (email, options = {}) => {

@@ -14,16 +14,59 @@
 
 .popular-filter-row {
   display: flex;
-  gap: 8px;
-  overflow-x: visible;
-  padding-bottom: 6px;
-  scrollbar-width: none;
-
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  padding: var(--space-1) 0 var(--space-2);
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) var(--color-surface-muted);
 }
 
 .popular-filter-row::-webkit-scrollbar {
-  display: none;
+  height: 6px;
+}
+
+.popular-filter-row.is-scrollable,
+.popular-filter-row.is-scrollable > .popular-filter-btn {
+  cursor: grab;
+  user-select: none;
+}
+
+.popular-filter-row.is-dragging {
+  scroll-snap-type: none;
+}
+
+.popular-filter-row.is-dragging,
+.popular-filter-row.is-dragging > .popular-filter-btn {
+  cursor: grabbing;
+}
+
+.popular-filter-row::-webkit-scrollbar-track {
+  background: var(--color-surface-muted);
+  border-radius: 999px;
+}
+
+.popular-filter-row::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 999px;
+}
+
+.popular-filter-row > .popular-filter-btn {
+  flex: 0 0 calc((100% - 3 * var(--space-2)) / 4);
+  min-width: 0;
+  justify-content: center;
+  padding: 0 var(--space-2);
+  scroll-snap-align: start;
+}
+
+.popular-filter-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .popular-filter-btn {
@@ -50,6 +93,14 @@
 .popular-filter-btn:disabled {
   opacity: 0.6;
   cursor: default;
+}
+
+.popular-filter-btn:not(.active):enabled:hover {
+  background: var(--color-hover);
+}
+
+.popular-filter-row > .popular-filter-btn:focus-visible {
+  outline-offset: -3px;
 }
 
 .popular-country-notice,

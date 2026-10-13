@@ -22,6 +22,7 @@ const api = axios.create({
 const PUBLIC_API_PATHS = [
   "/api/auth/login",
   "/api/auth/signup",
+  "/api/auth/password/reset",
   "/api/auth/kakao/authorize",
   "/api/auth/kakao/login",
   "/api/auth/google/authorize",

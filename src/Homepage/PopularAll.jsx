@@ -126,6 +126,9 @@ function PopularAll() {
   const selectedFilter = selection.account === account ? selection.filter : "전체";
   const selectedPage = selection.account === account ? selection.page : 1;
   const moreHeadingRef = useRef(null);
+  const filterDragRef = useRef(null);
+  const ignoreCountryClick = useRef(false);
+  const [isFilterDragging, setIsFilterDragging] = useState(false);
   const scrollRequested = useRef(false);
   const saving = usePlaceSaving();
   const { isSavingId } = saving;
@@ -137,6 +140,50 @@ function PopularAll() {
   const selectedUnavailable = selectedFilter !== "전체" && isLoaded && !availableCountries.includes(selectedFilter);
   const filterList = ["전체", ...availableCountries, ...(selectedUnavailable ? [selectedFilter] : [])];
   const unclassifiedCount = useMemo(() => places.filter(place => !getPlaceCountry(place)).length, [places]);
+
+  const startFilterDrag = event => {
+    ignoreCountryClick.current = false;
+    const row = event.currentTarget;
+    // Touch and pen use native scrolling, including vertical page gestures.
+    if (event.pointerType !== "mouse" || event.button !== 0 || row.scrollWidth <= row.clientWidth) return;
+    filterDragRef.current = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      scrollLeft: row.scrollLeft,
+      moved: false,
+    };
+  };
+  const moveFilterDrag = event => {
+    const drag = filterDragRef.current;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    const distance = event.clientX - drag.x;
+    if (!drag.moved && (Math.abs(distance) < 8 || Math.abs(distance) <= Math.abs(event.clientY - drag.y))) return;
+    const row = event.currentTarget;
+    if (!drag.moved) {
+      drag.moved = true;
+      ignoreCountryClick.current = true;
+      row.setPointerCapture?.(event.pointerId);
+      setIsFilterDragging(true);
+    }
+    event.preventDefault();
+    row.scrollLeft = Math.max(0, Math.min(drag.scrollLeft - distance, row.scrollWidth - row.clientWidth));
+  };
+  const finishFilterDrag = event => {
+    const drag = filterDragRef.current;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    filterDragRef.current = null;
+    setIsFilterDragging(false);
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+  const preventDraggedCountryClick = event => {
+    // A completed drag must not select its starting button; keyboard activation remains available.
+    if (ignoreCountryClick.current && event.detail > 0) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    ignoreCountryClick.current = false;
+  };
 
   const visiblePlaces = useMemo(() => {
     if (!isLoaded) {
@@ -195,7 +242,13 @@ function PopularAll() {
         <PlaceSavingFeedback saving={saving} />
         {listing.status === "loading" && !listing.data && <p role="status">장소를 불러오는 중...</p>}
         {listing.status === "error" && <div role="alert"><p>장소를 불러오지 못했어요.</p><button type="button" onClick={listing.retry}>목록 다시 조회</button></div>}
-        <div className="popular-filter-row" role="group" aria-label="국가별 장소 필터">
+        <div id="popular-country-filters"
+          className={`popular-filter-row${filterList.length > 4 ? " is-scrollable" : ""}${isFilterDragging ? " is-dragging" : ""}`}
+          role="group" aria-label="국가별 장소 필터"
+          onPointerDown={startFilterDrag} onPointerMove={moveFilterDrag} onPointerUp={finishFilterDrag}
+          onPointerCancel={finishFilterDrag} onLostPointerCapture={finishFilterDrag}
+          onPointerLeave={event => { if (!filterDragRef.current?.moved) finishFilterDrag(event); }}
+          onClickCapture={preventDraggedCountryClick}>
           {filterList.map((filter) => (
             <button
               key={filter}
@@ -205,9 +258,11 @@ function PopularAll() {
               }`}
               onClick={() => selectCountry(filter)}
               aria-pressed={selectedFilter === filter}
+              aria-label={filter}
+              title={filter}
               disabled={selectedUnavailable && filter === selectedFilter}
             >
-              {filter}
+              <span className="popular-filter-label">{filter}</span>
             </button>
           ))}
         </div>

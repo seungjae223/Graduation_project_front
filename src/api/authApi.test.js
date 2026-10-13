@@ -1,5 +1,5 @@
 import api, { getAccessToken } from "./api";
-import { completeSocialLoginApi, getSocialAuthorizationApi, loginApi, logoutApi, sendEmailCodeApi, signupApi, verifyEmailCodeApi } from "./authApi";
+import { completeSocialLoginApi, getSocialAuthorizationApi, loginApi, logoutApi, resetPasswordApi, sendEmailCodeApi, signupApi, verifyEmailCodeApi } from "./authApi";
 import { notifyAuthChange } from "../utils/authState";
 
 jest.mock("./api", () => {
@@ -11,8 +11,74 @@ jest.mock("./api", () => {
     default: {
       post: jest.fn(),
       get: jest.fn(),
+      patch: jest.fn(),
     },
   };
+});
+
+describe("new authentication contracts", () => {
+  const profile = { nickname: "서버 닉네임", email: "user@example.com", emailAvailable: true, provider: "LOCAL" };
+  beforeEach(() => {
+    localStorage.clear(); sessionStorage.clear();
+    api.get.mockReset(); api.post.mockReset(); api.patch.mockReset(); notifyAuthChange();
+  });
+  test.each([true, false])("login reads the server nickname with the new token and respects keepLogin=%s", async keepLogin => {
+    localStorage.setItem("userNickname", "다른 계정");
+    api.post.mockResolvedValue({ data: "header.payload.signature-long-enough-for-existing-contract", headers: {} });
+    api.get.mockImplementation(async url => {
+      expect(url).toBe("/api/mypage/profile");
+      expect(getAccessToken()).toBe("header.payload.signature-long-enough-for-existing-contract");
+      return { data: profile };
+    });
+    const result = await loginApi({ email: " User@Example.com ", password: "test", keepLogin });
+    expect(result.nickname).toBe("서버 닉네임");
+    const storage = keepLogin ? localStorage : sessionStorage;
+    const other = keepLogin ? sessionStorage : localStorage;
+    expect(JSON.parse(storage.getItem("currentUser"))).toEqual(profile);
+    expect(other.getItem("currentUser")).toBeNull();
+    expect(other.getItem("userNickname")).toBeNull();
+  });
+  test("social login clears the previous user's cache and uses the synchronized profile", async () => {
+    localStorage.setItem("userEmail", "old@example.com");
+    localStorage.setItem("userNickname", "이전 이름");
+    api.post.mockResolvedValue({ data: { token: "new-social-token", newUser: false } });
+    api.get.mockResolvedValue({ data: { nickname: "동기화 이름", email: null, emailAvailable: false, provider: "KAKAO" } });
+    const result = await completeSocialLoginApi({ provider: "kakao", code: "code", state: "state" });
+    expect(result.profile.nickname).toBe("동기화 이름");
+    expect(localStorage.getItem("userEmail")).toBeNull();
+    expect(JSON.parse(localStorage.getItem("currentUser")).email).toBeNull();
+  });
+  test("late profile from an older login cannot overwrite a newer account", async () => {
+    const read = deferred();
+    api.post.mockResolvedValue({ data: "header.payload.signature-long-enough-for-existing-contract", headers: {} });
+    api.get.mockReturnValue(read.promise);
+    const pending = loginApi({ email: "user@example.com", password: "test" });
+    await Promise.resolve();
+    localStorage.setItem("accessToken", "newer-login-token");
+    localStorage.setItem("currentUser", JSON.stringify({ nickname: "새 계정" })); notifyAuthChange();
+    read.resolve({ data: profile });
+    await expect(pending).rejects.toMatchObject({ code: "ERR_CANCELED" });
+    expect(JSON.parse(localStorage.getItem("currentUser")).nickname).toBe("새 계정");
+  });
+  test("profile failure preserves successful credentials and never restores an old nickname", async () => {
+    localStorage.setItem("userNickname", "다른 계정");
+    api.post.mockResolvedValue({ data: "header.payload.signature-long-enough-for-existing-contract", headers: {} });
+    api.get.mockRejectedValue({ response: { status: 500 } });
+    await expect(loginApi({ email: "user@example.com", password: "test" })).resolves.toMatchObject({ profile: null });
+    expect(getAccessToken()).toBeTruthy();
+    expect(localStorage.getItem("userNickname")).toBeNull();
+  });
+  test("reset sends only normalized email and unchanged newPassword without installing credentials", async () => {
+    api.patch.mockResolvedValue({ data: "비밀번호가 변경되었습니다." });
+    const controller = new AbortController();
+    await expect(resetPasswordApi({ email: " User@Example.com ", newPassword: "ValidPassword!" }, { signal: controller.signal })).resolves.toBe("비밀번호가 변경되었습니다.");
+    expect(api.patch).toHaveBeenCalledWith("/api/auth/password/reset", { email: "user@example.com", newPassword: "ValidPassword!" }, { signal: controller.signal });
+    expect(getAccessToken()).toBeNull();
+  });
+  test.each(["<html>login</html>", {}, null])("ambiguous reset 200 cannot display success", async data => {
+    api.patch.mockResolvedValue({ data });
+    await expect(resetPasswordApi({ email: "user@example.com", newPassword: "ValidPassword!" })).rejects.toThrow("변경 결과");
+  });
 });
 
 test.each([true, false])("일반 로그인 저장 기간 유지: keepLogin=%s", async (keepLogin) => {

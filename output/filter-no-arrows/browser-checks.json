@@ -1,0 +1,58 @@
+[
+  {
+    "theme": "light",
+    "width": 320,
+    "arrows": 0,
+    "dragWorks": true,
+    "selectionKept": true,
+    "lastFour": [
+      "중국(홍콩)",
+      "태국",
+      "필리핀",
+      "한국"
+    ],
+    "noPageOverflow": true
+  },
+  {
+    "theme": "light",
+    "width": 1366,
+    "arrows": 0,
+    "dragWorks": true,
+    "selectionKept": true,
+    "lastFour": [
+      "중국(홍콩)",
+      "태국",
+      "필리핀",
+      "한국"
+    ],
+    "noPageOverflow": true
+  },
+  {
+    "theme": "dark",
+    "width": 320,
+    "arrows": 0,
+    "dragWorks": true,
+    "selectionKept": true,
+    "lastFour": [
+      "중국(홍콩)",
+      "태국",
+      "필리핀",
+      "한국"
+    ],
+    "noPageOverflow": true
+  },
+  {
+    "theme": "dark",
+    "width": 1366,
+    "arrows": 0,
+    "dragWorks": true,
+    "selectionKept": true,
+    "lastFour": [
+      "중국(홍콩)",
+      "태국",
+      "필리핀",
+      "한국"
+    ],
+    "noPageOverflow": true
+  }
+]

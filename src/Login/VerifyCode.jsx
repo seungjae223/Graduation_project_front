@@ -7,7 +7,9 @@ import {
 } from "react-router-dom";
 import "./VerifyCode.css";
 import { getApiErrorMessage } from "../api/api";
-import { sendEmailCodeApi, verifyEmailCodeApi } from "../api/authApi";
+import { resetPasswordApi, sendEmailCodeApi, verifyEmailCodeApi } from "../api/authApi";
+import { PASSWORD_PATTERN, PASSWORD_HELP, getPasswordIssues } from "./passwordValidation";
+import { getPasswordResetFailure } from "../utils/passwordResetError";
 import { buildAuthPath, getAuthReturnPath } from "./authPaths";
 import useAuthRequest, { isCanceledAuthRequest } from "./useAuthRequest";
 import useEmailCooldown from "./useEmailCooldown";
@@ -19,7 +21,7 @@ const VerifyCode = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  const email = location.state?.email || searchParams.get("email") || "";
+  const email = String(location.state?.email || searchParams.get("email") || "").trim().toLowerCase();
   const returnPath = getAuthReturnPath(location.search);
   const scope = `${location.key}:${location.pathname}${location.search}:${email}`;
   const task = useAuthRequest(scope);
@@ -27,22 +29,33 @@ const VerifyCode = () => {
 
   const inputRefs = useRef([]);
   const resendFocus = useRef(null);
+  const passwordFocus = useRef(null);
 
   const [code, setCode] = useState(Array(CODE_LENGTH).fill(""));
   const [isVerified, setIsVerified] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isResetComplete, setIsResetComplete] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const isVerifying = task.busy === "verify";
   const isResending = task.busy === "resend";
+  const isResetting = task.busy === "reset";
   // Email send/verify currently provide no expiration metadata. The server
   // validates expiration; a new visit must not invent another five minutes.
   useEffect(() => {
     setCode(Array(CODE_LENGTH).fill(""));
     setIsVerified(false);
+    setNewPassword("");
+    setConfirmPassword("");
+    setIsResetComplete(false);
     setErrorMessage("");
     setStatusMessage("");
     resendFocus.current = null;
   }, [scope]);
+  useEffect(() => {
+    if (isVerified && !isResetComplete) passwordFocus.current?.focus();
+  }, [isVerified, isResetComplete]);
   useEffect(() => {
     if (task.busy || resendFocus.current === null) return;
     if (resendFocus.current === scope) inputRefs.current[0]?.focus();
@@ -191,6 +204,41 @@ const VerifyCode = () => {
   };
 
   const isCodeComplete = code.every((number) => number !== "");
+  const passwordIssues = getPasswordIssues(newPassword);
+  const passwordsMatch = confirmPassword === newPassword;
+  const canReset = PASSWORD_PATTERN.test(newPassword) && passwordsMatch;
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!isVerified || isResetComplete || !canReset) return;
+    const request = task.begin("reset");
+    if (!request) return;
+    setErrorMessage("");
+    try {
+      await resetPasswordApi({ email, newPassword }, request.options);
+      if (!request.isCurrent()) return;
+      setNewPassword("");
+      setConfirmPassword("");
+      setCode(Array(CODE_LENGTH).fill(""));
+      setIsVerified(false);
+      setIsResetComplete(true);
+      setStatusMessage("비밀번호가 변경되었습니다. 새 비밀번호로 로그인해주세요.");
+    } catch (error) {
+      if (!request.isCurrent() || isCanceledAuthRequest(error)) return;
+      logSafeApiError(error, "VerifyCode.jsx");
+      const failure = getPasswordResetFailure(error);
+      setErrorMessage(failure?.message || getApiErrorMessage(error, "비밀번호 변경 결과를 확인하지 못했습니다. 새 비밀번호로 로그인하거나 이메일 인증을 다시 진행해주세요."));
+      if (failure?.reason === "email_verification") {
+        setIsVerified(false);
+        setCode(Array(CODE_LENGTH).fill(""));
+        setNewPassword("");
+        setConfirmPassword("");
+        setStatusMessage("");
+      }
+    } finally {
+      task.end(request);
+    }
+  };
 
   if (!email) {
     return <main className="verify-code-page"><section className="verify-code-form">
@@ -201,23 +249,19 @@ const VerifyCode = () => {
 
   return (
     <main className="verify-code-page">
-      <form className="verify-code-form" onSubmit={handleVerifyCode}>
+      <form className="verify-code-form" onSubmit={isVerified ? handleResetPassword : handleVerifyCode} aria-label={isVerified ? "비밀번호 재설정" : "이메일 인증"}>
         <section className="verify-code-top">
           <h1>
-            이메일로 발송된
-            <br />
-            6자리 인증번호를
-            <br />
-            입력해 주세요.
+            {isResetComplete ? "비밀번호가 변경되었습니다." : isVerified ? "새 비밀번호를 입력해 주세요." : <>이메일로 발송된<br />6자리 인증번호를<br />입력해 주세요.</>}
           </h1>
 
           <p className="verify-code-desc">
-            <span>{email}</span> 주소의 인증번호를 입력해 주세요.
+            <span>{email}</span>{isVerified || isResetComplete ? " 계정의 비밀번호를 재설정합니다." : " 주소의 인증번호를 입력해 주세요."}
             <br />
-            메일함을 확인해 주세요.
+            {isResetComplete ? "새 비밀번호로 로그인해주세요." : isVerified ? "이메일 인증 후 10분 이내에 변경해 주세요. 카카오·구글 계정은 해당 서비스로 로그인해 주세요." : "메일함을 확인해 주세요."}
           </p>
 
-          <div className="verify-code-inputs" onPaste={handlePaste}>
+          {!isVerified && !isResetComplete && <><div className="verify-code-inputs" onPaste={handlePaste}>
             {code.map((number, index) => (
               <input
                 key={index}
@@ -247,20 +291,33 @@ const VerifyCode = () => {
               <span className="resend-icon" aria-hidden="true">↻</span>
               <span>{isResending ? "재발송 중..." : emailCooldown.remaining > 0 ? `${emailCooldown.remaining}초 후 재발송` : "인증번호 재발송"}</span>
             </button>
-          </div>
+          </div></>}
+          {isVerified && <div className="reset-password-fields">
+            <label htmlFor="reset-password">새 비밀번호</label>
+            <input ref={passwordFocus} id="reset-password" type="password" autoComplete="new-password" value={newPassword} disabled={Boolean(task.busy)}
+              aria-invalid={Boolean(newPassword && passwordIssues.length)} aria-describedby="reset-password-help reset-password-issues"
+              onChange={e => { setNewPassword(e.target.value); setErrorMessage(""); }} />
+            <p id="reset-password-help">{PASSWORD_HELP}</p>
+            <p id="reset-password-issues" className="verify-code-error">{newPassword && passwordIssues.join(" ")}</p>
+            <label htmlFor="reset-password-confirm">새 비밀번호 확인</label>
+            <input id="reset-password-confirm" type="password" autoComplete="new-password" value={confirmPassword} disabled={Boolean(task.busy)}
+              aria-invalid={Boolean(confirmPassword && !passwordsMatch)} aria-describedby="reset-password-match"
+              onChange={e => { setConfirmPassword(e.target.value); setErrorMessage(""); }} />
+            <p id="reset-password-match" className="verify-code-error">{confirmPassword && !passwordsMatch ? "비밀번호가 일치하지 않습니다." : ""}</p>
+          </div>}
           {errorMessage && <p className="verify-code-error" role="alert">{errorMessage}</p>}
           {statusMessage && <p className="verify-code-status" role="status">{statusMessage}</p>}
-          {isVerified && <p className="verify-code-service-notice">현재 비밀번호 변경 기능은 준비 중입니다.</p>}
         </section>
 
         <section className="verify-code-bottom">
-          <button
+          {!isResetComplete && <button
             type="submit"
             className="verify-code-submit"
-            disabled={!isCodeComplete || Boolean(task.busy) || isVerified}
+            disabled={Boolean(task.busy) || (isVerified ? !canReset : !isCodeComplete)}
           >
-            {isVerifying ? "확인 중..." : isVerified ? "인증 완료" : "확인"}
-          </button>
+            {isResetting ? "변경 중..." : isVerified ? "비밀번호 변경" : isVerifying ? "확인 중..." : "확인"}
+          </button>}
+          {!isResetComplete && <Link className="verify-code-login" to={buildAuthPath("/find-password", returnPath)}>이메일 다시 입력하기</Link>}
           <Link className="verify-code-login" to={buildAuthPath("/login", returnPath)}>로그인으로 돌아가기</Link>
         </section>
       </form>

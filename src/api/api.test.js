@@ -8,6 +8,7 @@ describe("JWT 인증 헤더", () => {
 
   test.each([
     "/api/mypage/stats",
+    "/api/mypage/profile",
     "/api/places",
     "/api/places/search",
     "/api/places/1",
