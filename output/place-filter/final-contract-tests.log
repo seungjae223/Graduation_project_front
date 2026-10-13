@@ -1,0 +1,8 @@
+PASS src/api/specSync.test.js
+PASS src/utils/placeCountry.test.js
+
+Test Suites: 2 passed, 2 total
+Tests:       38 passed, 38 total
+Snapshots:   0 total
+Time:        6.138 s
+Ran all test suites within paths "src/utils/placeCountry.test.js", "src/api/specSync.test.js".

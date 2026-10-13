@@ -56,8 +56,8 @@
   border-radius: 18px;
   background: var(--color-accent-soft);
   color: var(--color-accent-text);
-  font-size: 17px;
-  font-weight: 900;
+  font-size: var(--font-control);
+  font-weight: var(--weight-semibold);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -73,8 +73,8 @@
 .my-schedule-section-header h2 {
   margin: 0;
   color: var(--color-text-strong);
-  font-size: 19px;
-  font-weight: 900;
+  font-size: var(--font-section-title);
+  font-weight: var(--weight-heading);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -138,9 +138,9 @@
 .my-schedule-card-body h3 {
   margin: 0;
   color: var(--color-text-strong);
-  font-size: 17px;
-  font-weight: 900;
-  line-height: 1.35;
+  font-size: var(--font-card-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   word-break: keep-all;
 }
 
@@ -212,9 +212,9 @@
 
 .my-schedule-recommend-card h3 {
   margin: 0;
-  font-size: 30px;
-  font-weight: 900;
-  line-height: 1.25;
+  font-size: var(--font-section-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
 }
 
 .my-schedule-recommend-card p {
@@ -233,7 +233,7 @@
   border-radius: 14px;
   background: var(--color-surface);
   color: var(--color-accent-text);
-  font-size: 18px;
-  font-weight: 900;
+  font-size: var(--font-control);
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }

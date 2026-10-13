@@ -1,0 +1,310 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/trips/7"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/trips/7/days/1/places/order",
+    "body": {
+      "tripPlaceIds": [
+        91,
+        93,
+        92
+      ],
+      "startTime": "10:00"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/trips/7/days/1/places/order",
+    "body": {
+      "tripPlaceIds": [
+        93,
+        91,
+        92
+      ],
+      "startTime": "10:00"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/trips/7/days/1/places/order",
+    "body": {
+      "tripPlaceIds": [
+        91,
+        92,
+        93
+      ],
+      "startTime": "10:00"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/trips/7/days/1/places/order",
+    "body": {
+      "tripPlaceIds": [
+        93,
+        91,
+        92
+      ],
+      "startTime": "10:00"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/trips/7/days/1/places/order",
+    "body": {
+      "tripPlaceIds": [
+        91,
+        93,
+        92
+      ],
+      "startTime": "10:00"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/trips/7/days/1/places/order",
+    "body": {
+      "tripPlaceIds": [
+        91,
+        93,
+        92
+      ],
+      "startTime": "10:00"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/trips/7/days/1/places/order",
+    "body": {
+      "tripPlaceIds": [
+        91,
+        93,
+        92
+      ],
+      "startTime": "10:00"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/trips/7/days/1/places/order",
+    "body": {
+      "tripPlaceIds": [
+        93,
+        91,
+        92
+      ],
+      "startTime": "10:00"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/trips/7/days/1/places/order",
+    "body": {
+      "tripPlaceIds": [
+        91,
+        93,
+        92
+      ],
+      "startTime": "10:00"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/trips/7/days/1/places/order",
+    "body": {
+      "tripPlaceIds": [
+        91,
+        93,
+        92
+      ],
+      "startTime": "10:00"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/trips/7/days/1/places/order",
+    "body": {
+      "tripPlaceIds": [
+        93,
+        91,
+        92
+      ],
+      "startTime": "10:00"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/trips/7/days/1/places/order",
+    "body": {
+      "tripPlaceIds": [
+        91,
+        93,
+        92
+      ],
+      "startTime": "10:00"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/trips/7/days/1/places/order",
+    "body": {
+      "tripPlaceIds": [
+        93,
+        91,
+        92
+      ],
+      "startTime": "10:00"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/places"
+  },
+  {
+    "method": "GET",
+    "path": "/api/trips/7/days/1/timeline"
+  }
+]

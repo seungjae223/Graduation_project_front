@@ -31,17 +31,17 @@
 .inquiry-title-section h1 {
   margin: 0;
   color: var(--color-text-strong);
-  font-size: 31px;
-  font-weight: 900;
-  line-height: 1.12;
+  font-size: var(--font-page-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   letter-spacing: -0.06em;
 }
 
 .inquiry-title-section p {
   margin: 18px 0 0;
   color: var(--color-text-muted);
-  font-size: 16px;
-  font-weight: 500;
+  font-size: var(--font-body);
+  font-weight: 400;
   letter-spacing: -0.03em;
 }
 
@@ -58,7 +58,7 @@
   box-sizing: border-box;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 18px;
+  border-radius: var(--radius-card);
   box-shadow: 0 2px 8px var(--color-shadow);
 }
 
@@ -114,9 +114,9 @@
 .inquiry-card-title {
   margin: 0 0 17px;
   color: var(--color-text-strong);
-  font-size: 20px;
-  font-weight: 900;
-  line-height: 1.25;
+  font-size: var(--font-card-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   letter-spacing: -0.05em;
 }
 
@@ -188,8 +188,8 @@
   background: var(--color-primary);
   color: var(--color-on-primary);
   box-shadow: 0 8px 18px rgba(24, 168, 237, 0.36);
-  font-size: 18px;
-  font-weight: 900;
+  font-size: var(--font-control);
+  font-weight: var(--weight-semibold);
   letter-spacing: -0.04em;
   cursor: pointer;
 }
@@ -273,19 +273,21 @@
   }
 
   .inquiry-title-section h1 {
-    font-size: 29px;
+    font-size: var(--font-page-title);
   }
 
   .inquiry-title-section p {
-    font-size: 15px;
+    font-size: var(--font-body);
   }
 
   .inquiry-card {
     padding: 24px 22px 20px;
-  }
+
+  border-radius: var(--radius-card);
+}
 
   .inquiry-card-title {
-    font-size: 19px;
+    font-size: var(--font-card-title);
   }
 
   .inquiry-card-content {
@@ -301,7 +303,7 @@
     min-width: 152px;
     height: 60px;
     padding: 0 22px;
-    font-size: 17px;
+    font-size: var(--font-control);
   }
 
   .inquiry-pagination {

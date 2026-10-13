@@ -1,0 +1,164 @@
+{
+  "List": {
+    "tags": [
+      "place-controller"
+    ],
+    "operationId": "getAllPlaces",
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "*/*": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Place"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "Search": {
+    "tags": [
+      "place-controller"
+    ],
+    "operationId": "searchPlaces",
+    "parameters": [
+      {
+        "name": "keyword",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "*/*": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/PlaceResponseDto"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "Recommendations": {
+    "tags": [
+      "recommendation-controller"
+    ],
+    "operationId": "getRecommendations",
+    "parameters": [
+      {
+        "name": "region",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "theme",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "*/*": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Place"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "Place": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "region": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "theme": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "address": {
+        "type": "string"
+      },
+      "latitude": {
+        "type": "number",
+        "format": "double"
+      },
+      "longitude": {
+        "type": "number",
+        "format": "double"
+      },
+      "placeType": {
+        "type": "string"
+      }
+    }
+  },
+  "PlaceResponse": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "region": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "theme": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "address": {
+        "type": "string"
+      },
+      "latitude": {
+        "type": "number",
+        "format": "double"
+      },
+      "longitude": {
+        "type": "number",
+        "format": "double"
+      },
+      "placeType": {
+        "type": "string"
+      }
+    }
+  },
+  "CountryPaths": []
+}

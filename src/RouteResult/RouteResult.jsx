@@ -1340,7 +1340,7 @@ const TimelineMemo = ({ memo, onClick }) => {
     </button>
   );
 };
-const MemoModal = ({ isOpen, value, onChange, onCancel, onSave, task }) => {
+const MemoModal = ({ isOpen, value, onChange, onCancel, onSave, onRetryRead, showSuccess, task }) => {
   const dialogRef = useModalFocus({
     open: isOpen,
     onClose: onCancel,
@@ -1348,8 +1348,11 @@ const MemoModal = ({ isOpen, value, onChange, onCancel, onSave, task }) => {
     lockScroll: true,
   });
   if (!isOpen) return null;
+  const feedback = task?.message && (task.status !== "success" || showSuccess) ? (
+    <p className={`route-result-memo-status is-${task.status}`} role={["error", "refreshError", "unknown"].includes(task.status) ? "alert" : "status"}>{task.message}</p>
+  ) : null;
   return createPortal(
-    <div className="route-result-page route-result-memo-portal">
+    <div className="route-result-memo-portal">
       <div className="route-result-memo-backdrop" onClick={onCancel}>
       {" "}
       <div
@@ -1363,7 +1366,11 @@ const MemoModal = ({ isOpen, value, onChange, onCancel, onSave, task }) => {
       >
         {" "}
         <h3 id="route-result-memo-title">메모 작성</h3>{" "}
+        <div className="route-result-memo-body">
         <textarea
+          id="route-result-memo-content"
+          aria-label="메모 내용"
+          aria-describedby="route-result-memo-hint"
           className="route-result-memo-textarea"
           disabled={task?.blocked}
           value={value}
@@ -1372,8 +1379,14 @@ const MemoModal = ({ isOpen, value, onChange, onCancel, onSave, task }) => {
           onChange={(event) => onChange(event.target.value)}
           data-modal-initial-focus
         />{" "}
-        {task?.message && <p role="status">{task.message}</p>}
-        {["refreshError", "unknown"].includes(task?.status) && <button type="button" onClick={task.retryRead}>최신 메모 다시 확인</button>}
+        <p id="route-result-memo-hint" className="route-result-memo-hint">
+          <span>최대 500자까지 작성할 수 있어요.</span>
+          <span>{value.length}/500</span>
+        </p>
+        {task?.status !== "success" && feedback}
+        {["refreshError", "unknown"].includes(task?.status) && <button className="route-result-memo-retry" type="button" onClick={onRetryRead}>최신 메모 다시 확인</button>}
+        </div>
+        {task?.status === "success" && feedback}
         <div className="route-result-memo-actions">
           {" "}
           <button
@@ -1383,7 +1396,7 @@ const MemoModal = ({ isOpen, value, onChange, onCancel, onSave, task }) => {
             onClick={onCancel}
           >
             {" "}
-            취소{" "}
+            {task?.status === "success" && showSuccess ? "닫기" : "취소"}{" "}
           </button>{" "}
           <button
             type="button"
@@ -1392,7 +1405,7 @@ const MemoModal = ({ isOpen, value, onChange, onCancel, onSave, task }) => {
             onClick={onSave}
           >
             {" "}
-            저장{" "}
+            {task?.status === "running" ? "저장 중..." : "저장"}{" "}
           </button>{" "}
         </div>{" "}
         </div>{" "}
@@ -1432,6 +1445,7 @@ const SortableTimelineItem = ({
   onClick,
   ariaLabel,
   title,
+  disabled = false,
 }) => {
   const {
     attributes,
@@ -1441,7 +1455,7 @@ const SortableTimelineItem = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({ id, disabled });
 
   return (
     <div
@@ -1463,6 +1477,7 @@ const SortableTimelineItem = ({
         ref={setActivatorNodeRef}
         className="route-result-drag-handle"
         {...attributes}
+        aria-disabled={disabled}
         aria-label={`${title} 일정 순서 변경`}
         title="드래그해서 순서 변경"
         onClick={(event) => event.stopPropagation()}
@@ -1483,6 +1498,8 @@ export const DetailSection = ({
   onOpenMemo,
   onOpenPlaceMap,
   onReorderItems,
+  reorderDisabled = false,
+  orderFeedback,
   mapProvider = "google",
 }) => {
   const providerLabel = mapProvider === "kakao" ? "카카오맵" : "구글맵";
@@ -1532,6 +1549,7 @@ export const DetailSection = ({
     },
   };
   const handleDragEnd = (event) => {
+    if (reorderDisabled) return;
     const { active, over } = event;
 
     if (!over || active.id === over.id) {
@@ -1635,6 +1653,7 @@ export const DetailSection = ({
         <SortableTimelineItem
           key={sortableId}
           id={sortableId}
+          disabled={reorderDisabled}
           title={item.title}
           isClickable={isClickable}
           onClick={isClickable ? () => handleOpen(item) : undefined}
@@ -1653,8 +1672,7 @@ export const DetailSection = ({
           {day.sectionDistance}
         </span>
       </div>
-
-
+      {orderFeedback}
       {isReorderable ? (
         <DndContext
           accessibility={accessibility}
@@ -2086,6 +2104,8 @@ const RouteDayContent = ({
   onOpenPlaceMap,
   onOpenMemo,
   onReorderItems,
+  reorderDisabled = false,
+  orderFeedback,
   coordinateOwner,
   onResolvedCoordinates,
 }) => {
@@ -2122,6 +2142,8 @@ const RouteDayContent = ({
         onOpenMemo={onOpenMemo}
         onOpenPlaceMap={onOpenPlaceMap}
         onReorderItems={onReorderItems}
+        reorderDisabled={reorderDisabled}
+        orderFeedback={orderFeedback}
         mapProvider={mapProvider}
       />{" "}
     </div>
@@ -2203,6 +2225,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
 
   const closeMemoModal = () => {
     if (memoTask.status === "running") return;
+    memoTask.reset();
     setMemoModal({ isOpen: false, dayIndex: null, itemIndex: null, value: "" });
   };
   const handleOpenMemo = (dayIndex, itemIndex) => {
@@ -2217,11 +2240,13 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     });
   };
   const handleChangeMemo = (value) => {
-    setMemoModal((prev) => ({ ...prev, value }));
+    memoTask.reset();
+    setMemoModal((prev) => ({ ...prev, value, showSuccess: false }));
   };
   const memoItem = displayResultDays[memoModal.dayIndex]?.items?.[memoModal.itemIndex];
   const memoTask = useMutationTask(accountKey + ":" + String(routeId) + ":" + (memoItem?.tripPlaceId ?? memoItem?.id));
   const orderTask = useMutationTask(accountKey + ":" + String(routeId) + ":order");
+  const orderRequest = useRef(null);
   const handleSaveMemo = async () => {
     if (!memoItem || memoTask.blocked) return;
     const targetTrip = routeId || serverTrip?.id;
@@ -2230,6 +2255,7 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
     const submitted = memoModal.value.trim();
     const key = getMemoKey(memoModal.dayIndex, memoModal.itemIndex, memoItem.title, memoItem);
     if (!targetTrip || !targetId) { setPageNotice("저장할 서버 방문 항목을 확인할 수 없습니다."); return; }
+    setMemoModal(previous => ({ ...previous, showSuccess: true }));
     await memoTask.run(
       () => api.patch("/api/trips/" + targetTrip + "/days/" + day + "/places/" + targetId + "/memo", { memo: submitted }),
       async () => {
@@ -2239,44 +2265,71 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
         if (String(currentRoute.current) !== String(targetTrip) || getAuthSnapshot().accountKey !== accountKey) return;
         setMemoValues(previous => ({ ...previous, [key]: updated.memo }));
       },
-      { failure: "메모를 저장하지 못했어요. 입력은 유지됩니다.", success: "메모를 저장하고 최신 내용을 확인했어요.", refreshFailure: "메모는 저장됐지만 최신 내용을 확인하지 못했어요." }
+      { failure: "메모를 저장하지 못했어요. 입력은 유지됩니다.", success: "메모를 저장했어요.", refreshFailure: "메모는 저장됐지만 최신 내용을 확인하지 못했어요." }
     );
   };
-  const handleReorderItems = (dayIndex, nextItems) => {
-    if (orderTask.blocked || memoTask.blocked) return;
+  const handleReorderItems = async (dayIndex, nextItems) => {
+    const requestKey = `${accountKey}:${routeId}`;
+    if (orderRequest.current?.key === requestKey || orderTask.blocked || memoTask.blocked) return;
+    const originalItems = resultDays[dayIndex]?.items;
+    if (!originalItems || sameOrder(originalItems, nextItems)) return;
+    const ids = nextItems.map(item => item.tripPlaceId ?? item.id);
+    if (ids.length !== originalItems.length || new Set(ids.map(String)).size !== ids.length ||
+        ids.some(id => !originalItems.some(item => visitKey(item) === String(id)))) {
+      setPageNotice("방문 항목을 확인하지 못했어요. 일정을 다시 불러와 주세요.");
+      return;
+    }
     if (nextItems.some((item, index) => item.isStartPoint && index !== 0)) {
       setPageNotice("출발 장소는 첫 번째 방문 순서로 유지해주세요.");
       return;
     }
     setPageNotice("");
     orderTask.reset();
+    const targetTrip = routeId;
+    const clearDraft = () => {
+      if (String(currentRoute.current) !== String(targetTrip) || getAuthSnapshot().accountKey !== accountKey) return;
+      setOrderEdits(previous => {
+        const days = { ...previous.days }; delete days[dayIndex];
+        return { tripId: targetTrip, days };
+      });
+    };
     setOrderEdits(previous => {
       const days = previous.tripId === routeId ? { ...previous.days } : {};
       if (sameOrder(resultDays[dayIndex].items, nextItems)) delete days[dayIndex];
       else days[dayIndex] = nextItems.map(visitKey);
       return { tripId: routeId, days };
     });
-  };
-  const handleSaveOrder = async () => {
-    if (!routeId || orderTask.blocked || memoTask.blocked || !activeDay?.isCustomOrder) return;
-    const targetTrip = routeId;
-    const dayIndex = activeDayIndex;
-    const ids = activeDay.items.map(item => item.tripPlaceId ?? item.id);
-    await orderTask.run(
-      () => updateTripPlaceOrderApi({ tripId: targetTrip, day: dayIndex + 1, tripPlaceIds: ids, startTime: "10:00" }),
+    // Explicit demo screens have no server trip; retain their local reorder/reset.
+    if (!targetTrip) return;
+    const request = { key: requestKey };
+    orderRequest.current = request;
+    let allowDifferentOrder = false;
+    try { await orderTask.run(
       async () => {
-        const result = await queryResult.refreshDayOrder(dayIndex + 1, ids);
-        if (String(currentRoute.current) !== String(targetTrip) || getAuthSnapshot().accountKey !== accountKey) return;
-        setOrderEdits(previous => {
-          const days = { ...previous.days }; delete days[dayIndex];
-          return { tripId: targetTrip, days };
-        });
+        try {
+          await updateTripPlaceOrderApi({ tripId: targetTrip, day: dayIndex + 1, tripPlaceIds: ids, startTime: "10:00" });
+        } catch (error) {
+          clearDraft();
+          // An HTTP error or lost response must not leave an unsaved order visible.
+          allowDifferentOrder = true;
+          throw error;
+        }
+      },
+      async () => {
+        const acceptDifferentOrder = allowDifferentOrder;
+        allowDifferentOrder = true; // Subsequent retries reconcile the authoritative order.
+        const result = await queryResult.refreshDayOrder(dayIndex + 1, ids, { acceptDifferentOrder });
+        clearDraft();
         return result;
       },
-      { failure: "방문 순서를 저장하지 못했어요. 출발지와 고정 시간을 확인해주세요.",
-        success: "방문 순서를 저장하고 시간을 다시 계산했어요.",
-        refreshFailure: "방문 순서는 저장됐지만 최신 일정 확인에 실패했어요." }
-    );
+      { failure: "순서를 저장하지 못해 이전 순서로 복원했어요. 출발지와 고정 시간을 확인해주세요.",
+        unknown: "저장 여부를 확인하지 못해 이전 순서로 복원했어요. 최신 순서를 다시 확인해주세요.",
+        success: "방문 순서를 저장했어요.",
+        notApplied: "서버의 최신 순서가 요청한 순서와 달라 최신 순서로 복원했어요.",
+        refreshFailure: "저장 응답은 받았지만 최신 일정을 확인하지 못했어요. 다시 확인해주세요." }
+    ); } finally {
+      if (orderRequest.current === request) orderRequest.current = null;
+    }
   };
   const hasTemporaryOrder = displayResultDays.some(day => day.isCustomOrder);
   useEffect(() => {
@@ -2440,20 +2493,20 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
           onOpenRouteMap={handleOpenRouteMap}
           onOpenPlaceMap={handleOpenPlaceMap}
           onOpenMemo={orderTask.blocked ? undefined : handleOpenMemo}
-          onReorderItems={orderTask.blocked || memoTask.blocked ? undefined : handleReorderItems}
+          onReorderItems={handleReorderItems}
+          reorderDisabled={orderTask.blocked || memoTask.blocked}
+          orderFeedback={orderTask.status !== "idle" && <div className="route-order-feedback" role={orderTask.status === "success" || orderTask.status === "running" ? "status" : "alert"}>
+            <p>{orderTask.status === "running" ? "방문 순서를 저장하는 중입니다..." : orderTask.message}</p>
+            {["refreshError", "unknown"].includes(orderTask.status) && <button type="button" onClick={orderTask.retryRead}>저장된 순서 다시 확인</button>}
+          </div>}
           coordinateOwner={coordinateOwner}
           onResolvedCoordinates={publishCoordinates}
         />{" "}
-      {activeDay?.isCustomOrder && <div className="route-order-reset">
-        {routeId && <button type="button" disabled={orderTask.blocked || memoTask.blocked} onClick={handleSaveOrder}>순서 저장</button>}
+      {!routeId && activeDay?.isCustomOrder && <div className="route-order-reset">
         <button type="button" disabled={orderTask.blocked} onClick={() => {
           setOrderEdits(previous => { const days = { ...previous.days }; delete days[activeDayIndex]; return { tripId: routeId, days }; });
           if (lastReorderHandle.current?.isConnected) lastReorderHandle.current.focus();
         }}>저장된 순서로 되돌리기</button>
-      </div>}
-      {orderTask.status !== "idle" && <div className="route-query-status" role={orderTask.status === "success" || orderTask.status === "running" ? "status" : "alert"}>
-        <p>{orderTask.status === "running" ? "방문 순서를 저장하는 중입니다..." : orderTask.message}</p>
-        {["refreshError", "unknown"].includes(orderTask.status) && <button type="button" onClick={orderTask.retryRead}>저장된 순서 다시 확인</button>}
       </div>}
       </div>{" "}
       {pageNotice && <p className="route-query-status" role="status">{pageNotice}</p>}
@@ -2463,6 +2516,11 @@ function RouteResult({ initialSavedRoute = null, isEmbedded = false }) {
         onChange={handleChangeMemo}
         onCancel={closeMemoModal}
         onSave={handleSaveMemo}
+        showSuccess={memoModal.showSuccess}
+        onRetryRead={() => {
+          setMemoModal(previous => ({ ...previous, showSuccess: true }));
+          memoTask.retryRead();
+        }}
         task={memoTask}
       />{" "}
       {!isEmbedded && (

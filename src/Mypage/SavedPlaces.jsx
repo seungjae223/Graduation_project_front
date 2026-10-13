@@ -276,7 +276,7 @@ function SavedPlacesContent() {
     setValidation("");
     await createTask.run(() => api.post(FOLDERS_API, { name }), loadFolders, {
       failure: "폴더 생성에 실패했어요. 입력한 이름은 유지됩니다.",
-      success: "폴더가 생성됐어요. 취소 버튼으로 닫을 수 있습니다.",
+      success: "폴더가 생성됐어요.",
       refreshFailure: "폴더는 생성됐지만 목록을 새로 불러오지 못했어요.",
     });
   };
@@ -327,6 +327,7 @@ function SavedPlacesContent() {
       <InputDialog open={createOpen} title="새 폴더 만들기" label="폴더명" value={folderName} maxLength={255}
         onChange={setFolderName} onClose={() => setCreateOpen(false)} onSubmit={submitFolder}
         busy={createTask.status === "running"} blocked={createTask.blocked || createTask.status === "success"} message={validation || createTask.message}
+        closeLabel={createTask.status === "success" ? "닫기" : "취소"}
         onRetry={["refreshError", "unknown"].includes(createTask.status) ? createTask.retryRead : null} />
       {foldersQuery.status === "error" && <section role="alert"><p>폴더 목록을 불러오지 못했어요.</p><button type="button" onClick={foldersQuery.retry}>폴더 목록 다시 불러오기</button></section>}
       {folders.some(folder => folder.countUnknown) && <section role="status"><p>일부 폴더의 장소 개수를 확인하지 못했어요.</p><button type="button" onClick={foldersQuery.retry}>장소 개수 다시 확인</button></section>}

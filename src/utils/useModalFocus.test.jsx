@@ -97,3 +97,38 @@ test("an empty modal traps focus on the dialog and unmount restores document scr
   expect(document.documentElement.style.overflowY).toBe("");
   expect(document.body.style.overflowY).toBe("");
 });
+
+test("nested dialogs follow keyboard viewport changes and restore previous styles after closing", () => {
+  const previousViewport = window.visualViewport;
+  const viewport = new EventTarget();
+  viewport.height = 667;
+  viewport.offsetTop = 0;
+  Object.defineProperty(window, "visualViewport", { configurable: true, value: viewport });
+  const rootStyle = document.documentElement.style;
+  rootStyle.setProperty("--modal-viewport-height", "600px");
+  rootStyle.setProperty("--modal-viewport-top", "2px", "important");
+  const view = render(<StrictMode><NestedDialogs innerClose={jest.fn()} outerClose={jest.fn()} /></StrictMode>);
+  try {
+    userEvent.click(screen.getByRole("button", { name: "Open outer" }));
+    userEvent.click(screen.getByRole("button", { name: "Open inner" }));
+    viewport.height = 280; viewport.offsetTop = 80;
+    viewport.dispatchEvent(new Event("resize"));
+    expect(rootStyle.getPropertyValue("--modal-viewport-height")).toBe("280px");
+    expect(rootStyle.getPropertyValue("--modal-viewport-top")).toBe("80px");
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(rootStyle.getPropertyValue("--modal-viewport-height")).toBe("280px");
+    viewport.offsetTop = 100; viewport.dispatchEvent(new Event("scroll"));
+    expect(rootStyle.getPropertyValue("--modal-viewport-top")).toBe("100px");
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(rootStyle.getPropertyValue("--modal-viewport-height")).toBe("600px");
+    expect(rootStyle.getPropertyValue("--modal-viewport-top")).toBe("2px");
+    expect(rootStyle.getPropertyPriority("--modal-viewport-top")).toBe("important");
+    viewport.height = 150; viewport.dispatchEvent(new Event("resize"));
+    expect(rootStyle.getPropertyValue("--modal-viewport-height")).toBe("600px");
+  } finally {
+    view.unmount();
+    rootStyle.removeProperty("--modal-viewport-height");
+    rootStyle.removeProperty("--modal-viewport-top");
+    Object.defineProperty(window, "visualViewport", { configurable: true, value: previousViewport });
+  }
+});

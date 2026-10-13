@@ -13,8 +13,8 @@
 
 .recent-places-title {
   margin: 0 0 32px;
-  font-size: 22px;
-  font-weight: 800;
+  font-size: var(--font-section-title);
+  font-weight: var(--weight-heading);
   line-height: 1.2;
   letter-spacing: -0.5px;
   color: var(--color-text-strong);

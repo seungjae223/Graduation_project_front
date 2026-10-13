@@ -45,9 +45,9 @@
 .inquiry-detail-left h1 {
   margin: 0;
   color: var(--color-text-strong);
-  font-size: 23px;
-  font-weight: 800;
-  line-height: 1.25;
+  font-size: var(--font-page-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   letter-spacing: -1.2px;
   word-break: keep-all;
 }
@@ -109,8 +109,8 @@
 .inquiry-question-head h2 {
   margin: 0 0 3px;
   color: var(--color-text-strong);
-  font-size: 17px;
-  font-weight: 800;
+  font-size: var(--font-card-title);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.7px;
 }
 
@@ -181,8 +181,8 @@
 .inquiry-answer-profile h2 {
   margin: 0 0 3px;
   color: var(--color-accent-text);
-  font-size: 17px;
-  font-weight: 800;
+  font-size: var(--font-card-title);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.7px;
 }
 
@@ -275,7 +275,7 @@
   }
 
   .inquiry-detail-left h1 {
-    font-size: 22px;
+    font-size: var(--font-page-title);
   }
 
   .inquiry-detail-meta strong {

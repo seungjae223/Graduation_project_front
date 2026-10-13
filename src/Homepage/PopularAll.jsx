@@ -1,24 +1,23 @@
 
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import AnimatedHeart from "../AnimatedHeart/AnimatedHeart";
 import useReadQuery from "../utils/useReadQuery";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
-import { requireList } from "../api/responseContract";
+import { getPlacesApi } from "../api/placeApi";
+import { getAvailableCountries, getPlaceCountry } from "../utils/placeCountry";
+import { getPaginationItems } from "../utils/pagination";
 import usePlaceSaving from "../utils/usePlaceSaving";
 import PlaceSavingFeedback, { PlaceSaveModal } from "../components/PlaceSavingFeedback";
-import api from "../api/api";
 import "./PopularAll.css";
 
 import PlacePhoto from "../components/PlacePhoto";
 
 
-const PLACES_API = "/api/places";
 const EMPTY_PLACES = [];
-
-const filterList = ["전체", "일본", "한국", "동남아"];
+const MORE_PLACES_PER_PAGE = 5;
 
 
 
@@ -55,20 +54,6 @@ const getIdValue = (...values) => {
 
 
 
-
-const getPlaceText = (place = {}) =>
-  [
-    place.region,
-    place.name,
-    place.placeName,
-    place.title,
-    place.theme,
-    place.description,
-    place.address,
-    place.placeType,
-  ]
-    .filter(Boolean)
-    .join(" ");
 
 const getPlaceTags = (place = {}) => {
   if (Array.isArray(place.tags) && place.tags.length > 0) {
@@ -132,41 +117,26 @@ const normalizePlace = (place = {}, index = 0) => {
   };
 };
 
-const regionMatchers = {
-  일본:
-    /일본|도쿄|교토|오사카|나라|후쿠오카|삿포로|요코하마|나고야|오키나와|japan|jp|jpn|tokyo|kyoto|osaka|nara|fukuoka|sapporo|yokohama|nagoya|okinawa/i,
-  한국:
-    /한국|대한민국|국내|서울|제주|부산|강원|경주|여수|거제|인천|대구|대전|광주|울산|전주|속초|강릉|남해|안동|양양|korea|kr|kor|seoul|jeju|busan|gangwon|gyeongju|yeosu|geoje/i,
-  동남아:
-    /동남아|베트남|태국|인도네시아|필리핀|싱가포르|말레이시아|라오스|캄보디아|발리|다낭|방콕|하노이|호치민|세부|vietnam|thailand|indonesia|philippines|singapore|malaysia|bali|danang|bangkok|hanoi|cebu/i,
-};
-
-const isMatchedFilter = (place, selectedFilter) => {
-  if (selectedFilter === "전체") {
-    return true;
-  }
-
-  const text = getPlaceText(place);
-  const matcher = regionMatchers[selectedFilter];
-
-  if (!matcher) {
-    return text.includes(selectedFilter);
-  }
-
-  return matcher.test(text);
-};
-
 
 
 function PopularAll() {
 
-  const [selectedFilter, setSelectedFilter] = useState("전체");
   const account = useSessionKey();
+  const [selection, setSelection] = useState({ account, filter: "전체", page: 1 });
+  const selectedFilter = selection.account === account ? selection.filter : "전체";
+  const selectedPage = selection.account === account ? selection.page : 1;
+  const moreHeadingRef = useRef(null);
+  const scrollRequested = useRef(false);
   const saving = usePlaceSaving();
   const { isSavingId } = saving;
-  const listing = useReadQuery(`${account}:popular-all`, async signal => requireList((await api.get(PLACES_API, { signal })).data).map(normalizePlace), true, () => getAuthSnapshot().accountKey === account);
+  const listing = useReadQuery(`${account}:popular-all`, async signal => (await getPlacesApi({ signal })).map(normalizePlace)
+    .sort((a, b) => Number(a.id) - Number(b.id)), true, () => getAuthSnapshot().accountKey === account);
   const places = listing.data || EMPTY_PLACES;
   const isLoaded = Boolean(listing.data);
+  const availableCountries = useMemo(() => getAvailableCountries(places), [places]);
+  const selectedUnavailable = selectedFilter !== "전체" && isLoaded && !availableCountries.includes(selectedFilter);
+  const filterList = ["전체", ...availableCountries, ...(selectedUnavailable ? [selectedFilter] : [])];
+  const unclassifiedCount = useMemo(() => places.filter(place => !getPlaceCountry(place)).length, [places]);
 
   const visiblePlaces = useMemo(() => {
     if (!isLoaded) {
@@ -178,7 +148,7 @@ function PopularAll() {
 
   const filteredPlaces = useMemo(() => {
     return visiblePlaces.filter((place) =>
-      isMatchedFilter(place, selectedFilter)
+      selectedFilter === "전체" || getPlaceCountry(place) === selectedFilter
     );
   }, [visiblePlaces, selectedFilter]);
 
@@ -189,6 +159,33 @@ function PopularAll() {
   const monthlyPlaces = useMemo(() => {
     return filteredPlaces.slice(4);
   }, [filteredPlaces]);
+  const totalPages = Math.max(1, Math.ceil(monthlyPlaces.length / MORE_PLACES_PER_PAGE));
+  const currentPage = Math.max(1, Math.min(selectedPage, totalPages));
+  const pagePlaces = monthlyPlaces.slice((currentPage - 1) * MORE_PLACES_PER_PAGE, currentPage * MORE_PLACES_PER_PAGE);
+  const pageItems = getPaginationItems(currentPage, totalPages);
+  useEffect(() => {
+    setSelection(previous => previous.account !== account ? { account, filter: "전체", page: 1 } :
+      previous.page !== currentPage ? { ...previous, page: currentPage } : previous);
+  }, [account, currentPage]);
+
+  const selectCountry = filter => {
+    scrollRequested.current = false;
+    setSelection({ account, filter, page: 1 });
+  };
+  const changePage = page => {
+    if (page === currentPage || page < 1 || page > totalPages) return;
+    scrollRequested.current = true;
+    setSelection({ account, filter: selectedFilter, page });
+  };
+  useEffect(() => {
+    if (!scrollRequested.current) return;
+    scrollRequested.current = false;
+    moreHeadingRef.current?.focus({ preventScroll: true });
+    moreHeadingRef.current?.scrollIntoView?.({
+      behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: "start",
+    });
+  }, [currentPage]);
 
   const handleToggleSaved = saving.toggle;
 
@@ -198,8 +195,7 @@ function PopularAll() {
         <PlaceSavingFeedback saving={saving} />
         {listing.status === "loading" && !listing.data && <p role="status">장소를 불러오는 중...</p>}
         {listing.status === "error" && <div role="alert"><p>장소를 불러오지 못했어요.</p><button type="button" onClick={listing.retry}>목록 다시 조회</button></div>}
-        {listing.status === "success" && !filteredPlaces.length && <p>조건에 맞는 장소가 없어요.</p>}
-        <div className="popular-filter-row">
+        <div className="popular-filter-row" role="group" aria-label="국가별 장소 필터">
           {filterList.map((filter) => (
             <button
               key={filter}
@@ -207,15 +203,19 @@ function PopularAll() {
               className={`popular-filter-btn ${
                 selectedFilter === filter ? "active" : ""
               }`}
-              onClick={() => setSelectedFilter(filter)}
+              onClick={() => selectCountry(filter)}
+              aria-pressed={selectedFilter === filter}
+              disabled={selectedUnavailable && filter === selectedFilter}
             >
               {filter}
-              {filter !== "전체" && (
-                <span className="popular-filter-chevron" aria-hidden="true" />
-              )}
             </button>
           ))}
         </div>
+        {selectedFilter === "전체" && unclassifiedCount > 0 && <p className="popular-country-notice">국가를 확인할 수 없는 장소는 전체 목록에서 확인할 수 있어요.</p>}
+        {listing.status === "success" && !filteredPlaces.length && <div className="popular-empty" role="status">
+          <p>{selectedFilter === "전체" ? "등록된 장소가 없어요." : `${selectedFilter}에 해당하는 장소가 없어요.`}</p>
+          {selectedFilter !== "전체" && <button type="button" className="popular-filter-btn" onClick={() => selectCountry("전체")}>전체 장소 보기</button>}
+        </div>}
 
         <section className="popular-grid popular-grid-one-column">
           {hotPlaces.map((place) => {
@@ -255,11 +255,12 @@ function PopularAll() {
         </section>
 
         {monthlyPlaces.length > 0 && (
-          <section className="popular-month-section">
-            <h2>더 많은 장소</h2>
+          <section className="popular-month-section" aria-labelledby="popular-more-title">
+            <h2 id="popular-more-title" ref={moreHeadingRef} tabIndex={-1}>더 많은 장소</h2>
+            <p className="popular-page-summary" role="status" aria-live="polite">총 {monthlyPlaces.length}개 · {currentPage}/{totalPages} 페이지</p>
 
             <div className="popular-month-list">
-              {monthlyPlaces.map((place) => {
+              {pagePlaces.map((place) => {
                 const placeId = getIdValue(place.id, place.placeId);
                 const saved = saving.isSaved(placeId);
 
@@ -302,6 +303,18 @@ function PopularAll() {
                 );
               })}
             </div>
+            {totalPages > 1 && <nav className="popular-pagination" aria-label="더 많은 장소 페이지">
+              <div className="popular-pagination-numbers">
+                {pageItems.map(page => typeof page === "number" ? <button key={page} type="button"
+                  className={`popular-page-btn ${page === currentPage ? "active" : ""}`}
+                  aria-label={`${page}페이지`} aria-current={page === currentPage ? "page" : undefined}
+                  onClick={() => changePage(page)}>{page}</button> : <span key={page} className="popular-page-gap" aria-hidden="true">…</span>)}
+              </div>
+              <div className="popular-pagination-navigation">
+                <button type="button" className="popular-page-btn" disabled={currentPage === 1} onClick={() => changePage(currentPage - 1)}>이전</button>
+                <button type="button" className="popular-page-btn" disabled={currentPage === totalPages} onClick={() => changePage(currentPage + 1)}>다음</button>
+              </div>
+            </nav>}
           </section>
         )}
       </div>

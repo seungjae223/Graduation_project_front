@@ -14,7 +14,7 @@ test("ID-less success has no name-based selection and duplicate submits only POS
   userEvent.click(screen.getByLabelText("폴더 이름")); userEvent.keyboard("{Enter}"); userEvent.click(screen.getByLabelText("폴더 이름")); userEvent.keyboard("{Enter}"); expect(api.post).toHaveBeenCalledTimes(1);
   expect(screen.getByRole("button", { name: "새 폴더 만들기 닫기" })).toBeDisabled();
   await act(async () => complete({ data: "폴더 생성 완료" })); await screen.findByText(/목록으로 돌아가 직접 폴더/);
-  fireEvent.click(screen.getByRole("button", { name: "취소" }));
+  fireEvent.click(screen.getByRole("button", { name: "목록으로" }));
   expect(save).not.toHaveBeenCalled(); expect(screen.getByRole("button", { name: /저장/ })).toBeDisabled();
   fireEvent.click(screen.getAllByRole("button", { name: "같은 이름" })[1]);
   fireEvent.click(screen.getByRole("button", { name: "저장", exact: true }));

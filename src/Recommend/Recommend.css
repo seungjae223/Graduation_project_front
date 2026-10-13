@@ -1,5 +1,5 @@
 .recommend-page {
-  padding: 24px 8px 24px;
+  padding: 24px 16px;
   box-sizing: border-box;
   background: var(--color-page);
 }
@@ -10,9 +10,9 @@
 
 .recommend-title {
   margin: 0;
-  font-size: 22px;
-  line-height: 1.35;
-  font-weight: 800;
+  font-size: var(--font-page-title);
+  line-height: var(--line-heading);
+  font-weight: var(--weight-heading);
   color: var(--color-text-strong);
   letter-spacing: -0.03em;
 }
@@ -122,7 +122,9 @@ html[data-theme="dark"] .theme-card:not(.active) .theme-icon {
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  padding: 0;
+  padding: 8px 4px;
+
+  min-height: var(--touch-target);
 }
 
 .recommend-card-list {
@@ -133,7 +135,7 @@ html[data-theme="dark"] .theme-card:not(.active) .theme-icon {
 
 .recommend-card {
   overflow: hidden;
-  border-radius: 20px;
+  border-radius: var(--radius-card);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   box-shadow: 0 2px 10px rgba(21, 33, 61, 0.05);
@@ -157,8 +159,8 @@ html[data-theme="dark"] .theme-card:not(.active) .theme-icon {
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 38px;
-  height: 38px;
+  width: var(--touch-target);
+  height: var(--touch-target);
   border: none;
   border-radius: 50%;
   background: var(--color-surface);
@@ -182,9 +184,9 @@ html[data-theme="dark"] .theme-card:not(.active) .theme-icon {
 
 .recommend-title-row h3 {
   margin: 0;
-  font-size: 17px;
-  line-height: 1.35;
-  font-weight: 800;
+  font-size: var(--font-card-title);
+  line-height: var(--line-heading);
+  font-weight: var(--weight-heading);
   color: var(--color-text-strong);
   letter-spacing: -0.02em;
 }
@@ -242,8 +244,8 @@ html[data-theme="dark"] .theme-card:not(.active) .theme-icon {
 }
 
 .recommend-page-btn {
-  min-width: 36px;
-  height: 36px;
+  min-width: var(--touch-target);
+  height: var(--touch-target);
   padding: 0 12px;
   border: 1px solid var(--color-border-strong);
   border-radius: 999px;

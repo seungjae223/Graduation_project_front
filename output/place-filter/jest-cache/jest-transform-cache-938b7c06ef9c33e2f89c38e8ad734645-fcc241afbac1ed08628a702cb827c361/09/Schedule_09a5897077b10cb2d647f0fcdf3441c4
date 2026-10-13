@@ -1,0 +1,19 @@
+003dd0c5af72fbab640aa424817d9c6d
+"use strict";
+
+var _interopRequireDefault = require("C:/Users/joyfu/Desktop/graduation_project/graduation/node_modules/@babel/runtime/helpers/interopRequireDefault.js").default;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Schedule;
+var _MySchedule = _interopRequireDefault(require("../MySchedule/MySchedule"));
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _jsxFileName = "C:\\Users\\joyfu\\Desktop\\graduation_project\\graduation\\src\\Schedule\\Schedule.jsx"; // The date-grouped server list requires an explicit selection, never a guessed latest trip.
+function Schedule() {
+  return /*#__PURE__*/(0, _jsxDevRuntime.jsxDEV)(_MySchedule.default, {}, void 0, false, {
+    fileName: _jsxFileName,
+    lineNumber: 5,
+    columnNumber: 10
+  }, this);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfTXlTY2hlZHVsZSIsIl9pbnRlcm9wUmVxdWlyZURlZmF1bHQiLCJyZXF1aXJlIiwiX2pzeERldlJ1bnRpbWUiLCJfanN4RmlsZU5hbWUiLCJTY2hlZHVsZSIsImpzeERFViIsImRlZmF1bHQiLCJmaWxlTmFtZSIsImxpbmVOdW1iZXIiLCJjb2x1bW5OdW1iZXIiXSwic291cmNlcyI6WyJTY2hlZHVsZS5qc3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IE15U2NoZWR1bGUgZnJvbSBcIi4uL015U2NoZWR1bGUvTXlTY2hlZHVsZVwiO1xyXG5cclxuLy8gVGhlIGRhdGUtZ3JvdXBlZCBzZXJ2ZXIgbGlzdCByZXF1aXJlcyBhbiBleHBsaWNpdCBzZWxlY3Rpb24sIG5ldmVyIGEgZ3Vlc3NlZCBsYXRlc3QgdHJpcC5cclxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gU2NoZWR1bGUoKSB7XHJcbiAgcmV0dXJuIDxNeVNjaGVkdWxlIC8+O1xyXG59XHJcbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7OztBQUFBLElBQUFBLFdBQUEsR0FBQUMsc0JBQUEsQ0FBQUMsT0FBQTtBQUFrRCxJQUFBQyxjQUFBLEdBQUFELE9BQUE7QUFBQSxJQUFBRSxZQUFBLDZGQUVsRDtBQUNlLFNBQVNDLFFBQVFBLENBQUEsRUFBRztFQUNqQyxvQkFBTyxJQUFBRixjQUFBLENBQUFHLE1BQUEsRUFBQ04sV0FBQSxDQUFBTyxPQUFVO0lBQUFDLFFBQUEsRUFBQUosWUFBQTtJQUFBSyxVQUFBO0lBQUFDLFlBQUE7RUFBQSxPQUFFLENBQUM7QUFDdkIiLCJpZ25vcmVMaXN0IjpbXX0=

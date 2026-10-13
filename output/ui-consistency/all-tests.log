@@ -1,0 +1,791 @@
+FAIL src/mocks/mockMode.test.jsx (9.163 s)
+  ● Console
+
+    console.error
+      Request failed { context: 'api' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/api/api.js:171:20
+      at Axios.request (node_modules/axios/lib/core/Axios.js:41:14)
+      at getRecentSearchesApi (src/api/placeApi.js:45:16)
+      at src/utils/useReadQuery.js:19:20
+
+  ● place search and detail pages render the adapter data and review pagination
+
+    Unable to find role="heading" and name "경복궁"
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div />
+      <div>
+        <div
+          class="app"
+        >
+          <header
+            class="header"
+          >
+            <div
+              class="header-side"
+            >
+              <button
+                aria-label="뒤로 가기"
+                class="icon-btn"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="header-icon"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M15 4 7 12l8 8"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div
+              class="header-center"
+            >
+              <span
+                class="brand-wordmark brand-wordmark--default"
+              >
+                너만 오면 go
+              </span>
+            </div>
+            <div
+              class="header-side"
+            />
+          </header>
+          <main
+            class="app-content "
+          >
+            <div
+              class="route-transition "
+              data-page-entry="pending"
+            >
+              <div
+                aria-live="polite"
+                class="earth-loading-screen earth-loading-screen--page"
+                role="status"
+              >
+                <div
+                  class="earth"
+                >
+                  <div
+                    class="earth-loader"
+                  >
+                    <svg
+                      viewBox="0 0 200 200"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M29.4,-17.4C33.1,1.8,27.6,16.1,11.5,31.6C-4.7,47,-31.5,63.6,-43,56C-54.5,48.4,-50.7,16.6,-41,-10.9C-31.3,-38.4,-15.6,-61.5,-1.4,-61C12.8,-60.5,25.7,-36.5,29.4,-17.4Z"
+                        fill="#7CC133"
+                        transform="translate(100 100)"
+                      />
+                    </svg>
+                    <svg
+                      viewBox="0 0 200 200"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M31.7,-55.8C40.3,-50,45.9,-39.9,49.7,-29.8C53.5,-19.8,55.5,-9.9,53.1,-1.4C50.6,7.1,43.6,14.1,41.8,27.6C40.1,41.1,43.4,61.1,37.3,67C31.2,72.9,15.6,64.8,1.5,62.2C-12.5,59.5,-25,62.3,-31.8,56.7C-38.5,51.1,-39.4,37.2,-49.3,26.3C-59.1,15.5,-78,7.7,-77.6,0.2C-77.2,-7.2,-57.4,-14.5,-49.3,-28.4C-41.2,-42.4,-44.7,-63,-38.5,-70.1C-32.2,-77.2,-16.1,-70.8,-2.3,-66.9C11.6,-63,23.1,-61.5,31.7,-55.8Z"
+                        fill="#7CC133"
+                        transform="translate(100 100)"
+                      />
+                    </svg>
+                    <svg
+                      viewBox="0 0 200 200"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M30.6,-49.2C42.5,-46.1,57.1,-43.7,67.6,-35.7C78.1,-27.6,84.6,-13.8,80.3,-2.4C76.1,8.9,61.2,17.8,52.5,29.1C43.8,40.3,41.4,53.9,33.7,64C26,74.1,13,80.6,2.2,76.9C-8.6,73.1,-17.3,59,-30.6,52.1C-43.9,45.3,-61.9,45.7,-74.1,38.2C-86.4,30.7,-92.9,15.4,-88.6,2.5C-84.4,-10.5,-69.4,-20.9,-60.7,-34.6C-52.1,-48.3,-49.8,-65.3,-40.7,-70C-31.6,-74.8,-15.8,-67.4,-3.2,-61.8C9.3,-56.1,18.6,-52.3,30.6,-49.2Z"
+                        fill="#7CC133"
+                        transform="translate(100 100)"
+                      />
+                    </svg>
+                    <svg
+                      viewBox="0 0 200 200"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M39.4,-66C48.6,-62.9,51.9,-47.4,52.9,-34.3C53.8,-21.3,52.4,-10.6,54.4,1.1C56.3,12.9,61.7,25.8,57.5,33.2C53.2,40.5,39.3,42.3,28.2,46C17,49.6,8.5,55.1,1.3,52.8C-5.9,50.5,-11.7,40.5,-23.6,37.2C-35.4,34,-53.3,37.5,-62,32.4C-70.7,27.4,-70.4,13.7,-72.4,-1.1C-74.3,-15.9,-78.6,-31.9,-73.3,-43C-68.1,-54.2,-53.3,-60.5,-39.5,-60.9C-25.7,-61.4,-12.9,-56,1.1,-58C15.1,-59.9,30.2,-69.2,39.4,-66Z"
+                        fill="#7CC133"
+                        transform="translate(100 100)"
+                      />
+                    </svg>
+                  </div>
+                  <p>
+                    화면을 불러오는 중...
+                  </p>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </body>
+
+      220 |   window.history.replaceState({}, "", "/detail?id=1");
+      221 |   render(<App />);
+    > 222 |   expect(await screen.findByRole("heading", { name: "경복궁" })).toBeInTheDocument();
+          |                       ^
+      223 |   const more = await screen.findByRole("button", { name: "리뷰 더보기" });
+      224 |   fireEvent.click(more);
+      225 |   await waitFor(() => expect(screen.queryByRole("button", { name: "리뷰 더보기" })).not.toBeInTheDocument());
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at findByRole (node_modules/@testing-library/dom/dist/query-helpers.js:86:33)
+      at Object.<anonymous> (src/mocks/mockMode.test.jsx:222:23)
+
+PASS src/Login/authFlow.test.jsx
+PASS src/RouteResult/editing.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      An update to GoogleMapBox inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      1822 |         if (!mounted) return;
+      1823 |         logSafeApiError(error, "RouteResult.jsx");
+    > 1824 |         setMapError(
+           |         ^
+      1825 |           "지도를 불러오지 못했어요. API 키 또는 Google Cloud 설정을 확인해 주세요.",
+      1826 |         );
+      1827 |       }
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at setMapError (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at src/RouteResult/RouteResult.jsx:1824:9
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+PASS src/RouteCreate/searchFolders.test.jsx
+PASS src/Search/Search.test.jsx
+PASS src/Login/emailCooldown.test.jsx
+PASS src/SearchPopup/SearchPop.test.jsx
+PASS src/Mypage/profileFlows.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'InquiryWrite.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/Mypage/InquiryWrite.jsx:53:38
+      at Object.run (src/utils/useMutationTask.js:17:11)
+      at handleSubmit (src/Mypage/InquiryWrite.jsx:51:5)
+
+    console.error
+      Request failed { context: 'MySchedule.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/MySchedule/MySchedule.jsx:372:22
+
+PASS src/RouteCreate/selectionUi.test.jsx
+PASS src/routeSecurity.test.js
+PASS src/utils/placeSaving.test.jsx
+PASS src/RouteResult/useTripResult.test.js
+PASS src/FolderSelectModal/FolderSelectModal.test.jsx
+PASS src/Recommend/listFlows.test.jsx
+PASS src/Login/SignUp.test.jsx
+PASS src/Recommend/Detail.test.jsx
+PASS src/Mypage/availableActions.test.jsx
+PASS src/Footer/Footer.test.js
+PASS src/RouteResult/mapCoordinates.test.jsx
+PASS src/Loading/RouteErrorBoundary.test.jsx
+PASS src/Login/OAuthCallback.test.js
+PASS src/RouteResult/keyboardOrder.test.jsx
+PASS src/api/apiConfig.test.js
+PASS src/api/authApi.test.js
+PASS src/api/api.test.js
+PASS src/Header/scheduleActions.test.jsx
+PASS src/utils/useModalFocus.test.jsx
+PASS src/api/security.test.js
+PASS src/ShareModal/ShareModal.test.jsx
+PASS src/Homepage/Home.test.jsx
+PASS src/RouteCreate/validation.test.js
+PASS src/RouteResult/RouteResult.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+    console.error
+      Request failed { context: 'RouteResult.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/RouteResult/RouteResult.jsx:1823:24
+
+PASS src/RouteCreate/generation.test.js
+PASS src/api/specSync.test.js
+PASS src/Schedule/Schedule.test.jsx
+  ● Console
+
+    console.error
+      Request failed { context: 'MySchedule.jsx' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/MySchedule/MySchedule.jsx:372:22
+
+PASS src/api/authApi.mock.test.js
+PASS src/RouteResult/mapLifecycle.test.jsx
+PASS src/App.test.js
+PASS src/Loading/routeFallback.test.jsx
+PASS src/utils/requestTasks.test.js
+PASS src/utils/authState.test.jsx
+PASS src/utils/useKeyboardRouteFocus.test.jsx
+PASS src/components/PlacePhoto.test.jsx
+PASS src/components/InputDialog.test.jsx
+PASS src/animations/PageTransition.test.jsx
+PASS src/mocks/specSync.test.js
+  ● Console
+
+    console.error
+      Request failed { context: 'api', status: 400 }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/api/api.js:171:20
+      at Axios.request (node_modules/axios/lib/core/Axios.js:41:14)
+      at updateTripPlaceOrderApi (src/api/tripApi.js:577:20)
+      at Object.<anonymous> (src/mocks/specSync.test.js:34:3)
+
+    console.error
+      Request failed { context: 'api', status: 400 }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/api/api.js:171:20
+      at Axios.request (node_modules/axios/lib/core/Axios.js:41:14)
+      at updateTripPlaceOrderApi (src/api/tripApi.js:577:20)
+      at Object.<anonymous> (src/mocks/specSync.test.js:42:5)
+
+    console.error
+      Request failed { context: 'api', status: 400 }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/api/api.js:171:20
+      at Axios.request (node_modules/axios/lib/core/Axios.js:41:14)
+      at updateTripPlaceOrderApi (src/api/tripApi.js:577:20)
+      at Object.<anonymous> (src/mocks/specSync.test.js:42:5)
+
+PASS src/OnBoarding/onboardingTransition.test.js
+PASS src/utils/kakaoMapLoader.test.js
+PASS src/utils/authStorage.test.js
+PASS src/utils/pdfTask.test.js
+PASS src/Login/passwordValidation.test.js
+PASS src/utils/oauthSecurity.test.js
+PASS src/utils/detailBack.test.js
+PASS src/Mypage/inquiryData.test.js
+  ● Console
+
+    console.error
+      Request failed { context: 'recentPlaces.js' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at getRecentPlaces (src/utils/recentPlaces.js:22:20)
+      at src/Mypage/inquiryData.test.js:13:25
+
+PASS src/utils/placeType.test.js
+PASS src/utils/securityAssets.test.js
+PASS src/api/travelContracts.test.js
+PASS src/utils/theme.test.js
+PASS src/utils/mobileResponsive.test.js
+PASS src/utils/iconRendering.test.js
+PASS src/RouteResult/temporaryOrder.test.js
+PASS src/utils/mapUrl.test.js
+PASS src/utils/safeLog.test.js
+
+Summary of all failing tests
+FAIL src/mocks/mockMode.test.jsx (9.163 s)
+  ● place search and detail pages render the adapter data and review pagination
+
+    Unable to find role="heading" and name "경복궁"
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div />
+      <div>
+        <div
+          class="app"
+        >
+          <header
+            class="header"
+          >
+            <div
+              class="header-side"
+            >
+              <button
+                aria-label="뒤로 가기"
+                class="icon-btn"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="header-icon"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M15 4 7 12l8 8"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div
+              class="header-center"
+            >
+              <span
+                class="brand-wordmark brand-wordmark--default"
+              >
+                너만 오면 go
+              </span>
+            </div>
+            <div
+              class="header-side"
+            />
+          </header>
+          <main
+            class="app-content "
+          >
+            <div
+              class="route-transition "
+              data-page-entry="pending"
+            >
+              <div
+                aria-live="polite"
+                class="earth-loading-screen earth-loading-screen--page"
+                role="status"
+              >
+                <div
+                  class="earth"
+                >
+                  <div
+                    class="earth-loader"
+                  >
+                    <svg
+                      viewBox="0 0 200 200"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M29.4,-17.4C33.1,1.8,27.6,16.1,11.5,31.6C-4.7,47,-31.5,63.6,-43,56C-54.5,48.4,-50.7,16.6,-41,-10.9C-31.3,-38.4,-15.6,-61.5,-1.4,-61C12.8,-60.5,25.7,-36.5,29.4,-17.4Z"
+                        fill="#7CC133"
+                        transform="translate(100 100)"
+                      />
+                    </svg>
+                    <svg
+                      viewBox="0 0 200 200"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M31.7,-55.8C40.3,-50,45.9,-39.9,49.7,-29.8C53.5,-19.8,55.5,-9.9,53.1,-1.4C50.6,7.1,43.6,14.1,41.8,27.6C40.1,41.1,43.4,61.1,37.3,67C31.2,72.9,15.6,64.8,1.5,62.2C-12.5,59.5,-25,62.3,-31.8,56.7C-38.5,51.1,-39.4,37.2,-49.3,26.3C-59.1,15.5,-78,7.7,-77.6,0.2C-77.2,-7.2,-57.4,-14.5,-49.3,-28.4C-41.2,-42.4,-44.7,-63,-38.5,-70.1C-32.2,-77.2,-16.1,-70.8,-2.3,-66.9C11.6,-63,23.1,-61.5,31.7,-55.8Z"
+                        fill="#7CC133"
+                        transform="translate(100 100)"
+                      />
+                    </svg>
+                    <svg
+                      viewBox="0 0 200 200"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M30.6,-49.2C42.5,-46.1,57.1,-43.7,67.6,-35.7C78.1,-27.6,84.6,-13.8,80.3,-2.4C76.1,8.9,61.2,17.8,52.5,29.1C43.8,40.3,41.4,53.9,33.7,64C26,74.1,13,80.6,2.2,76.9C-8.6,73.1,-17.3,59,-30.6,52.1C-43.9,45.3,-61.9,45.7,-74.1,38.2C-86.4,30.7,-92.9,15.4,-88.6,2.5C-84.4,-10.5,-69.4,-20.9,-60.7,-34.6C-52.1,-48.3,-49.8,-65.3,-40.7,-70C-31.6,-74.8,-15.8,-67.4,-3.2,-61.8C9.3,-56.1,18.6,-52.3,30.6,-49.2Z"
+                        fill="#7CC133"
+                        transform="translate(100 100)"
+                      />
+                    </svg>
+                    <svg
+                      viewBox="0 0 200 200"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M39.4,-66C48.6,-62.9,51.9,-47.4,52.9,-34.3C53.8,-21.3,52.4,-10.6,54.4,1.1C56.3,12.9,61.7,25.8,57.5,33.2C53.2,40.5,39.3,42.3,28.2,46C17,49.6,8.5,55.1,1.3,52.8C-5.9,50.5,-11.7,40.5,-23.6,37.2C-35.4,34,-53.3,37.5,-62,32.4C-70.7,27.4,-70.4,13.7,-72.4,-1.1C-74.3,-15.9,-78.6,-31.9,-73.3,-43C-68.1,-54.2,-53.3,-60.5,-39.5,-60.9C-25.7,-61.4,-12.9,-56,1.1,-58C15.1,-59.9,30.2,-69.2,39.4,-66Z"
+                        fill="#7CC133"
+                        transform="translate(100 100)"
+                      />
+                    </svg>
+                  </div>
+                  <p>
+                    화면을 불러오는 중...
+                  </p>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </body>
+
+      220 |   window.history.replaceState({}, "", "/detail?id=1");
+      221 |   render(<App />);
+    > 222 |   expect(await screen.findByRole("heading", { name: "경복궁" })).toBeInTheDocument();
+          |                       ^
+      223 |   const more = await screen.findByRole("button", { name: "리뷰 더보기" });
+      224 |   fireEvent.click(more);
+      225 |   await waitFor(() => expect(screen.queryByRole("button", { name: "리뷰 더보기" })).not.toBeInTheDocument());
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at findByRole (node_modules/@testing-library/dom/dist/query-helpers.js:86:33)
+      at Object.<anonymous> (src/mocks/mockMode.test.jsx:222:23)
+
+
+Test Suites: 1 failed, 62 passed, 63 total
+Tests:       1 failed, 417 passed, 418 total
+Snapshots:   0 total
+Time:        64.659 s
+Ran all test suites.

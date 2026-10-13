@@ -6,6 +6,7 @@
 }
 
 .admin-inquiry-back-button {
+  min-height: var(--touch-target);
   border: none;
   background: transparent;
   color: var(--color-text-muted);
@@ -52,8 +53,8 @@
 
 .admin-inquiry-detail-header h2 {
   margin: 0;
-  font-size: 19px;
-  font-weight: 800;
+  font-size: var(--font-section-title);
+  font-weight: var(--weight-heading);
   color: var(--color-text-strong);
   line-height: 1.45;
   min-width: 0;
@@ -163,8 +164,8 @@
   border-radius: 999px;
   background: var(--color-primary);
   color: var(--color-on-primary);
-  font-size: 18px;
-  font-weight: 800;
+  font-size: var(--font-control);
+  font-weight: var(--weight-semibold);
   cursor: pointer;
   box-shadow: 0 10px 20px rgba(25, 168, 244, 0.18);
 }
@@ -240,17 +241,17 @@
 
 .admin-success-title {
   margin: 0;
-  font-size: 17px;
-  font-weight: 900;
+  font-size: var(--font-section-title);
+  font-weight: var(--weight-heading);
   color: var(--color-text-strong);
   letter-spacing: -0.03em;
 }
 
 .admin-success-message {
   margin: 10px 0 24px;
-  font-size: 12px;
-  line-height: 1.65;
-  font-weight: 600;
+  font-size: var(--font-body);
+  line-height: var(--line-body);
+  font-weight: 400;
   color: var(--color-text-muted);
 }
 

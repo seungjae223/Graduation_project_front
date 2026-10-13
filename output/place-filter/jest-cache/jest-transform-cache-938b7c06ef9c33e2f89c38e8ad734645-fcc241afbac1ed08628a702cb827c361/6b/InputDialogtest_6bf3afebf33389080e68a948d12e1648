@@ -1,0 +1,60 @@
+116c30ab636a5e89966619affc22e63d
+"use strict";
+
+var _interopRequireDefault = require("C:/Users/joyfu/Desktop/graduation_project/graduation/node_modules/@babel/runtime/helpers/interopRequireDefault.js").default;
+var _react = require("@testing-library/react");
+var _InputDialog = _interopRequireDefault(require("./InputDialog"));
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _jsxFileName = "C:\\Users\\joyfu\\Desktop\\graduation_project\\graduation\\src\\components\\InputDialog.test.jsx";
+test("input gets focus, keyboard submits, busy prevents editing and closing, restore focus", () => {
+  const close = jest.fn(),
+    submit = jest.fn();
+  const opener = document.createElement("button");
+  document.body.appendChild(opener);
+  opener.focus();
+  const props = {
+    open: true,
+    title: "새 폴더 만들기",
+    label: "폴더명",
+    value: "입력 유지",
+    onChange: jest.fn(),
+    onClose: close,
+    onSubmit: submit
+  };
+  const {
+    rerender
+  } = (0, _react.render)(/*#__PURE__*/(0, _jsxDevRuntime.jsxDEV)(_InputDialog.default, {
+    ...props
+  }, void 0, false, {
+    fileName: _jsxFileName,
+    lineNumber: 7,
+    columnNumber: 31
+  }, void 0));
+  expect(_react.screen.getByLabelText("폴더명")).toHaveFocus();
+  _react.fireEvent.submit(_react.screen.getByRole("dialog"));
+  expect(submit).toHaveBeenCalledTimes(1);
+  rerender(/*#__PURE__*/(0, _jsxDevRuntime.jsxDEV)(_InputDialog.default, {
+    ...props,
+    busy: true
+  }, void 0, false, {
+    fileName: _jsxFileName,
+    lineNumber: 9,
+    columnNumber: 12
+  }, void 0));
+  expect(_react.screen.getByLabelText("폴더명")).toBeDisabled();
+  _react.fireEvent.keyDown(document, {
+    key: "Escape"
+  });
+  expect(close).not.toHaveBeenCalled();
+  rerender(/*#__PURE__*/(0, _jsxDevRuntime.jsxDEV)(_InputDialog.default, {
+    ...props,
+    open: false
+  }, void 0, false, {
+    fileName: _jsxFileName,
+    lineNumber: 11,
+    columnNumber: 12
+  }, void 0));
+  expect(opener).toHaveFocus();
+  opener.remove();
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfcmVhY3QiLCJyZXF1aXJlIiwiX0lucHV0RGlhbG9nIiwiX2ludGVyb3BSZXF1aXJlRGVmYXVsdCIsIl9qc3hEZXZSdW50aW1lIiwiX2pzeEZpbGVOYW1lIiwidGVzdCIsImNsb3NlIiwiamVzdCIsImZuIiwic3VibWl0Iiwib3BlbmVyIiwiZG9jdW1lbnQiLCJjcmVhdGVFbGVtZW50IiwiYm9keSIsImFwcGVuZENoaWxkIiwiZm9jdXMiLCJwcm9wcyIsIm9wZW4iLCJ0aXRsZSIsImxhYmVsIiwidmFsdWUiLCJvbkNoYW5nZSIsIm9uQ2xvc2UiLCJvblN1Ym1pdCIsInJlcmVuZGVyIiwicmVuZGVyIiwianN4REVWIiwiZGVmYXVsdCIsImZpbGVOYW1lIiwibGluZU51bWJlciIsImNvbHVtbk51bWJlciIsImV4cGVjdCIsInNjcmVlbiIsImdldEJ5TGFiZWxUZXh0IiwidG9IYXZlRm9jdXMiLCJmaXJlRXZlbnQiLCJnZXRCeVJvbGUiLCJ0b0hhdmVCZWVuQ2FsbGVkVGltZXMiLCJidXN5IiwidG9CZURpc2FibGVkIiwia2V5RG93biIsImtleSIsIm5vdCIsInRvSGF2ZUJlZW5DYWxsZWQiLCJyZW1vdmUiXSwic291cmNlcyI6WyJJbnB1dERpYWxvZy50ZXN0LmpzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBmaXJlRXZlbnQsIHJlbmRlciwgc2NyZWVuIH0gZnJvbSBcIkB0ZXN0aW5nLWxpYnJhcnkvcmVhY3RcIjtcclxuaW1wb3J0IElucHV0RGlhbG9nIGZyb20gXCIuL0lucHV0RGlhbG9nXCI7XHJcbnRlc3QoXCJpbnB1dCBnZXRzIGZvY3VzLCBrZXlib2FyZCBzdWJtaXRzLCBidXN5IHByZXZlbnRzIGVkaXRpbmcgYW5kIGNsb3NpbmcsIHJlc3RvcmUgZm9jdXNcIiwgKCkgPT4ge1xyXG4gIGNvbnN0IGNsb3NlID0gamVzdC5mbigpLCBzdWJtaXQgPSBqZXN0LmZuKCk7XHJcbiAgY29uc3Qgb3BlbmVyID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcImJ1dHRvblwiKTsgZG9jdW1lbnQuYm9keS5hcHBlbmRDaGlsZChvcGVuZXIpOyBvcGVuZXIuZm9jdXMoKTtcclxuICBjb25zdCBwcm9wcyA9IHsgb3BlbjogdHJ1ZSwgdGl0bGU6IFwi7IOIIO2PtOuNlCDrp4zrk6TquLBcIiwgbGFiZWw6IFwi7Y+0642U66qFXCIsIHZhbHVlOiBcIuyeheugpSDsnKDsp4BcIiwgb25DaGFuZ2U6IGplc3QuZm4oKSwgb25DbG9zZTogY2xvc2UsIG9uU3VibWl0OiBzdWJtaXQgfTtcclxuICBjb25zdCB7IHJlcmVuZGVyIH0gPSByZW5kZXIoPElucHV0RGlhbG9nIHsuLi5wcm9wc30gLz4pO1xyXG4gIGV4cGVjdChzY3JlZW4uZ2V0QnlMYWJlbFRleHQoXCLtj7TrjZTrqoVcIikpLnRvSGF2ZUZvY3VzKCk7IGZpcmVFdmVudC5zdWJtaXQoc2NyZWVuLmdldEJ5Um9sZShcImRpYWxvZ1wiKSk7IGV4cGVjdChzdWJtaXQpLnRvSGF2ZUJlZW5DYWxsZWRUaW1lcygxKTtcclxuICByZXJlbmRlcig8SW5wdXREaWFsb2cgey4uLnByb3BzfSBidXN5IC8+KTsgZXhwZWN0KHNjcmVlbi5nZXRCeUxhYmVsVGV4dChcIu2PtOuNlOuqhVwiKSkudG9CZURpc2FibGVkKCk7XHJcbiAgZmlyZUV2ZW50LmtleURvd24oZG9jdW1lbnQsIHsga2V5OiBcIkVzY2FwZVwiIH0pOyBleHBlY3QoY2xvc2UpLm5vdC50b0hhdmVCZWVuQ2FsbGVkKCk7XHJcbiAgcmVyZW5kZXIoPElucHV0RGlhbG9nIHsuLi5wcm9wc30gb3Blbj17ZmFsc2V9IC8+KTsgZXhwZWN0KG9wZW5lcikudG9IYXZlRm9jdXMoKTsgb3BlbmVyLnJlbW92ZSgpO1xyXG59KTtcclxuIl0sIm1hcHBpbmdzIjoiOzs7QUFBQSxJQUFBQSxNQUFBLEdBQUFDLE9BQUE7QUFDQSxJQUFBQyxZQUFBLEdBQUFDLHNCQUFBLENBQUFGLE9BQUE7QUFBd0MsSUFBQUcsY0FBQSxHQUFBSCxPQUFBO0FBQUEsSUFBQUksWUFBQTtBQUN4Q0MsSUFBSSxDQUFDLHNGQUFzRixFQUFFLE1BQU07RUFDakcsTUFBTUMsS0FBSyxHQUFHQyxJQUFJLENBQUNDLEVBQUUsQ0FBQyxDQUFDO0lBQUVDLE1BQU0sR0FBR0YsSUFBSSxDQUFDQyxFQUFFLENBQUMsQ0FBQztFQUMzQyxNQUFNRSxNQUFNLEdBQUdDLFFBQVEsQ0FBQ0MsYUFBYSxDQUFDLFFBQVEsQ0FBQztFQUFFRCxRQUFRLENBQUNFLElBQUksQ0FBQ0MsV0FBVyxDQUFDSixNQUFNLENBQUM7RUFBRUEsTUFBTSxDQUFDSyxLQUFLLENBQUMsQ0FBQztFQUNsRyxNQUFNQyxLQUFLLEdBQUc7SUFBRUMsSUFBSSxFQUFFLElBQUk7SUFBRUMsS0FBSyxFQUFFLFVBQVU7SUFBRUMsS0FBSyxFQUFFLEtBQUs7SUFBRUMsS0FBSyxFQUFFLE9BQU87SUFBRUMsUUFBUSxFQUFFZCxJQUFJLENBQUNDLEVBQUUsQ0FBQyxDQUFDO0lBQUVjLE9BQU8sRUFBRWhCLEtBQUs7SUFBRWlCLFFBQVEsRUFBRWQ7RUFBTyxDQUFDO0VBQ3BJLE1BQU07SUFBRWU7RUFBUyxDQUFDLEdBQUcsSUFBQUMsYUFBTSxlQUFDLElBQUF0QixjQUFBLENBQUF1QixNQUFBLEVBQUN6QixZQUFBLENBQUEwQixPQUFXO0lBQUEsR0FBS1g7RUFBSztJQUFBWSxRQUFBLEVBQUF4QixZQUFBO0lBQUF5QixVQUFBO0lBQUFDLFlBQUE7RUFBQSxTQUFHLENBQUMsQ0FBQztFQUN2REMsTUFBTSxDQUFDQyxhQUFNLENBQUNDLGNBQWMsQ0FBQyxLQUFLLENBQUMsQ0FBQyxDQUFDQyxXQUFXLENBQUMsQ0FBQztFQUFFQyxnQkFBUyxDQUFDMUIsTUFBTSxDQUFDdUIsYUFBTSxDQUFDSSxTQUFTLENBQUMsUUFBUSxDQUFDLENBQUM7RUFBRUwsTUFBTSxDQUFDdEIsTUFBTSxDQUFDLENBQUM0QixxQkFBcUIsQ0FBQyxDQUFDLENBQUM7RUFDekliLFFBQVEsY0FBQyxJQUFBckIsY0FBQSxDQUFBdUIsTUFBQSxFQUFDekIsWUFBQSxDQUFBMEIsT0FBVztJQUFBLEdBQUtYLEtBQUs7SUFBRXNCLElBQUk7RUFBQTtJQUFBVixRQUFBLEVBQUF4QixZQUFBO0lBQUF5QixVQUFBO0lBQUFDLFlBQUE7RUFBQSxTQUFFLENBQUMsQ0FBQztFQUFFQyxNQUFNLENBQUNDLGFBQU0sQ0FBQ0MsY0FBYyxDQUFDLEtBQUssQ0FBQyxDQUFDLENBQUNNLFlBQVksQ0FBQyxDQUFDO0VBQzlGSixnQkFBUyxDQUFDSyxPQUFPLENBQUM3QixRQUFRLEVBQUU7SUFBRThCLEdBQUcsRUFBRTtFQUFTLENBQUMsQ0FBQztFQUFFVixNQUFNLENBQUN6QixLQUFLLENBQUMsQ0FBQ29DLEdBQUcsQ0FBQ0MsZ0JBQWdCLENBQUMsQ0FBQztFQUNwRm5CLFFBQVEsY0FBQyxJQUFBckIsY0FBQSxDQUFBdUIsTUFBQSxFQUFDekIsWUFBQSxDQUFBMEIsT0FBVztJQUFBLEdBQUtYLEtBQUs7SUFBRUMsSUFBSSxFQUFFO0VBQU07SUFBQVcsUUFBQSxFQUFBeEIsWUFBQTtJQUFBeUIsVUFBQTtJQUFBQyxZQUFBO0VBQUEsU0FBRSxDQUFDLENBQUM7RUFBRUMsTUFBTSxDQUFDckIsTUFBTSxDQUFDLENBQUN3QixXQUFXLENBQUMsQ0FBQztFQUFFeEIsTUFBTSxDQUFDa0MsTUFBTSxDQUFDLENBQUM7QUFDbEcsQ0FBQyxDQUFDIiwiaWdub3JlTGlzdCI6W119

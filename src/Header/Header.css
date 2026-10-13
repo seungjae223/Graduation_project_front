@@ -120,14 +120,14 @@ svg.menu-icon {
 .header-title {
   margin: 0;
   color: var(--color-text);
-  font-size: 18px;
-  font-weight: 800;
+  font-size: var(--font-toolbar-title);
+  font-weight: var(--weight-heading);
   line-height: 1.2;
   letter-spacing: -0.4px;
 }
 
 .result-title {
-  font-size: 14px;
+  font-size: var(--font-toolbar-title);
   font-weight: 700;
 }
 
@@ -171,11 +171,11 @@ svg.menu-icon {
   }
 
   .header-title {
-    font-size: 17px;
+    font-size: var(--font-toolbar-title);
   }
 
   .result-title {
-    font-size: 13px;
+    font-size: var(--font-toolbar-title);
   }
 
   .logo-center {

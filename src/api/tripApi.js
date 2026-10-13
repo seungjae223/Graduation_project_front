@@ -578,7 +578,19 @@ export const updateTripPlaceOrderApi = async ({
     `${TRIP_BASE_URL}/${safeTripId}/days/${safeDay}/places/order`,
     { tripPlaceIds: ids, startTime: assertStartTime(startTime) }
   );
-  return requireList(response.data).map(place => normalizeTripPlace(place, safeDay));
+  const rows = requireList(response.data);
+  if (rows.some(place => Number(place?.day) !== safeDay || !Number.isSafeInteger(Number(place?.id)) || Number(place.id) < 1 ||
+    !Number.isInteger(Number(place.visitOrder)) || Number(place.visitOrder) < 1)) {
+    throw new Error("저장 응답의 방문 순서를 확인할 수 없습니다.");
+  }
+  const places = rows.map(place => normalizeTripPlace(place, safeDay))
+    .sort((a, b) => a.visitOrder - b.visitOrder);
+  if (places.length !== ids.length || places.some((place, index) =>
+    Number(place.day) !== safeDay || Number(place.visitOrder) !== index + 1 ||
+    String(place.tripPlaceId) !== String(ids[index]))) {
+    throw new Error("저장 응답의 방문 순서를 확인할 수 없습니다.");
+  }
+  return places;
 };
 
 export const deleteTripApi = async (id) => {

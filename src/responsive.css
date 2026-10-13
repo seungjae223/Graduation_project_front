@@ -284,60 +284,11 @@ button {
     padding-right: var(--page-gutter);
   }
 
-  .header {
-    min-height: clamp(82px, 5.729vw, 118px) !important;
-    padding-top: clamp(18px, 1.258vw, 26px) !important;
-    padding-bottom: clamp(18px, 1.258vw, 26px) !important;
-  }
-
-  .header-side {
-    width: clamp(48px, 3.354vw, 69px) !important;
-  }
-
-  .icon-btn {
-    width: clamp(40px, 2.795vw, 58px) !important;
-    height: clamp(40px, 2.795vw, 58px) !important;
-  }
-
-  .header-icon,
-  .back-icon {
-    width: clamp(24px, 1.677vw, 35px) !important;
-    height: clamp(24px, 1.677vw, 35px) !important;
-  }
-
-  .my-icon,
-  .menu-icon {
-    width: clamp(30px, 2.096vw, 43px) !important;
-    height: clamp(30px, 2.096vw, 43px) !important;
-  }
-
-  .logo,
-  .logo-center {
-    height: clamp(20px, 1.397vw, 29px) !important;
-  }
-
-  .brand-wordmark {
-    font-size: clamp(20px, 1.397vw, 29px) !important;
-  }
-
-  .header-title {
-    font-size: clamp(18px, 1.258vw, 26px) !important;
-  }
-
   .footer-nav,
   .admin-footer-inner {
     width: 100%;
     max-width: var(--page-max-width);
     margin-inline: auto;
-  }
-
-  .footer-nav {
-    height: calc(clamp(70px, 4.891vw, 101px) + env(safe-area-inset-bottom)) !important;
-  }
-
-  .tab {
-    gap: clamp(4px, 0.28vw, 6px) !important;
-    font-size: clamp(12px, 0.838vw, 17px) !important;
   }
 
   .detail-bottom-actions {
@@ -351,11 +302,11 @@ button {
   }
 
   .home-header h1 {
-    font-size: 28px !important;
+    font-size: var(--font-page-title);
   }
 
   .home-header .subtitle {
-    font-size: 16px !important;
+    font-size: var(--font-body);
   }
 
   .home-header .search-box {
@@ -386,7 +337,7 @@ button {
   }
 
   .travel-overlay span {
-    font-size: clamp(24px, 1.677vw, 35px) !important;
+    font-size: var(--font-section-title);
   }
 
   .theme-card {
@@ -460,6 +411,16 @@ button {
 
 /* Fixed dialogs must remain operable when notebook height is limited. */
 :where(
+  .input-dialog,
+  .login-alert-sheet,
+  .signup-alert-card,
+  .signup-complete-modal,
+  .inquiry-success-modal-box,
+  .admin-success-modal,
+  .route-complete-modal,
+  .folder-modal,
+  .folder-rename-modal,
+  .folder-delete-modal,
   .alert-modal,
   .login-alert-modal,
   .signup-alert-modal,
@@ -475,12 +436,16 @@ button {
   .inquiry-success-modal
 ) {
   max-width: min(92vw, 560px) !important;
-  max-height: calc(100dvh - 32px) !important;
+  max-height: calc(var(--modal-viewport-height, 100dvh) - 48px) !important;
   overflow-y: auto !important;
   overscroll-behavior: contain;
 }
 
 :where(
+  .input-dialog-backdrop,
+  .folder-select-backdrop,
+  .admin-success-modal-overlay,
+  .inquiry-success-modal-overlay,
   .search-pop-overlay,
   .share-modal-overlay,
   .folder-select-overlay,
@@ -498,8 +463,35 @@ button {
 
 .search-pop-sheet {
   width: min(92vw, var(--page-max-width)) !important;
-  max-height: calc(100dvh - 84px);
+  max-height: calc(var(--modal-viewport-height, 100dvh) - 84px);
   overflow-y: auto !important;
+}
+
+/* Visual viewport follows the keyboard; layout viewport can remain taller. */
+html :is(
+  .input-dialog-backdrop,
+  .alert-overlay,
+  .login-alert-overlay,
+  .signup-alert-overlay,
+  .signup-complete-overlay,
+  .folder-modal-backdrop,
+  .folder-select-backdrop,
+  .admin-success-modal-overlay,
+  .inquiry-success-modal-overlay,
+  .route-complete-overlay,
+  .search-pop-overlay,
+  .share-modal-overlay,
+  .start-place-overlay,
+  .favorite-place-overlay,
+  .fix-point-portal,
+  .fix-point-overlay,
+  .route-result-memo-backdrop,
+  .location-permission-overlay,
+  .privacy-modal-overlay
+) {
+  top: var(--modal-viewport-top, 0px);
+  bottom: auto;
+  height: var(--modal-viewport-height, 100dvh);
 }
 
 @media (prefers-reduced-motion: reduce) {

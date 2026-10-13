@@ -1,0 +1,23 @@
+{
+  "environment": "local contract API; synthetic trip 7; USE_MOCK=false",
+  "productionSaveVerified": false,
+  "checks": {
+    "immediateABCtoCAB": true,
+    "patchTripPlaceIdsAndStartTime": true,
+    "readConfirmed": true,
+    "reloadPreservesOrder": true,
+    "scheduleReentryPreservesOrder": true,
+    "http400Rollback": true,
+    "networkBeforeWriteReconcilesOldOrder": true,
+    "lostResponseAfterWriteConfirmsWithoutResend": true,
+    "staleReadDoesNotShowSuccess": true,
+    "keyboardAndMouseDrag": true,
+    "memoAndVisitIdsPreserved": true,
+    "mobileDarkAndDesktopLightNoOverflow": true
+  },
+  "tests": {
+    "suites": 63,
+    "passed": 427
+  },
+  "build": "passed"
+}

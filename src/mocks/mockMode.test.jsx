@@ -179,7 +179,8 @@ test.each([1, 2])("domestic Mock trip %s renders the Kakao map container without
   const log = jest.spyOn(console, "error").mockImplementation(() => {});
   window.history.replaceState({}, "", `/route-result?id=${id}`);
   render(<App />);
-  await screen.findAllByText(id === 1 ? "경복궁" : "사려니숲길");
+  // Wait for the lazy result chunk as well as its server read model on a cold transform.
+  await screen.findAllByText(id === 1 ? "경복궁" : "사려니숲길", {}, { timeout: 5000 });
   // The SDK's empty map container has no accessible role or text to query.
   // eslint-disable-next-line testing-library/no-node-access
   expect(document.querySelector(".route-result-map-section .route-map-real")).toBeInTheDocument();
@@ -219,7 +220,8 @@ test("place search and detail pages render the adapter data and review paginatio
   view.unmount();
   window.history.replaceState({}, "", "/detail?id=1");
   render(<App />);
-  expect(await screen.findByRole("heading", { name: "경복궁" })).toBeInTheDocument();
+  // The lazy detail chunk includes PDF support; a cold transform can exceed the default 1s wait.
+  expect(await screen.findByRole("heading", { name: "경복궁" }, { timeout: 5000 })).toBeInTheDocument();
   const more = await screen.findByRole("button", { name: "리뷰 더보기" });
   fireEvent.click(more);
   await waitFor(() => expect(screen.queryByRole("button", { name: "리뷰 더보기" })).not.toBeInTheDocument());

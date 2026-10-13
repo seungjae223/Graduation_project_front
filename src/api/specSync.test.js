@@ -1,15 +1,41 @@
 import api from "./api";
 import { addPlaceToTripApi, createTripApi, getTripDayPlacesApi, getTripTimelineApi,
   mapTripToSavedRoute, optimizeTripDayApi, updateTripPlaceOrderApi, updateTripPlaceScheduleApi } from "./tripApi";
-import { createReviewApi, getRecommendationsApi, getReviewsApi } from "./placeApi";
+import { createReviewApi, getPlacesApi, getRecommendationsApi, getReviewsApi } from "./placeApi";
 jest.mock("./api", () => ({ __esModule: true, default: { get: jest.fn(), post: jest.fn(), patch: jest.fn() } }));
 beforeEach(() => jest.resetAllMocks());
 
+test("place listing forwards cancellation without inventing country or paging parameters", async () => {
+  const places = [{ id: 1, name: "실제 장소", region: "뉴욕" }];
+  api.get.mockResolvedValue({ data: places });
+  const signal = new AbortController().signal;
+  expect(await getPlacesApi({ signal })).toBe(places);
+  expect(api.get).toHaveBeenCalledWith("/api/places", { signal });
+});
+
+test.each([
+  { rows: [{ name: "ID 없는 장소" }] },
+  { rows: [{ id: 1, name: "중복 1" }, { id: 1, name: "중복 2" }] },
+  { rows: [{ id: 1 }] },
+])("invalid place IDs or names cannot become fabricated cards", async ({ rows }) => {
+  api.get.mockResolvedValue({ data: rows });
+  await expect(getPlacesApi()).rejects.toThrow("장소 목록 응답");
+});
+
 test("order PATCH sends TripPlace IDs and HH:mm, preserving next-day fields", async () => {
-  api.patch.mockResolvedValue({ data: [{ id: 92, placeId: 4, day: 1, visitOrder: 1, isFixed: true, isNextDay: true }] });
+  api.patch.mockResolvedValue({ data: [{ id: 92, placeId: 4, day: 1, visitOrder: 1, isFixed: true, isNextDay: true }, { id: 91, placeId: 4, day: 1, visitOrder: 2 }] });
   const places = await updateTripPlaceOrderApi({ tripId: 7, day: 1, tripPlaceIds: [92, 91], startTime: "10:00" });
   expect(api.patch).toHaveBeenCalledWith("/api/trips/7/days/1/places/order", { tripPlaceIds: [92, 91], startTime: "10:00" });
   expect(places[0]).toMatchObject({ tripPlaceId: 92, placeId: 4, isNextDay: true });
+});
+
+test.each([
+  [{ id: 91, placeId: 4, day: 1, visitOrder: 1 }, { id: 92, placeId: 4, day: 1, visitOrder: 2 }],
+  [{ id: 92, placeId: 4, day: 1, visitOrder: 1 }],
+  [{ id: 92, placeId: 4, day: 2, visitOrder: 1 }, { id: 91, placeId: 4, day: 2, visitOrder: 2 }],
+].map(rows => [rows]))("a mismatched order response is not reported as a confirmed save", async rows => {
+  api.patch.mockResolvedValue({ data: rows });
+  await expect(updateTripPlaceOrderApi({ tripId: 7, day: 1, tripPlaceIds: [92, 91] })).rejects.toThrow("저장 응답의 방문 순서");
 });
 
 test.each([

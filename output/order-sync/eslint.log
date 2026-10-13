@@ -1,0 +1,9 @@
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+C:\Users\joyfu\Desktop\graduation_project\graduation\src\RouteResult\editing.test.jsx
+  2:37  warning  'waitFor' is defined but never used  no-unused-vars
+
+✖ 1 problem (0 errors, 1 warning)
+

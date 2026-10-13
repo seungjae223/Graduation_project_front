@@ -353,7 +353,7 @@ function FolderSelectModal({
                 />
               </div>
 
-              {createTask.message && <p role="status">{createTask.status === "unknown" ? "폴더가 생성되었을 수 있어요. 목록을 확인해 주세요. 자동으로 다시 생성하지 않습니다." : createTask.message}</p>}
+              {createTask.message && <p className="folder-create-feedback" role="status">{createTask.status === "unknown" ? "폴더가 생성되었을 수 있어요. 목록을 확인해 주세요. 자동으로 다시 생성하지 않습니다." : createTask.message}</p>}
               {["unknown", "refreshError"].includes(createTask.status) && <button type="button" onClick={createTask.retryRead}>목록 다시 확인</button>}
               {isCreatingFolder && <p role="status">생성 요청 처리 중에는 닫을 수 없습니다.</p>}
               {createFolderError && (
@@ -369,7 +369,7 @@ function FolderSelectModal({
                 onClick={handleCancelCreateFolder}
                 disabled={isSaving || isCreatingFolder}
               >
-                취소
+                {createTask.status === "success" ? "목록으로" : "취소"}
               </button>
 
               <button

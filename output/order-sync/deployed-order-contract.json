@@ -1,0 +1,133 @@
+{
+  "Endpoint": "/api/trips/{tripId}/days/{day}/places/order",
+  "Operation": {
+    "tags": [
+      "trip-place-controller"
+    ],
+    "operationId": "updateVisitOrder",
+    "parameters": [
+      {
+        "name": "tripId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      {
+        "name": "day",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    ],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/TripPlaceOrderRequestDto"
+          }
+        }
+      },
+      "required": true
+    },
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "*/*": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TripPlaceResponseDto"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "Request": {
+    "type": "object",
+    "properties": {
+      "tripPlaceIds": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "startTime": {
+        "type": "string"
+      }
+    }
+  },
+  "Response": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "tripId": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "placeId": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "placeName": {
+        "type": "string"
+      },
+      "latitude": {
+        "type": "number",
+        "format": "double"
+      },
+      "longitude": {
+        "type": "number",
+        "format": "double"
+      },
+      "address": {
+        "type": "string"
+      },
+      "placeType": {
+        "type": "string"
+      },
+      "day": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "visitOrder": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "isStartPoint": {
+        "type": "boolean"
+      },
+      "arrivalTime": {
+        "type": "string"
+      },
+      "departureTime": {
+        "type": "string"
+      },
+      "stayDuration": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "isFixed": {
+        "type": "boolean"
+      },
+      "isNextDay": {
+        "type": "boolean"
+      },
+      "memo": {
+        "type": "string"
+      }
+    }
+  }
+}

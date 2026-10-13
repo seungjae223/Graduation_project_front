@@ -1,0 +1,310 @@
+[
+  {
+    "width": 320,
+    "height": 568,
+    "theme": "light",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 445.4921875,
+      "left": 16,
+      "right": 304,
+      "top": 122.5078125
+    },
+    "scrollWidth": 288,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-320-light.jpg",
+    "dialogWidth": 288
+  },
+  {
+    "width": 320,
+    "height": 568,
+    "theme": "dark",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 445.4921875,
+      "left": 16,
+      "right": 304,
+      "top": 122.5078125
+    },
+    "scrollWidth": 288,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-320-dark.jpg",
+    "dialogWidth": 288
+  },
+  {
+    "width": 375,
+    "height": 667,
+    "theme": "light",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 507.1640625,
+      "left": 16,
+      "right": 359,
+      "top": 159.8359375
+    },
+    "scrollWidth": 343,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-375-light.jpg",
+    "dialogWidth": 343
+  },
+  {
+    "width": 375,
+    "height": 667,
+    "theme": "dark",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 507.1640625,
+      "left": 16,
+      "right": 359,
+      "top": 159.8359375
+    },
+    "scrollWidth": 343,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-375-dark.jpg",
+    "dialogWidth": 343
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "theme": "light",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 615.1328125,
+      "left": 16,
+      "right": 374,
+      "top": 228.859375
+    },
+    "scrollWidth": 358,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-390-light.jpg",
+    "dialogWidth": 358
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "theme": "dark",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 615.1328125,
+      "left": 16,
+      "right": 374,
+      "top": 228.859375
+    },
+    "scrollWidth": 358,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-390-dark.jpg",
+    "dialogWidth": 358
+  },
+  {
+    "width": 768,
+    "height": 1024,
+    "theme": "light",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 712.296875,
+      "left": 174,
+      "right": 594,
+      "top": 311.703125
+    },
+    "scrollWidth": 420,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-768-light.jpg",
+    "dialogWidth": 420
+  },
+  {
+    "width": 768,
+    "height": 1024,
+    "theme": "dark",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 712.296875,
+      "left": 174,
+      "right": 594,
+      "top": 311.703125
+    },
+    "scrollWidth": 420,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-768-dark.jpg",
+    "dialogWidth": 420
+  },
+  {
+    "width": 1024,
+    "height": 768,
+    "theme": "light",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 568.7734375,
+      "left": 302,
+      "right": 722,
+      "top": 199.2265625
+    },
+    "scrollWidth": 420,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-1024-light.jpg",
+    "dialogWidth": 420
+  },
+  {
+    "width": 1024,
+    "height": 768,
+    "theme": "dark",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 568.7734375,
+      "left": 302,
+      "right": 722,
+      "top": 199.2265625
+    },
+    "scrollWidth": 420,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-1024-dark.jpg",
+    "dialogWidth": 420
+  },
+  {
+    "width": 1366,
+    "height": 768,
+    "theme": "light",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 568.7734375,
+      "left": 473,
+      "right": 893,
+      "top": 199.2265625
+    },
+    "scrollWidth": 420,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-1366-light.jpg",
+    "dialogWidth": 420
+  },
+  {
+    "width": 1366,
+    "height": 768,
+    "theme": "dark",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 568.7734375,
+      "left": 473,
+      "right": 893,
+      "top": 199.2265625
+    },
+    "scrollWidth": 420,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-1366-dark.jpg",
+    "dialogWidth": 420
+  },
+  {
+    "width": 1920,
+    "height": 1080,
+    "theme": "light",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 740.296875,
+      "left": 750,
+      "right": 1170,
+      "top": 339.703125
+    },
+    "scrollWidth": 420,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-1920-light.jpg",
+    "dialogWidth": 420
+  },
+  {
+    "width": 1920,
+    "height": 1080,
+    "theme": "dark",
+    "successBeforeSave": false,
+    "successAfterEdit": false,
+    "buttonHeights": [
+      44,
+      44
+    ],
+    "rect": {
+      "bottom": 740.296875,
+      "left": 750,
+      "right": 1170,
+      "top": 339.703125
+    },
+    "scrollWidth": 420,
+    "statusFont": "14px",
+    "textareaFont": "16px",
+    "file": "C:/Users/joyfu/Desktop/graduation_project/graduation/output/ui-consistency/after/memo-1920-dark.jpg",
+    "dialogWidth": 420
+  }
+]

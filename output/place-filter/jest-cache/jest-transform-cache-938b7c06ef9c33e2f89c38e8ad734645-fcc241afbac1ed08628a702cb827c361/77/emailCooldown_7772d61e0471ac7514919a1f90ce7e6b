@@ -1,0 +1,20 @@
+2c7e24dc44ed5a8aea3803d08377d37a
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.EMAIL_RESEND_SECONDS = void 0;
+exports.getEmailRetrySeconds = getEmailRetrySeconds;
+const EMAIL_RESEND_SECONDS = exports.EMAIL_RESEND_SECONDS = 60;
+
+// Accept only the public cooldown message defined by the email service.
+function getEmailRetrySeconds(error) {
+  var _error$response, _error$response2, _error$response2$data;
+  if (Number(error === null || error === void 0 ? void 0 : (_error$response = error.response) === null || _error$response === void 0 ? void 0 : _error$response.status) !== 400) return 0;
+  const message = error === null || error === void 0 ? void 0 : (_error$response2 = error.response) === null || _error$response2 === void 0 ? void 0 : (_error$response2$data = _error$response2.data) === null || _error$response2$data === void 0 ? void 0 : _error$response2$data.message;
+  if (typeof message !== "string") return 0;
+  const match = message.match(/^인증번호는 ([1-9]|[1-5][0-9]|60)초 후 다시 요청할 수 있습니다\.$/);
+  return match ? Number(match[1]) : 0;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJFTUFJTF9SRVNFTkRfU0VDT05EUyIsImV4cG9ydHMiLCJnZXRFbWFpbFJldHJ5U2Vjb25kcyIsImVycm9yIiwiX2Vycm9yJHJlc3BvbnNlIiwiX2Vycm9yJHJlc3BvbnNlMiIsIl9lcnJvciRyZXNwb25zZTIkZGF0YSIsIk51bWJlciIsInJlc3BvbnNlIiwic3RhdHVzIiwibWVzc2FnZSIsImRhdGEiLCJtYXRjaCJdLCJzb3VyY2VzIjpbImVtYWlsQ29vbGRvd24uanMiXSwic291cmNlc0NvbnRlbnQiOlsiZXhwb3J0IGNvbnN0IEVNQUlMX1JFU0VORF9TRUNPTkRTID0gNjA7XG5cbi8vIEFjY2VwdCBvbmx5IHRoZSBwdWJsaWMgY29vbGRvd24gbWVzc2FnZSBkZWZpbmVkIGJ5IHRoZSBlbWFpbCBzZXJ2aWNlLlxuZXhwb3J0IGZ1bmN0aW9uIGdldEVtYWlsUmV0cnlTZWNvbmRzKGVycm9yKSB7XG4gIGlmIChOdW1iZXIoZXJyb3I/LnJlc3BvbnNlPy5zdGF0dXMpICE9PSA0MDApIHJldHVybiAwO1xuICBjb25zdCBtZXNzYWdlID0gZXJyb3I/LnJlc3BvbnNlPy5kYXRhPy5tZXNzYWdlO1xuICBpZiAodHlwZW9mIG1lc3NhZ2UgIT09IFwic3RyaW5nXCIpIHJldHVybiAwO1xuICBjb25zdCBtYXRjaCA9IG1lc3NhZ2UubWF0Y2goL17snbjspp3rsojtmLjripQgKFsxLTldfFsxLTVdWzAtOV18NjAp7LSIIO2bhCDri6Tsi5wg7JqU7LKt7ZWgIOyImCDsnojsirXri4jri6RcXC4kLyk7XG4gIHJldHVybiBtYXRjaCA/IE51bWJlcihtYXRjaFsxXSkgOiAwO1xufVxuIl0sIm1hcHBpbmdzIjoiOzs7Ozs7O0FBQU8sTUFBTUEsb0JBQW9CLEdBQUFDLE9BQUEsQ0FBQUQsb0JBQUEsR0FBRyxFQUFFOztBQUV0QztBQUNPLFNBQVNFLG9CQUFvQkEsQ0FBQ0MsS0FBSyxFQUFFO0VBQUEsSUFBQUMsZUFBQSxFQUFBQyxnQkFBQSxFQUFBQyxxQkFBQTtFQUMxQyxJQUFJQyxNQUFNLENBQUNKLEtBQUssYUFBTEEsS0FBSyx3QkFBQUMsZUFBQSxHQUFMRCxLQUFLLENBQUVLLFFBQVEsY0FBQUosZUFBQSx1QkFBZkEsZUFBQSxDQUFpQkssTUFBTSxDQUFDLEtBQUssR0FBRyxFQUFFLE9BQU8sQ0FBQztFQUNyRCxNQUFNQyxPQUFPLEdBQUdQLEtBQUssYUFBTEEsS0FBSyx3QkFBQUUsZ0JBQUEsR0FBTEYsS0FBSyxDQUFFSyxRQUFRLGNBQUFILGdCQUFBLHdCQUFBQyxxQkFBQSxHQUFmRCxnQkFBQSxDQUFpQk0sSUFBSSxjQUFBTCxxQkFBQSx1QkFBckJBLHFCQUFBLENBQXVCSSxPQUFPO0VBQzlDLElBQUksT0FBT0EsT0FBTyxLQUFLLFFBQVEsRUFBRSxPQUFPLENBQUM7RUFDekMsTUFBTUUsS0FBSyxHQUFHRixPQUFPLENBQUNFLEtBQUssQ0FBQyxrREFBa0QsQ0FBQztFQUMvRSxPQUFPQSxLQUFLLEdBQUdMLE1BQU0sQ0FBQ0ssS0FBSyxDQUFDLENBQUMsQ0FBQyxDQUFDLEdBQUcsQ0FBQztBQUNyQyIsImlnbm9yZUxpc3QiOltdfQ==

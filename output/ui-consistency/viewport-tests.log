@@ -1,0 +1,8 @@
+PASS src/utils/mobileResponsive.test.js
+PASS src/utils/useModalFocus.test.jsx
+
+Test Suites: 2 passed, 2 total
+Tests:       7 passed, 7 total
+Snapshots:   0 total
+Time:        5.912 s
+Ran all test suites matching /src\\utils\\useModalFocus.test.jsx|src\\utils\\mobileResponsive.test.js/i.

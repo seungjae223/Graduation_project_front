@@ -6,7 +6,7 @@
 .signup-page {
   width: 100%;
   min-height: calc(100vh - 82px);
-  padding: 56px 16px 80px;
+  padding: 32px 16px 40px;
   background: var(--color-page);
 
   display: flex;
@@ -36,11 +36,13 @@
 .signup-subtitle {
   margin: 14px 0 0;
   color: var(--color-text-muted);
-  font-size: 18px;
-  font-weight: 500;
-  line-height: 1.35;
+  font-size: var(--font-body);
+  font-weight: 400;
+  line-height: var(--line-body);
   letter-spacing: -0.6px;
-  white-space: nowrap;
+  white-space: normal;
+
+  overflow-wrap: anywhere;
 }
 
 .signup-form {
@@ -67,18 +69,18 @@
 
 .signup-input {
   width: 100%;
-  height: 54px;
+  height: var(--control-height);
   padding: 0 18px;
 
   border: 1.5px solid var(--color-border-strong);
-  border-radius: 16px;
+  border-radius: var(--radius-control);
   outline: none;
 
   background: var(--color-input);
   color: var(--color-text);
 
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--font-control);
+  font-weight: 400;
   letter-spacing: -0.3px;
 
   transition:
@@ -115,18 +117,18 @@
   flex-shrink: 0;
 
   min-width: 96px;
-  height: 54px;
+  height: auto;
   padding: 0 14px;
 
   border: none;
-  border-radius: 16px;
+  border-radius: var(--radius-control);
 
   background: var(--color-disabled-bg);
   color: var(--color-disabled-text);
 
   font-family: inherit;
-  font-size: 14px;
-  font-weight: 900;
+  font-size: var(--font-body);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.5px;
   white-space: nowrap;
 
@@ -137,6 +139,8 @@
     background 0.25s ease,
     color 0.25s ease,
     box-shadow 0.25s ease;
+
+  min-height: var(--control-height);
 }
 
 .signup-inline-btn:hover:not(:disabled) {
@@ -153,18 +157,18 @@
   flex-shrink: 0;
 
   min-width: 118px;
-  height: 54px;
+  height: auto;
   padding: 0 16px;
 
   border: transparent;
-  border-radius: 16px;
+  border-radius: var(--radius-control);
 
   background: var(--color-primary);
   color: var(--color-on-primary);
 
   font-family: inherit;
-  font-size: 14px;
-  font-weight: 900;
+  font-size: var(--font-body);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.5px;
   white-space: nowrap;
 
@@ -175,6 +179,8 @@
     transform 0.2s ease,
     background 0.25s ease,
     box-shadow 0.25s ease;
+
+  min-height: var(--control-height);
 }
 
 .signup-code-send-btn:hover,
@@ -216,8 +222,8 @@
   right: 15px;
   transform: translateY(-50%);
 
-  width: 30px;
-  height: 30px;
+  width: var(--touch-target);
+  height: var(--touch-target);
   padding: 0;
 
   border: none;
@@ -273,12 +279,18 @@
 .signup-agreement label {
   cursor: pointer;
   word-break: keep-all;
+
+  display: inline-block;
+
+  min-height: var(--touch-target);
+
+  padding: 8px 0;
 }
 
 .signup-agreement-link {
   display: block;
   margin-top: 4px;
-  padding: 0;
+  padding: 8px 0;
   border: 0;
   background: transparent;
   color: var(--color-accent-text);
@@ -287,6 +299,8 @@
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
+
+  min-height: var(--touch-target);
 }
 
 .signup-field-help,
@@ -314,8 +328,8 @@
   color: var(--color-disabled-text);
 
   font-family: inherit;
-  font-size: 18px;
-  font-weight: 900;
+  font-size: var(--font-control);
+  font-weight: var(--weight-semibold);
   letter-spacing: -0.6px;
 
   cursor: not-allowed;
@@ -446,9 +460,9 @@
 .signup-alert-card h2 {
   margin: 0;
   color: var(--color-text-strong);
-  font-size: 22px;
-  font-weight: 900;
-  line-height: 1.25;
+  font-size: var(--font-section-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   letter-spacing: -0.8px;
   text-align: center;
 }
@@ -518,7 +532,7 @@
 /* 작은 모바일 */
 @media (max-width: 390px) {
   .signup-page {
-    padding: 56px 16px 80px;
+    padding: 32px 16px 40px;
   }
 
   .signup-brand {
@@ -529,16 +543,22 @@
 
   .signup-subtitle {
     margin-top: 14px;
-    font-size: 18px;
-    line-height: 1.35;
+    font-size: var(--font-body);
+    line-height: var(--line-body);
     letter-spacing: -0.6px;
-  }
+
+  white-space: normal;
+
+  overflow-wrap: anywhere;
+}
 
   .signup-input {
-    height: 52px;
+    height: var(--control-height);
     padding: 0 16px;
-    font-size: 14px;
-  }
+    font-size: var(--font-control);
+
+  border-radius: var(--radius-control);
+}
 
   .signup-inline {
     gap: 8px;
@@ -546,24 +566,28 @@
 
   .signup-inline-btn {
     min-width: 88px;
-    height: 52px;
+    height: auto;
     padding: 0 12px;
-    font-size: 13px;
-    border-radius: 15px;
-  }
+    font-size: var(--font-body);
+    border-radius: var(--radius-control);
+
+  min-height: var(--control-height);
+}
 
   .signup-code-send-btn,
   .signup-inline-btn--active {
     min-width: 112px;
-    height: 52px;
+    height: auto;
     padding: 0 13px;
-    font-size: 13px;
-    border-radius: 15px;
-  }
+    font-size: var(--font-body);
+    border-radius: var(--radius-control);
+
+  min-height: var(--control-height);
+}
 
   .signup-submit-btn {
     height: 56px;
-    font-size: 17px;
+    font-size: var(--font-control);
   }
 
   .signup-alert-card {
@@ -583,14 +607,14 @@
   }
 
   .signup-alert-card h2 {
-    font-size: 21px;
+    font-size: var(--font-section-title);
   }
 }
 
 /* 아주 작은 화면 */
 @media (max-width: 340px) {
   .signup-page {
-    padding: 52px 12px 80px;
+    padding: 32px 16px 40px;
   }
 
   .signup-brand {
@@ -598,9 +622,11 @@
   }
 
   .signup-subtitle {
-    font-size: 16px;
+    font-size: var(--font-body);
     white-space: normal;
-  }
+
+  overflow-wrap: anywhere;
+}
 
   .signup-inline {
     gap: 7px;
@@ -609,15 +635,27 @@
   .signup-inline-btn {
     min-width: 80px;
     padding: 0 10px;
-    font-size: 12px;
-  }
+    font-size: var(--font-body);
+
+  height: auto;
+
+  min-height: var(--control-height);
+
+  border-radius: var(--radius-control);
+}
 
   .signup-code-send-btn,
   .signup-inline-btn--active {
     min-width: 102px;
     padding: 0 10px;
-    font-size: 12px;
-  }
+    font-size: var(--font-body);
+
+  height: auto;
+
+  min-height: var(--control-height);
+
+  border-radius: var(--radius-control);
+}
 
   .signup-agreement {
     font-size: 13px;
@@ -652,7 +690,7 @@
   max-height: calc(100dvh - 40px);
   overflow-y: auto;
   padding: 30px 24px 24px;
-  border-radius: 26px;
+  border-radius: var(--radius-dialog);
   background: var(--color-surface);
   box-shadow: 0 20px 52px var(--color-shadow);
   text-align: center;
@@ -682,16 +720,16 @@
 .signup-complete-text h2 {
   margin: 0;
   color: var(--color-text-strong);
-  font-size: 22px;
-  font-weight: 900;
+  font-size: var(--font-section-title);
+  font-weight: var(--weight-heading);
 }
 
 .signup-complete-text p {
   margin: 12px 0 24px;
   color: var(--color-text-muted);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.6;
+  font-size: var(--font-body);
+  font-weight: 400;
+  line-height: var(--line-body);
 }
 
 .signup-complete-button {

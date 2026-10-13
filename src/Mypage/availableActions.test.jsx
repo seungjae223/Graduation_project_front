@@ -23,7 +23,7 @@ test("unsupported folder menu is absent; folder creation and place removal still
   fireEvent.click(screen.getByRole("button", { name: "생성", exact: true }));
   await waitFor(() => expect(api.post).toHaveBeenCalledWith("/api/folders", { name: "추가 폴더" }));
   await screen.findByText(/폴더가 생성됐어요/);
-  fireEvent.click(screen.getByRole("button", { name: "취소" }));
+  fireEvent.click(screen.getByRole("button", { name: "닫기" }));
   fireEvent.click(folder);
   await screen.findByRole("heading", { name: "저장 장소" });
   const confirm = jest.spyOn(window, "confirm").mockReturnValue(true);

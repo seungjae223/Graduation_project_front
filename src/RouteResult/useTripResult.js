@@ -95,7 +95,7 @@ export default function useTripResult(id, demo = false) {
       void loadTimeline(id, day, generation.current, controller.current.signal);
     }
   };
-  const refreshDayOrder = async (day, expectedIds) => {
+  const refreshDayOrder = async (day, expectedIds, { acceptDifferentOrder = false } = {}) => {
     const version = generation.current;
     const signal = controller.current?.signal;
     const owner = account;
@@ -110,8 +110,9 @@ export default function useTripResult(id, demo = false) {
       if (!alive()) throw new Error("일정 화면이 변경되었습니다.");
       const ordered = places.filter(place => Number(place.day) === day)
         .sort((a, b) => Number(a.visitOrder) - Number(b.visitOrder));
-      if (ordered.length !== expectedIds.length || ordered.some((place, index) =>
-        String(place.tripPlaceId ?? place.id) !== String(expectedIds[index]))) {
+      const applied = ordered.length === expectedIds.length && ordered.every((place, index) =>
+        String(place.tripPlaceId ?? place.id) === String(expectedIds[index]));
+      if (!applied && !acceptDifferentOrder) {
         throw new Error("저장된 방문 순서를 확인하지 못했습니다.");
       }
       confirmedPlaces.current = places;
@@ -119,7 +120,7 @@ export default function useTripResult(id, demo = false) {
       if (!await loadTimeline(id, day, version, signal)) {
         throw new Error("저장 후 타임라인을 확인하지 못했습니다.");
       }
-      return { confirmed: true };
+      return { confirmed: true, applied };
     } catch (error) {
       if (alive()) setState(s => ({ ...s, timelines: { ...s.timelines, [day]: {
         status: "error", error: getApiErrorMessage(error, "저장된 순서와 타임라인을 다시 확인해주세요.")

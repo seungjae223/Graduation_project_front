@@ -1,0 +1,19 @@
+7ca217a5f24cfc41e1cdf0fde8b0fea1
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.seedReviews = seedReviews;
+function seedReviews(places) {
+  const comments = ["산책하기 좋고 주변 풍경이 예뻐요.", "친구들과 즐거운 시간을 보냈어요.", "오전에 방문하니 여유롭게 둘러볼 수 있었어요.", "다음 여행에도 다시 방문하고 싶어요.", "주변 볼거리까지 함께 즐기기 좋아요.", "사진 찍기 좋은 장소가 많아요."];
+  return places.flatMap(place => comments.map((comment, i) => ({
+    id: place.id * 10 + i,
+    placeId: place.id,
+    nickname: ["주말여행자", "산책하는나무", "여행기록"][i % 3],
+    comment,
+    rating: i % 3 === 0 ? 4 : 5,
+    createdAt: "2026-10-01T10:00:00"
+  })));
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJzZWVkUmV2aWV3cyIsInBsYWNlcyIsImNvbW1lbnRzIiwiZmxhdE1hcCIsInBsYWNlIiwibWFwIiwiY29tbWVudCIsImkiLCJpZCIsInBsYWNlSWQiLCJuaWNrbmFtZSIsInJhdGluZyIsImNyZWF0ZWRBdCJdLCJzb3VyY2VzIjpbInJldmlld01vY2suanMiXSwic291cmNlc0NvbnRlbnQiOlsiZXhwb3J0IGZ1bmN0aW9uIHNlZWRSZXZpZXdzKHBsYWNlcykge1xuICBjb25zdCBjb21tZW50cyA9IFtcIuyCsOyxhe2VmOq4sCDsoovqs6Ag7KO867OAIO2SjeqyveydtCDsmIjru5DsmpQuXCIsIFwi7Lmc6rWs65Ok6rO8IOymkOqxsOyatCDsi5zqsITsnYQg67O064OI7Ja07JqULlwiLCBcIuyYpOyghOyXkCDrsKnrrLjtlZjri4gg7Jes7Jyg66Gt6rKMIOuRmOufrOuzvCDsiJgg7J6I7JeI7Ja07JqULlwiLCBcIuuLpOydjCDsl6ztlonsl5Drj4Qg64uk7IucIOuwqeusuO2VmOqzoCDsi7bslrTsmpQuXCIsIFwi7KO867OAIOuzvOqxsOumrOq5jOyngCDtlajqu5gg7KaQ6riw6riwIOyii+yVhOyalC5cIiwgXCLsgqzsp4Qg7LCN6riwIOyii+ydgCDsnqXshozqsIAg66eO7JWE7JqULlwiXTtcbiAgcmV0dXJuIHBsYWNlcy5mbGF0TWFwKHBsYWNlID0+IGNvbW1lbnRzLm1hcCgoY29tbWVudCwgaSkgPT4gKHtcbiAgICBpZDogcGxhY2UuaWQgKiAxMCArIGksIHBsYWNlSWQ6IHBsYWNlLmlkLCBuaWNrbmFtZTogW1wi7KO866eQ7Jes7ZaJ7J6QXCIsIFwi7IKw7LGF7ZWY64qU64KY66y0XCIsIFwi7Jes7ZaJ6riw66GdXCJdW2kgJSAzXSxcbiAgICBjb21tZW50LCByYXRpbmc6IGkgJSAzID09PSAwID8gNCA6IDUsIGNyZWF0ZWRBdDogXCIyMDI2LTEwLTAxVDEwOjAwOjAwXCIsXG4gIH0pKSk7XG59XG4iXSwibWFwcGluZ3MiOiI7Ozs7OztBQUFPLFNBQVNBLFdBQVdBLENBQUNDLE1BQU0sRUFBRTtFQUNsQyxNQUFNQyxRQUFRLEdBQUcsQ0FBQyxxQkFBcUIsRUFBRSxvQkFBb0IsRUFBRSwyQkFBMkIsRUFBRSxzQkFBc0IsRUFBRSxzQkFBc0IsRUFBRSxtQkFBbUIsQ0FBQztFQUNoSyxPQUFPRCxNQUFNLENBQUNFLE9BQU8sQ0FBQ0MsS0FBSyxJQUFJRixRQUFRLENBQUNHLEdBQUcsQ0FBQyxDQUFDQyxPQUFPLEVBQUVDLENBQUMsTUFBTTtJQUMzREMsRUFBRSxFQUFFSixLQUFLLENBQUNJLEVBQUUsR0FBRyxFQUFFLEdBQUdELENBQUM7SUFBRUUsT0FBTyxFQUFFTCxLQUFLLENBQUNJLEVBQUU7SUFBRUUsUUFBUSxFQUFFLENBQUMsT0FBTyxFQUFFLFFBQVEsRUFBRSxNQUFNLENBQUMsQ0FBQ0gsQ0FBQyxHQUFHLENBQUMsQ0FBQztJQUN0RkQsT0FBTztJQUFFSyxNQUFNLEVBQUVKLENBQUMsR0FBRyxDQUFDLEtBQUssQ0FBQyxHQUFHLENBQUMsR0FBRyxDQUFDO0lBQUVLLFNBQVMsRUFBRTtFQUNuRCxDQUFDLENBQUMsQ0FBQyxDQUFDO0FBQ04iLCJpZ25vcmVMaXN0IjpbXX0=

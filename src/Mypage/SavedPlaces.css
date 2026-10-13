@@ -52,9 +52,9 @@
 .saved-places-title-box h1 {
   margin: 0 0 8px;
   color: var(--color-text-strong);
-  font-size: 28px;
-  font-weight: 800;
-  line-height: 1.2;
+  font-size: var(--font-page-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   letter-spacing: -0.8px;
 }
 
@@ -181,10 +181,12 @@
   margin: 0 0 8px;
   color: var(--color-text-strong);
 
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1.2;
+  font-size: var(--font-card-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   letter-spacing: -0.6px;
+
+  overflow-wrap: anywhere;
 }
 
 .saved-folder-info p {
@@ -222,8 +224,8 @@
   z-index: 10;
   pointer-events: auto;
 
-  width: 28px;
-  height: 28px;
+  width: var(--touch-target);
+  height: var(--touch-target);
   padding: 0;
 
   border: none;
@@ -278,13 +280,13 @@
   width: min(100%, 356px);
   overflow: hidden;
 
-  border-radius: 32px;
+  border-radius: var(--radius-dialog);
   background: var(--color-surface);
   box-shadow: 0 18px 50px var(--color-shadow);
 }
 
 .folder-modal-header {
-  padding: 34px 24px;
+  padding: 20px;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -292,9 +294,9 @@
   margin: 0;
   color: var(--color-text-strong);
 
-  font-size: 30px;
-  font-weight: 800;
-  line-height: 1.2;
+  font-size: var(--font-section-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   letter-spacing: -1px;
 }
 
@@ -305,7 +307,7 @@
 
 .folder-modal-menu-item {
   width: 100%;
-  min-height: 92px;
+  min-height: 72px;
   padding: 0;
 
   border: none;
@@ -313,7 +315,7 @@
 
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
 
   text-align: left;
   cursor: pointer;
@@ -326,8 +328,8 @@
 }
 
 .folder-modal-icon-circle {
-  width: 58px;
-  height: 58px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
 
   display: flex;
@@ -357,8 +359,8 @@
   min-width: 0;
 
   color: var(--color-text-strong);
-  font-size: 22px;
-  font-weight: 800;
+  font-size: var(--font-card-title);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.7px;
 }
 
@@ -415,8 +417,8 @@
 .folder-rename-modal h2 {
   margin: 0 0 22px;
   color: var(--color-text-strong);
-  font-size: 24px;
-  font-weight: 800;
+  font-size: var(--font-section-title);
+  font-weight: var(--weight-heading);
   text-align: center;
   letter-spacing: -0.7px;
 }
@@ -521,9 +523,9 @@
 .folder-delete-content h2 {
   margin: 0 0 14px;
   color: var(--color-text-strong);
-  font-size: 21px;
-  font-weight: 800;
-  line-height: 1.35;
+  font-size: var(--font-section-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   letter-spacing: -0.6px;
 }
 
@@ -564,6 +566,8 @@
 }
 .saved-folder-card {
   cursor: pointer;
+
+  border-radius: var(--radius-card);
 }
 
 .saved-folder-card:focus-visible,
@@ -585,8 +589,8 @@
 .saved-folder-detail-header h1 {
   margin: 0;
   color: var(--color-text-strong);
-  font-size: 22px;
-  font-weight: 800;
+  font-size: var(--font-page-title);
+  font-weight: var(--weight-heading);
 }
 
 .saved-folder-detail-header p {
@@ -668,9 +672,9 @@
 .saved-place-body h2 {
   margin: 10px 0 8px;
   color: var(--color-text-strong);
-  font-size: 20px;
-  font-weight: 900;
-  line-height: 1.25;
+  font-size: var(--font-card-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   overflow-wrap: anywhere;
 }
 
@@ -794,6 +798,8 @@
 }
 .saved-folder-card {
   cursor: pointer;
+
+  border-radius: var(--radius-card);
 }
 
 .saved-folder-card:focus-visible,
@@ -815,8 +821,8 @@
 .saved-folder-detail-header h1 {
   margin: 0;
   color: var(--color-text-strong);
-  font-size: 22px;
-  font-weight: 800;
+  font-size: var(--font-page-title);
+  font-weight: var(--weight-heading);
 }
 
 .saved-folder-detail-header p {
@@ -898,9 +904,9 @@
 .saved-place-body h2 {
   margin: 10px 0 8px;
   color: var(--color-text-strong);
-  font-size: 20px;
-  font-weight: 900;
-  line-height: 1.25;
+  font-size: var(--font-card-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
 }
 
 .saved-place-meta {
@@ -1029,7 +1035,7 @@
   }
 
   .saved-place-body h2 {
-    font-size: 18px;
+    font-size: var(--font-card-title);
   }
 
   .saved-place-meta {
@@ -1053,7 +1059,7 @@
   }
 
   .saved-place-body h2 {
-    font-size: 18px;
+    font-size: var(--font-card-title);
   }
 
   .saved-place-meta {
@@ -1071,7 +1077,7 @@
   }
 
   .folder-rename-modal h2 {
-    font-size: 23px;
+    font-size: var(--font-section-title);
   }
 
   .folder-delete-modal {
@@ -1114,7 +1120,7 @@
   }
 
   .saved-places-title-box h1 {
-    font-size: 26px;
+    font-size: var(--font-page-title);
   }
 
   .saved-places-title-box p {
@@ -1162,8 +1168,10 @@
   }
 
   .saved-folder-info h2 {
-    font-size: 21px;
-  }
+    font-size: var(--font-card-title);
+
+  overflow-wrap: anywhere;
+}
 
   .saved-folder-info p {
     font-size: 14px;
@@ -1171,23 +1179,25 @@
 
   .folder-modal {
     width: min(100%, 348px);
-    border-radius: 30px;
+    border-radius: var(--radius-dialog);
   }
 
   .folder-modal-header {
-    padding: 32px 24px;
+    padding: 20px;
   }
 
   .folder-modal-header h2 {
-    font-size: 29px;
+    font-size: var(--font-section-title);
   }
 
   .folder-modal-menu-item {
-    min-height: 90px;
-  }
+    min-height: 72px;
+
+  gap: 12px;
+}
 
   .folder-modal-menu-text {
-    font-size: 21px;
+    font-size: var(--font-card-title);
   }
 
   .folder-modal-cancel {
@@ -1238,8 +1248,10 @@
   }
 
   .saved-folder-info h2 {
-    font-size: 19px;
-  }
+    font-size: var(--font-card-title);
+
+  overflow-wrap: anywhere;
+}
 
   .saved-folder-info p {
     font-size: 13px;
@@ -1251,15 +1263,15 @@
 
   .folder-modal {
     width: min(100%, 324px);
-    border-radius: 28px;
+    border-radius: var(--radius-dialog);
   }
 
   .folder-modal-header {
-    padding: 28px 22px;
+    padding: 20px;
   }
 
   .folder-modal-header h2 {
-    font-size: 27px;
+    font-size: var(--font-section-title);
   }
 
   .folder-modal-body {
@@ -1267,13 +1279,13 @@
   }
 
   .folder-modal-menu-item {
-    min-height: 84px;
-    gap: 16px;
+    min-height: 72px;
+    gap: 12px;
   }
 
   .folder-modal-icon-circle {
-    width: 54px;
-    height: 54px;
+    width: 44px;
+    height: 44px;
   }
 
   .folder-modal-icon-circle img {
@@ -1282,7 +1294,7 @@
   }
 
   .folder-modal-menu-text {
-    font-size: 19px;
+    font-size: var(--font-card-title);
   }
 
   .folder-modal-footer {

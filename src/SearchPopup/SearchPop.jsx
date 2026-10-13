@@ -217,7 +217,12 @@ const SearchPop = ({ isOpen, onClose }) => {
 
           <div className="search-pop-result-header">
             <h2 id="search-pop-title">검색 결과</h2>
-            <span>{query.data ? `${filteredPlaces.length}개 발견` : isLoading ? "조회 중" : "확인 필요"}</span>
+            <div className="search-pop-result-meta">
+              <span>{query.data ? `${filteredPlaces.length}개 발견` : isLoading ? "조회 중" : "확인 필요"}</span>
+              <button type="button" className="search-pop-close" aria-label="검색 닫기" onClick={onClose}>
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+              </button>
+            </div>
           </div>
 
           <div className="search-pop-list">

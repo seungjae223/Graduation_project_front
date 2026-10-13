@@ -1,0 +1,41 @@
+  console.error
+    Request failed { context: 'api' }
+
+      2 | export const logSafeApiError = (error, context = "request") => {
+      3 |   const status = Number(error?.response?.status);
+    > 4 |   console.error("Request failed", {
+        |           ^
+      5 |     context,
+      6 |     ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      7 |   });
+
+      at logSafeApiError (src/utils/safeLog.js:4:11)
+      at src/api/api.js:171:20
+      at Axios.request (node_modules/axios/lib/core/Axios.js:41:14)
+      at getRecentSearchesApi (src/api/placeApi.js:45:16)
+      at src/utils/useReadQuery.js:19:20
+
+PASS src/mocks/mockMode.test.jsx (8.236 s)
+  √ email login survives remount with isolated credentials (keepLogin=true) (815 ms)
+  √ email login survives remount with isolated credentials (keepLogin=false) (123 ms)
+  √ 구글 로그인 uses existing return route without OAuth navigation (121 ms)
+  √ 카카오 로그인 uses existing return route without OAuth navigation (97 ms)
+  √ email form logs in and logout returns to login (198 ms)
+  √ signup and email verification retain registered nickname (24 ms)
+  √ signup form enables submission after verification, matching password and policy agreement (927 ms)
+  √ search, recommendations, detail and reviews use existing response contracts (12 ms)
+  √ Mock ON: unauthenticated place list, search and detail share Mock data without a backend (3 ms)
+  √ folder creation and save/remove are reflected on the next read (6 ms)
+  √ trip CRUD, start, fixed time, memo and timeline stay consistent (11 ms)
+  √ existing route generation flow saves and re-reads a multi-day itinerary (12 ms)
+  √ domestic Mock trip 1 renders the Kakao map container without returning a DOM child (405 ms)
+  √ domestic Mock trip 2 renders the Kakao map container without returning a DOM child (67 ms)
+  √ inquiry creation and admin reply share the same data (3 ms)
+  √ Mock forces its adapter, strips credentials and never falls back for unknown endpoints (61 ms)
+  √ place search and detail pages render the adapter data and review pagination (726 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       17 passed, 17 total
+Snapshots:   0 total
+Time:        11.124 s
+Ran all test suites matching /src\\mocks\\mockMode.test.jsx/i.

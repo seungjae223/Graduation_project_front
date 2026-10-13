@@ -2,7 +2,14 @@ import api from "./api";
 import { requireList } from "./responseContract";
 import { toApiTheme } from "../utils/placeTheme";
 
-export const getPlacesApi = async () => requireList((await api.get("/api/places")).data);
+export const getPlacesApi = async (options = {}) => {
+  const places = requireList((await api.get("/api/places", options)).data);
+  if (places.some(place => !Number.isSafeInteger(Number(place?.id)) || Number(place.id) <= 0 || !place.name) ||
+      new Set(places.map(place => String(place.id))).size !== places.length) {
+    throw new Error("장소 목록 응답을 확인할 수 없습니다.");
+  }
+  return places;
+};
 
 export const createPlaceApi = async (place) =>
   (await api.post("/api/places", place)).data;

@@ -28,18 +28,18 @@
 .admin-page-title {
   margin: 16px 0 0;
   color: var(--color-text-strong);
-  font-size: 28px;
-  font-weight: 900;
-  line-height: 1.2;
+  font-size: var(--font-page-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   letter-spacing: -0.6px;
 }
 
 .admin-page-subtitle {
   margin: 10px 0 0;
   color: var(--color-text-muted);
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.5;
+  font-size: var(--font-body);
+  font-weight: 400;
+  line-height: var(--line-body);
 }
 
 .admin-stat-card {
@@ -225,7 +225,7 @@
 
 @media (max-width: 360px) {
   .admin-page-title {
-    font-size: 26px;
+    font-size: var(--font-page-title);
   }
 
   .admin-main-value {

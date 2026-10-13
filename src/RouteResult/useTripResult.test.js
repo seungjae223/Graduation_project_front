@@ -79,3 +79,13 @@ test("order refresh discards an older timeline even when the transport ignores a
   await act(async () => finishOld([{ visitOrder: 1, arrivalTime: "10:00" }]));
   expect(result.current.timelines[1].items[0].arrivalTime).toBe("12:00");
 });
+
+test("reconciliation publishes authoritative data without confirming an unapplied order", async () => {
+  const { result } = renderHook(() => useTripResult("1"));
+  await waitFor(() => expect(result.current.timelines[1]?.status).toBe("success"));
+  let outcome;
+  await act(async () => { outcome = await result.current.refreshDayOrder(1, [92], { acceptDifferentOrder: true }); });
+  expect(outcome).toEqual({ confirmed: true, applied: false });
+  expect(result.current.places).toEqual(places);
+  expect(result.current.timelines[1].status).toBe("success");
+});

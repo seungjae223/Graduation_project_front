@@ -1,0 +1,101 @@
+
+> graduation@0.1.0 build
+> node scripts/build-production.cjs
+
+Creating an optimized production build...
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Compiled successfully.
+
+File sizes after gzip:
+
+  388.3 kB        build\static\js\main.62bf36d8.js
+  24.59 kB        build\static\js\957.89842220.chunk.js
+  18.12 kB        build\static\js\661.a33b4079.chunk.js
+  16.07 kB        build\static\js\58.7d3a7143.chunk.js
+  11.26 kB        build\static\js\675.309b46fb.chunk.js
+  11.21 kB        build\static\js\705.9cd69f27.chunk.js
+  9.58 kB         build\static\css\main.3b89f3d9.css
+  8.29 kB         build\static\js\645.fe193477.chunk.js
+  7.43 kB         build\static\js\915.9339c9b0.chunk.js
+  7.19 kB (-1 B)  build\static\js\321.7945eacb.chunk.js
+  6.47 kB         build\static\js\795.2897e96f.chunk.js
+  6.1 kB          build\static\js\263.852415df.chunk.js
+  5.93 kB         build\static\js\513.f55fa2e8.chunk.js
+  5.5 kB          build\static\js\131.67f470b2.chunk.js
+  5.43 kB         build\static\css\957.ac2b6536.chunk.css
+  5.18 kB         build\static\js\278.ad0c49fc.chunk.js
+  4.67 kB         build\static\js\109.a350bbec.chunk.js
+  4.34 kB         build\static\js\718.56068852.chunk.js
+  4.17 kB         build\static\js\686.b738b665.chunk.js
+  3.78 kB         build\static\css\690.054bc000.chunk.css
+  3.68 kB         build\static\js\296.a43d8f6d.chunk.js
+  3.63 kB         build\static\js\613.b01124b3.chunk.js
+  3.51 kB         build\static\js\199.b8aad067.chunk.js
+  3.33 kB         build\static\js\821.7d0058f6.chunk.js
+  3.26 kB         build\static\css\795.886b91bd.chunk.css
+  3.2 kB          build\static\css\705.01dd2e19.chunk.css
+  3.17 kB         build\static\css\321.a6e38bb7.chunk.css
+  3.13 kB         build\static\css\661.fe5184a1.chunk.css
+  3.08 kB         build\static\css\131.9d2834ae.chunk.css
+  3.02 kB         build\static\css\406.292fd6aa.chunk.css
+  2.97 kB         build\static\css\915.e7c29ed4.chunk.css
+  2.88 kB         build\static\js\406.ec07b43c.chunk.js
+  2.74 kB         build\static\js\741.5452104e.chunk.js
+  2.59 kB         build\static\js\690.2a52c338.chunk.js
+  2.45 kB         build\static\css\278.be898d88.chunk.css
+  2.41 kB         build\static\js\23.930d05b3.chunk.js
+  2.38 kB         build\static\css\721.1bb5cb23.chunk.css
+  2.27 kB         build\static\js\721.b96809df.chunk.js
+  2.18 kB         build\static\js\782.0d8172cf.chunk.js
+  1.72 kB         build\static\js\206.bfa153a5.chunk.js
+  1.61 kB         build\static\css\109.e1959ec3.chunk.css
+  1.43 kB         build\static\css\296.8c3efae7.chunk.css
+  1.31 kB         build\static\css\675.c77c26cf.chunk.css
+  1.31 kB         build\static\css\821.c77c26cf.chunk.css
+  1.26 kB         build\static\css\741.207c5f4e.chunk.css
+  1.24 kB         build\static\css\613.0de130e4.chunk.css
+  1.23 kB         build\static\css\50.fbaec2b6.chunk.css
+  1.23 kB         build\static\css\689.fbaec2b6.chunk.css
+  1.2 kB          build\static\css\513.12b79515.chunk.css
+  1.11 kB         build\static\css\645.e1047c9a.chunk.css
+  1.1 kB          build\static\css\199.944d62bd.chunk.css
+  952 B           build\static\css\718.85cb0937.chunk.css
+  947 B           build\static\css\23.559efb2a.chunk.css
+  179 B           build\static\js\689.6aa32f33.chunk.js
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  npm install -g serve
+  serve -s build
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+

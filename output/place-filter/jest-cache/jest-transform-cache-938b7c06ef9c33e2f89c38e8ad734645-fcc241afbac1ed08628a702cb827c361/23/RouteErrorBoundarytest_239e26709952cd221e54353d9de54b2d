@@ -1,0 +1,51 @@
+8ed956449c4a959853024b35779d20a5
+"use strict";
+
+var _interopRequireDefault = require("C:/Users/joyfu/Desktop/graduation_project/graduation/node_modules/@babel/runtime/helpers/interopRequireDefault.js").default;
+var _react = require("react");
+var _react2 = require("@testing-library/react");
+var _RouteErrorBoundary = _interopRequireDefault(require("./RouteErrorBoundary"));
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _jsxFileName = "C:\\Users\\joyfu\\Desktop\\graduation_project\\graduation\\src\\Loading\\RouteErrorBoundary.test.jsx";
+test("rejected page chunk displays recovery while the shell remains visible", async () => {
+  const error = new Error("ChunkLoadError");
+  const log = jest.spyOn(console, "error").mockImplementation(() => {});
+  const Page = /*#__PURE__*/(0, _react.lazy)(() => Promise.reject(error));
+  (0, _react2.render)(/*#__PURE__*/(0, _jsxDevRuntime.jsxDEV)(_jsxDevRuntime.Fragment, {
+    children: [/*#__PURE__*/(0, _jsxDevRuntime.jsxDEV)("header", {
+      children: "\uD5E4\uB354"
+    }, void 0, false, {
+      fileName: _jsxFileName,
+      lineNumber: 9,
+      columnNumber: 12
+    }, void 0), /*#__PURE__*/(0, _jsxDevRuntime.jsxDEV)(_RouteErrorBoundary.default, {
+      children: /*#__PURE__*/(0, _jsxDevRuntime.jsxDEV)(_react.Suspense, {
+        fallback: "\uB85C\uB529",
+        children: /*#__PURE__*/(0, _jsxDevRuntime.jsxDEV)(Page, {}, void 0, false, {
+          fileName: _jsxFileName,
+          lineNumber: 9,
+          columnNumber: 75
+        }, void 0)
+      }, void 0, false, {
+        fileName: _jsxFileName,
+        lineNumber: 9,
+        columnNumber: 51
+      }, void 0)
+    }, void 0, false, {
+      fileName: _jsxFileName,
+      lineNumber: 9,
+      columnNumber: 31
+    }, void 0)]
+  }, void 0, true));
+  expect(await _react2.screen.findByRole("alert")).toHaveTextContent("화면을 불러오지 못했어요");
+  expect(_react2.screen.getByText("헤더")).toBeVisible();
+  expect(_react2.screen.getByRole("button", {
+    name: "화면 다시 불러오기"
+  })).toBeEnabled();
+  expect(_react2.screen.getByRole("link", {
+    name: "홈으로 돌아가기"
+  })).toHaveAttribute("href", "/home");
+  expect(log).toHaveBeenCalled();
+  log.mockRestore();
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfcmVhY3QiLCJyZXF1aXJlIiwiX3JlYWN0MiIsIl9Sb3V0ZUVycm9yQm91bmRhcnkiLCJfaW50ZXJvcFJlcXVpcmVEZWZhdWx0IiwiX2pzeERldlJ1bnRpbWUiLCJfanN4RmlsZU5hbWUiLCJ0ZXN0IiwiZXJyb3IiLCJFcnJvciIsImxvZyIsImplc3QiLCJzcHlPbiIsImNvbnNvbGUiLCJtb2NrSW1wbGVtZW50YXRpb24iLCJQYWdlIiwibGF6eSIsIlByb21pc2UiLCJyZWplY3QiLCJyZW5kZXIiLCJqc3hERVYiLCJGcmFnbWVudCIsImNoaWxkcmVuIiwiZmlsZU5hbWUiLCJsaW5lTnVtYmVyIiwiY29sdW1uTnVtYmVyIiwiZGVmYXVsdCIsIlN1c3BlbnNlIiwiZmFsbGJhY2siLCJleHBlY3QiLCJzY3JlZW4iLCJmaW5kQnlSb2xlIiwidG9IYXZlVGV4dENvbnRlbnQiLCJnZXRCeVRleHQiLCJ0b0JlVmlzaWJsZSIsImdldEJ5Um9sZSIsIm5hbWUiLCJ0b0JlRW5hYmxlZCIsInRvSGF2ZUF0dHJpYnV0ZSIsInRvSGF2ZUJlZW5DYWxsZWQiLCJtb2NrUmVzdG9yZSJdLCJzb3VyY2VzIjpbIlJvdXRlRXJyb3JCb3VuZGFyeS50ZXN0LmpzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBsYXp5LCBTdXNwZW5zZSB9IGZyb20gXCJyZWFjdFwiO1xyXG5pbXBvcnQgeyByZW5kZXIsIHNjcmVlbiB9IGZyb20gXCJAdGVzdGluZy1saWJyYXJ5L3JlYWN0XCI7XHJcbmltcG9ydCBSb3V0ZUVycm9yQm91bmRhcnkgZnJvbSBcIi4vUm91dGVFcnJvckJvdW5kYXJ5XCI7XHJcblxyXG50ZXN0KFwicmVqZWN0ZWQgcGFnZSBjaHVuayBkaXNwbGF5cyByZWNvdmVyeSB3aGlsZSB0aGUgc2hlbGwgcmVtYWlucyB2aXNpYmxlXCIsIGFzeW5jICgpID0+IHtcclxuICBjb25zdCBlcnJvciA9IG5ldyBFcnJvcihcIkNodW5rTG9hZEVycm9yXCIpO1xyXG4gIGNvbnN0IGxvZyA9IGplc3Quc3B5T24oY29uc29sZSwgXCJlcnJvclwiKS5tb2NrSW1wbGVtZW50YXRpb24oKCkgPT4ge30pO1xyXG4gIGNvbnN0IFBhZ2UgPSBsYXp5KCgpID0+IFByb21pc2UucmVqZWN0KGVycm9yKSk7XHJcbiAgcmVuZGVyKDw+PGhlYWRlcj7tl6TrjZQ8L2hlYWRlcj48Um91dGVFcnJvckJvdW5kYXJ5PjxTdXNwZW5zZSBmYWxsYmFjaz1cIuuhnOuUqVwiPjxQYWdlIC8+PC9TdXNwZW5zZT48L1JvdXRlRXJyb3JCb3VuZGFyeT48Lz4pO1xyXG4gIGV4cGVjdChhd2FpdCBzY3JlZW4uZmluZEJ5Um9sZShcImFsZXJ0XCIpKS50b0hhdmVUZXh0Q29udGVudChcIu2ZlOuptOydhCDrtojrn6zsmKTsp4Ag66q77ZaI7Ja07JqUXCIpO1xyXG4gIGV4cGVjdChzY3JlZW4uZ2V0QnlUZXh0KFwi7Zek642UXCIpKS50b0JlVmlzaWJsZSgpO1xyXG4gIGV4cGVjdChzY3JlZW4uZ2V0QnlSb2xlKFwiYnV0dG9uXCIsIHsgbmFtZTogXCLtmZTrqbQg64uk7IucIOu2iOufrOyYpOq4sFwiIH0pKS50b0JlRW5hYmxlZCgpO1xyXG4gIGV4cGVjdChzY3JlZW4uZ2V0QnlSb2xlKFwibGlua1wiLCB7IG5hbWU6IFwi7ZmI7Jy866GcIOuPjOyVhOqwgOq4sFwiIH0pKS50b0hhdmVBdHRyaWJ1dGUoXCJocmVmXCIsIFwiL2hvbWVcIik7XHJcbiAgZXhwZWN0KGxvZykudG9IYXZlQmVlbkNhbGxlZCgpO1xyXG4gIGxvZy5tb2NrUmVzdG9yZSgpO1xyXG59KTtcclxuIl0sIm1hcHBpbmdzIjoiOzs7QUFBQSxJQUFBQSxNQUFBLEdBQUFDLE9BQUE7QUFDQSxJQUFBQyxPQUFBLEdBQUFELE9BQUE7QUFDQSxJQUFBRSxtQkFBQSxHQUFBQyxzQkFBQSxDQUFBSCxPQUFBO0FBQXNELElBQUFJLGNBQUEsR0FBQUosT0FBQTtBQUFBLElBQUFLLFlBQUE7QUFFdERDLElBQUksQ0FBQyx1RUFBdUUsRUFBRSxZQUFZO0VBQ3hGLE1BQU1DLEtBQUssR0FBRyxJQUFJQyxLQUFLLENBQUMsZ0JBQWdCLENBQUM7RUFDekMsTUFBTUMsR0FBRyxHQUFHQyxJQUFJLENBQUNDLEtBQUssQ0FBQ0MsT0FBTyxFQUFFLE9BQU8sQ0FBQyxDQUFDQyxrQkFBa0IsQ0FBQyxNQUFNLENBQUMsQ0FBQyxDQUFDO0VBQ3JFLE1BQU1DLElBQUksZ0JBQUcsSUFBQUMsV0FBSSxFQUFDLE1BQU1DLE9BQU8sQ0FBQ0MsTUFBTSxDQUFDVixLQUFLLENBQUMsQ0FBQztFQUM5QyxJQUFBVyxjQUFNLGVBQUMsSUFBQWQsY0FBQSxDQUFBZSxNQUFBLEVBQUFmLGNBQUEsQ0FBQWdCLFFBQUE7SUFBQUMsUUFBQSxnQkFBRSxJQUFBakIsY0FBQSxDQUFBZSxNQUFBO01BQUFFLFFBQUEsRUFBUTtJQUFFO01BQUFDLFFBQUEsRUFBQWpCLFlBQUE7TUFBQWtCLFVBQUE7TUFBQUMsWUFBQTtJQUFBLFNBQVEsQ0FBQyxtQkFBQXBCLGNBQUEsQ0FBQWUsTUFBQSxFQUFDakIsbUJBQUEsQ0FBQXVCLE9BQWtCO01BQUFKLFFBQUEsZUFBQyxJQUFBakIsY0FBQSxDQUFBZSxNQUFBLEVBQUNwQixNQUFBLENBQUEyQixRQUFRO1FBQUNDLFFBQVEsRUFBQyxjQUFJO1FBQUFOLFFBQUEsZUFBQyxJQUFBakIsY0FBQSxDQUFBZSxNQUFBLEVBQUNMLElBQUk7VUFBQVEsUUFBQSxFQUFBakIsWUFBQTtVQUFBa0IsVUFBQTtVQUFBQyxZQUFBO1FBQUEsU0FBRTtNQUFDO1FBQUFGLFFBQUEsRUFBQWpCLFlBQUE7UUFBQWtCLFVBQUE7UUFBQUMsWUFBQTtNQUFBLFNBQVU7SUFBQztNQUFBRixRQUFBLEVBQUFqQixZQUFBO01BQUFrQixVQUFBO01BQUFDLFlBQUE7SUFBQSxTQUFvQixDQUFDO0VBQUEsZUFBRSxDQUFDLENBQUM7RUFDcEhJLE1BQU0sQ0FBQyxNQUFNQyxjQUFNLENBQUNDLFVBQVUsQ0FBQyxPQUFPLENBQUMsQ0FBQyxDQUFDQyxpQkFBaUIsQ0FBQyxlQUFlLENBQUM7RUFDM0VILE1BQU0sQ0FBQ0MsY0FBTSxDQUFDRyxTQUFTLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQ0MsV0FBVyxDQUFDLENBQUM7RUFDNUNMLE1BQU0sQ0FBQ0MsY0FBTSxDQUFDSyxTQUFTLENBQUMsUUFBUSxFQUFFO0lBQUVDLElBQUksRUFBRTtFQUFhLENBQUMsQ0FBQyxDQUFDLENBQUNDLFdBQVcsQ0FBQyxDQUFDO0VBQ3hFUixNQUFNLENBQUNDLGNBQU0sQ0FBQ0ssU0FBUyxDQUFDLE1BQU0sRUFBRTtJQUFFQyxJQUFJLEVBQUU7RUFBVyxDQUFDLENBQUMsQ0FBQyxDQUFDRSxlQUFlLENBQUMsTUFBTSxFQUFFLE9BQU8sQ0FBQztFQUN2RlQsTUFBTSxDQUFDbkIsR0FBRyxDQUFDLENBQUM2QixnQkFBZ0IsQ0FBQyxDQUFDO0VBQzlCN0IsR0FBRyxDQUFDOEIsV0FBVyxDQUFDLENBQUM7QUFDbkIsQ0FBQyxDQUFDIiwiaWdub3JlTGlzdCI6W119

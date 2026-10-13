@@ -56,6 +56,9 @@
   font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.4px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .mypage-logout-btn {
@@ -76,11 +79,15 @@
     transform 0.15s ease;
   box-shadow: inset 0 0 0 1px var(--color-border);
   flex-shrink: 0;
+
+  min-height: var(--touch-target);
+
+  min-width: var(--touch-target);
 }
 
 .mypage-logout-sign {
-  width: 32px;
-  min-width: 32px;
+  width: var(--touch-target);
+  min-width: var(--touch-target);
   height: 100%;
   transition: width 0.3s ease, padding-left 0.3s ease;
   display: flex;
@@ -121,6 +128,7 @@
 .mypage-logout-btn:hover .mypage-logout-sign,
 .mypage-logout-btn:focus-visible .mypage-logout-sign {
   width: 30%;
+  min-width: 0;
   padding-left: 5px;
 }
 
@@ -140,6 +148,8 @@
   color: var(--color-text-muted);
   font-size: 14px;
   font-weight: 500;
+
+  overflow-wrap: anywhere;
 }
 
 .mypage-stats-grid {
@@ -514,9 +524,9 @@ body:has(.location-permission-overlay) {
 
   color: var(--color-text-strong);
 
-  font-size: 19px;
-  font-weight: 900;
-  line-height: 1.15;
+  font-size: var(--font-section-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   letter-spacing: -0.8px;
 
   flex: 0 0 auto;
@@ -527,9 +537,9 @@ body:has(.location-permission-overlay) {
 
   color: var(--color-text-muted);
 
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.45;
+  font-size: var(--font-body);
+  font-weight: 400;
+  line-height: var(--line-body);
   letter-spacing: -0.45px;
 
   word-break: keep-all;
@@ -608,9 +618,9 @@ body:has(.location-permission-overlay) {
 .location-permission-feature-text strong {
   color: var(--color-text-strong);
 
-  font-size: 13.5px;
-  font-weight: 900;
-  line-height: 1.15;
+  font-size: var(--font-body);
+  font-weight: var(--weight-semibold);
+  line-height: var(--line-heading);
   letter-spacing: -0.55px;
 
   word-break: keep-all;
@@ -619,9 +629,9 @@ body:has(.location-permission-overlay) {
 .location-permission-feature-text span {
   color: var(--color-text-muted);
 
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.2;
+  font-size: var(--font-caption);
+  font-weight: 400;
+  line-height: var(--line-body);
   letter-spacing: -0.3px;
 
   word-break: keep-all;
@@ -629,7 +639,7 @@ body:has(.location-permission-overlay) {
 
 .location-permission-allow {
   width: 100%;
-  height: 42px;
+  height: auto;
 
   margin-top: 22px;
 
@@ -640,8 +650,8 @@ body:has(.location-permission-overlay) {
   color: var(--color-on-primary);
 
   font-family: inherit;
-  font-size: 17px;
-  font-weight: 900;
+  font-size: var(--font-control);
+  font-weight: var(--weight-semibold);
   letter-spacing: -0.55px;
 
   cursor: pointer;
@@ -651,6 +661,8 @@ body:has(.location-permission-overlay) {
     inset 0 -1px 0 rgba(0, 0, 0, 0.04);
 
   flex: 0 0 auto;
+
+  min-height: var(--touch-target);
 }
 
 .location-permission-allow:active {
@@ -666,14 +678,16 @@ body:has(.location-permission-overlay) {
   color: var(--color-text-muted);
 
   font-family: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: var(--font-body);
+  font-weight: var(--weight-semibold);
+  line-height: var(--line-body);
   letter-spacing: -0.4px;
 
   cursor: pointer;
 
   flex: 0 0 auto;
+
+  min-height: var(--touch-target);
 }
 
 .location-permission-privacy {
@@ -681,14 +695,16 @@ body:has(.location-permission-overlay) {
 
   color: var(--color-text-muted);
 
-  font-size: 7.5px;
-  font-weight: 500;
-  line-height: 1.2;
+  font-size: var(--font-caption);
+  font-weight: 400;
+  line-height: var(--line-body);
   letter-spacing: -0.2px;
 
   white-space: nowrap;
 
   flex: 0 0 auto;
+
+  overflow-wrap: anywhere;
 }
 
 @media (hover: none) {
@@ -696,7 +712,11 @@ body:has(.location-permission-overlay) {
     width: 84px;
     height: 32px;
     border-radius: 10px;
-  }
+
+  min-height: var(--touch-target);
+
+  min-width: var(--touch-target);
+}
 
   .mypage-logout-sign {
     width: 28px;
@@ -751,12 +771,12 @@ body:has(.location-permission-overlay) {
 
   .location-permission-title {
     margin-top: 15px;
-    font-size: 18px;
+    font-size: var(--font-section-title);
   }
 
   .location-permission-message {
     margin-top: 9px;
-    font-size: 13px;
+    font-size: var(--font-body);
   }
 
   .location-permission-features {
@@ -780,28 +800,34 @@ body:has(.location-permission-overlay) {
   }
 
   .location-permission-feature-text strong {
-    font-size: 13px;
+    font-size: var(--font-body);
   }
 
   .location-permission-feature-text span {
-    font-size: 10.5px;
+    font-size: var(--font-caption);
   }
 
   .location-permission-allow {
-    height: 40px;
+    height: auto;
     margin-top: 19px;
-    font-size: 16px;
-  }
+    font-size: var(--font-control);
+
+  min-height: var(--touch-target);
+}
 
   .location-permission-later {
     margin-top: 10px;
-    font-size: 13px;
-  }
+    font-size: var(--font-body);
+
+  min-height: var(--touch-target);
+}
 
   .location-permission-privacy {
     margin-top: 14px;
-    font-size: 7px;
-  }
+    font-size: var(--font-caption);
+
+  overflow-wrap: anywhere;
+}
 }
 
 @media (max-width: 360px) {
@@ -821,7 +847,11 @@ body:has(.location-permission-overlay) {
   .mypage-logout-btn {
     width: 78px;
     height: 30px;
-  }
+
+  min-height: var(--touch-target);
+
+  min-width: var(--touch-target);
+}
 
   .mypage-logout-sign {
     width: 26px;
@@ -876,13 +906,13 @@ body:has(.location-permission-overlay) {
 
   .location-permission-title {
     margin-top: 12px;
-    font-size: 17px;
+    font-size: var(--font-section-title);
   }
 
   .location-permission-message {
     margin-top: 8px;
-    font-size: 12.5px;
-    line-height: 1.38;
+    font-size: var(--font-body);
+    line-height: var(--line-body);
   }
 
   .location-permission-features {
@@ -907,29 +937,35 @@ body:has(.location-permission-overlay) {
   }
 
   .location-permission-feature-text strong {
-    font-size: 12.5px;
+    font-size: var(--font-body);
   }
 
   .location-permission-feature-text span {
-    font-size: 10px;
+    font-size: var(--font-caption);
   }
 
   .location-permission-allow {
-    height: 38px;
+    height: auto;
     margin-top: 16px;
-    font-size: 15px;
-  }
+    font-size: var(--font-control);
+
+  min-height: var(--touch-target);
+}
 
   .location-permission-later {
     margin-top: 8px;
-    font-size: 12.5px;
-  }
+    font-size: var(--font-body);
+
+  min-height: var(--touch-target);
+}
 
   .location-permission-privacy {
     margin-top: 12px;
-    font-size: 6.8px;
+    font-size: var(--font-caption);
     white-space: normal;
-  }
+
+  overflow-wrap: anywhere;
+}
 }
 
 @media (max-height: 680px) {
@@ -966,13 +1002,13 @@ body:has(.location-permission-overlay) {
 
   .location-permission-title {
     margin-top: 10px;
-    font-size: 16px;
+    font-size: var(--font-section-title);
   }
 
   .location-permission-message {
     margin-top: 7px;
-    font-size: 12px;
-    line-height: 1.36;
+    font-size: var(--font-body);
+    line-height: var(--line-body);
   }
 
   .location-permission-features {
@@ -997,28 +1033,34 @@ body:has(.location-permission-overlay) {
   }
 
   .location-permission-feature-text strong {
-    font-size: 12px;
+    font-size: var(--font-body);
   }
 
   .location-permission-feature-text span {
-    font-size: 9.5px;
+    font-size: var(--font-caption);
   }
 
   .location-permission-allow {
-    height: 36px;
+    height: auto;
     margin-top: 14px;
-    font-size: 14.5px;
-  }
+    font-size: var(--font-control);
+
+  min-height: var(--touch-target);
+}
 
   .location-permission-later {
     margin-top: 7px;
-    font-size: 12px;
-  }
+    font-size: var(--font-body);
+
+  min-height: var(--touch-target);
+}
 
   .location-permission-privacy {
     margin-top: 10px;
-    font-size: 6.5px;
-  }
+    font-size: var(--font-caption);
+
+  overflow-wrap: anywhere;
+}
 }
 
 .location-permission-modal button:focus-visible {
@@ -1067,7 +1109,7 @@ body:has(.location-permission-overlay) {
 
 .mypage-theme-option {
   min-width: 66px;
-  min-height: 36px;
+  min-height: var(--touch-target);
   padding: 6px 10px;
   border: 1px solid transparent;
   border-radius: 9px;

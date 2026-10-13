@@ -49,18 +49,18 @@
 
 .alert-title {
   margin: 0;
-  font-size: 21px;
-  font-weight: 900;
-  line-height: 1.35;
+  font-size: var(--font-section-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   color: var(--color-text-strong);
   word-break: keep-all;
 }
 
 .alert-description {
   margin: 18px 0 0;
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.65;
+  font-size: var(--font-body);
+  font-weight: 400;
+  line-height: var(--line-body);
   color: var(--color-text-muted);
   word-break: keep-all;
 }

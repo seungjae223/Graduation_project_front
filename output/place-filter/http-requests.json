@@ -1,0 +1,323 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places/10",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places/10/reviews",
+    "query": {}
+  },
+  {
+    "method": "POST",
+    "path": "/api/recent-places",
+    "query": {},
+    "body": {
+      "placeId": 10
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "POST",
+    "path": "/api/folders",
+    "query": {},
+    "body": {
+      "name": "페이지 저장 테스트"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "POST",
+    "path": "/api/folders/1/places/10",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/places",
+    "query": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/folders/1/places",
+    "query": {}
+  }
+]

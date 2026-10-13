@@ -1,0 +1,170 @@
+src\App.css:5:  --color-page: #f8fbfd;
+src\App.css:6:  --color-canvas: #f2f4f7;
+src\App.css:7:  --color-surface: #ffffff;
+src\App.css:8:  --color-surface-muted: #f4f7fb;
+src\App.css:9:  --color-surface-raised: #ffffff;
+src\App.css:10:  --color-text: #182031;
+src\App.css:11:  --color-text-strong: #111827;
+src\App.css:12:  --color-text-muted: #607086;
+src\App.css:13:  --color-border: #e5e7eb;
+src\App.css:14:  --color-border-strong: #77869b;
+src\App.css:15:  --color-hover: #edf4fa;
+src\App.css:16:  --color-focus: #0879b9;
+src\App.css:17:  --color-accent: #0da6f2;
+src\App.css:18:  --color-on-accent: #ffffff;
+src\App.css:19:  --color-accent-soft: #e9f6fd;
+src\App.css:20:  --color-input: #ffffff;
+src\App.css:21:  --color-placeholder: #607086;
+src\App.css:24:  --color-primary: #0879b9;
+src\App.css:25:  --color-primary-hover: #06649a;
+src\App.css:26:  --color-on-primary: #ffffff;
+src\App.css:27:  --color-accent-text: #086ca8;
+src\App.css:28:  --color-danger: #b42318;
+src\App.css:29:  --color-danger-soft: #fff1f0;
+src\App.css:30:  --color-danger-fill: #b42318;
+src\App.css:31:  --color-on-danger: #ffffff;
+src\App.css:32:  --color-warning: #8a5300;
+src\App.css:33:  --color-warning-soft: #fff6df;
+src\App.css:34:  --color-success: #147d51;
+src\App.css:35:  --color-success-soft: #edf8f1;
+src\App.css:36:  --color-disabled-bg: #e5ebf1;
+src\App.css:37:  --color-disabled-text: #64748b;
+src\App.css:42:  --color-page: #0f1722;
+src\App.css:43:  --color-canvas: #0f1722;
+src\App.css:44:  --color-surface: #17212f;
+src\App.css:45:  --color-surface-muted: #202c3c;
+src\App.css:46:  --color-surface-raised: #243244;
+src\App.css:47:  --color-text: #f1f5f9;
+src\App.css:48:  --color-text-strong: #f8fafc;
+src\App.css:49:  --color-text-muted: #aebccd;
+src\App.css:50:  --color-border: #344255;
+src\App.css:51:  --color-border-strong: #778aa2;
+src\App.css:52:  --color-hover: #273649;
+src\App.css:53:  --color-focus: #55bdf8;
+src\App.css:54:  --color-accent: #55bdf8;
+src\App.css:55:  --color-on-accent: #ffffff;
+src\App.css:56:  --color-accent-soft: #15344a;
+src\App.css:57:  --color-input: #202c3c;
+src\App.css:58:  --color-placeholder: #91a2b7;
+src\App.css:61:  --color-accent-text: #55bdf8;
+src\App.css:62:  --color-danger: #ffb4ab;
+src\App.css:63:  --color-danger-soft: #442b30;
+src\App.css:64:  --color-warning: #ffd08a;
+src\App.css:65:  --color-warning-soft: #403420;
+src\App.css:66:  --color-success: #80d5ab;
+src\App.css:67:  --color-success-soft: #193c32;
+src\App.css:68:  --color-disabled-bg: #2b394b;
+src\App.css:69:  --color-disabled-text: #aebccd;
+src\App.css:116:  font-family: inherit;
+src\App.css:135:  --color-page: #f7f9fc;
+src\App.css:136:  --color-surface: #ffffff;
+src\App.css:137:  --color-surface-muted: #f4f7fb;
+src\App.css:138:  --color-surface-raised: #ffffff;
+src\App.css:139:  --color-text: #182031;
+src\App.css:140:  --color-text-strong: #111827;
+src\App.css:141:  --color-text-muted: #65748a;
+src\App.css:142:  --color-border: #e5e7eb;
+src\App.css:143:  --color-border-strong: #77869b;
+src\App.css:144:  --color-accent: #0da6f2;
+src\App.css:145:  --color-accent-text: #086ca8;
+src\App.css:146:  --color-accent-soft: #e9f6fd;
+src\App.css:147:  --color-input: #ffffff;
+src\App.css:148:  --color-placeholder: #65748a;
+src\App.css:149:  --color-danger: #b42318;
+src\App.css:150:  --color-danger-soft: #fff1f0;
+src\App.css:151:  --color-warning: #8a5300;
+src\App.css:152:  --color-warning-soft: #fff6df;
+src\App.css:153:  --color-success: #147d51;
+src\App.css:154:  --color-success-soft: #edf8f1;
+src\App.css:155:  --color-disabled-bg: #e5ebf1;
+src\App.css:156:  --color-disabled-text: #64748b;
+src\App.css:307:  color: #0da6f2;
+src\AnimatedHeart\AnimatedHeart.css:3:  --heart-active-color: #ff3b30;
+src\FolderSelectModal\FolderSelectModal.css:338:  font-family: inherit;
+src\Homepage\Home.css:41:    var(--home-hero-start, #cfe9f7) 0%,
+src\Homepage\Home.css:42:    var(--home-hero-middle, #eaf6fd) 60%,
+src\Homepage\Home.css:43:    var(--home-hero-end, #ffffff) 100%
+src\Homepage\Home.css:311:  color: #ffffff;
+src\Homepage\Home.css:378:  font-size: 34px;
+src\Homepage\Home.css:384:  --home-hero-start: #14283a;
+src\Homepage\Home.css:385:  --home-hero-middle: #17293a;
+src\Homepage\Home.css:624:    font-size: 30px;
+src\Header\Header.css:117:  color: #0da6f2;
+src\components\PlacePhoto.css:15:  background: rgba(15, 23, 42, .72); color: #fff;
+src\components\PlacePhoto.css:18:.place-photo-credit:visited { color: #fff; }
+src\Landingpage\Landing.css:254:  font-size: 32px;
+src\Landingpage\Landing.css:294:    font-size: 30px;
+src\Admin\AdminMain\AdminMain.css:113:  font-size: 34px;
+src\Admin\AdminMain\AdminMain.css:232:    font-size: 30px;
+src\Loading\EarthLoader.css:16:  --watercolor: #7dd3fc;
+src\Loading\EarthLoader.css:17:  --landcolor: #7cc133;
+src\Loading\EarthLoader.css:23:  background-color: #7dd3fc;
+src\Loading\EarthLoader.css:31:  border: solid 0.15em #ffffff;
+src\Loading\EarthLoader.css:45:  font-family:
+src\Login\Login.css:237:  background: #fee500;
+src\Login\Login.css:238:  color: #111827;
+src\Login\Login.css:243:  background: #ffffff;
+src\Login\Login.css:244:  color: #202124;
+src\Login\Login.css:245:  border: 1px solid #dadce0;
+src\Login\Login.css:249:  background: #f8fafd;
+src\MySchedule\MySchedule.css:215:  font-size: 30px;
+src\Login\PrivacyPolicyModal.css:164:  font-family: inherit;
+src\Login\SignUp.css:29:  font-size: 34px;
+src\Login\SignUp.css:127:  font-family: inherit;
+src\Login\SignUp.css:165:  font-family: inherit;
+src\Login\SignUp.css:316:  font-family: inherit;
+src\Login\SignUp.css:476:  font-family: inherit;
+src\Login\SignUp.css:525:    font-size: 34px;
+src\Login\SignUp.css:597:    font-size: 31px;
+src\Login\SignUp.css:704:  font-family: inherit;
+src\OnBoarding\OnBoarding.css:48:font-family: "Noto Sans KR";
+src\OnBoarding\OnBoarding.css:49:font-size: 30px;
+src\OnBoarding\OnBoarding.css:59:font-family: "Noto Sans KR";
+src\Recommend\Total.css:131:  stroke: #ffffff;
+src\Recommend\Total.css:137:  fill: #ffffff;
+src\Recommend\Total.css:240:      #284f13 0 8px,
+src\Recommend\Total.css:241:      #4d7e1f 8px 18px,
+src\Recommend\Total.css:242:      #86ba33 18px 26px
+src\Recommend\Total.css:244:    linear-gradient(180deg, #d4f082 0 18%, #79a838 18% 52%, #284f13 52% 100%);
+src\Recommend\Total.css:255:  background: linear-gradient(180deg, rgba(252, 236, 198, 0) 0%, #e6d8bd 100%);
+src\Recommend\Total.css:265:      #1d2a17 0 10px,
+src\Recommend\Total.css:266:      #2e4a22 10px 28px,
+src\Recommend\Total.css:267:      #52763b 28px 34px
+src\Recommend\Total.css:269:    linear-gradient(180deg, #b7e1a3 0 20%, #5c8f47 20% 62%, #24321b 62% 100%);
+src\Recommend\Total.css:275:    #7fd5ff 0 28%,
+src\Recommend\Total.css:276:    #1aa2d6 28% 62%,
+src\Recommend\Total.css:277:    #11a0b3 62% 84%,
+src\Recommend\Total.css:278:    #f4eee5 84% 100%
+src\Recommend\Total.css:298:    linear-gradient(180deg, #b9def0 0 30%, #7db4c9 30% 60%, #436f66 60% 100%);
+src\Recommend\Total.css:302:  background: linear-gradient(180deg, #93d5ff 0 30%, #d9f1ff 30% 45%, #6ba56a 45% 100%);
+src\Recommend\Total.css:310:    linear-gradient(150deg, transparent 0 35%, #4c7057 35% 60%, transparent 60%),
+src\Recommend\Total.css:311:    linear-gradient(30deg, transparent 0 40%, #35543f 40% 65%, transparent 65%);
+src\Recommend\Total.css:315:  background: linear-gradient(180deg, #f2d2a0 0 24%, #d76f4a 24% 50%, #6b3a25 50% 100%);
+src\Recommend\Total.css:328:  background: linear-gradient(180deg, #f6e2d1 0 35%, #c98e63 35% 100%);
+src\Recommend\Total.css:344:  background: linear-gradient(180deg, #ffb87e 0 18%, #f27059 18% 45%, #56497c 45% 100%);
+src\Recommend\Total.css:355:      #24324f 0 10%,
+src\Recommend\Total.css:357:      #1e2a40 16% 28%,
+src\Recommend\Total.css:359:      #27304a 36% 48%,
+src\Recommend\Total.css:361:      #1f2740 58% 70%,
+src\Recommend\Total.css:363:      #23314a 82% 100%
+src\Recommend\Total.css:368:  background: linear-gradient(180deg, #7ec0ff 0 28%, #46648d 28% 56%, #13233f 56% 100%);
+src\Recommend\Total.css:379:      #162745 0 12%,
+src\Recommend\Total.css:381:      #10203b 18% 30%,
+src\Recommend\Total.css:383:      #1b2c49 36% 54%,
+src\Recommend\Total.css:385:      #152744 60% 74%,
+src\Recommend\Total.css:387:      #0f213c 80% 100%
+src\RouteCreate\StartPlaceModal.css:233:  font-size: 30px;
+src\RouteCreate\RouteCreate.css:15:  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+src\Mypage\SavedPlaces.css:295:  font-size: 30px;
+src\Mypage\SavedPlaces.css:779:  font-size: 38px;
+src\Mypage\SavedPlaces.css:1003:  font-size: 38px;
+src\RouteResult\RouteResult.css:375:  background: #f7f9fc;
+src\RouteResult\RouteResult.css:724:  font-family: inherit;
+src\RouteResult\RouteResult.css:752:  font-family: inherit;
+src\Mypage\InquiryWrite.css:71:  font-family: inherit;
+src\Mypage\MyPage.css:302:  background: linear-gradient(90deg, #7dd3fc, #0ea5e9);
+src\Mypage\MyPage.css:363:  color: #9b9b9b;
+src\Mypage\MyPage.css:364:  font-family: "Times New Roman", serif;
+src\Mypage\MyPage.css:642:  font-family: inherit;
+src\Mypage\MyPage.css:668:  font-family: inherit;
+src\Mypage\Inquiry.css:34:  font-size: 31px;

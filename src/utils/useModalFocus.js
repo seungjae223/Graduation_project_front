@@ -3,6 +3,27 @@ import { useEffect, useRef } from "react";
 const modals = [];
 const scrollLocks = new Set();
 let originalScrollStyles;
+let releaseVisualViewport;
+function followVisualViewport() {
+  const viewport = window.visualViewport;
+  if (!viewport) return;
+  const rootStyle = document.documentElement.style;
+  const properties = ["--modal-viewport-height", "--modal-viewport-top"];
+  const previous = properties.map(name => [name, rootStyle.getPropertyValue(name), rootStyle.getPropertyPriority(name)]);
+  const sync = () => {
+    rootStyle.setProperty(properties[0], `${viewport.height}px`);
+    rootStyle.setProperty(properties[1], `${viewport.offsetTop}px`);
+  };
+  viewport.addEventListener("resize", sync);
+  viewport.addEventListener("scroll", sync);
+  sync();
+  releaseVisualViewport = () => {
+    viewport.removeEventListener("resize", sync);
+    viewport.removeEventListener("scroll", sync);
+    previous.forEach(([name, value, priority]) => value ? rootStyle.setProperty(name, value, priority) : rootStyle.removeProperty(name));
+    releaseVisualViewport = null;
+  };
+}
 function lockDocument(token) {
   if (!scrollLocks.size) {
     const scroller = document.scrollingElement || document.documentElement;
@@ -60,6 +81,7 @@ export default function useModalFocus({
     previousFocusRef.current = document.activeElement;
     const token = {};
     modals.push(token);
+    if (modals.length === 1) followVisualViewport();
     const unlock = lockScroll ? lockDocument(token) : () => {};
 
     const initialFocus =
@@ -116,6 +138,7 @@ export default function useModalFocus({
       const wasTop = modals[modals.length - 1] === token;
       const index = modals.indexOf(token);
       if (index >= 0) modals.splice(index, 1);
+      if (!modals.length) releaseVisualViewport?.();
       unlock();
       if (wasTop && previousFocusRef.current?.isConnected) previousFocusRef.current.focus?.({ preventScroll: true });
     };

@@ -1,0 +1,8 @@
+PASS src/Mypage/availableActions.test.jsx
+PASS src/components/InputDialog.test.jsx
+
+Test Suites: 2 passed, 2 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        8.331 s
+Ran all test suites within paths "src/components/InputDialog.test.jsx", "src/Mypage/availableActions.test.jsx".

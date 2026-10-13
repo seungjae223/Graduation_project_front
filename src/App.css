@@ -2,6 +2,29 @@
   color-scheme: light;
   --app-width: 390px;
   --footer-height: 70px;
+  --font-caption: 12px;
+  --font-body: 14px;
+  --font-control: 16px;
+  --font-card-title: 16px;
+  --font-toolbar-title: 18px;
+  --font-section-title: 20px;
+  --font-page-title: 24px;
+  --line-body: 1.6;
+  --line-heading: 1.35;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-heading: 700;
+  --control-height: 48px;
+  --touch-target: 44px;
+  --radius-control: 12px;
+  --radius-card: 16px;
+  --radius-dialog: 24px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
   --color-page: #f8fbfd;
   --color-canvas: #f2f4f7;
   --color-surface: #ffffff;
@@ -96,6 +119,9 @@ body::-webkit-scrollbar,
 
 body {
   min-height: 100vh;
+  font-family: "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: var(--font-control);
+  line-height: var(--line-body);
   background: var(--color-page);
   overflow-x: clip;
   overflow-y: auto;
@@ -127,6 +153,13 @@ a {
 :where(button, a, input, textarea, select):focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+:where([role="status"], [role="alert"]) {
+  font-size: var(--font-body);
+  font-weight: 400;
+  line-height: var(--line-body);
+  overflow-wrap: anywhere;
 }
 
 /* Exports keep the established light canvas regardless of the current UI theme. */

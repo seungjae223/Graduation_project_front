@@ -1,0 +1,617 @@
+[
+  {
+    "path": "/onboarding",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/onboarding2",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/onboarding3",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/landing",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/login",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [
+      {
+        "class": "",
+        "height": 13,
+        "text": ""
+      }
+    ],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/find-password",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/verify-code?email=test%40example.com",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [
+      {
+        "class": "verify-code-resend",
+        "height": 23,
+        "text": "↻인증번호 재발송"
+      }
+    ],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/signup",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [
+      {
+        "class": "signup-eye-btn",
+        "height": 30,
+        "text": "비밀번호 표시"
+      },
+      {
+        "class": "signup-eye-btn",
+        "height": 30,
+        "text": "비밀번호 확인 값 표시"
+      },
+      {
+        "class": "",
+        "height": 18,
+        "text": ""
+      },
+      {
+        "class": "signup-agreement-link",
+        "height": 18.84375,
+        "text": "문서 보기"
+      }
+    ],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/home",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [
+      {
+        "class": "search-icon-frame",
+        "height": 20,
+        "text": "검색"
+      },
+      {
+        "class": "home-popular-more-button",
+        "height": 16,
+        "text": "전체보기"
+      }
+    ],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/search",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [
+      {
+        "class": "search-icon-submit",
+        "height": 24,
+        "text": "검색"
+      },
+      {
+        "class": "",
+        "height": 25,
+        "text": "장소, 도시 또는 테마 검색"
+      },
+      {
+        "class": "hot-place-action",
+        "height": 33.59375,
+        "text": "서울 시티 나이트 투어"
+      },
+      {
+        "class": "hot-place-action",
+        "height": 25.59375,
+        "text": "제주 오설록"
+      },
+      {
+        "class": "hot-place-action",
+        "height": 25.59375,
+        "text": "부산 광안리"
+      }
+    ],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/recommend",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [
+      {
+        "class": "view-all-btn",
+        "height": 20,
+        "text": "전체보기"
+      },
+      {
+        "class": "recommend-heart-btn",
+        "height": 38,
+        "text": "저장 취소"
+      },
+      {
+        "class": "recommend-heart-btn",
+        "height": 38,
+        "text": "저장 취소"
+      },
+      {
+        "class": "recommend-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "recommend-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "recommend-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "recommend-page-btn active",
+        "height": 36,
+        "text": "1"
+      },
+      {
+        "class": "recommend-page-btn ",
+        "height": 36,
+        "text": "2"
+      },
+      {
+        "class": "recommend-page-btn recommend-page-nav",
+        "height": 36,
+        "text": "다음"
+      }
+    ],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/total",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [
+      {
+        "class": "sort-chip active",
+        "height": 36,
+        "text": "인기순⌄"
+      },
+      {
+        "class": "sort-chip ",
+        "height": 36,
+        "text": "별점순⌄"
+      },
+      {
+        "class": "theme-total-save-btn",
+        "height": 38,
+        "text": "저장 취소"
+      },
+      {
+        "class": "theme-total-save-btn",
+        "height": 38,
+        "text": "저장 취소"
+      },
+      {
+        "class": "theme-total-save-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "theme-total-save-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "theme-total-save-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "theme-total-save-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "theme-total-save-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "theme-total-save-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "theme-total-save-btn",
+        "height": 38,
+        "text": "저장"
+      }
+    ],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/popular-all",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [
+      {
+        "class": "popular-filter-btn ",
+        "left": 280.3359375,
+        "overflow": "visible",
+        "right": 376.5,
+        "tag": "BUTTON",
+        "text": "동남아"
+      },
+      {
+        "class": "popular-filter-chevron",
+        "left": 348.5,
+        "overflow": "visible",
+        "right": 358.5,
+        "tag": "SPAN",
+        "text": ""
+      }
+    ],
+    "scrollWidth": 320,
+    "smallTargets": [
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장 취소"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장 취소"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      },
+      {
+        "class": "popular-bookmark-btn popular-heart-btn",
+        "height": 38,
+        "text": "저장"
+      }
+    ],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/detail?id=1",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [
+      {
+        "class": "detail-action-btn",
+        "height": 38,
+        "text": "공유"
+      },
+      {
+        "class": "detail-action-btn",
+        "height": 38,
+        "text": "관심 장소 해제"
+      }
+    ],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/route-create",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [
+      {
+        "class": "calendar-arrow",
+        "height": 28,
+        "text": "이전 달"
+      },
+      {
+        "class": "calendar-arrow",
+        "height": 28,
+        "text": "다음 달"
+      }
+    ],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/route-result?id=1",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [
+      {
+        "class": "route-result-drag-handle",
+        "height": 31,
+        "text": "경복궁 일정 순서 변경"
+      },
+      {
+        "class": "route-result-place-action",
+        "height": 21.59375,
+        "text": "경복궁 카카오맵에서 열기"
+      },
+      {
+        "class": "route-result-drag-handle",
+        "height": 31,
+        "text": "북촌한옥마을 일정 순서 변경"
+      },
+      {
+        "class": "route-result-place-action",
+        "height": 21.59375,
+        "text": "북촌한옥마을 카카오맵에서 열기"
+      }
+    ],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/schedule",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/my-schedule",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/mypage",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [
+      {
+        "class": "mypage-theme-option active",
+        "height": 36,
+        "text": "라이트 모드로 전환"
+      },
+      {
+        "class": "mypage-theme-option ",
+        "height": 36,
+        "text": "다크 모드로 전환"
+      },
+      {
+        "class": "",
+        "height": 18.3984375,
+        "text": ""
+      }
+    ],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/saved-places",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [
+      {
+        "class": "saved-folder-action-button",
+        "height": 28,
+        "text": "폴더 열기"
+      },
+      {
+        "class": "saved-folder-action-button",
+        "height": 28,
+        "text": "폴더 열기"
+      }
+    ],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/mypage/recent-places",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/inquiry",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/inquiry/write",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/inquiry/1",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/oauth/google/callback",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [],
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "path": "/not-found",
+    "phase": "in-progress",
+    "height": 568,
+    "overflow": [],
+    "scrollWidth": 320,
+    "smallTargets": [],
+    "theme": "light",
+    "width": 320
+  }
+]

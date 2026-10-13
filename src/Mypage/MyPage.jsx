@@ -248,7 +248,7 @@ const LocationPermissionModal = ({ onClose, onAllow }) => {
         </button>
 
         <p className="location-permission-privacy">
-          PRIVACY MATTERS. YOUR LOCATION IS ENCRYPTED.
+          위치 정보는 경로 계산과 주변 장소 추천에 사용됩니다.
         </p>
       </div>
     </div>,

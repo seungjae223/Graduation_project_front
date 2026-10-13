@@ -7,6 +7,11 @@
   margin: 0 auto;
 }
 
+.admin-inquiry-page .admin-inquiry-tab,
+.admin-inquiry-page .admin-inquiry-answer-button {
+  min-height: var(--touch-target);
+}
+
 .admin-inquiry-label {
   display: inline-flex;
   align-items: center;
@@ -24,9 +29,9 @@
 
 .admin-inquiry-title {
   margin: 0;
-  font-size: 27px;
-  line-height: 1.2;
-  font-weight: 900;
+  font-size: var(--font-page-title);
+  line-height: var(--line-heading);
+  font-weight: var(--weight-heading);
   color: var(--color-text-strong);
   letter-spacing: -0.04em;
 }
@@ -75,7 +80,7 @@
 
 .admin-inquiry-card {
   background: var(--color-surface);
-  border-radius: 16px;
+  border-radius: var(--radius-card);
   padding: 18px 18px 19px;
   box-sizing: border-box;
   box-shadow: 0 2px 10px var(--color-shadow);
@@ -138,9 +143,9 @@
 
 .admin-inquiry-card-title {
   margin: 0 0 10px;
-  font-size: 17px;
-  line-height: 1.35;
-  font-weight: 900;
+  font-size: var(--font-card-title);
+  line-height: var(--line-heading);
+  font-weight: var(--weight-heading);
   color: var(--color-text-strong);
   letter-spacing: -0.02em;
 }

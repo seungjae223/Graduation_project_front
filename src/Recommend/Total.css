@@ -22,9 +22,9 @@
 .total-intro h1 {
   margin: 0;
   color: var(--color-text-strong);
-  font-size: 17px;
-  font-weight: 800;
-  line-height: 1.45;
+  font-size: var(--font-page-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--line-heading);
   letter-spacing: -0.4px;
   word-break: keep-all;
 }
@@ -154,8 +154,8 @@
 .total-card-top h3,
 .theme-total-title-row h3 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 800;
+  font-size: var(--font-card-title);
+  font-weight: var(--weight-heading);
   color: var(--color-text-strong);
   letter-spacing: -0.4px;
 }
@@ -226,8 +226,8 @@
   border-radius: 10px;
   background: var(--color-primary);
   color: var(--color-on-primary);
-  font-size: 17px;
-  font-weight: 800;
+  font-size: var(--font-control);
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -387,3 +387,8 @@
       #0f213c 80% 100%
     );
 }
+.theme-total-save-btn { width: var(--touch-target); height: var(--touch-target); }
+
+.sort-chip { height: var(--touch-target); }
+
+.theme-total-card { border-radius: var(--radius-card); }

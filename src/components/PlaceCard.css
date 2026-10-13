@@ -22,8 +22,8 @@
   position: absolute;
   top: 14px;
   right: 14px;
-  width: 42px;
-  height: 42px;
+  width: var(--touch-target);
+  height: var(--touch-target);
   border: none;
   border-radius: 50%;
   background: var(--color-surface);
@@ -58,15 +58,23 @@
 
 .place-title {
   margin: 12px 0 6px;
-  font-size: 18px;
-  font-weight: 800;
+  font-size: var(--font-card-title);
+  font-weight: var(--weight-heading);
   color: var(--color-text-strong);
+
+  overflow-wrap: anywhere;
+
+  line-height: var(--line-heading);
 }
 
 .place-address {
   margin: 0 0 12px;
   color: var(--color-text-muted);
-  font-size: 15px;
+  font-size: var(--font-body);
+
+  overflow-wrap: anywhere;
+
+  line-height: var(--line-body);
 }
 
 .place-rating {
