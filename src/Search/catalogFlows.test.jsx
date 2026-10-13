@@ -33,13 +33,13 @@ beforeEach(() => {
 });
 
 test("no hardcoded rankings, trending cards or unsupported regions remain", async () => {
-  render(view()); await screen.findByRole("button", { name: "한국", exact: true });
+  render(view()); await screen.findByRole("button", { name: "서울", exact: true });
   expect(screen.queryByRole("heading", { name: "인기 검색어" })).not.toBeInTheDocument();
   expect(screen.queryByRole("heading", { name: "지금 가장 핫한 곳" })).not.toBeInTheDocument();
   expect(screen.queryByText("TRENDING")).not.toBeInTheDocument();
   for (const name of ["강원", "여수", "거제", "경주 불국사", "남해 독일마을"]) expect(screen.queryByRole("button", { name, exact: true })).not.toBeInTheDocument();
   expect(regionButtons().map(button => button.textContent)).toEqual(["도쿄", "부산", "서울", "오사카", "제주"]);
-  expect(within(screen.getByRole("group", { name: "국가별 장소 필터" })).getAllByRole("button").map(button => button.textContent)).toEqual(["전체", "일본", "한국"]);
+  expect(screen.queryByRole("group", { name: "국가별 장소 필터" })).not.toBeInTheDocument();
   expect(getPlacesApi).toHaveBeenCalledWith(expect.objectContaining({ signal: expect.any(AbortSignal) }));
   expect(getRecommendationsApi).not.toHaveBeenCalled();
 });
@@ -55,16 +55,11 @@ test("the complete API list paginates 5/5/5/5/4 and preserves original IDs on la
   expect(getPlacesApi).toHaveBeenCalledTimes(1);
 });
 
-test("country changes reset paging, narrow regions and use no invented country API parameter", async () => {
-  render(view()); await screen.findByText("총 24개 · 1/5 페이지");
-  fireEvent.click(screen.getByRole("button", { name: "5페이지", exact: true }));
-  fireEvent.click(screen.getByRole("button", { name: "일본", exact: true }));
-  expect(regionButtons().map(button => button.textContent)).toEqual(["도쿄", "오사카"]);
-  expect(screen.getByText("총 9개 · 1/2 페이지")).toBeInTheDocument();
-  expect(results().getAllByRole("button", { name: /장소 \d/ }).every(button => button.textContent.includes("도쿄"))).toBe(true);
-  fireEvent.click(screen.getByRole("button", { name: "한국", exact: true }));
-  expect(regionButtons().map(button => button.textContent)).toEqual(["부산", "서울", "제주"]);
-  expect(screen.getByText("총 15개 · 1/3 페이지")).toBeInTheDocument();
+test("legacy country URLs no longer hide regions or restrict the complete place list", async () => {
+  render(view("/search?country=일본")); await screen.findByText("총 24개 · 1/5 페이지");
+  expect(regionButtons().map(button => button.textContent)).toEqual(["도쿄", "부산", "서울", "오사카", "제주"]);
+  expect(screen.getByLabelText("검색 URL")).not.toHaveTextContent("country=");
+  expect(screen.queryByRole("group", { name: "국가별 장소 필터" })).not.toBeInTheDocument();
   expect(getPlacesApi).toHaveBeenCalledTimes(1);
 });
 
@@ -80,9 +75,8 @@ test("region buttons query only their exact raw value and reset the previous key
   expect(screen.getByRole("button", { name: "1페이지", exact: true })).toHaveAttribute("aria-current", "page");
 });
 
-test("a keyword search respects the selected country and region and resets page one", async () => {
+test("a keyword search respects the selected region and resets page one", async () => {
   render(view()); await screen.findByText("총 24개 · 1/5 페이지");
-  fireEvent.click(screen.getByRole("button", { name: "한국", exact: true }));
   fireEvent.click(screen.getByRole("button", { name: "서울", exact: true }));
   await screen.findByText("총 12개 · 1/3 페이지");
   fireEvent.click(screen.getByRole("button", { name: "3페이지", exact: true }));
@@ -102,19 +96,24 @@ test("region keyboard activation works without inventing a search statistic", as
   expect(searchPlacesApi).not.toHaveBeenCalled();
 });
 
-test("unknown regions are visible only in All and are never guessed into Korea", async () => {
+test("all server regions remain available without country classification", async () => {
   getPlacesApi.mockResolvedValue([...data, ...rows(1, "미분류 지역", 24)]);
   render(view()); await screen.findByRole("button", { name: "미분류 지역", exact: true });
-  expect(screen.getByText(/국가를 확인할 수 없는 장소와 지역은 전체/)).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "한국", exact: true }));
-  expect(screen.queryByRole("button", { name: "미분류 지역", exact: true })).not.toBeInTheDocument();
+  expect(screen.queryByText(/국가를 확인할 수 없는 장소/)).not.toBeInTheDocument();
 });
 
-test.each(["/search?country=지원하지않는국가", "/search?region=등록되지않은지역", "/search?country=일본&region=서울"])("invalid selectors never silently become all places (%s)", async path => {
-  render(view(path)); await screen.findByText(/선택한 .*등록된 장소를 확인할 수 없습니다/);
+test("an unsupported region never silently becomes all places", async () => {
+  render(view("/search?region=등록되지않은지역")); await screen.findByText(/선택한 지역의 등록된 장소를 확인할 수 없습니다/);
   expect(getRecommendationsApi).not.toHaveBeenCalled();
-  expect(screen.queryByRole("button", { name: /서울 장소 1 서울 주소/ })).not.toBeInTheDocument();
   expect(screen.queryByText(/총 24개/)).not.toBeInTheDocument();
+});
+
+test("removing a legacy country parameter preserves the region and keyword", async () => {
+  render(view("/search?country=일본&region=서울&keyword=장소"));
+  await screen.findByText("총 12개 · 1/3 페이지");
+  expect(screen.getByLabelText("검색 URL")).not.toHaveTextContent("country=");
+  expect(screen.getByLabelText("장소, 도시 또는 테마 검색")).toHaveValue("장소");
+  expect(screen.getByRole("button", { name: "서울", exact: true })).toHaveAttribute("aria-pressed", "true");
 });
 
 test("late response from region A cannot replace B, even when cancellation is ignored", async () => {
@@ -130,23 +129,24 @@ test("late response from region A cannot replace B, even when cancellation is ig
   expect(screen.queryByText("서울 장소 1", { exact: true })).not.toBeInTheDocument();
 });
 
-test("changing country cancels the old region read and cannot restore Korean regions", async () => {
+test("clearing a region cancels its old read and restores all places", async () => {
   const old = deferred(); getRecommendationsApi.mockReturnValue(old.promise);
   render(view()); fireEvent.click(await screen.findByRole("button", { name: "서울", exact: true }));
   await waitFor(() => expect(getRecommendationsApi).toHaveBeenCalledTimes(1));
-  fireEvent.click(screen.getByRole("button", { name: "일본", exact: true }));
+  const signal = getRecommendationsApi.mock.calls[0][1].signal;
+  fireEvent.click(screen.getByRole("button", { name: "전체 지역 보기", exact: true }));
   await act(async () => old.resolve(data.filter(place => place.region === "서울")));
-  expect(regionButtons().map(button => button.textContent)).toEqual(["도쿄", "오사카"]);
-  expect(screen.getByText("총 9개 · 1/2 페이지")).toBeInTheDocument();
+  expect(signal.aborted).toBe(true);
+  expect(screen.getByText("총 24개 · 1/5 페이지")).toBeInTheDocument();
 });
 
-test("late catalog from a prior account cannot restore its country or region options", async () => {
+test("late catalog from a prior account cannot restore its region options", async () => {
   const old = deferred(); getPlacesApi.mockReturnValueOnce(old.promise).mockResolvedValueOnce(rows(2, "뉴욕"));
   const rendered = render(view()); mockAccount = "account:B"; rendered.rerender(view());
-  await screen.findByRole("button", { name: "미국", exact: true });
+  await screen.findByRole("button", { name: "뉴욕", exact: true });
   await act(async () => old.resolve(data));
   expect(regionButtons().map(button => button.textContent)).toEqual(["뉴욕"]);
-  expect(screen.queryByRole("button", { name: "한국", exact: true })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "서울", exact: true })).not.toBeInTheDocument();
 });
 
 test("empty catalog has no fake countries, regions, place cards or pagination", async () => {

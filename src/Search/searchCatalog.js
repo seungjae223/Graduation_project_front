@@ -1,5 +1,3 @@
-import { getPlaceCountry } from "../utils/placeCountry";
-
 export const SEARCH_PAGE_SIZE = 5;
 
 export function requireSearchPlaces(places) {
@@ -15,10 +13,9 @@ export function requireSearchPlaces(places) {
 
 // Options come only from the complete place response. Values retain the server's
 // exact region strings; the backend has no separate country or region codes.
-export function getSearchRegions(places, country = "전체") {
+export function getSearchRegions(places) {
   const regions = new Map();
   for (const place of places) {
-    if (country !== "전체" && getPlaceCountry(place) !== country) continue;
     if (typeof place.region !== "string" || !place.region.trim()) continue;
     const name = place.region.trim();
     if (!regions.has(name)) regions.set(name, { name, values: new Set() });
@@ -28,7 +25,6 @@ export function getSearchRegions(places, country = "전체") {
     .sort((a, b) => a.name.localeCompare(b.name, "ko"));
 }
 
-export function filterSearchPlaces(places, country, region) {
-  return places.filter(place => (country === "전체" || getPlaceCountry(place) === country) &&
-    (!region || region.values.includes(place.region)));
+export function filterSearchPlaces(places, region) {
+  return places.filter(place => !region || region.values.includes(place.region));
 }

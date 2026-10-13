@@ -1,0 +1,10 @@
+PASS src/Homepage/PopularAll.test.jsx (8.002 s)
+PASS src/Search/catalogFlows.test.jsx
+PASS src/Search/Search.test.jsx
+PASS src/Search/searchCatalog.test.js
+
+Test Suites: 4 passed, 4 total
+Tests:       52 passed, 52 total
+Snapshots:   0 total
+Time:        18.065 s
+Ran all test suites within paths "src/Search/Search.test.jsx", "src/Search/catalogFlows.test.jsx", "src/Search/searchCatalog.test.js", "src/Homepage/PopularAll.test.jsx".

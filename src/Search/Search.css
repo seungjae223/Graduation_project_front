@@ -334,16 +334,6 @@
 
 .hot-place-action { min-height: var(--touch-target); }
 
-.search-country-filters {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 4px 2px 10px;
-  scrollbar-width: thin;
-}
-
-.search-country-button,
 .search-pagination button {
   flex-shrink: 0;
   min-width: var(--touch-target);
@@ -358,14 +348,12 @@
   cursor: pointer;
 }
 
-.search-country-button[aria-pressed="true"],
 .search-pagination button[aria-current="page"] {
   background: var(--color-primary);
   border-color: var(--color-primary);
   color: var(--color-on-primary);
 }
 
-.search-country-notice { margin-top: 8px; }
 .search-page .region-card { min-width: 0; min-height: var(--touch-target); }
 .search-page .region-card span { max-width: 100%; overflow-wrap: anywhere; line-height: 1.5; }
 .search-page .region-icon-box { box-sizing: border-box; border: 2px solid transparent; }
@@ -397,7 +385,6 @@
 
 .search-page .region-card:focus-visible,
 .search-page .popular-card:focus-visible,
-.search-country-button:focus-visible,
 .search-pagination button:focus-visible,
 .search-page .clear-btn:focus-visible {
   outline: 3px solid var(--color-focus);
