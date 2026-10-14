@@ -392,3 +392,24 @@
 .sort-chip { height: var(--touch-target); }
 
 .theme-total-card { border-radius: var(--radius-card); }
+
+.total-page .total-sort-summary { margin: -8px 0 18px; color: var(--color-text-muted); font-size: var(--font-body); line-height: var(--line-body); overflow-wrap: anywhere; }
+.total-sort-summary p { margin: 8px 0; }
+.total-sort-summary button, .total-current-location { padding: 8px 0; border: 0; background: transparent; color: var(--color-accent-text); font: inherit; cursor: pointer; min-height: var(--touch-target); }
+.total-result-count { font-size: var(--font-caption); }
+.total-page .total-place-distance { margin: 8px 0 0; color: var(--color-accent-text); font-size: var(--font-body); }
+.total-page .total-origin-picker { padding: var(--modal-padding); margin-bottom: 20px; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); }
+.total-origin-picker h2 { margin: 0; font-size: var(--font-section-title); color: var(--color-text-strong); }
+.total-origin-picker p { font-size: var(--font-body); line-height: var(--line-body); color: var(--color-text-muted); }
+.total-origin-picker label { display: block; margin: 12px 0; color: var(--color-text-strong); font-size: var(--font-body); }
+.total-origin-picker select { display: block; margin-top: 6px; width: 100%; min-width: 0; min-height: var(--touch-target); border: 1px solid var(--color-border-strong); border-radius: 8px; padding: 8px; font: inherit; background: var(--color-surface); color: var(--color-text-strong); }
+.total-origin-actions { display: flex; gap: 8px; }
+.total-origin-actions button { flex: 1; min-width: 0; min-height: var(--modal-button-height); padding: 8px; border: 1px solid var(--color-border-strong); border-radius: 8px; font: inherit; color: var(--color-text-strong); background: var(--color-surface); cursor: pointer; }
+.total-origin-actions .total-origin-apply { color: var(--color-on-primary); background: var(--color-primary); border-color: var(--color-primary); }
+.total-origin-picker button:disabled { opacity: .55; cursor: default; }
+.total-origin-picker [role="alert"] { color: var(--color-danger); }
+.total-page .total-pagination { display: flex; gap: 6px; margin-top: 24px; }
+.total-pagination button { flex: 1; min-width: 0; min-height: var(--touch-target); padding: 8px 4px; border: 1px solid var(--color-border-strong); border-radius: 10px; font: inherit; background: var(--color-surface); color: var(--color-text-strong); cursor: pointer; }
+.total-pagination button.active { background: var(--color-primary); color: var(--color-on-primary); border-color: var(--color-primary); }
+.total-pagination button:disabled { color: var(--color-text-muted); background: var(--color-surface-muted); cursor: default; }
+.total-page :is(.sort-chip, .total-origin-picker button, .total-origin-picker select, .total-pagination button, .total-sort-summary button):focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }

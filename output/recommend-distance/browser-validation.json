@@ -1,0 +1,471 @@
+{
+  "basis": "Existing components in Chrome; provided backend SQL shapes and previously observed place IDs; review-empty fixture case only; production API auth not available locally",
+  "liveRoute": "/recommend → /total?theme=activity",
+  "functional": [
+    {
+      "activeSort": "거리순⌄",
+      "cards": [
+        {
+          "distance": "직선거리 0m",
+          "loaded": true,
+          "name": "린쿠 프리미엄 아울렛",
+          "photo": "/place-images/jp-16-27c562dc.jpg"
+        },
+        {
+          "distance": "직선거리 31.4km",
+          "loaded": true,
+          "name": "유니버설 스튜디오 재팬",
+          "photo": "/place-images/jp-1.jpg"
+        },
+        {
+          "distance": "직선거리 34.1km",
+          "loaded": true,
+          "name": "덴덴타운",
+          "photo": "/place-images/jp-12-7d042db8.jpg"
+        },
+        {
+          "distance": "직선거리 384.2km",
+          "loaded": true,
+          "name": "다카오산",
+          "photo": "/place-images/jp-81-b5c9497c.jpg"
+        },
+        {
+          "distance": "직선거리 398.9km",
+          "loaded": true,
+          "name": "다마동물공원",
+          "photo": "/place-images/jp-107-5e787062.jpg"
+        }
+      ],
+      "scrollWidth": 390,
+      "status": "린쿠 프리미엄 아울렛 기준 · 직선거리순기준 위치 변경총 186개 · 1/38 페이지",
+      "step": "distance-page-1",
+      "width": 390
+    },
+    {
+      "activeSort": "거리순⌄",
+      "cards": [
+        {
+          "distance": "직선거리 400.0km",
+          "name": "산리오 퓨로랜드"
+        },
+        {
+          "distance": "직선거리 407.7km",
+          "name": "요미우리랜드"
+        },
+        {
+          "distance": "직선거리 410.5km",
+          "name": "에도도쿄 건축박물관"
+        },
+        {
+          "distance": "직선거리 414.7km",
+          "name": "지브리 미술관"
+        },
+        {
+          "distance": "직선거리 421.8km",
+          "name": "고엔지"
+        }
+      ],
+      "status": "린쿠 프리미엄 아울렛 기준 · 직선거리순기준 위치 변경총 186개 · 2/38 페이지",
+      "step": "distance-page-2"
+    },
+    {
+      "step": "detail-back",
+      "text": "린쿠 프리미엄 아울렛 기준 · 직선거리순기준 위치 변경총 186개 · 2/38 페이지"
+    },
+    {
+      "active": "인기순⌄",
+      "names": [
+        "유니버설 스튜디오 재팬",
+        "덴덴타운",
+        "린쿠 프리미엄 아울렛",
+        "도쿄 디즈니씨",
+        "하라주쿠 다케시타 거리"
+      ],
+      "status": "인기도 정보가 제공되지 않아 기본 조회 순서로 표시해요.총 186개 · 1/38 페이지",
+      "step": "popular-reset"
+    },
+    {
+      "active": "별점순⌄",
+      "names": [
+        "유니버설 스튜디오 재팬",
+        "덴덴타운",
+        "린쿠 프리미엄 아울렛",
+        "도쿄 디즈니씨",
+        "하라주쿠 다케시타 거리"
+      ],
+      "status": "등록된 리뷰 평점이 없어 기본 순서로 표시해요.총 186개 · 1/38 페이지",
+      "step": "review-sort-empty-case"
+    },
+    {
+      "step": "save-ui",
+      "folderPickerOpened": true,
+      "apiWriteSubmitted": false
+    },
+    {
+      "active": "거리순⌄",
+      "cards": 5,
+      "first": "린쿠 프리미엄 아울렛",
+      "scrollWidth": 390,
+      "status": "린쿠 프리미엄 아울렛 기준 · 직선거리순기준 위치 변경총 186개 · 1/38 페이지",
+      "step": "dark-mobile",
+      "width": 390
+    },
+    {
+      "step": "final-dark-text-color",
+      "distanceTextColor": "rgb(85, 189, 248)",
+      "verified": true
+    }
+  ],
+  "responsive": [
+    {
+      "width": 320,
+      "picker": {
+        "controls": [
+          {
+            "height": 44,
+            "width": 250.6666717529297
+          },
+          {
+            "height": 44,
+            "width": 250.6666717529297
+          },
+          {
+            "height": 48,
+            "width": 121.33333587646484
+          },
+          {
+            "height": 48,
+            "width": 121.33333587646484
+          },
+          {
+            "height": 44,
+            "width": 97.28125
+          }
+        ],
+        "width": 292
+      },
+      "activeSort": "거리순⌄",
+      "cardCount": 5,
+      "clientWidth": 320,
+      "credits": 5,
+      "firstDistance": "직선거리 0m",
+      "firstPlace": "린쿠 프리미엄 아울렛",
+      "images": [
+        {
+          "height": 172,
+          "width": 290.66668701171875
+        },
+        {
+          "height": 172,
+          "width": 290.66668701171875
+        },
+        {
+          "height": 172,
+          "width": 290.66668701171875
+        },
+        {
+          "height": 172,
+          "width": 290.66668701171875
+        },
+        {
+          "height": 172,
+          "width": 290.66668701171875
+        }
+      ],
+      "paginationButtons": 5,
+      "scrollWidth": 320
+    },
+    {
+      "width": 375,
+      "picker": {
+        "controls": [
+          {
+            "height": 44,
+            "width": 306
+          },
+          {
+            "height": 44,
+            "width": 306
+          },
+          {
+            "height": 48,
+            "width": 149
+          },
+          {
+            "height": 48,
+            "width": 149
+          },
+          {
+            "height": 44,
+            "width": 97.28125
+          }
+        ],
+        "width": 347.3333435058594
+      },
+      "activeSort": "거리순⌄",
+      "cardCount": 5,
+      "clientWidth": 375,
+      "credits": 5,
+      "firstDistance": "직선거리 0m",
+      "firstPlace": "린쿠 프리미엄 아울렛",
+      "images": [
+        {
+          "height": 172,
+          "width": 346
+        },
+        {
+          "height": 172,
+          "width": 346
+        },
+        {
+          "height": 172,
+          "width": 346
+        },
+        {
+          "height": 172,
+          "width": 346
+        },
+        {
+          "height": 172,
+          "width": 346
+        }
+      ],
+      "paginationButtons": 5,
+      "scrollWidth": 375
+    },
+    {
+      "width": 390,
+      "picker": {
+        "controls": [
+          {
+            "height": 44,
+            "width": 320.66668701171875
+          },
+          {
+            "height": 44,
+            "width": 320.66668701171875
+          },
+          {
+            "height": 48,
+            "width": 156.33334350585938
+          },
+          {
+            "height": 48,
+            "width": 156.33334350585938
+          },
+          {
+            "height": 44,
+            "width": 97.28125
+          }
+        ],
+        "width": 362
+      },
+      "activeSort": "거리순⌄",
+      "cardCount": 5,
+      "clientWidth": 390,
+      "credits": 5,
+      "firstDistance": "직선거리 0m",
+      "firstPlace": "린쿠 프리미엄 아울렛",
+      "images": [
+        {
+          "height": 172,
+          "width": 360.6666870117187
+        },
+        {
+          "height": 172,
+          "width": 360.6666870117187
+        },
+        {
+          "height": 172,
+          "width": 360.6666870117187
+        },
+        {
+          "height": 172,
+          "width": 360.6666870117187
+        },
+        {
+          "height": 172,
+          "width": 360.6666870117187
+        }
+      ],
+      "paginationButtons": 5,
+      "scrollWidth": 390
+    },
+    {
+      "width": 768,
+      "picker": {
+        "controls": [
+          {
+            "height": 44,
+            "width": 308.66668701171875
+          },
+          {
+            "height": 44,
+            "width": 308.66668701171875
+          },
+          {
+            "height": 48,
+            "width": 150.33334350585938
+          },
+          {
+            "height": 48,
+            "width": 150.33334350585938
+          },
+          {
+            "height": 44,
+            "width": 97.28125
+          }
+        ],
+        "width": 358
+      },
+      "activeSort": "거리순⌄",
+      "cardCount": 5,
+      "clientWidth": 768,
+      "credits": 5,
+      "firstDistance": "직선거리 0m",
+      "firstPlace": "린쿠 프리미엄 아울렛",
+      "images": [
+        {
+          "height": 146,
+          "width": 356.66668701171875
+        },
+        {
+          "height": 146,
+          "width": 356.66668701171875
+        },
+        {
+          "height": 146,
+          "width": 356.66668701171875
+        },
+        {
+          "height": 146,
+          "width": 356.66668701171875
+        },
+        {
+          "height": 146,
+          "width": 356.66668701171875
+        }
+      ],
+      "paginationButtons": 5,
+      "scrollWidth": 768
+    },
+    {
+      "width": 1366,
+      "picker": {
+        "controls": [
+          {
+            "height": 44,
+            "width": 308.66668701171875
+          },
+          {
+            "height": 44,
+            "width": 308.66668701171875
+          },
+          {
+            "height": 48,
+            "width": 150.33334350585938
+          },
+          {
+            "height": 48,
+            "width": 150.33334350585938
+          },
+          {
+            "height": 44,
+            "width": 97.28125
+          }
+        ],
+        "width": 358
+      },
+      "activeSort": "거리순⌄",
+      "cardCount": 5,
+      "clientWidth": 1366,
+      "credits": 5,
+      "firstDistance": "직선거리 0m",
+      "firstPlace": "린쿠 프리미엄 아울렛",
+      "images": [
+        {
+          "height": 146,
+          "width": 356.66668701171875
+        },
+        {
+          "height": 146,
+          "width": 356.66668701171875
+        },
+        {
+          "height": 146,
+          "width": 356.66668701171875
+        },
+        {
+          "height": 146,
+          "width": 356.66668701171875
+        },
+        {
+          "height": 146,
+          "width": 356.66668701171875
+        }
+      ],
+      "paginationButtons": 5,
+      "scrollWidth": 1366
+    },
+    {
+      "width": 1920,
+      "picker": {
+        "controls": [
+          {
+            "height": 44,
+            "width": 430.9479370117187
+          },
+          {
+            "height": 44,
+            "width": 430.9479370117187
+          },
+          {
+            "height": 48,
+            "width": 211.46875
+          },
+          {
+            "height": 48,
+            "width": 211.4791717529297
+          },
+          {
+            "height": 44,
+            "width": 97.28125
+          }
+        ],
+        "width": 480.28125
+      },
+      "activeSort": "거리순⌄",
+      "cardCount": 5,
+      "clientWidth": 1920,
+      "credits": 5,
+      "firstDistance": "직선거리 0m",
+      "firstPlace": "린쿠 프리미엄 아울렛",
+      "images": [
+        {
+          "height": 195.83334350585935,
+          "width": 478.9479370117187
+        },
+        {
+          "height": 195.83334350585935,
+          "width": 478.9479370117187
+        },
+        {
+          "height": 195.83334350585935,
+          "width": 478.9479370117187
+        },
+        {
+          "height": 195.83334350585935,
+          "width": 478.9479370117187
+        },
+        {
+          "height": 195.83334350585935,
+          "width": 478.9479370117187
+        }
+      ],
+      "paginationButtons": 5,
+      "scrollWidth": 1920
+    }
+  ],
+  "productionWrites": false,
+  "nativeViewportOverride": false
+}

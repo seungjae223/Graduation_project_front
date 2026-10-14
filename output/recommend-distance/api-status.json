@@ -1,0 +1,12 @@
+[
+  {
+    "path": "/api/recommendations?theme=ACTIVITY",
+    "status": 403,
+    "authenticated": false
+  },
+  {
+    "path": "/api/places/16/reviews",
+    "status": 403,
+    "authenticated": false
+  }
+]

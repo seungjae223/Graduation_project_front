@@ -1,0 +1,83 @@
+{
+  "basis": "provided backend SQL, independent atan2 Haversine verification",
+  "origin": {
+    "placeId": null,
+    "sourceRow": 16,
+    "region": "오사카",
+    "name": "린쿠 프리미엄 아울렛",
+    "countryCode": "JP",
+    "address": "3-28 Rinkuoraiminami, Izumisano, Osaka",
+    "latitude": 34.4066,
+    "longitude": 135.2951,
+    "theme": "ACTIVITY",
+    "placeType": "ATTRACTION",
+    "description": "해변가 쇼핑: 간사이 공항 직전, 바다를 바라보며 즐기는 대규모 아울렛 | 브랜드 특가: 다양한 해외 및 일본 로컬 브랜드를 저렴하게 득템"
+  },
+  "total": 186,
+  "pageSize": 5,
+  "page1": [
+    {
+      "name": "린쿠 프리미엄 아울렛",
+      "latitude": 34.4066,
+      "longitude": 135.2951,
+      "distanceKm": 0
+    },
+    {
+      "name": "유니버설 스튜디오 재팬",
+      "latitude": 34.6654,
+      "longitude": 135.4323,
+      "distanceKm": 31.401729104362204
+    },
+    {
+      "name": "덴덴타운",
+      "latitude": 34.6596,
+      "longitude": 135.5056,
+      "distanceKm": 34.10618297281827
+    },
+    {
+      "name": "다카오산",
+      "latitude": 35.6252,
+      "longitude": 139.2436,
+      "distanceKm": 384.22741708450957
+    },
+    {
+      "name": "다마동물공원",
+      "latitude": 35.6497,
+      "longitude": 139.4049,
+      "distanceKm": 398.8855854086159
+    }
+  ],
+  "page2": [
+    {
+      "name": "산리오 퓨로랜드",
+      "latitude": 35.6246,
+      "longitude": 139.429,
+      "distanceKm": 400.04565895011837
+    },
+    {
+      "name": "요미우리랜드",
+      "latitude": 35.625,
+      "longitude": 139.5177,
+      "distanceKm": 407.66743343917295
+    },
+    {
+      "name": "에도도쿄 건축박물관",
+      "latitude": 35.7158,
+      "longitude": 139.5124,
+      "distanceKm": 410.47972621679173
+    },
+    {
+      "name": "지브리 미술관",
+      "latitude": 35.6962,
+      "longitude": 139.5704,
+      "distanceKm": 414.70413330124615
+    },
+    {
+      "name": "고엔지",
+      "latitude": 35.7053,
+      "longitude": 139.6498,
+      "distanceKm": 421.8156986455239
+    }
+  ],
+  "monotonic": true
+}

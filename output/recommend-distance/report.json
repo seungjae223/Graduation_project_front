@@ -1,0 +1,264 @@
+{
+  "date": "2026-10-14",
+  "route": "/recommend → /total?theme=<selectedTheme> (keyword mode retains /total?keyword=...)",
+  "routeSource": "src/Recommend/Recommend.jsx handleViewAll; src/App.js /total → Total",
+  "files": [
+    "src/Recommend/Total.jsx",
+    "src/Recommend/Total.css",
+    "src/Recommend/DistanceOriginPicker.jsx",
+    "src/Recommend/recommendationSort.js",
+    "src/Recommend/Total.test.jsx",
+    "src/Recommend/recommendationSort.test.js",
+    "src/Recommend/listFlows.test.jsx"
+  ],
+  "apis": [
+    "GET /api/recommendations?theme=ACTIVITY (existing theme conversion)",
+    "GET /api/places/search?keyword=... (existing keyword path)",
+    "GET /api/places/{id}/reviews"
+  ],
+  "apiContract": "Place/PlaceResponse 전체 배열을 반환하며 위도·경도는 nullable입니다. 서버 정렬·페이지네이션·평점 집계·인기도 지표는 없습니다. 추천 API에는 지역·테마 필터가 있습니다.",
+  "distance": "Haversine 공식(지구 반지름 6371km)으로 실제 좌표의 직선거리를 계산해 오름차순으로 정렬합니다. 누락·잘못된 좌표는 마지막에 두며 원본 배열을 수정하지 않습니다. 전체 응답을 먼저 정렬하고 페이지를 나눕니다. 일부 데이터만 담긴 페이지 래퍼는 오류로 처리합니다.",
+  "origin": "기존 추천/전체 보기에는 여행 기준 위치가 없었습니다. 사용자가 API에서 받은 실제 장소를 선택하면 최신 좌표·명칭을 사용합니다. 현재 위치는 별도 클릭으로 요청합니다. 임의의 역·도시 중심 좌표는 사용하지 않습니다. 권한 거부·시간 초과·취소를 처리하고 GPS 좌표는 URL이나 API 파라미터에 보내지 않습니다.",
+  "pagination": "페이지당 카드 5개. 이전/숫자 최대 3개/다음으로 한 줄 최대 5개 버튼. 정렬이나 기준 위치를 변경하면 1페이지로 초기화합니다. 페이지 이동에는 기준·정렬을 유지하고 상세보기에서 복귀할 때 페이지와 선택을 복원합니다.",
+  "popularity": "현재 계약에 인기도나 순위가 없어 기존 API 순서를 유지하고 기본 조회 순서임을 안내합니다. 실제 인기순에는 백엔드의 인기도 지표 또는 순위가 필요합니다.",
+  "rating": "실제로 제공된 점수 또는 기존 리뷰 API의 유효한 평점 평균을 사용합니다(0점 포함). 평점이 없으면 마지막에 두고 기본 별점을 만들지 않습니다. 동시 조회 최대 4개, 현재 목록에서 조회 결과를 재사용합니다. 조회 실패 시 이전 정렬을 유지하고 다시 조회할 수 있습니다.",
+  "filters": "기존 Total에는 국가·지역 필터가 없습니다. 다른 검색·목록·추천 화면은 수정하지 않았습니다. 기준 선택의 지역 필터는 기준 장소 후보만 좁히며 결과 목록을 임의로 제한하지 않습니다.",
+  "backendChanges": "백엔드 수정이나 새 파라미터가 없습니다. 현재 전체 배열 계약이면 거리순 추가 개발은 필요 없습니다. 실제 인기순에는 인기도 정보가 필요합니다. 평점 집계 응답은 조회 성능 개선을 위한 선택 사항입니다.",
+  "verification": {
+    "testSuites": 74,
+    "tests": 539,
+    "allPassed": true,
+    "productionBuild": true,
+    "browserBasis": "Existing components in Chrome; provided backend SQL shapes and previously observed place IDs; review-empty fixture case only; production API auth not available locally",
+    "responsiveWidths": [
+      320,
+      375,
+      390,
+      768,
+      1366,
+      1920
+    ],
+    "noHorizontalOverflow": true,
+    "fiveCards": true,
+    "fivePageButtons": true,
+    "liveRouteConfirmed": true,
+    "permissionDenialAndCancellation": "Automated tests; no real GPS permission requested in browser QA",
+    "saving": "Folder-picker interaction and ID retention verified; actual production save/remove not executed",
+    "starOrder": "Automated actual-score-response cases; browser empty-review case. Authenticated production review values not verified.",
+    "apiStatus": [
+      {
+        "path": "/api/recommendations?theme=ACTIVITY",
+        "status": 403,
+        "authenticated": false
+      },
+      {
+        "path": "/api/places/16/reviews",
+        "status": 403,
+        "authenticated": false
+      }
+    ],
+    "math": {
+      "basis": "provided backend SQL, independent atan2 Haversine verification",
+      "origin": {
+        "placeId": null,
+        "sourceRow": 16,
+        "region": "오사카",
+        "name": "린쿠 프리미엄 아울렛",
+        "countryCode": "JP",
+        "address": "3-28 Rinkuoraiminami, Izumisano, Osaka",
+        "latitude": 34.4066,
+        "longitude": 135.2951,
+        "theme": "ACTIVITY",
+        "placeType": "ATTRACTION",
+        "description": "해변가 쇼핑: 간사이 공항 직전, 바다를 바라보며 즐기는 대규모 아울렛 | 브랜드 특가: 다양한 해외 및 일본 로컬 브랜드를 저렴하게 득템"
+      },
+      "total": 186,
+      "pageSize": 5,
+      "page1": [
+        {
+          "name": "린쿠 프리미엄 아울렛",
+          "latitude": 34.4066,
+          "longitude": 135.2951,
+          "distanceKm": 0
+        },
+        {
+          "name": "유니버설 스튜디오 재팬",
+          "latitude": 34.6654,
+          "longitude": 135.4323,
+          "distanceKm": 31.401729104362204
+        },
+        {
+          "name": "덴덴타운",
+          "latitude": 34.6596,
+          "longitude": 135.5056,
+          "distanceKm": 34.10618297281827
+        },
+        {
+          "name": "다카오산",
+          "latitude": 35.6252,
+          "longitude": 139.2436,
+          "distanceKm": 384.22741708450957
+        },
+        {
+          "name": "다마동물공원",
+          "latitude": 35.6497,
+          "longitude": 139.4049,
+          "distanceKm": 398.8855854086159
+        }
+      ],
+      "page2": [
+        {
+          "name": "산리오 퓨로랜드",
+          "latitude": 35.6246,
+          "longitude": 139.429,
+          "distanceKm": 400.04565895011837
+        },
+        {
+          "name": "요미우리랜드",
+          "latitude": 35.625,
+          "longitude": 139.5177,
+          "distanceKm": 407.66743343917295
+        },
+        {
+          "name": "에도도쿄 건축박물관",
+          "latitude": 35.7158,
+          "longitude": 139.5124,
+          "distanceKm": 410.47972621679173
+        },
+        {
+          "name": "지브리 미술관",
+          "latitude": 35.6962,
+          "longitude": 139.5704,
+          "distanceKm": 414.70413330124615
+        },
+        {
+          "name": "고엔지",
+          "latitude": 35.7053,
+          "longitude": 139.6498,
+          "distanceKm": 421.8156986455239
+        }
+      ],
+      "monotonic": true
+    },
+    "browser": [
+      {
+        "activeSort": "거리순⌄",
+        "cards": [
+          {
+            "distance": "직선거리 0m",
+            "loaded": true,
+            "name": "린쿠 프리미엄 아울렛",
+            "photo": "/place-images/jp-16-27c562dc.jpg"
+          },
+          {
+            "distance": "직선거리 31.4km",
+            "loaded": true,
+            "name": "유니버설 스튜디오 재팬",
+            "photo": "/place-images/jp-1.jpg"
+          },
+          {
+            "distance": "직선거리 34.1km",
+            "loaded": true,
+            "name": "덴덴타운",
+            "photo": "/place-images/jp-12-7d042db8.jpg"
+          },
+          {
+            "distance": "직선거리 384.2km",
+            "loaded": true,
+            "name": "다카오산",
+            "photo": "/place-images/jp-81-b5c9497c.jpg"
+          },
+          {
+            "distance": "직선거리 398.9km",
+            "loaded": true,
+            "name": "다마동물공원",
+            "photo": "/place-images/jp-107-5e787062.jpg"
+          }
+        ],
+        "scrollWidth": 390,
+        "status": "린쿠 프리미엄 아울렛 기준 · 직선거리순기준 위치 변경총 186개 · 1/38 페이지",
+        "step": "distance-page-1",
+        "width": 390
+      },
+      {
+        "activeSort": "거리순⌄",
+        "cards": [
+          {
+            "distance": "직선거리 400.0km",
+            "name": "산리오 퓨로랜드"
+          },
+          {
+            "distance": "직선거리 407.7km",
+            "name": "요미우리랜드"
+          },
+          {
+            "distance": "직선거리 410.5km",
+            "name": "에도도쿄 건축박물관"
+          },
+          {
+            "distance": "직선거리 414.7km",
+            "name": "지브리 미술관"
+          },
+          {
+            "distance": "직선거리 421.8km",
+            "name": "고엔지"
+          }
+        ],
+        "status": "린쿠 프리미엄 아울렛 기준 · 직선거리순기준 위치 변경총 186개 · 2/38 페이지",
+        "step": "distance-page-2"
+      },
+      {
+        "step": "detail-back",
+        "text": "린쿠 프리미엄 아울렛 기준 · 직선거리순기준 위치 변경총 186개 · 2/38 페이지"
+      },
+      {
+        "active": "인기순⌄",
+        "names": [
+          "유니버설 스튜디오 재팬",
+          "덴덴타운",
+          "린쿠 프리미엄 아울렛",
+          "도쿄 디즈니씨",
+          "하라주쿠 다케시타 거리"
+        ],
+        "status": "인기도 정보가 제공되지 않아 기본 조회 순서로 표시해요.총 186개 · 1/38 페이지",
+        "step": "popular-reset"
+      },
+      {
+        "active": "별점순⌄",
+        "names": [
+          "유니버설 스튜디오 재팬",
+          "덴덴타운",
+          "린쿠 프리미엄 아울렛",
+          "도쿄 디즈니씨",
+          "하라주쿠 다케시타 거리"
+        ],
+        "status": "등록된 리뷰 평점이 없어 기본 순서로 표시해요.총 186개 · 1/38 페이지",
+        "step": "review-sort-empty-case"
+      },
+      {
+        "step": "save-ui",
+        "folderPickerOpened": true,
+        "apiWriteSubmitted": false
+      },
+      {
+        "active": "거리순⌄",
+        "cards": 5,
+        "first": "린쿠 프리미엄 아울렛",
+        "scrollWidth": 390,
+        "status": "린쿠 프리미엄 아울렛 기준 · 직선거리순기준 위치 변경총 186개 · 1/38 페이지",
+        "step": "dark-mobile",
+        "width": 390
+      },
+      {
+        "step": "final-dark-text-color",
+        "distanceTextColor": "rgb(85, 189, 248)",
+        "verified": true
+      }
+    ]
+  },
+  "limitations": [
+    "Operating site route and old disabled distance button observed directly. Modified behavior verified locally using provided SQL place data; this is not authenticated production response validation.",
+    "Anonymous production recommendation/review requests return 403. Production end-to-end data and actual favorite writes are not confirmed.",
+    "No commit, push, deployment, backend changes, or production mock implementation. QA transport is isolated under output/."
+  ]
+}

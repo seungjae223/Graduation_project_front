@@ -43,11 +43,13 @@ test("late old theme success/error cannot overwrite current results", async () =
   await act(async () => old.reject(new Error("late failure")));
   expect(screen.getByText("새 테마 장소")).toBeInTheDocument(); expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });
-test("missing ratings are omitted; actual zero is retained and distance sorting stays unavailable without a contract", async () => {
+test("missing ratings are omitted; actual zero is retained and distance requires a selected origin", async () => {
   api.get.mockResolvedValue({ data: [place, { id: 2, name: "평점 없는 장소", distance: 0 }] });
   setup("/total"); await screen.findByText("평점 없는 장소");
   expect(screen.getAllByText("★")).toHaveLength(1); expect(screen.getByText("0")).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /거리순/ })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: /거리순/ }));
+  expect(screen.getByRole("heading", { name: "거리 기준 선택" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "이 위치로 정렬" })).toBeDisabled();
 });
 test("popular list paginates more places and retains detail links and neutral missing photos", async () => {
   api.get.mockResolvedValue({ data: Array.from({ length: 11 }, (_, i) => ({ id: i + 1, name: `장소 ${i + 1}` })) });
