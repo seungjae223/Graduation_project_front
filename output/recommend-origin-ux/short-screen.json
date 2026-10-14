@@ -1,0 +1,71 @@
+{
+  "anchor": {
+    "bottom": 171.98958587646484,
+    "x": 113.97917175292967,
+    "y": 127.98958587646484
+  },
+  "background": "rgb(255, 255, 255)",
+  "bodyFont": "14px",
+  "bodyScroll": true,
+  "controls": [
+    {
+      "clientWidth": 44,
+      "height": 44,
+      "name": "거리 기준 선택 닫기",
+      "scrollWidth": 44,
+      "width": 44
+    },
+    {
+      "clientWidth": 233,
+      "height": 44,
+      "name": "전체 지역",
+      "scrollWidth": 233,
+      "width": 234.6666717529297
+    },
+    {
+      "clientWidth": 233,
+      "height": 44,
+      "name": "기준 장소 선택",
+      "scrollWidth": 233,
+      "width": 234.6666717529297
+    },
+    {
+      "clientWidth": 233,
+      "height": 44,
+      "name": "내 현재 위치 사용",
+      "scrollWidth": 233,
+      "width": 234.6666717529297
+    },
+    {
+      "clientWidth": 120,
+      "height": 48,
+      "name": "취소",
+      "scrollWidth": 120,
+      "width": 121.33333587646484
+    },
+    {
+      "clientWidth": 120,
+      "height": 48,
+      "name": "이 위치로 정렬",
+      "scrollWidth": 120,
+      "width": 121.33333587646484
+    }
+  ],
+  "focus": "SELECT",
+  "footerBottom": 347.33335876464844,
+  "headingFont": "18px",
+  "height": 360,
+  "locked": "hidden",
+  "panel": {
+    "bottom": 348,
+    "height": 336,
+    "right": 308,
+    "width": 296,
+    "x": 12,
+    "y": 12
+  },
+  "scrollWidth": 320,
+  "text": "rgb(17, 24, 39)",
+  "theme": "light",
+  "width": 320
+}
