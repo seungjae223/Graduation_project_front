@@ -354,7 +354,7 @@ function Recommend() {
                           tabIndex={0}
                         >
                           <div className="recommend-card-image-wrap">
-                            <PlacePhoto src={place.image} alt={place.title} className="recommend-card-image"
+                            <PlacePhoto place={place} src={place.image} alt={place.title} className="recommend-card-image"
                               credit={place.image === getPlacePhoto(place.title).image ? getPlacePhoto(place.title).credit : undefined} />
 
                             <button

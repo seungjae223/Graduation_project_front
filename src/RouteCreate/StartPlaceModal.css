@@ -189,8 +189,11 @@
   height: 100%;
   object-fit: cover;
 }
+.start-place-thumb { position: relative; }
+.start-place-thumb .place-photo-credit { top: auto; bottom: 2px; left: 2px; font-size: 10px; padding: 2px 4px; }
 
-.start-place-item:disabled {
+.start-place-item:disabled,
+.start-place-item[aria-disabled="true"] {
   cursor: not-allowed;
   color: var(--color-disabled-text);
   background: var(--color-disabled-bg);
@@ -242,6 +245,7 @@
 }
 
 .start-place-item {
+  position: relative;
   width: 100%;
   min-height: 92px;
   display: flex;

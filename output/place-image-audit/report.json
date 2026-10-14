@@ -1,0 +1,162 @@
+{
+  "date": "2026-10-14",
+  "basis": "사용자 승인: 제공된 SQL 기준. 운영 API 비로그인 GET 403; 운영 DB의 실제 개수와 ID는 미확인.",
+  "counts": {
+    "catalog": 600,
+    "reused": 15,
+    "external": 113,
+    "matched": 128,
+    "unmatched": 472,
+    "candidates": 159,
+    "existingAssetsInvestigated": 26
+  },
+  "regionCounts": {
+    "오사카": {
+      "catalog": 25,
+      "matched": 10
+    },
+    "도쿄": {
+      "catalog": 100,
+      "matched": 23
+    },
+    "마닐라": {
+      "catalog": 25,
+      "matched": 7
+    },
+    "세부": {
+      "catalog": 25,
+      "matched": 4
+    },
+    "서울": {
+      "catalog": 100,
+      "matched": 21
+    },
+    "경주": {
+      "catalog": 25,
+      "matched": 6
+    },
+    "부산": {
+      "catalog": 25,
+      "matched": 6
+    },
+    "제주": {
+      "catalog": 25,
+      "matched": 5
+    },
+    "방콕": {
+      "catalog": 25,
+      "matched": 6
+    },
+    "로스앤젤레스": {
+      "catalog": 25,
+      "matched": 5
+    },
+    "뉴욕": {
+      "catalog": 25,
+      "matched": 8
+    },
+    "홍콩": {
+      "catalog": 100,
+      "matched": 21
+    },
+    "치앙마이": {
+      "catalog": 25,
+      "matched": 4
+    },
+    "푸꾸옥": {
+      "catalog": 25,
+      "matched": 1
+    },
+    "다낭": {
+      "catalog": 25,
+      "matched": 1
+    }
+  },
+  "matching": "SQL INSERT에 ID가 없으므로 행번호를 placeId로 사용하지 않음. 정확한 이름+지역/국가+주소(제공되는 경우)+좌표로 유일한 장소를 판별. 좌표 필수, SQL 기준 250m 이내. 확인된 DB ID를 추후 넣어도 이름/위치 모순을 거부. 런타임 사진 검색 없음. 일정 화면의 OVERSEAS는 ISO 코드가 아닌 기존 화면 분류로 인식하며 KR 장소를 거부한다.",
+  "validation": {
+    "fullTests": "72 suites, 523 tests passed",
+    "finalAffectedTests": "11 suites, 76 tests passed",
+    "build": "Compiled successfully",
+    "widths": [
+      320,
+      375,
+      390,
+      768,
+      1366,
+      1920
+    ],
+    "screens": [
+      "검색 결과",
+      "더 많은 장소",
+      "지역별 추천",
+      "장소 상세",
+      "일정 결과 타임라인",
+      "테마 추천",
+      "홈 여행지 카드"
+    ],
+    "horizontalOverflow": 0,
+    "allFilesLoaded": "128/128",
+    "duplicateImageUrls": 0,
+    "duplicateFileHashes": 0,
+    "countryFilter": "한국 선택 시 한국 장소 사진/대체 UI 확인",
+    "keyboard": "검색 1→2→1 페이지, 검색→상세에서 동일 src 확인",
+    "failure": "404 이미지와 다른 국가 입력 모두 사진 정보 없음; 출처 링크 제거",
+    "additional": "시작 장소 모달 8개 사진 표시, 390px/1366px 다크모드 확인; 실제 buildDaysFromServerData 변환 결과(OVERSEAS)를 통한 해외 사진 3개를 6개 너비 모두 재검증",
+    "limits": "실제 운영 로그인 후 조회/즐겨찾기/일정 생성은 실행하지 않음. 브라우저는 SQL 형태의 격리된 응답과 실제 컴포넌트로 검증. 저장·일정·삭제 API 로직은 회귀 테스트로 확인."
+  },
+  "licenseCounts": {
+    "CC BY-SA 3.0": 28,
+    "CC BY 2.5": 3,
+    "CC BY-SA 4.0": 47,
+    "CC0": 11,
+    "CC BY 2.0": 11,
+    "CC BY 4.0": 4,
+    "Public domain": 9,
+    "CC BY-SA 2.0": 8,
+    "KOGL Type 1": 5,
+    "CC BY 3.0": 1,
+    "CC BY-SA 2.5": 1
+  },
+  "sources": [
+    "https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia",
+    "https://developers.google.com/maps/documentation/places/web-service/place-photos",
+    "https://developers.google.com/maps/documentation/places/web-service/policies",
+    "https://developers.google.com/maps/billing-and-pricing/pricing"
+  ],
+  "google": "기존 Google Maps 브라우저 키 설정 확인(키 값 미공개). 코드에서 maps/marker/geocoding 사용, Places 사진 기능 없음. Cloud Console의 API 활성화·키 제한은 접근 권한이 없어 확인하지 못함. 유료 API 활성화/추가 호출 없음.",
+  "costs": "새 사진 기능에 외부 API 키/과금 설정 불필요. Google Places Photos 사용 0회. 로컬 사진 추가 용량 약 25.4 MiB; 배포 정적 파일의 저장/전송 비용은 현재 호스팅 요금에 따름.",
+  "future": "미연결 472개는 해당 장소 사진, 독립적인 위치 자료, 재사용 라이선스 확인이 추가로 필요. 실제 운영 ID를 확보하면 manifest의 placeId를 검증된 값으로 채울 수 있음. prepare→download 후 실물 검수, approved.json에 명시한 사진만 apply. 캐시의 행번호는 파일명/출처 앵커이며 backend ID가 아님.",
+  "files": [
+    "src/Homepage/Home.css",
+    "src/Homepage/Home.jsx",
+    "src/Homepage/PopularAll.jsx",
+    "src/MySchedule/MySchedule.jsx",
+    "src/Mypage/SavedPlaces.jsx",
+    "src/RecentPlacesPage/RecentPlacesPage.jsx",
+    "src/Recommend/Detail.css",
+    "src/Recommend/Detail.jsx",
+    "src/Recommend/Recommend.jsx",
+    "src/Recommend/Total.jsx",
+    "src/RouteCreate/RouteCreate.css",
+    "src/RouteCreate/RouteCreate.jsx",
+    "src/RouteCreate/StartPlaceModal.css",
+    "src/RouteCreate/StartPlaceModal.jsx",
+    "src/RouteResult/RouteResult.css",
+    "src/RouteResult/RouteResult.jsx",
+    "src/Search/Search.css",
+    "src/Search/Search.jsx",
+    "src/ShareModal/ShareModal.css",
+    "src/ShareModal/ShareModal.jsx",
+    "src/components/PlacePhoto.css",
+    "src/components/PlacePhoto.jsx",
+    "src/data/placeImages.json",
+    "src/utils/placeImageResolver.js",
+    "public/place-images/credits.html",
+    "public/place-images/ (113 photographs)",
+    "scripts/prepare-place-images.cjs",
+    "scripts/place-photo-candidates.json",
+    "scripts/place-photo-review.json",
+    "src/components/PlacePhoto.test.jsx",
+    "src/utils/placeImageResolver.test.js"
+  ]
+}

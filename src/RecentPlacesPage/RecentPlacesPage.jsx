@@ -80,7 +80,7 @@ function RecentPlacesPage() {
                     key={place.id}
                     onClick={() => handlePlaceClick(place)}
                   >
-                    <PlacePhoto src={place.image} alt={place.name} className="recent-place-thumb" />
+                    <span className="place-photo-frame recent-place-thumb"><PlacePhoto place={place} src={place.image} alt={place.name} className="place-photo-frame-image" /></span>
 
                     <div className="recent-place-info">
                       <h3 className="recent-place-name"><Link to={`/detail?id=${encodeURIComponent(place.id)}`} onClick={event => event.stopPropagation()}>{place.name}</Link></h3>

@@ -282,7 +282,7 @@ function PopularAll() {
                 key={place.id}
                 className="popular-grid-card"
               >
-                <PlacePhoto
+                <PlacePhoto place={place}
                   src={place.image}
                   alt={place.title}
                   className="popular-grid-image"
@@ -324,11 +324,11 @@ function PopularAll() {
                     key={place.id}
                     className="popular-month-card"
                       >
-                    <PlacePhoto
+                    <span className="place-photo-frame popular-month-thumb"><PlacePhoto place={place}
                       src={place.image}
                       alt={place.title}
-                      className="popular-month-thumb"
-                    />
+                      className="place-photo-frame-image"
+                    /></span>
 
                     <div className="popular-month-body">
                       <div className="popular-month-top">

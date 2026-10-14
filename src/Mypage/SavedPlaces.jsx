@@ -373,7 +373,7 @@ function SavedPlacesContent() {
                     }
                   }}
                 >
-                  <PlacePhoto src={place.image} alt={place.title} className="saved-place-image" />
+                  <span className="place-photo-frame saved-place-image"><PlacePhoto place={place} src={place.image} alt={place.title} className="place-photo-frame-image" /></span>
 
                   <div className="saved-place-body">
                     <span className="saved-place-type">{place.placeTypeLabel}</span>

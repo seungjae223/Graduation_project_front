@@ -4,6 +4,8 @@ import { createPortal } from "react-dom";
 import useModalFocus from "../utils/useModalFocus";
 import "./ShareModal.css";
 import useSessionKey from "../utils/useSessionKey";
+import PlacePhoto from "../components/PlacePhoto";
+import { placeImageUrl, resolvePlaceImage } from "../utils/placeImageResolver";
 
 const copyText = async (text) => {
   if (!text) {
@@ -43,6 +45,7 @@ function ShareModal({
   previewTitle = "",
   previewSubtitle = "",
   previewImage = "",
+  previewPlace,
   onSavePdf,
   contextKey = shareUrl,
   exportBlockedReason = "",
@@ -61,6 +64,8 @@ function ShareModal({
   const close = () => { if (!lock.current) onClose?.(); };
   const dialogRef = useModalFocus({ open, onClose: close, canClose: !busy, lockScroll: true });
   const showPreviewCard = variant !== "schedule";
+  const verifiedPreview = resolvePlaceImage(previewPlace);
+  const displayPreviewImage = verifiedPreview ? placeImageUrl(verifiedPreview) : previewImage;
   const previewUrl = useMemo(() => (shareUrl || "").replace(/^https?:\/\//, "").toUpperCase(), [shareUrl]);
   const execute = async kind => {
     if (lock.current) return;
@@ -174,15 +179,13 @@ function ShareModal({
         {showPreviewCard && (
           <div
             className={`share-modal-preview-card ${
-              previewImage ? "has-image" : ""
+              displayPreviewImage ? "has-image" : ""
             }`}
           >
-            {previewImage && (
-              <img
-                className="share-modal-preview-image"
-                src={previewImage}
-                alt={previewTitle ? `${previewTitle} 대표 사진` : "대표 사진"}
-              />
+            {displayPreviewImage && (
+              <div className="share-modal-preview-photo"><PlacePhoto place={previewPlace}
+                className="share-modal-preview-image" src={displayPreviewImage}
+                alt={previewTitle ? `${previewTitle} 대표 사진` : "대표 사진"} /></div>
             )}
 
             <div className="share-modal-preview-info">

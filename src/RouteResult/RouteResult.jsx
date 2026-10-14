@@ -31,6 +31,7 @@ import { editDayOrder, sameOrder, visitKey } from "./temporaryOrder";
 import useMutationTask from "../utils/useMutationTask";
 import { getTripPlacesApi, updateTripPlaceOrderApi } from "../api/tripApi";
 import useModalFocus from "../utils/useModalFocus";
+import PlacePhoto from "../components/PlacePhoto";
 import "./RouteResult.css";
 
 let mapsConfigured = false;
@@ -1580,6 +1581,7 @@ export const DetailSection = ({
         </div>
 
         <div className="route-result-item-body">
+          <div className="route-result-photo-wrap"><PlacePhoto place={item} alt={item.title} className="route-result-place-photo" /></div>
           {item.time && (!item.needsRecalculation || item.fixedTime) ? (
             <div className="route-result-item-time">{item.time}</div>
           ) : null}

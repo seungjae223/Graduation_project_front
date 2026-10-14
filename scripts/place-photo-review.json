@@ -1,0 +1,56 @@
+{
+  "JP:도쿄:고이시카와 고라쿠엔": {
+    "rejectedReason": "Author attribution needs confirmation"
+  },
+  "JP:도쿄:요요기 공원": {
+    "rejectedReason": "City panorama does not clearly depict the specified park"
+  },
+  "KR:서울:선유도공원": {
+    "rejectedReason": "Portrait is unsuitable as a representative place photograph"
+  },
+  "KR:제주:우도": {
+    "rejectedReason": "Satellite image; no verified on-site photograph"
+  },
+  "TH:방콕:아이콘시암": {
+    "rejectedReason": "Photograph focuses on adjacent residences"
+  },
+  "HK:홍콩:홍콩 역사박물관": {
+    "rejectedReason": "Author attribution needs confirmation"
+  },
+  "HK:홍콩:홍콩 미술관": {
+    "rejectedReason": "Renovation-site photograph is unsuitable as a representative photograph"
+  },
+  "HK:홍콩:포린 수도원": {
+    "rejectedReason": "Author attribution needs confirmation"
+  },
+  "VN:다낭:오행산 동굴 탐험": {
+    "rejectedReason": "General mountain panorama does not depict the specified caves"
+  },
+  "VN:다낭:바나힐 프렌치 빌리지": {
+    "rejectedReason": "Photograph depicts a pagoda, not the French Village"
+  },
+  "JP:도쿄:조조지": {
+    "author": "Supanut Arunoprayote"
+  },
+  "KR:경주:불국사": {
+    "author": "Unknown author"
+  },
+  "KR:제주:제주동문재래시장 (야시장)": {
+    "coordinates": {
+      "lat": 33.5122,
+      "lon": 126.5267,
+      "globe": "earth",
+      "source": "https://www.wikidata.org/wiki/Q12593341"
+    }
+  },
+  "VN:푸꾸옥:사오 비치": {
+    "file": "Star Beach (Bãi Sao).jpg",
+    "coordinates": {
+      "lat": 10.052473,
+      "lon": 104.0351928,
+      "globe": "earth",
+      "source": "https://www.openstreetmap.org/way/152287771",
+      "license": "ODbL"
+    }
+  }
+}

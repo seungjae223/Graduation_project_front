@@ -198,7 +198,7 @@ function Total() {
           return (
             <article key={place.id} className="theme-total-card">
               <div className="theme-total-image-wrap">
-                <PlacePhoto
+                <PlacePhoto place={place}
                   src={place.image}
                   alt={place.title}
                   className="theme-total-image"

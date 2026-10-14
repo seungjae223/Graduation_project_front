@@ -283,19 +283,15 @@ const StartPlaceModal = ({
                     const placeAddress = getPlaceAddress(place);
 
                     return (
-                      <button
+                      <div
                         key={place.id}
-                        type="button"
                         className={`start-place-item ${
                           isSelected ? "is-selected" : ""
                         }`}
-                        aria-pressed={isSelected}
-                        aria-label={place.isFixedTime ? `${place.name} (고정 시간 설정으로 출발지 선택 불가)` : place.name}
-                        onClick={() => onSelectPlace(activeDateKey, place.id)}
-                        disabled={isSubmitting || place.isFixedTime}
+                        aria-disabled={isSubmitting || place.isFixedTime || undefined}
                       >
                         <span className="start-place-thumb">
-                          <PlacePhoto src={placeImage} alt={place.name || "장소"} className="start-place-photo" />
+                          <PlacePhoto place={place} src={placeImage} alt={place.name || "장소"} className="start-place-photo" />
                         </span>
 
                         <span className="start-place-text">
@@ -310,7 +306,10 @@ const StartPlaceModal = ({
                         >
                           <span />
                         </span>
-                      </button>
+                        <button type="button" className="place-photo-card-action" aria-pressed={isSelected}
+                          aria-label={place.isFixedTime ? `${place.name} (고정 시간 설정으로 출발지 선택 불가)` : place.name}
+                          onClick={() => onSelectPlace(activeDateKey, place.id)} disabled={isSubmitting || place.isFixedTime} />
+                      </div>
                     );
                   })
                 ) : (

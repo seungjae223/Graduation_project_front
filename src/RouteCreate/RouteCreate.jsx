@@ -806,14 +806,11 @@ const FavoritePlacesModal = ({
                       );
 
                       return (
-                        <button
-                          type="button"
+                        <div
                           key={place.sourceId}
                           className={`favorite-place-item ${
                             isChecked ? "is-selected" : ""
                           }`}
-                          onClick={() => onTogglePlace(place.sourceId)}
-                          aria-pressed={isChecked}
                         >
                           <span
                             className={`favorite-place-checkbox ${
@@ -823,17 +820,18 @@ const FavoritePlacesModal = ({
                             {isChecked ? "✓" : ""}
                           </span>
 
-                          <PlacePhoto
+                          <span className="place-photo-frame favorite-place-thumb"><PlacePhoto place={place}
                             src={place.thumb}
                             alt={place.name}
-                            className="favorite-place-thumb"
-                          />
+                            className="place-photo-frame-image"
+                          /></span>
 
                           <span className="favorite-place-text">
                             <strong>{place.name}</strong>
                             <small>{place.desc}</small>
                           </span>
-                        </button>
+                          <button type="button" className="place-photo-card-action" aria-label={place.name} aria-pressed={isChecked} onClick={() => onTogglePlace(place.sourceId)} />
+                        </div>
                       );
                     })}
                   </div>
@@ -2426,11 +2424,11 @@ const RouteCreate = () => {
                   </button>
 
                   <div className="place-main schedule-card-main">
-                    <PlacePhoto
+                    <span className="place-photo-frame schedule-place-thumb"><PlacePhoto place={place}
                       src={thumb}
                       alt={place.name}
-                      className="schedule-place-thumb"
-                    />
+                      className="place-photo-frame-image"
+                    /></span>
 
                     <div className="place-text schedule-card-content">
                       <div className="place-name schedule-place-name">

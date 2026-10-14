@@ -351,13 +351,14 @@ const Home = () => {
       {travel.status === "success" && !travelData.length && <p>추천 여행지가 없어요.</p>}
       <div className="travel-list">
         {visibleTravelData.map((place) => (
-          <button type="button" key={place.id} className="travel-card" onClick={() => navigate(`/detail?id=${encodeURIComponent(place.id)}`)}>
-            <PlacePhoto src={place.imageUrl || place.thumbnailUrl || place.image} alt={place.name || place.title} />
+          <article key={place.id} className="travel-card">
+            <PlacePhoto place={place} src={place.imageUrl || place.thumbnailUrl || place.image} alt={place.name || place.title} />
 
             <div className="travel-overlay">
               <span>{place.name || place.title}</span>
             </div>
-          </button>
+            <button type="button" className="place-photo-card-action" aria-label={place.name || place.title} onClick={() => navigate(`/detail?id=${encodeURIComponent(place.id)}`)} />
+          </article>
         ))}
       </div>
 

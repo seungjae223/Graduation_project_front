@@ -194,6 +194,9 @@
   background: var(--color-surface-muted);
 }
 
+.share-modal-preview-photo { position: relative; flex-shrink: 0; }
+.share-modal-preview-photo .place-photo-credit { top: 2px; left: 2px; font-size: 10px; padding: 2px 3px; }
+
 /* 오른쪽 텍스트 영역 */
 .share-modal-preview-info {
   flex: 1;

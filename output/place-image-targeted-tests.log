@@ -1,0 +1,17 @@
+PASS src/Homepage/PopularAll.test.jsx
+PASS src/RouteCreate/searchFolders.test.jsx
+PASS src/Search/catalogFlows.test.jsx
+PASS src/RouteCreate/selectionUi.test.jsx
+PASS src/Recommend/Detail.test.jsx
+PASS src/Recommend/listFlows.test.jsx
+PASS src/RouteResult/keyboardOrder.test.jsx
+PASS src/Homepage/Home.test.jsx
+PASS src/components/PlacePhoto.test.jsx
+PASS src/utils/detailBack.test.js
+PASS src/utils/placeImageResolver.test.js
+
+Test Suites: 11 passed, 11 total
+Tests:       76 passed, 76 total
+Snapshots:   0 total
+Time:        13.492 s
+Ran all test suites matching /selectionUi|searchFolders|Home|PopularAll|Detail|listFlows|catalogFlows|PlacePhoto|placeImageResolver|keyboardOrder/i.

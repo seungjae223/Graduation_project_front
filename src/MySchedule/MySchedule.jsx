@@ -316,6 +316,7 @@ const convertScheduleToCard = (schedule, source = "server") => {
     dateText: getScheduleDateText(schedule),
     location: getScheduleLocation(schedule),
     image: getScheduleImage(schedule),
+    photoPlace: getScheduleFirstPlace(schedule),
     route: {
       ...schedule,
       id: routeId,
@@ -523,7 +524,7 @@ function MySchedule() {
                   className="my-schedule-card"
                   onClick={() => handleOpenSchedule(schedule)}
                 >
-                  <PlacePhoto src={schedule.image} alt={schedule.title} className="my-schedule-thumb" />
+                  <span className="place-photo-frame my-schedule-thumb"><PlacePhoto place={schedule.photoPlace} src={schedule.image} alt={schedule.title} className="place-photo-frame-image" /></span>
 
                   <div className="my-schedule-card-body">
                     <div className="my-schedule-card-top">

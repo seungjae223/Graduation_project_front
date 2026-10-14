@@ -675,7 +675,7 @@ function Detail() {
     <>
       <div id="detail-pdf" className="detail-page">
         <section className="detail-hero">
-          <PlacePhoto src={detailPlace.image} alt={detailPlace.title} className="detail-hero-image"
+          <PlacePhoto place={detailPlace} src={detailPlace.image} alt={detailPlace.title} className="detail-hero-image"
             credit={detailPlace.image === getPlacePhoto(detailPlace.title).image ? getPlacePhoto(detailPlace.title).credit : undefined} />
 
           <div className="detail-top-actions">
@@ -801,6 +801,7 @@ function Detail() {
         previewTitle={detailPlace.title}
         previewSubtitle={detailPlace.address}
         previewImage={detailPlace.image}
+        previewPlace={detailPlace}
         onSavePdf={handleSavePdf}
         contextKey={requestKey}
         exportBlockedReason={basicQuery.status !== "success" || reviewQuery.status !== "success" ? "상세 정보와 리뷰 조회가 완료된 뒤 PDF를 생성할 수 있습니다." : ""}

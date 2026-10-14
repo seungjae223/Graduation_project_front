@@ -8,6 +8,7 @@ import {
   getRecommendationsApi,
 } from "../api/placeApi";
 import "./Search.css";
+import PlacePhoto from "../components/PlacePhoto";
 import useServerSearch from "./useServerSearch";
 import useReadQuery from "../utils/useReadQuery";
 import useMutationTask from "../utils/useMutationTask";
@@ -398,10 +399,12 @@ function Search() {
       {resultStatus === "success" && results.length > 0 && <>
         <p className="search-page-summary" role="status">총 {results.length}개 · {currentPage}/{totalPages} 페이지</p>
         <div className="popular-grid search-results-grid">
-          {pagePlaces.map(place => <button type="button" key={place.id} className="popular-card search-result-card" onClick={() => handleResultClick(place)}>
-            <span className="search-result-region">{place.region || place.placeType || "장소"}</span><span className="popular-text">{place.name}</span>
-            <span className="search-result-address">{place.address || "주소 정보 없음"}</span>
-          </button>)}
+          {pagePlaces.map(place => <article key={place.id} className="popular-card search-result-card">
+            <div className="search-result-photo"><PlacePhoto place={place} alt={place.name} className="search-result-image" /></div>
+            <div className="search-result-copy"><span className="search-result-region">{place.region || place.placeType || "장소"}</span><span className="popular-text">{place.name}</span>
+              <span className="search-result-address">{place.address || "주소 정보 없음"}</span></div>
+            <button type="button" className="place-photo-card-action" aria-label={`${place.region || place.placeType || "장소"} ${place.name} ${place.address || "주소 정보 없음"}`} onClick={() => handleResultClick(place)} />
+          </article>)}
         </div>
         {totalPages > 1 && <nav className="search-pagination" aria-label="장소 목록 페이지">
           <div className="search-pagination-numbers">

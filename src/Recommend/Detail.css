@@ -39,6 +39,7 @@
   object-fit: cover;
   display: block;
 }
+.detail-hero > .place-photo-credit { z-index: 3; }
 
 .detail-top-actions {
   position: absolute;
