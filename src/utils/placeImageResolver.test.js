@@ -35,6 +35,42 @@ test("the trip display group OVERSEAS retains precise place matching and cannot 
   expect(resolve({ ...place(america), countryCode: "unverified-country" })).toBeNull();
 });
 
+test("verified production Rinku ID and multilingual names resolve to one photo and reject contradictory fields", () => {
+  const photo = images.find(p => p.placeName === "린쿠 프리미엄 아울렛");
+  expect(photo.placeId).toBe(16);
+  const raw = { id: 16, name: photo.placeName, region: "오사카", countryCode: "JP", address: photo.address, latitude: photo.latitude, longitude: photo.longitude };
+  for (const name of [photo.placeName, "Rinku Premium Outlets", "りんくうプレミアム・アウトレット", "린쿠 프리미엄 아웃렛"]) {
+    expect(resolvePlaceImage({ ...raw, name })).toBe(photo);
+  }
+  expect(resolvePlaceImage({ ...raw, name: "Rinku Premium Outlets", region: "Osaka" })).toBe(photo);
+  expect(resolvePlaceImage({ ...raw, region: "大阪", countryCode: "日本" })).toBe(photo);
+  expect(resolvePlaceImage({ ...raw, countryCode: "US" })).toBeNull();
+  expect(resolvePlaceImage({ ...raw, region: "도쿄" })).toBeNull();
+  expect(resolvePlaceImage({ ...raw, latitude: 35.68, longitude: 139.76 })).toBeNull();
+});
+
+test("the actual mixed-script park names use explicit verified aliases without changing API names", () => {
+  for (const name of ["우에노 은賜 공원", "이노카시라 은賜 공원"]) {
+    const photo = images.find(p => p.aliases?.includes(name));
+    expect(photo).toBeDefined();
+    const raw = { id: photo.placeId, name, region: "도쿄", address: photo.address, latitude: photo.latitude, longitude: photo.longitude };
+    expect(resolvePlaceImage(raw)).toBe(photo);
+    expect(withPlaceImage(raw).name).toBe(name);
+  }
+});
+
+test("known backend IDs and photo paths are unique, and every entry retains complete credit information", () => {
+  const ids = images.filter(p => p.placeId != null).map(p => p.placeId);
+  expect(ids.every(id => Number.isSafeInteger(id) && id > 0)).toBe(true);
+  expect(new Set(ids).size).toBe(ids.length);
+  expect(new Set(images.map(p => p.imageUrl)).size).toBe(images.length);
+  for (const photo of images) {
+    expect(photo.imageTitle).toBeTruthy();
+    expect(photo.author).toBeTruthy();
+    expect(photo.licenseUrl).toMatch(/^https?:\/\//);
+  }
+});
+
 test("all published photos have provenance and resolve equally from catalog and trip payloads without changing IDs", () => {
   for (const image of images) {
     const original = { id: 90000, name: image.placeName, region: image.region, address: image.address, latitude: image.latitude, longitude: image.longitude };

@@ -2,7 +2,7 @@ import verifiedImages from "../data/placeImages.json";
 
 const normalize = value => String(value || "").normalize("NFKC").trim().replace(/\s+/g, "").toLowerCase();
 const numeric = value => value === null || value === undefined || value === "" || !Number.isFinite(Number(value)) ? null : Number(value);
-const countries = { 한국:"KR", 대한민국:"KR", southkorea:"KR", 일본:"JP", japan:"JP", 미국:"US", usa:"US", unitedstates:"US", 필리핀:"PH", philippines:"PH", 태국:"TH", thailand:"TH", 베트남:"VN", vietnam:"VN", 홍콩:"HK", "중국(홍콩)":"HK", hongkong:"HK" };
+const countries = { 한국:"KR", 대한민국:"KR", southkorea:"KR", 일본:"JP", japan:"JP", 日本:"JP", 미국:"US", usa:"US", unitedstates:"US", 필리핀:"PH", philippines:"PH", 태국:"TH", thailand:"TH", 베트남:"VN", vietnam:"VN", 홍콩:"HK", "중국(홍콩)":"HK", hongkong:"HK" };
 const countryCode = value => /^[a-z]{2}$/i.test(String(value || "").trim()) ? String(value).trim().toUpperCase() : countries[normalize(value)] || null;
 const distanceKm = (lat, lng, record) => {
   const rad = Math.PI / 180;
@@ -36,7 +36,7 @@ export function createPlaceImageResolver(records) {
     const address = normalize(raw.address || raw.roadAddress);
     const matches = record =>
       [record.placeName, ...(record.aliases || [])].some(alias => normalize(alias) === name) &&
-      (!region || region === normalize(record.region)) &&
+      (!region || [record.region, ...(record.regionAliases || [])].some(value => region === normalize(value))) &&
       (!country || country === record.countryCode) &&
       (!overseasGroup || record.countryCode !== "KR") &&
       (!address || address === normalize(record.address)) &&

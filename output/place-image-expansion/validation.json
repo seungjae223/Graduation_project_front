@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-14",
+  "testCommand": "node node_modules/react-scripts/scripts/test.js --watchAll=false --runInBand",
+  "testSuites": 72,
+  "tests": 526,
+  "testsPassed": true,
+  "productionBuildCompleted": true,
+  "buildWarnings": [
+    "Existing html2pdf.js SVGPathData.module.js.map missing source map; optimized build produced successfully"
+  ],
+  "photoUrls": {
+    "credits": 333,
+    "failures": [],
+    "fallbacks": 0,
+    "images": 333,
+    "loaded": 333,
+    "portraitFits": [
+      {
+        "alt": "미노오 공원",
+        "loaded": true,
+        "style": "object-fit: contain; object-position: 50% 50%;"
+      },
+      {
+        "alt": "호텔 닛코 오사카",
+        "loaded": true,
+        "style": "object-fit: contain; object-position: 50% 50%;"
+      }
+    ]
+  },
+  "viewportWidths": [
+    320,
+    375,
+    390,
+    768,
+    1366,
+    1920
+  ],
+  "responsiveMethod": "Chrome: existing components rendered at exact iframe CSS widths; no horizontal overflow",
+  "screens": [
+    "search",
+    "more",
+    "country",
+    "region",
+    "detail",
+    "trip",
+    "recommend",
+    "home"
+  ],
+  "businessChecks": "Search, page changes, country selection, ID retention and fallback verified; saved-place/trip API behavior covered by existing automated suites. Local fixture rejects API writes; no production favorite/save/delete requests intentionally made.",
+  "limits": [
+    "Production changes are not deployed; no authenticated API raw response inspected",
+    "Native viewport override did not honor requested 390px; responsive measurements use 320–1920px iframe instead",
+    "Final dark screenshot capture unavailable; image/credit/fallback DOM checks passed"
+  ]
+}

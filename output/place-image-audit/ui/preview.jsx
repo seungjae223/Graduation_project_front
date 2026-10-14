@@ -19,11 +19,11 @@ import '../../../src/responsive.css';
 import '../../../src/modal.css';
 const q = new URLSearchParams(window.location.search), screen = q.get('screen') || 'search';
 applyTheme(q.get('theme') || 'light');
-const screens = {search:'/search?region=오사카', more:'/popular-all', country:'/popular-all', region:'/search?region=서울', detail:'/detail?id=20001', recommend:'/recommend?theme=photo', home:'/'};
-const tripPlaces = [places[0], places[2], places[46]].map((p,i)=>({...p,id:90000+i,placeId:p.id,placeName:p.name,day:1,visitOrder:i+1,arrivalTime:`${9+i}:00:00`}));
+const screens = {rinku:'/search?keyword=린쿠',rinkuDetail:'/detail?id=16',search:'/search?region=오사카', more:'/popular-all', country:'/popular-all', region:'/search?region=서울', detail:'/detail?id=1', recommend:'/recommend?theme=photo', home:'/'};
+const tripPlaces = [places[0], places[2], places[15]].map((p,i)=>({...p,id:90000+i,placeId:p.id,placeName:p.name,day:1,visitOrder:i+1,arrivalTime:`${9+i}:00:00`}));
 const tripDay = buildDaysFromServerData({id:7,title:'사진 검증',startDate:'2026-10-14',endDate:'2026-10-14'},tripPlaces)[0];
 function Preview() {
-  return <><nav style={{display:'flex',gap:8,padding:12,flexWrap:'wrap'}}>{['search','more','country','region','detail','trip','recommend','home','selection','all','failure'].map(s=><a key={s} href={`/?screen=${s}`} style={{fontSize:12}}>{s}</a>)}</nav>
+  return <><nav style={{display:'flex',gap:8,padding:12,flexWrap:'wrap'}}>{['rinku','rinkuDetail','search','more','country','region','detail','trip','recommend','home','selection','all','failure'].map(s=><a key={s} href={`/?screen=${s}`} style={{fontSize:12}}>{s}</a>)}</nav>
     <Routes><Route path="/search" element={<Search/>}/><Route path="/popular-all" element={<PopularAll/>}/><Route path="/recommend" element={<Recommend/>}/><Route path="/detail" element={<Detail/>}/><Route path="/" element={screen==='home'?<Home/>:<></>}/></Routes>
     {screen==='trip' && <main className="route-result-page"><DetailSection day={tripDay} dayIndex={0}/></main>}
     {screen==='selection' && <StartPlaceModal open selectedDates={[new Date(2026,9,14)]} getDateKey={()=>'preview'} placesByDate={{preview:places.slice(0,8)}} selectedStartPlaces={{}} onClose={()=>{}} onConfirm={()=>{}} onSelectPlace={()=>{}} onChangeDay={()=>{}}/>}

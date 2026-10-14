@@ -1,6 +1,7 @@
 // Isolated SQL-shaped responses; these test-only IDs are never production IDs.
 import catalog from '../catalog.json';
-export const places = catalog.places.map(p => ({ ...p, id: 20000 + p.sourceRow }));
+import liveIds from '../../place-image-expansion/live-id-map.json';
+export const places = catalog.places.map(p => ({ ...p, id: liveIds.find(l=>l.sourceRow===p.sourceRow)?.id || 20000 + p.sourceRow }));
 export const getAccessToken = () => 'preview-only';
 export const clearAuthStorage = () => {};
 export const getApiErrorMessage = () => '미리보기 오류';

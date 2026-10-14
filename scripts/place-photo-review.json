@@ -52,5 +52,153 @@
       "source": "https://www.openstreetmap.org/way/152287771",
       "license": "ODbL"
     }
+  },
+  "JP:오사카:린쿠 프리미엄 아울렛": {
+    "file": "Rinku premium outlets02s3200.jpg",
+    "coordinates": {
+      "lat": 34.406389,
+      "lon": 135.296083,
+      "globe": "earth",
+      "source": "https://www.wikidata.org/wiki/Q11281488"
+    },
+    "locationSource": "https://www.premiumoutlets.co.jp/en/rinku/",
+    "regionAliases": [
+      "Osaka",
+      "大阪",
+      "大阪府"
+    ]
+  },
+  "JP:도쿄:우에노 온시 공원": {
+    "aliases": [
+      "우에노 은賜 공원",
+      "Ueno Park",
+      "上野恩賜公園"
+    ]
+  },
+  "JP:도쿄:이노카시라 온시 공원": {
+    "aliases": [
+      "이노카시라 은賜 공원",
+      "Inokashira Park",
+      "井の頭恩賜公園"
+    ]
+  },
+  "JP:도쿄:맥셀 아쿠아 파크 시나가와": {
+    "aliases": [
+      "시나가와 아쿠아파크",
+      "Aqua Park Shinagawa",
+      "マクセル アクアパーク品川"
+    ]
+  },
+  "JP:도쿄:도쿄 디즈니씨": {
+    "rejectedReason": "Logo, not a photograph of the destination"
+  },
+  "JP:오사카:나카노시마 공원": {
+    "rejectedReason": "Depicts a civic hall instead of the specified park"
+  },
+  "JP:도쿄:하라주쿠 다케시타 거리": {
+    "rejectedReason": "Depicts Harajuku station and an adjacent road rather than Takeshita Street"
+  },
+  "JP:도쿄:스미다 수족관": {
+    "rejectedReason": "Depicts Skytree complex rather than the aquarium"
+  },
+  "JP:도쿄:미야시타 파크": {
+    "rejectedReason": "Old park photograph predates the redeveloped destination"
+  },
+  "TH:방콕:방끄라차오 시 나콘 쿠언 칸 공원": {
+    "rejectedReason": "Satellite image rather than the specified park"
+  },
+  "PH:세부:세부 사파리 & 어드벤처 파크": {
+    "rejectedReason": "Wildlife photograph; the specific safari location is not confirmed"
+  },
+  "TH:방콕:마하나콘 스카이워크": {
+    "rejectedReason": "Logo, not a photograph of the destination"
+  },
+  "PH:마닐라:살세도 토요 마켓": {
+    "rejectedReason": "Depicts an empty park rather than the market"
+  },
+  "US:로스앤젤레스:비스타 허모사 자연공원": {
+    "rejectedReason": "Historical oil field photograph instead of the current park"
+  },
+  "HK:홍콩:로즈우드 홍콩": {
+    "rejectedReason": "Logo, not a photograph of the hotel"
+  },
+  "HK:홍콩:옹핑 빌리지": {
+    "rejectedReason": "Cable car photograph does not depict the village"
+  },
+  "HK:홍콩:IFC 몰": {
+    "rejectedReason": "Office tower photograph does not clearly depict the mall"
+  },
+  "JP:오사카:팀랩 보타니컬 가든": {
+    "rejectedReason": "Daytime garden photograph does not depict the specified digital art exhibition"
+  },
+  "JP:도쿄:쓰키지 장외시장": {
+    "rejectedReason": "Former wholesale fish market, not the outer market"
+  },
+  "JP:도쿄:마루노우치 나카도리": {
+    "rejectedReason": "Historical streetscape does not represent the current street"
+  },
+  "KR:서울:성수동 카페거리": {
+    "rejectedReason": "Community service center, not the cafe street"
+  },
+  "KR:서울:문래창작촌": {
+    "rejectedReason": "Community service center, not the art village"
+  },
+  "KR:서울:삼청동": {
+    "rejectedReason": "Community service center photograph; a representative neighborhood photo is needed"
+  },
+  "KR:서울:서울역사박물관": {
+    "rejectedReason": "Logo, not a photograph of the museum"
+  },
+  "KR:서울:홍대거리": {
+    "rejectedReason": "University main gate instead of the specified street"
+  },
+  "KR:서울:문화비축기지": {
+    "rejectedReason": "Unconfirmed architectural project image rather than a verified venue photograph"
+  },
+  "KR:부산:파크 하얏트 부산": {
+    "rejectedReason": "Broad city skyline does not clearly depict the specified hotel"
+  },
+  "JP:도쿄:하마리큐 은사정원": {
+    "author": "Chris 73",
+    "attribution": "Chris 73 / Wikipedia and Wikimedia Commons",
+    "creditSource": "https://commons.wikimedia.org/wiki/File:Hamarikyu_Garden_as_seen_from_Shiodome.jpg"
+  },
+  "JP:오사카:리가 로얄 호텔 오사카": {
+    "file": "Rrh01s2816.jpg",
+    "coordinates": {
+      "lat": 34.69048889,
+      "lon": 135.48733611,
+      "source": "https://commons.wikimedia.org/wiki/Category:Rihga_Royal_Hotel_Osaka",
+      "basis": "Commons facility category coordinates; official Osaka hotel address checked"
+    },
+    "locationSource": "https://www.rihga.co.jp/osaka/about/",
+    "aliases": [
+      "RIHGA Royal Hotel Osaka",
+      "リーガロイヤルホテル大阪"
+    ],
+    "subjectReview": "Exact named subject visually reviewed against Commons description and independently sourced location"
+  },
+  "JP:오사카:구로몬 시장": {
+    "aliases": [
+      "Kuromon Market",
+      "Kuromon Ichiba Market",
+      "黒門市場"
+    ],
+    "subjectReview": "Exact named subject visually reviewed against Commons description and independently sourced location"
+  },
+  "JP:오사카:미노오 공원": {
+    "aliases": [
+      "Minoh Park",
+      "Minoo Park",
+      "箕面公園"
+    ],
+    "subjectReview": "Exact named subject visually reviewed against Commons description and independently sourced location"
+  },
+  "JP:오사카:호텔 닛코 오사카": {
+    "aliases": [
+      "Hotel Nikko Osaka",
+      "ホテル日航大阪"
+    ],
+    "subjectReview": "Exact named subject visually reviewed against Commons description and independently sourced location"
   }
 }

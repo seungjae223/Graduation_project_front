@@ -1,0 +1,743 @@
+{
+  "basis": "Existing production components with SQL-shaped local fixtures; actual production IDs separately read from all 75 live UI pages; iframe CSS viewport measurements",
+  "responsive": [
+    {
+      "screen": "rinkuDetail",
+      "width": 320,
+      "theme": "light",
+      "clientWidth": 320,
+      "creditCount": 1,
+      "photo": [
+        {
+          "height": 330,
+          "src": "/place-images/jp-16-27c562dc.jpg",
+          "width": 320,
+          "initialLoadComplete": false
+        }
+      ],
+      "scrollWidth": 320
+    },
+    {
+      "screen": "rinkuDetail",
+      "width": 375,
+      "theme": "light",
+      "clientWidth": 375,
+      "creditCount": 1,
+      "photo": [
+        {
+          "height": 330,
+          "src": "/place-images/jp-16-27c562dc.jpg",
+          "width": 375.3333435058594,
+          "initialLoadComplete": true
+        }
+      ],
+      "scrollWidth": 375
+    },
+    {
+      "screen": "rinkuDetail",
+      "width": 390,
+      "theme": "light",
+      "clientWidth": 390,
+      "creditCount": 1,
+      "photo": [
+        {
+          "height": 330,
+          "src": "/place-images/jp-16-27c562dc.jpg",
+          "width": 390,
+          "initialLoadComplete": false
+        }
+      ],
+      "scrollWidth": 390
+    },
+    {
+      "screen": "rinkuDetail",
+      "width": 768,
+      "theme": "light",
+      "clientWidth": 768,
+      "creditCount": 1,
+      "photo": [
+        {
+          "height": 330,
+          "src": "/place-images/jp-16-27c562dc.jpg",
+          "width": 390,
+          "initialLoadComplete": true
+        }
+      ],
+      "scrollWidth": 768
+    },
+    {
+      "screen": "rinkuDetail",
+      "width": 1366,
+      "theme": "light",
+      "clientWidth": 1366,
+      "creditCount": 1,
+      "photo": [
+        {
+          "height": 330,
+          "src": "/place-images/jp-16-27c562dc.jpg",
+          "width": 390,
+          "initialLoadComplete": false
+        }
+      ],
+      "scrollWidth": 1366
+    },
+    {
+      "screen": "rinkuDetail",
+      "width": 1920,
+      "theme": "light",
+      "clientWidth": 1920,
+      "creditCount": 1,
+      "photo": [
+        {
+          "height": 330,
+          "src": "/place-images/jp-16-27c562dc.jpg",
+          "width": 523.1979370117188,
+          "initialLoadComplete": false
+        }
+      ],
+      "scrollWidth": 1920
+    }
+  ],
+  "screens": [
+    {
+      "screen": "search",
+      "width": 390,
+      "clientWidth": 390,
+      "creditCount": 5,
+      "fallbackCount": 0,
+      "photos": [
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/jp-1.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-photos/dotonbori.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/jp-3.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/jp-4.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/jp-5.jpg",
+          "width": 141.6666717529297
+        }
+      ],
+      "scrollWidth": 390
+    },
+    {
+      "screen": "more",
+      "width": 390,
+      "clientWidth": 390,
+      "creditCount": 8,
+      "fallbackCount": 1,
+      "photos": [
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-images/jp-1.jpg",
+          "width": 171
+        },
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-photos/dotonbori.jpg",
+          "width": 171
+        },
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-images/jp-3.jpg",
+          "width": 171
+        },
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-images/jp-4.jpg",
+          "width": 171
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-5.jpg",
+          "width": 106
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-6.jpg",
+          "width": 106
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-7.jpg",
+          "width": 106
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-8.jpg",
+          "width": 106
+        }
+      ],
+      "scrollWidth": 390
+    },
+    {
+      "screen": "country",
+      "width": 390,
+      "clientWidth": 390,
+      "creditCount": 8,
+      "fallbackCount": 1,
+      "photos": [
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-images/jp-1.jpg",
+          "width": 171
+        },
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-photos/dotonbori.jpg",
+          "width": 171
+        },
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-images/jp-3.jpg",
+          "width": 171
+        },
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-images/jp-4.jpg",
+          "width": 171
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-5.jpg",
+          "width": 106
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-6.jpg",
+          "width": 106
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-7.jpg",
+          "width": 106
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-8.jpg",
+          "width": 106
+        }
+      ],
+      "scrollWidth": 390
+    },
+    {
+      "screen": "region",
+      "width": 390,
+      "clientWidth": 390,
+      "creditCount": 4,
+      "fallbackCount": 1,
+      "photos": [
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/kr-176.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-photos/bukchon.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/kr-178-ca736a0f.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/kr-179-ae75e767.jpg",
+          "width": 141.6666717529297
+        }
+      ],
+      "scrollWidth": 390
+    },
+    {
+      "screen": "detail",
+      "width": 390,
+      "clientWidth": 390,
+      "creditCount": 1,
+      "fallbackCount": 0,
+      "photos": [
+        {
+          "height": 330,
+          "lazy": "lazy",
+          "src": "/place-images/jp-1.jpg",
+          "width": 390
+        }
+      ],
+      "scrollWidth": 390
+    },
+    {
+      "screen": "trip",
+      "width": 390,
+      "clientWidth": 390,
+      "creditCount": 3,
+      "fallbackCount": 0,
+      "photos": [
+        {
+          "height": 72,
+          "lazy": "lazy",
+          "src": "/place-images/jp-1.jpg",
+          "width": 96
+        },
+        {
+          "height": 72,
+          "lazy": "lazy",
+          "src": "/place-images/jp-3.jpg",
+          "width": 96
+        },
+        {
+          "height": 72,
+          "lazy": "lazy",
+          "src": "/place-images/jp-16-27c562dc.jpg",
+          "width": 96
+        }
+      ],
+      "scrollWidth": 390
+    },
+    {
+      "screen": "recommend",
+      "width": 390,
+      "clientWidth": 390,
+      "creditCount": 2,
+      "fallbackCount": 3,
+      "photos": [
+        {
+          "height": 146,
+          "lazy": "lazy",
+          "src": "/place-images/jp-3.jpg",
+          "width": 356.66668701171875
+        },
+        {
+          "height": 146,
+          "lazy": "lazy",
+          "src": "/place-images/jp-7.jpg",
+          "width": 356.66668701171875
+        }
+      ],
+      "scrollWidth": 390
+    },
+    {
+      "screen": "home",
+      "width": 390,
+      "clientWidth": 390,
+      "creditCount": 2,
+      "fallbackCount": 0,
+      "photos": [
+        {
+          "height": 194.39584350585935,
+          "lazy": "lazy",
+          "src": "/place-images/jp-1.jpg",
+          "width": 162
+        },
+        {
+          "height": 194.39584350585935,
+          "lazy": "lazy",
+          "src": "/place-photos/dotonbori.jpg",
+          "width": 162
+        }
+      ],
+      "scrollWidth": 390
+    },
+    {
+      "screen": "selection",
+      "width": 390,
+      "clientWidth": 390,
+      "creditCount": 0,
+      "fallbackCount": 0,
+      "photos": [],
+      "scrollWidth": 390
+    },
+    {
+      "screen": "search",
+      "width": 1366,
+      "clientWidth": 1366,
+      "creditCount": 5,
+      "fallbackCount": 0,
+      "photos": [
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/jp-1.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-photos/dotonbori.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/jp-3.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/jp-4.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/jp-5.jpg",
+          "width": 141.6666717529297
+        }
+      ],
+      "scrollWidth": 1366
+    },
+    {
+      "screen": "more",
+      "width": 1366,
+      "clientWidth": 1366,
+      "creditCount": 8,
+      "fallbackCount": 1,
+      "photos": [
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-images/jp-1.jpg",
+          "width": 171
+        },
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-photos/dotonbori.jpg",
+          "width": 171
+        },
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-images/jp-3.jpg",
+          "width": 171
+        },
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-images/jp-4.jpg",
+          "width": 171
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-5.jpg",
+          "width": 106
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-6.jpg",
+          "width": 106
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-7.jpg",
+          "width": 106
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-8.jpg",
+          "width": 106
+        }
+      ],
+      "scrollWidth": 1366
+    },
+    {
+      "screen": "country",
+      "width": 1366,
+      "clientWidth": 1366,
+      "creditCount": 8,
+      "fallbackCount": 1,
+      "photos": [
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-images/jp-1.jpg",
+          "width": 171
+        },
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-photos/dotonbori.jpg",
+          "width": 171
+        },
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-images/jp-3.jpg",
+          "width": 171
+        },
+        {
+          "height": 222.0729217529297,
+          "lazy": "lazy",
+          "src": "/place-images/jp-4.jpg",
+          "width": 171
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-5.jpg",
+          "width": 106
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-6.jpg",
+          "width": 106
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-7.jpg",
+          "width": 106
+        },
+        {
+          "height": 106,
+          "lazy": "lazy",
+          "src": "/place-images/jp-8.jpg",
+          "width": 106
+        }
+      ],
+      "scrollWidth": 1366
+    },
+    {
+      "screen": "region",
+      "width": 1366,
+      "clientWidth": 1366,
+      "creditCount": 4,
+      "fallbackCount": 1,
+      "photos": [
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/kr-176.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-photos/bukchon.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/kr-178-ca736a0f.jpg",
+          "width": 141.6666717529297
+        },
+        {
+          "height": 106.25,
+          "lazy": "lazy",
+          "src": "/place-images/kr-179-ae75e767.jpg",
+          "width": 141.6666717529297
+        }
+      ],
+      "scrollWidth": 1366
+    },
+    {
+      "screen": "detail",
+      "width": 1366,
+      "clientWidth": 1366,
+      "creditCount": 1,
+      "fallbackCount": 0,
+      "photos": [
+        {
+          "height": 330,
+          "lazy": "lazy",
+          "src": "/place-images/jp-1.jpg",
+          "width": 390
+        }
+      ],
+      "scrollWidth": 1366
+    },
+    {
+      "screen": "trip",
+      "width": 1366,
+      "clientWidth": 1366,
+      "creditCount": 3,
+      "fallbackCount": 0,
+      "photos": [
+        {
+          "height": 72,
+          "lazy": "lazy",
+          "src": "/place-images/jp-1.jpg",
+          "width": 96
+        },
+        {
+          "height": 72,
+          "lazy": "lazy",
+          "src": "/place-images/jp-3.jpg",
+          "width": 96
+        },
+        {
+          "height": 72,
+          "lazy": "lazy",
+          "src": "/place-images/jp-16-27c562dc.jpg",
+          "width": 96
+        }
+      ],
+      "scrollWidth": 1366
+    },
+    {
+      "screen": "recommend",
+      "width": 1366,
+      "clientWidth": 1366,
+      "creditCount": 2,
+      "fallbackCount": 3,
+      "photos": [
+        {
+          "height": 146,
+          "lazy": "lazy",
+          "src": "/place-images/jp-3.jpg",
+          "width": 356.66668701171875
+        },
+        {
+          "height": 146,
+          "lazy": "lazy",
+          "src": "/place-images/jp-7.jpg",
+          "width": 356.66668701171875
+        }
+      ],
+      "scrollWidth": 1366
+    },
+    {
+      "screen": "home",
+      "width": 1366,
+      "clientWidth": 1366,
+      "creditCount": 2,
+      "fallbackCount": 0,
+      "photos": [
+        {
+          "height": 194.39584350585935,
+          "lazy": "lazy",
+          "src": "/place-images/jp-1.jpg",
+          "width": 162
+        },
+        {
+          "height": 194.39584350585935,
+          "lazy": "lazy",
+          "src": "/place-photos/dotonbori.jpg",
+          "width": 162
+        }
+      ],
+      "scrollWidth": 1366
+    },
+    {
+      "screen": "selection",
+      "width": 1366,
+      "clientWidth": 1366,
+      "creditCount": 0,
+      "fallbackCount": 0,
+      "photos": [],
+      "scrollWidth": 1366
+    }
+  ],
+  "allPhotos": {
+    "credits": 333,
+    "failures": [],
+    "fallbacks": 0,
+    "images": 333,
+    "loaded": 333,
+    "portraitFits": [
+      {
+        "alt": "미노오 공원",
+        "loaded": true,
+        "style": "object-fit: contain; object-position: 50% 50%;"
+      },
+      {
+        "alt": "호텔 닛코 오사카",
+        "loaded": true,
+        "style": "object-fit: contain; object-position: 50% 50%;"
+      }
+    ]
+  },
+  "failure": {
+    "credits": 0,
+    "fallbacks": [
+      "이미지 오류 사진 정보 없음",
+      "동명 다른 국가 사진 정보 없음"
+    ],
+    "photoCount": 0,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  "credit": {
+    "links": [
+      "https://commons.wikimedia.org/wiki/File:Rinku_premium_outlets02s3200.jpg",
+      "https://creativecommons.org/licenses/by/2.5"
+    ],
+    "loaded": true,
+    "photo": "/place-images/jp-16-27c562dc.jpg",
+    "text": "오사카 · 린쿠 프리미엄 아울렛사진: Rinku premium outlets02s3200.jpg저작자: 663highland표시: 663highlandWikimedia Commons 원본 및 이용 조건 · CC BY 2.5Unmodified Wikimedia thumbnail; proportional display. 카드에서는 원본 비율을 유지하여 일부 영역을 표시합니다."
+  },
+  "dark": {
+    "creditCount": 1,
+    "photo": [
+      {
+        "alt": "린쿠 프리미엄 아울렛",
+        "loaded": true,
+        "src": "/place-images/jp-16-27c562dc.jpg"
+      }
+    ],
+    "scrollWidth": 390,
+    "width": 390
+  },
+  "rinkuFunctional": {
+    "keyboardSearchToDetail": true,
+    "JapanFilterSelected": true,
+    "page3RinkuLoaded": true,
+    "sameImageUrlSearchListDetailTrip": "/place-images/jp-16-27c562dc.jpg",
+    "backendId": 16
+  },
+  "limits": [
+    "Production changes are not deployed; no authenticated API raw response inspected",
+    "Native viewport override did not honor requested 390px; responsive measurements use 320–1920px iframe instead",
+    "Final dark screenshot capture unavailable; image/credit/fallback DOM checks passed"
+  ],
+  "notes": [
+    "Initial responsive DOM probes can run before image decoding; final eager gallery confirms all 333 files loaded successfully.",
+    "Selection modal fixture was empty on initial probe and is not counted as a verified photo surface."
+  ]
+}
