@@ -1,0 +1,18 @@
+{
+  "head": "e4e6ce82b886f4e6278c11027d9d98e23a816a3f",
+  "hashes": {
+    "README.md": "43429af76e34bee528a5a553b86885ff00328d9ac16487ab953e33fdbec838b9",
+    "src/Login/Login.jsx": "0b6c08f980d60ec158406703daa46028e8e6e253e8030557c44cb65f320bef6c",
+    "src/Login/OAuthCallback.test.js": "34d8790bc93bbebd21330d72ed0e0372cbf62682f94229abe22859cfb0895c92",
+    "src/Login/authFlow.test.jsx": "8ceaadeae4d4495036be71f2d07a7fd91765d875ce694ce9bb9ae939d6faa499",
+    "src/Recommend/DistanceOriginPicker.css": "35033636b3a20a74463841fbf25231fee8855c05fc884765401500b5ff5f9c0e",
+    "src/Recommend/DistanceOriginPicker.jsx": "0ebf9a79118b5ef491665f28171e3d0813f56fe1ee2c800ab16f985a4e77b8b7",
+    "src/Recommend/Total.css": "7233d2a592933974aba787f055fe9aa36314aacdb2477c3d067be68c408e9802",
+    "src/Recommend/Total.jsx": "c09e65dec0a645d65bbbca6cc9868e6da5864efbd200e2248dcd958b5e446c09",
+    "src/Recommend/Total.test.jsx": "ac63752c266945db0b2e024e40a942760a90bba0978c22b921590c38928aa989",
+    "src/api/authApi.js": "7f074d38dc2cb7f0e1962493943158e34c416e1aa1d36da024b9be75c1402163",
+    "src/api/authApi.test.js": "4fb20ec153fc10a8b7e562f509283335c9057317a24d9a709c49bc38db1dfe48",
+    "src/utils/oauthSecurity.js": "a77857301b59e9ad62580377383e6c16dcbe710ae35987a6b992d088c2b9c566",
+    "src/utils/oauthSecurity.test.js": "62793653a92e9269b39efe4a0ba4810d68e4304367951332684bec7219a2f9ae"
+  }
+}

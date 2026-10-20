@@ -1,6 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import useModalFocus from "../utils/useModalFocus";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { readCoordinates } from "./recommendationSort";
 import "./DistanceOriginPicker.css";
 
@@ -8,7 +6,7 @@ function Chevron() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>;
 }
 
-export default function DistanceOriginPicker({ places, reference, anchorRef, onChoose, onCancel }) {
+export default function DistanceOriginPicker({ places, reference, onChoose, onCancel }) {
   const usable = useMemo(() => places.filter(readCoordinates), [places]);
   const initialPlace = usable.find(place => reference?.type === "place" && String(place.id) === String(reference.placeId));
   const [region, setRegion] = useState(initialPlace?.region || "");
@@ -16,45 +14,17 @@ export default function DistanceOriginPicker({ places, reference, anchorRef, onC
   const [currentLocation, setCurrentLocation] = useState(() => reference?.type === "current" ? readCoordinates(reference) : null);
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState("");
-  const [position, setPosition] = useState({});
   const request = useRef(0);
-  const dialogRef = useModalFocus({ open: true, onClose: onCancel, lockScroll: true });
+  const firstControl = useRef(null);
   const regions = [...new Set(usable.map(place => place.region).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ko"));
   const options = usable.filter(place => !region || place.region === region);
   const selectedPlace = usable.find(place => String(place.id) === placeId);
   const canApply = !locating && Boolean(currentLocation || selectedPlace);
 
-  useEffect(() => () => { request.current += 1; }, []);
-  useLayoutEffect(() => {
-    const align = () => {
-      const anchor = anchorRef?.current?.getBoundingClientRect();
-      if (!anchor || window.innerWidth < 768) return;
-      const inset = 16;
-      const viewport = window.visualViewport;
-      const start = viewport?.offsetTop || 0;
-      const end = start + (viewport?.height || window.innerHeight);
-      const width = Math.min(440, window.innerWidth - inset * 2);
-      const below = end - anchor.bottom - inset - 8;
-      const above = anchor.top - start - inset - 8;
-      const height = dialogRef.current?.getBoundingClientRect().height || 400;
-      const useAbove = below < height && above > below;
-      const available = Math.max(200, useAbove ? above : below);
-      const maxHeight = Math.min(end - start - inset * 2, available);
-      const top = useAbove ? anchor.top - 8 - Math.min(height, maxHeight) : anchor.bottom + 8;
-      setPosition({
-        "--origin-left": `${Math.max(inset, Math.min(anchor.left, window.innerWidth - width - inset))}px`,
-        "--origin-top": `${Math.max(start + inset, Math.min(top, end - maxHeight - inset))}px`,
-        "--origin-max-height": `${maxHeight}px`,
-      });
-    };
-    align();
-    window.addEventListener("resize", align);
-    window.visualViewport?.addEventListener("resize", align);
-    return () => {
-      window.removeEventListener("resize", align);
-      window.visualViewport?.removeEventListener("resize", align);
-    };
-  }, [anchorRef, dialogRef, error, locating]);
+  useEffect(() => {
+    firstControl.current?.focus({ preventScroll: true });
+    return () => { request.current += 1; };
+  }, []);
 
   const selectPlace = update => {
     request.current += 1;
@@ -86,9 +56,9 @@ export default function DistanceOriginPicker({ places, reference, anchorRef, onC
       }, fail, { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 });
     } catch (error) { fail(error); }
   };
-  return createPortal(<div className="total-origin-layer" onClick={event => { if (event.target === event.currentTarget) onCancel(); }}>
-    <section id="total-origin-dialog" className="total-origin-picker" ref={dialogRef} style={position}
-      role="dialog" aria-modal="true" aria-labelledby="total-origin-title" aria-describedby="total-origin-description" tabIndex={-1}>
+  return <section id="total-origin-panel" className="total-origin-picker"
+      aria-labelledby="total-origin-title" aria-describedby="total-origin-description"
+      onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); onCancel(); } }}>
       <header className="total-origin-header">
         <h2 id="total-origin-title">거리 기준 선택</h2>
         <p id="total-origin-description">어디를 기준으로 가까운 장소를 찾을까요?</p>
@@ -103,15 +73,18 @@ export default function DistanceOriginPicker({ places, reference, anchorRef, onC
       }}>
         <div className="total-origin-fields">
           <label>기준 장소의 지역<span className="total-origin-select">
-            <select data-modal-initial-focus value={region} onChange={event => selectPlace(() => { setRegion(event.target.value); setPlaceId(""); })}>
+            <select ref={firstControl} value={region} onChange={event => selectPlace(() => { setRegion(event.target.value); setPlaceId(""); })}>
               <option value="">전체 지역</option>{regions.map(region => <option key={region} value={region}>{region}</option>)}
             </select><Chevron />
           </span></label>
-          <label>기준 장소<span className="total-origin-select">
-            <select value={placeId} onChange={event => selectPlace(() => setPlaceId(event.target.value))}>
-              <option value="">기준 장소 선택</option>{options.map(place => <option key={place.id} value={place.id}>{place.region ? `${place.region} · ` : ""}{place.title}</option>)}
-            </select><Chevron />
-          </span></label>
+          <div className="total-origin-place-field">
+            <label>기준 장소<span className="total-origin-select">
+              <select value={placeId} aria-describedby={selectedPlace ? "total-origin-selected-place" : undefined} onChange={event => selectPlace(() => setPlaceId(event.target.value))}>
+                <option value="">기준 장소 선택</option>{options.map(place => <option key={place.id} value={place.id}>{place.region ? `${place.region} · ` : ""}{place.title}</option>)}
+              </select><Chevron />
+            </span></label>
+            {selectedPlace && <p id="total-origin-selected-place" className="total-origin-note">선택한 장소: {selectedPlace.title}</p>}
+          </div>
           {!usable.length && <p className="total-origin-note">좌표가 확인된 기준 장소가 없어요.</p>}
           <div className="total-origin-geolocation">
             <button type="button" className="total-current-location" onClick={useCurrentLocation} disabled={locating} aria-pressed={Boolean(currentLocation)}>
@@ -129,6 +102,5 @@ export default function DistanceOriginPicker({ places, reference, anchorRef, onC
           <button type="submit" className="total-origin-apply" disabled={!canApply}>이 위치로 정렬</button>
         </footer>
       </form>
-    </section>
-  </div>, document.body);
+    </section>;
 }

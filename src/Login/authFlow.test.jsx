@@ -6,7 +6,7 @@ import FindPassword from "./FindPassword";
 import VerifyCode from "./VerifyCode";
 import SignUp from "./SignUp";
 import OAuthCallback from "./OAuthCallback";
-import { beginOAuth } from "../utils/oauthSecurity";
+import { beginOAuth, getOAuthCallbackUri } from "../utils/oauthSecurity";
 import { saveSocialLoginReturnPath } from "../utils/authRedirect";
 import { completeSocialLoginApi, getSocialAuthorizationApi, loginApi, resetPasswordApi, sendEmailCodeApi, signupApi, verifyEmailCodeApi } from "../api/authApi";
 
@@ -364,9 +364,38 @@ test("StrictMode OAuth uses single-use state once, sends once and aborts departe
 });
 
 test("current StrictMode OAuth completion honors safe original destination", async () => {
-  beginOAuth("kakao", "https://kauth.kakao.com/authorize?state=test-state", "test-state");
+  beginOAuth("kakao", `https://kauth.kakao.com/authorize?state=test-state&redirect_uri=${encodeURIComponent(getOAuthCallbackUri("kakao"))}`, "test-state");
   saveSocialLoginReturnPath("/mypage"); completeSocialLoginApi.mockResolvedValue({});
   setup("/oauth/kakao/callback?code=test-code&state=test-state", true);
   await waitFor(() => expect(screen.getByTestId("location")).toHaveTextContent("/mypage"));
   expect(completeSocialLoginApi).toHaveBeenCalledTimes(1);
+});
+
+test("a deployed Kakao callback from a local login is blocked with an actionable error", async () => {
+  getSocialAuthorizationApi.mockResolvedValue({
+    authorizationUrl: "https://kauth.kakao.com/oauth/authorize?state=test-state&redirect_uri=https%3A%2F%2Fnoman-go.netlify.app%2Foauth%2Fkakao%2Fcallback",
+    state: "test-state",
+  });
+  setup("/login?returnTo=%2Fmypage");
+  fireEvent.click(screen.getByRole("button", { name: "카카오 로그인" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("현재 환경과 로그인 복귀 주소가 일치하지 않습니다.");
+  expect(screen.getByTestId("location")).toHaveTextContent("/login");
+  expect(sessionStorage.getItem("oauth_state_kakao")).toBeNull();
+  expect(sessionStorage.getItem("socialLoginReturnTo")).toBeNull();
+  expect(screen.getByRole("button", { name: "카카오 로그인" })).toBeEnabled();
+  expect(alert).not.toHaveBeenCalled();
+});
+
+test("Kakao cancellation consumes state and retry retains the original internal destination", async () => {
+  beginOAuth("kakao", `https://kauth.kakao.com/oauth/authorize?state=cancel-state&redirect_uri=${encodeURIComponent(getOAuthCallbackUri("kakao"))}`, "cancel-state");
+  saveSocialLoginReturnPath("/place/42?from=search#details");
+  setup("/oauth/kakao/callback?error=access_denied&state=cancel-state", true);
+  expect(await screen.findByText("소셜 로그인이 취소되었거나 승인되지 않았습니다.")).toBeInTheDocument();
+  expect(completeSocialLoginApi).not.toHaveBeenCalled();
+  expect(sessionStorage.getItem("oauth_state_kakao")).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "로그인으로 돌아가기" }));
+  expect(screen.getByTestId("location")).toHaveTextContent(`/login?returnTo=${encodeURIComponent("/place/42?from=search#details")}`);
+  getSocialAuthorizationApi.mockRejectedValue(new Error("test failure"));
+  fireEvent.click(screen.getByRole("button", { name: "카카오 로그인" }));
+  await waitFor(() => expect(getSocialAuthorizationApi).toHaveBeenCalledWith("kakao", expect.any(Object)));
 });

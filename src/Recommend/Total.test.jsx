@@ -142,12 +142,12 @@ test("a successful GPS selection stays in browser entry state, and changing acco
   fireEvent.click(screen.getByRole("button", { name: /거리순/ }));
   fireEvent.click(screen.getByRole("button", { name: "내 현재 위치 사용" }));
   act(() => geolocation.getCurrentPosition.mock.calls[0][0]({ coords: { latitude: 34.6, longitude: 135.5 } }));
-  expect(screen.getByRole("dialog", { name: "거리 기준 선택" })).toBeInTheDocument();
+  expect(screen.getByRole("region", { name: "거리 기준 선택" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /인기순/ })).toHaveAttribute("aria-pressed", "true");
   expect(titles()[0]).toBe("장소 1");
   expect(screen.getByRole("button", { name: "내 현재 위치 사용" })).toHaveAttribute("aria-pressed", "true");
   fireEvent.click(screen.getByRole("button", { name: "이 위치로 정렬" }));
-  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(screen.queryByRole("region", { name: "거리 기준 선택" })).not.toBeInTheDocument();
   expect(screen.getByText("현재 위치 기준 · 직선거리순")).toBeInTheDocument();
   expect(titles()[0]).toBe("장소 7");
   expect(api.get).toHaveBeenCalledWith("/api/recommendations", expect.objectContaining({ params: { theme: "ACTIVITY" } }));
@@ -166,7 +166,8 @@ test("reference edits are drafts: GPS success and cancel preserve the applied pl
   fireEvent.click(screen.getByRole("button", { name: "변경" }));
   expect(screen.getByLabelText("기준 장소", { exact: true })).toHaveValue("7");
   expect(screen.getByLabelText("기준 장소의 지역")).toHaveValue("오사카");
-  expect(screen.getByText("장소 7 기준 · 직선거리순").parentElement).toHaveAttribute("aria-hidden", "true");
+  expect(screen.getByText("장소 7 기준 · 직선거리순")).toBeVisible();
+  expect(screen.queryByRole("button", { name: "변경" })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "내 현재 위치 사용" }));
   expect(screen.getByRole("button", { name: "이 위치로 정렬" })).toBeDisabled();
   act(() => geolocation.getCurrentPosition.mock.calls[0][0]({ coords: { latitude: 35.2, longitude: 135.5 } }));
@@ -178,30 +179,54 @@ test("reference edits are drafts: GPS success and cancel preserve the applied pl
   expect(screen.getAllByText(/ 기준 · 직선거리순/)).toHaveLength(1);
   fireEvent.click(screen.getByRole("button", { name: /인기순/ }));
   fireEvent.click(screen.getByRole("button", { name: /거리순/ }));
-  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(screen.queryByRole("region", { name: "거리 기준 선택" })).not.toBeInTheDocument();
   expect(titles()[0]).toBe("장소 7");
   expect(api.get).toHaveBeenCalledTimes(1);
 });
 
-test("the picker traps keyboard focus, closes with ESC/backdrop and releases background scroll", async () => {
+test("the inline picker preserves page scrolling and allows keyboard focus to leave; ESC and the sort button cancel", async () => {
   render(view()); await screen.findByText("총 8개 · 1/2 페이지");
   const distance = screen.getByRole("button", { name: /거리순/ });
+  const scroller = document.scrollingElement || document.documentElement;
+  const originalOverflow = scroller.style.overflowY;
   distance.focus(); fireEvent.click(distance);
+  const panel = screen.getByRole("region", { name: "거리 기준 선택" });
+  expect(panel.closest(".total-page")).toBeInTheDocument();
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(distance).toHaveAttribute("aria-controls", panel.id);
+  expect(distance).not.toHaveAttribute("aria-haspopup");
   const region = screen.getByLabelText("기준 장소의 지역");
   expect(region).toHaveFocus();
-  const scroller = document.scrollingElement || document.documentElement;
-  expect(scroller.style.overflowY).toBe("hidden");
-  const close = screen.getByRole("button", { name: "거리 기준 선택 닫기" });
-  close.focus(); userEvent.tab({ shift: true });
-  expect(screen.getByRole("button", { name: "취소" })).toHaveFocus();
-  fireEvent.keyDown(document.activeElement, { key: "Escape" });
-  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(scroller.style.overflowY).toBe(originalOverflow);
+  userEvent.selectOptions(screen.getByLabelText("기준 장소", { exact: true }), "7");
+  screen.getByRole("button", { name: "이 위치로 정렬" }).focus();
+  userEvent.tab();
+  expect(panel.contains(document.activeElement)).toBe(false);
+  fireEvent.click(screen.getByRole("heading", { name: "장소 1" }));
+  expect(panel).toBeInTheDocument();
+  fireEvent.keyDown(region, { key: "Escape" });
+  expect(screen.queryByRole("region", { name: "거리 기준 선택" })).not.toBeInTheDocument();
   expect(distance).toHaveFocus();
-  expect(scroller.style.overflowY).not.toBe("hidden");
+  expect(scroller.style.overflowY).toBe(originalOverflow);
   fireEvent.click(distance);
-  fireEvent.click(screen.getByRole("dialog").parentElement);
-  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  fireEvent.click(distance);
+  expect(screen.queryByRole("region", { name: "거리 기준 선택" })).not.toBeInTheDocument();
   expect(distance).toHaveAttribute("aria-pressed", "false");
+});
+
+test("choosing another sort dismisses a draft picker without applying its location", async () => {
+  render(view()); await screen.findByText("총 8개 · 1/2 페이지");
+  fireEvent.click(screen.getByRole("button", { name: /거리순/ }));
+  userEvent.selectOptions(screen.getByLabelText("기준 장소", { exact: true }), "7");
+  fireEvent.click(screen.getByRole("button", { name: /별점순/ }));
+  await screen.findByText("등록된 리뷰의 평점순");
+  expect(screen.queryByRole("region", { name: "거리 기준 선택" })).not.toBeInTheDocument();
+  expect(screen.queryByText("장소 7 기준 · 직선거리순")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: /거리순/ }));
+  expect(screen.getByLabelText("기준 장소", { exact: true })).toHaveValue("");
+  expect(screen.getByRole("button", { name: /별점순/ })).toHaveAttribute("aria-pressed", "true");
+  fireEvent.click(screen.getByRole("button", { name: "취소" }));
+  expect(screen.getByRole("button", { name: /별점순/ })).toHaveAttribute("aria-pressed", "true");
 });
 
 test("a saved GPS reference is preselected on change and changing to a place ignores a pending GPS result", async () => {

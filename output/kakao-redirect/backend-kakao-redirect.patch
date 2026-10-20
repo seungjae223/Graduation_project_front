@@ -1,0 +1,726 @@
+diff --git a/docs/API_SPEC.md b/docs/API_SPEC.md
+index f7ea86d..e3237e0 100644
+--- a/docs/API_SPEC.md
++++ b/docs/API_SPEC.md
+@@ -4,6 +4,7 @@
+ > GlobalExceptionHandler 및 직접 연결된 Service 구현
+ >
+ > 최종 확인일: 2026-09-28
++> 2026-10-16 카카오 콜백 선택 계약을 3.3/3.4에 추가했다. 해당 변경은 운영 배포가 필요하다.
+ > 이 문서는 희망 설계가 아니라 현재 구현된 요청·응답 계약을 설명한다.
+ 
+ ## 1. 공통 사항
+@@ -214,6 +215,19 @@ eyJhbGciOiJIUzI1NiJ9...
+ `state`는 짧은 유효기간을 가진 일회용 값이다. 콜백에서 받은 `state`와 `code`를
+ 함께 로그인 API에 전달한다.
+ 
++카카오 전용 선택 쿼리 `redirectUri`를 지원한다(2026-10-16 소스 수정).
++현재 프론트 origin의 `/oauth/kakao/callback` 전체 URI를 URL 인코딩하여 보낸다.
++서버는 `KAKAO_ALLOWED_REDIRECT_URIS`의 정확한 URI만 허용하며 기본 allowlist는
++`http://localhost:3000/oauth/kakao/callback`과
++`https://noman-go.netlify.app/oauth/kakao/callback`이다. 빈 값, 외부 도메인,
++다른 포트/경로/쿼리/fragment는 `400`으로 거부한다. 파라미터 생략 시 기존
++`KAKAO_REDIRECT_URI`를 사용하므로 배포 기본값을 유지해야 하며, 이 기본값도
++allowlist에 있어야 한다. Google 요청 계약은 변경하지 않는다.
++
++검증한 카카오 URI는 provider·만료시간과 함께 각 state에 저장하고, 로그인에서
++해당 state를 일회성으로 소비해 같은 URI로 토큰을 교환한다. 운영 적용 절차와
++실제 계정 검증 범위는 [카카오 콜백 설정](KAKAO_REDIRECT_URIS.md)을 참고한다.
++
+ Google 인가 정보 발급의 정상 응답은 `200 OK`다. 이 요청은 공개 API이므로
+ `Authorization` 헤더가 필요하지 않다. 실행 중인 백엔드에 nonblank
+ `GOOGLE_CLIENT_ID`와 `GOOGLE_REDIRECT_URI`가 적용되어 있어야 한다.
+@@ -259,6 +273,9 @@ Content-Type: application/json
+ 주요 `400`: 요청/state/code 누락, 만료 또는 재사용된 state, provider가 맞지 않는
+ state, 동일 이메일의 기존 계정 충돌.
+ 
++카카오 로그인 요청에는 콜백 URI를 추가하지 않는다. 추가 `redirectUri` 필드를
++보내도 state에 저장된 URI를 바꿀 수 없다. 인가와 토큰 교환은 같은 URI를 사용한다.
++
+ ### 3.5 이메일 인증번호 발송
+ 
+ `POST /api/email/send` — 공개
+diff --git a/docs/CURRENT_STATE.md b/docs/CURRENT_STATE.md
+index 0cf692c..38f61d3 100644
+--- a/docs/CURRENT_STATE.md
++++ b/docs/CURRENT_STATE.md
+@@ -2,53 +2,55 @@
+ 
+ ## Current task
+ 
+-사용자가 드래그로 변경한 일차별 방문 순서를 서버에 저장하고, 저장된 순서를
+-기준으로 이동 시간·체류 시간·고정 방문 시간을 반영해 방문 시간을 다시 계산한다.
++2026-10-16: 로컬 프론트가 배포 백엔드를 사용할 때 카카오 로그인이 배포 사이트로
++돌아가는 문제를 수정한다. 프론트 저장소는 이 checkout 옆의 `../graduation`이다.
+ 
+ ## Current branch
+ 
+-`feat/trip-place-manual-order`
++`fix/kakao-environment-callback` (base `71ccee4`, main의 기존 작업 보존)
+ 
+ ## Completed work
+ 
+-- PR #36을 `main`에 병합한 최신 커밋 `70a5e9f`에서 작업을 시작했다.
+-- `PATCH /api/trips/{tripId}/days/{day}/places/order` API를 추가했다.
+-- 요청 DTO에 방문 순서대로 정렬된 `tripPlaceIds`와 재계산 기준 `startTime`을 받도록 했다.
+-- 해당 일차의 모든 TripPlace ID가 빠짐없이, 중복 없이 정확히 한 번씩 포함되는지 검증한다.
+-- 시작 장소가 지정된 경우 변경 순서에서도 반드시 첫 번째인지 검증한다.
+-- 요청 순서대로 `visitOrder`를 1부터 다시 저장한다.
+-- 기존 타임라인 계산 로직을 재사용해 이동 시간, 체류 시간, 고정 방문 시간을 반영한
+-  `arrivalTime`과 `departureTime`을 다시 계산한다.
+-- 변경 순서로 고정 방문 시간까지 도착할 수 없으면 요청을 거절하고 저장하지 않는다.
+-- `docs/API_SPEC.md`에 새 API 계약과 프론트 연동 기준을 추가했다.
+-- 순서 저장/시간 재계산, 고정 방문 시간 대기 반영, 불가능한 고정 일정 저장 거부
+-  회귀 테스트를 추가했다.
++- 실제 운영 authorize 응답이 로컬 Origin과 명시적 로컬 URI 요청에도 배포 콜백을
++  반환함을 확인했다. 운영 OpenAPI에는 콜백 선택 파라미터가 없었다.
++- authorize에 선택적 `redirectUri`를 추가하고 서버의 정확한 URI allowlist로 검증한다.
++- provider/만료시간/URI를 state별로 저장하고 원자적으로 일회성 소비한다.
++- 토큰 교환은 state의 URI를 사용하며 login body로 URI를 바꾸지 못한다.
++- 파라미터 생략은 기존 배포 기본값을 유지한다. Google/일반 로그인 계약은 보존한다.
++- 프론트는 현재 origin의 콜백을 요청하고, 반환 URI 불일치 시 이동을 차단한다.
++- 실제 로컬 브라우저에서 배포 이동 차단과 오류 표시를 검증했다.
++- API 명세와 `docs/KAKAO_REDIRECT_URIS.md`에 계약·설정·검증 경계를 기록했다.
+ 
+ ## Important decisions
+ 
+-- 수동 순서 저장은 일부 장소만 보내는 patch가 아니라 해당 일차의 전체 순서를 한 번에 저장한다.
+-- `startTime`은 시간 재계산에 필요하므로 요청 필수값으로 유지한다.
+-- 시작 장소가 있으면 첫 번째라는 기존 의미를 수동 재정렬에서도 유지한다.
+-- 고정 방문 시간은 사용자가 정한 예약 시간으로 유지하고, 그 전에 도착하면 대기한 뒤 체류를 시작한다.
+-- 고정 방문 시간을 지킬 수 없는 순서는 저장 성공으로 처리하지 않는다.
+-- 최근 검색어 백엔드는 이미 구현되어 있으므로 이번 변경 범위에 포함하지 않는다.
++- 프론트는 기존 배포 HTTPS API를 계속 사용한다. 로컬 8080은 Oracle listener였고
++  실행 중인 Spring 서버는 없었다. API 주소나 운영 환경변수를 임의 변경하지 않았다.
++- 기존 배포 KAKAO_REDIRECT_URI를 유지하고 KAKAO_ALLOWED_REDIRECT_URIS로
++  localhost:3000과 noman-go.netlify.app의 정확한 카카오 콜백을 관리한다.
++- 기존 인메모리 state TTL/일회성 소비, JWT·프로필·이메일 정책을 유지한다.
+ 
+ ## Tests / CI status
+ 
+-- `git diff --check`: 성공.
+-- `./gradlew test --tests "com.nomango.nomango.service.TripPlaceServiceTest"`: 성공.
+-- `./gradlew test`: 성공.
+-- GitHub CI: 아직 실행 전.
++- Java 17 `gradlew.bat test bootJar --no-daemon`: 26 suites, 106 tests, 실패 0, JAR 빌드 성공.
++- 프론트 인증/보안 회귀: 10 suites, 120 tests 성공. 프로덕션 빌드와 정적 release 검사 성공.
++- 컨트롤러 흐름 테스트의 카카오 HTTP 응답·사용자 저장은 대체 구현이다.
++  실제 카카오 계정 로그인을 완료한 것으로 간주하지 않는다.
++- GitHub push는 자동 승인 검토에서 비공개 소스 업로드에 대한 명시적 사용자 승인이
++  필요하다는 이유로 거부되었다. 업로드/PR 승인 요청은 사용자에게 전달한 상태다.
++  아직 push/PR/원격 CI를 수행하지 않았다.
+ 
+ ## Remaining work
+ 
+-- `docs/CURRENT_STATE.md`를 포함해 변경 사항을 커밋하고 원격 브랜치에 push한다.
+-- PR을 열고 GitHub CI 결과를 확인한다.
+-- 프론트엔드에서 순서 저장 API를 연결하고, 성공 시 재계산된 예상 시간을 다시 표시한다.
+-- 프론트엔드의 최근 검색어 UI와 조회 실패/로그인 필요/일정 없음 상태 문구를 연결·검증한다.
++- 사용자 승인 후 수정 브랜치 push 및 PR 생성, CI 확인, 검토/병합을 거쳐 운영 서버에
++  배포하고 재시작한다.
++- 프론트 변경도 배포 환경에 반영한다.
++- 현재 로그인 REST API 키의 카카오 Redirect URI 등록 두 건을 확인한다.
++- 양쪽 사이트의 실제 카카오 로그인, 원래 페이지 복귀, 새로고침, 취소/재시도와
++  기존 일반/Google 로그인을 실제 계정으로 확인한다.
+ 
+ ## Blockers / unverified items
+ 
+-- 이번 백엔드 기능 작업 자체의 blocker는 없다.
+-- PR #36에서 기록한 Google 운영 OAuth redirect URI 등록과 전체 브라우저 로그인 재검증은
+-  이번 방문 순서 저장 작업과 별개의 외부 설정 작업으로 남아 있다.
++- 운영 서버는 여전히 이전 구현이다. 운영 배포 및 환경변수 접근은 수행하지 않았다.
++- 카카오 개발자 콘솔 등록 상태와 실제 계정 인증 완료는 확인하지 않았다.
++- 기존 state 저장소는 인메모리다. 재시작 시 새 로그인을 시작해야 하며, 다중 인스턴스는
++  sticky routing 또는 공유 state 저장소가 필요하다.
+diff --git a/docs/KAKAO_REDIRECT_URIS.md b/docs/KAKAO_REDIRECT_URIS.md
+new file mode 100644
+index 0000000..9e41e43
+--- /dev/null
++++ b/docs/KAKAO_REDIRECT_URIS.md
+@@ -0,0 +1,131 @@
++# Kakao callback selection (2026-10-16)
++
++## Cause and current deployment
++
++The local React application loads `.env` with mock mode disabled and calls
++`https://nomango-backend-prod-3-27-110-86.nip.io` directly. Its development proxy
++only serves PDF map images. No Spring backend or React server was running at
++the start of this check; port 8080 belonged to Oracle's `TNSLSNR.EXE`.
++
++The live `GET /api/auth/kakao/authorize` returned HTTP 200 and
++`redirect_uri=https://noman-go.netlify.app/oauth/kakao/callback` for both
++`Origin: http://localhost:3000` and the deployment origin. Sending an explicit
++local `redirectUri` was also ignored. The deployed OpenAPI had no authorize
++parameter. This is the first point at which the deployment callback is selected,
++before the provider redirect or final application navigation. The runtime
++environment variable itself was not accessible; the effective URI was verified
++from the response and matches how `KakaoOAuthClient` uses `KAKAO_REDIRECT_URI`.
++
++This source fix is not an operational deployment. The production server must be
++updated before the local callback can be selected. Until then the updated frontend
++blocks the mismatched URI with a readable error instead of leaving localhost.
++
++## Request contract and implementation
++
++Changed backend files:
++
++- `controller/AuthController.java`: optional authorize query.
++- `service/KakaoRedirectUriPolicy.java`: exact allowlist and legacy default.
++- `service/KakaoLoginService.java`: validate, bind and consume the selected URI.
++- `service/KakaoOAuthClient.java`: use the selected URI in authorize/token requests.
++- `service/OAuthStateService.java`: add URI to each provider/expiry state record.
++- `src/main/resources/application.yml`: allowlist environment binding.
++- Tests: `KakaoRedirectFlowTest`, `KakaoRedirectUriPolicyTest`,
++  `KakaoLoginServiceTest`, `OAuthStateServiceTest`.
++- Documentation: `docs/API_SPEC.md`, `docs/CURRENT_STATE.md`, this checklist.
++
++Changed frontend files in the adjacent `graduation` repository:
++
++- `src/api/authApi.js`: current-origin Kakao `redirectUri` query.
++- `src/utils/oauthSecurity.js`: exact callback and duplicate-parameter validation.
++- `src/Login/Login.jsx`: inline mismatch error and validation before navigation.
++- Tests: `src/api/authApi.test.js`, `src/utils/oauthSecurity.test.js`,
++  `src/Login/OAuthCallback.test.js`, `src/Login/authFlow.test.jsx`.
++- `README.md`: deployment dependency and console configuration.
++
++- `GET /api/auth/kakao/authorize?redirectUri=<URL-encoded callback>` selects an
++  exact server-allowlisted callback. Invalid, empty, modified or external callback
++  requests return HTTP 400. Origin and Host headers do not define this allowlist.
++- Omitting `redirectUri` preserves `KAKAO_REDIRECT_URI` for existing deployed
++  clients, and that default must also belong to the allowlist.
++- Response remains `{ authorizationUrl, state }`. No secrets are added.
++- `KakaoLoginService` validates the URI before issuing state; `OAuthStateService`
++  stores provider, expiry and URI together under each random state.
++- `POST /api/auth/kakao/login` remains `{ code, state }`. No login-stage URI is
++  accepted as a selector, including an extra client-supplied `redirectUri` field.
++- State removal is atomic and single-use. Provider mismatch, missing, unknown,
++  expired and reused states are rejected. Token exchange uses the stored URI,
++  even if another authorization selected a different callback in the meantime.
++- Existing Google and local login contracts, Kakao consent/email policy, JWT
++  issuance and profile handling are preserved.
++
++The existing in-memory state store is retained. Restarting loses pending attempts;
++restart users must begin login again. Multiple backend instances still require
++sticky routing or a shared atomic state store; this change does not add Redis.
++
++## Server configuration and rollout
++
++Keep the deployment default:
++
++```text
++KAKAO_REDIRECT_URI=https://noman-go.netlify.app/oauth/kakao/callback
++KAKAO_ALLOWED_REDIRECT_URIS=http://localhost:3000/oauth/kakao/callback,https://noman-go.netlify.app/oauth/kakao/callback
++```
++
++The new property `oauth.kakao.allowed-redirect-uris` has those two exact callbacks
++as its default. Set the environment variable explicitly for repeatable deployments.
++Keep existing client credentials and CORS origins; both frontend origins were
++already allowed by the deployed authorize endpoint.
++
++1. Verify the two login Redirect URIs in the Kakao application associated with the
++   REST API client key used by this backend; retain the existing deployment entry.
++2. Deploy the reviewed backend build and restart it with the configuration above.
++   No production environment variables or deployment processes were modified here.
++3. Verify authorize responses for explicit local, explicit deployment and omitted
++   callbacks, plus HTTP 400 for an external URI. Do not print the response state,
++   client key, full authorization URL, authorization code or tokens.
++4. Run/rebuild the updated frontend. It must use `window.location.origin` for the
++   callback and check the returned URI before navigating. Its API base remains the
++   deployed HTTPS backend. The local frontend was started on port 3000 for the
++   real mismatch-blocking browser check.
++5. Complete the account-based checks below on both sites.
++
++For a separately configured local Spring instance, set its own default to
++`http://localhost:3000/oauth/kakao/callback` and use its verified listening port;
++do not change the deployed default or assume that local port 8080 is Spring.
++
++## Kakao console boundary
++
++Expected **login Redirect URIs**:
++
++- `http://localhost:3000/oauth/kakao/callback`
++- `https://noman-go.netlify.app/oauth/kakao/callback`
++
++These are distinct from site/JavaScript SDK domain registration. Do not remove
++existing deployment URIs or edit map settings. Console access and registration
++for the active REST API key were not verified in this task.
++
++Official references:
++[REST login](https://developers.kakao.com/docs/ko/kakaologin/rest-api),
++[login settings](https://developers.kakao.com/docs/ko/kakaologin/prerequisite).
++
++## Verification and remaining manual checks
++
++Automated backend: `gradlew.bat test bootJar --no-daemon` with Java 17 passed
++106 tests in 26 suites. Tests use real URI selection, controller, state store and
++HTTP client with substituted provider HTTP responses and user persistence. They
++verify reversed completion of local/deployment attempts, original default behavior,
++login-stage URI override prevention, invalid callbacks and state failures. They
++do not prove real Kakao authentication.
++
++Frontend authentication/security regression: 120 tests in 10 suites passed;
++production build passed. Coverage includes current-origin callback requests and
++validation, invalid-state rejection, cancellation/retry, safe path/query/fragment
++return and fresh-module initialization from persisted credentials. A real browser
++using the deployed backend stayed on localhost and displayed the mismatch error.
++
++After deployment, manually complete Kakao authentication from each origin and
++confirm the callback origin, original page/query/fragment, reload persistence,
++cancellation and a fresh retry. Recheck real local-password and Google logins
++with existing accounts. No account-based authentication, deployed-code rollout,
++console registration, or literal production environment value was verified here.
+diff --git a/src/main/java/com/nomango/nomango/controller/AuthController.java b/src/main/java/com/nomango/nomango/controller/AuthController.java
+index 762cd89..8e99689 100644
+--- a/src/main/java/com/nomango/nomango/controller/AuthController.java
++++ b/src/main/java/com/nomango/nomango/controller/AuthController.java
+@@ -57,8 +57,9 @@ public class AuthController {
+     }
+ 
+     @GetMapping("/kakao/authorize")
+-    public ResponseEntity<OAuthAuthorizeResponseDto> kakaoAuthorize() {
+-        return ResponseEntity.ok(kakaoLoginService.getAuthorizationInfo());
++    public ResponseEntity<OAuthAuthorizeResponseDto> kakaoAuthorize(
++            @RequestParam(name = "redirectUri", required = false) String redirectUri) {
++        return ResponseEntity.ok(kakaoLoginService.getAuthorizationInfo(redirectUri));
+     }
+ 
+     @PostMapping("/kakao/login")
+diff --git a/src/main/java/com/nomango/nomango/service/KakaoLoginService.java b/src/main/java/com/nomango/nomango/service/KakaoLoginService.java
+index 7993460..109d1cb 100644
+--- a/src/main/java/com/nomango/nomango/service/KakaoLoginService.java
++++ b/src/main/java/com/nomango/nomango/service/KakaoLoginService.java
+@@ -13,20 +13,28 @@ public class KakaoLoginService {
+     private final KakaoOAuthClient kakaoOAuthClient;
+     private final OAuthStateService stateService;
+     private final SocialLoginUserService socialLoginUserService;
++    private final KakaoRedirectUriPolicy redirectUriPolicy;
+ 
+     public KakaoLoginService(
+             KakaoOAuthClient kakaoOAuthClient,
+             OAuthStateService stateService,
+-            SocialLoginUserService socialLoginUserService
++            SocialLoginUserService socialLoginUserService,
++            KakaoRedirectUriPolicy redirectUriPolicy
+     ) {
+         this.kakaoOAuthClient = kakaoOAuthClient;
+         this.stateService = stateService;
+         this.socialLoginUserService = socialLoginUserService;
++        this.redirectUriPolicy = redirectUriPolicy;
+     }
+ 
+     public OAuthAuthorizeResponseDto getAuthorizationInfo() {
+-        String state = stateService.issueState(AuthProvider.KAKAO);
+-        String authorizationUrl = kakaoOAuthClient.buildAuthorizationUrl(state);
++        return getAuthorizationInfo(null);
++    }
++
++    public OAuthAuthorizeResponseDto getAuthorizationInfo(String requestedRedirectUri) {
++        String redirectUri = redirectUriPolicy.resolve(requestedRedirectUri);
++        String state = stateService.issueState(AuthProvider.KAKAO, redirectUri);
++        String authorizationUrl = kakaoOAuthClient.buildAuthorizationUrl(state, redirectUri);
+         return new OAuthAuthorizeResponseDto(authorizationUrl, state);
+     }
+ 
+@@ -35,8 +43,12 @@ public class KakaoLoginService {
+             throw new IllegalArgumentException("카카오 로그인 요청이 없습니다.");
+         }
+ 
+-        stateService.validateAndConsume(AuthProvider.KAKAO, request.getState());
+-        String kakaoAccessToken = kakaoOAuthClient.exchangeCodeForAccessToken(request.getCode());
++        String redirectUri = stateService.validateAndConsume(AuthProvider.KAKAO, request.getState());
++        // The login body cannot select a URI; only the consumed state can.
++        if (redirectUri == null) {
++            throw new IllegalArgumentException("카카오 로그인 요청이 유효하지 않습니다.");
++        }
++        String kakaoAccessToken = kakaoOAuthClient.exchangeCodeForAccessToken(request.getCode(), redirectUri);
+         KakaoOAuthClient.KakaoProfile profile = kakaoOAuthClient.getUserProfile(kakaoAccessToken);
+ 
+         String verifiedEmail = isUsableKakaoEmail(profile) ? profile.email() : null;
+diff --git a/src/main/java/com/nomango/nomango/service/KakaoOAuthClient.java b/src/main/java/com/nomango/nomango/service/KakaoOAuthClient.java
+index b2334b5..6c0ba0b 100644
+--- a/src/main/java/com/nomango/nomango/service/KakaoOAuthClient.java
++++ b/src/main/java/com/nomango/nomango/service/KakaoOAuthClient.java
+@@ -36,11 +36,15 @@ public class KakaoOAuthClient {
+     }
+ 
+     public String buildAuthorizationUrl(String state) {
++        return buildAuthorizationUrl(state, redirectUri);
++    }
++
++    public String buildAuthorizationUrl(String state, String selectedRedirectUri) {
+         validateConfiguration();
+         return UriComponentsBuilder.fromUriString(AUTHORIZE_URL)
+                 .queryParam("response_type", "code")
+                 .queryParam("client_id", clientId)
+-                .queryParam("redirect_uri", redirectUri)
++                .queryParam("redirect_uri", selectedRedirectUri)
+                 // Use the app's configured consent items; email permission is optional.
+                 .queryParam("state", state)
+                 .build()
+@@ -49,6 +53,10 @@ public class KakaoOAuthClient {
+     }
+ 
+     public String exchangeCodeForAccessToken(String code) {
++        return exchangeCodeForAccessToken(code, redirectUri);
++    }
++
++    public String exchangeCodeForAccessToken(String code, String selectedRedirectUri) {
+         validateConfiguration();
+         if (!StringUtils.hasText(code)) {
+             throw new IllegalArgumentException("카카오 인가 코드가 없습니다.");
+@@ -57,7 +65,7 @@ public class KakaoOAuthClient {
+         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+         form.add("grant_type", "authorization_code");
+         form.add("client_id", clientId);
+-        form.add("redirect_uri", redirectUri);
++        form.add("redirect_uri", selectedRedirectUri);
+         form.add("code", code);
+         if (StringUtils.hasText(clientSecret)) {
+             form.add("client_secret", clientSecret);
+diff --git a/src/main/java/com/nomango/nomango/service/KakaoRedirectUriPolicy.java b/src/main/java/com/nomango/nomango/service/KakaoRedirectUriPolicy.java
+new file mode 100644
+index 0000000..e8d9a9c
+--- /dev/null
++++ b/src/main/java/com/nomango/nomango/service/KakaoRedirectUriPolicy.java
+@@ -0,0 +1,33 @@
++package com.nomango.nomango.service;
++
++import org.springframework.beans.factory.annotation.Value;
++import org.springframework.stereotype.Component;
++
++import java.util.Arrays;
++import java.util.Set;
++import java.util.stream.Collectors;
++
++@Component
++public class KakaoRedirectUriPolicy {
++    private final String defaultRedirectUri;
++    private final Set<String> allowedRedirectUris;
++
++    public KakaoRedirectUriPolicy(
++            @Value("${oauth.kakao.redirect-uri:}") String defaultRedirectUri,
++            @Value("${oauth.kakao.allowed-redirect-uris:}") String allowedRedirectUris
++    ) {
++        this.defaultRedirectUri = defaultRedirectUri;
++        this.allowedRedirectUris = Arrays.stream(allowedRedirectUris.split(","))
++                .map(String::trim).filter(value -> !value.isEmpty()).collect(Collectors.toUnmodifiableSet());
++    }
++
++    public String resolve(String requestedRedirectUri) {
++        // Only an omitted parameter uses the legacy deployment default. Match
++        // exact server-configured URIs; never infer trust from Origin/Host.
++        String selected = requestedRedirectUri == null ? defaultRedirectUri : requestedRedirectUri;
++        if (!allowedRedirectUris.contains(selected)) {
++            throw new IllegalArgumentException("허용되지 않은 카카오 로그인 복귀 주소입니다.");
++        }
++        return selected;
++    }
++}
+diff --git a/src/main/java/com/nomango/nomango/service/OAuthStateService.java b/src/main/java/com/nomango/nomango/service/OAuthStateService.java
+index e0ea6f5..1826845 100644
+--- a/src/main/java/com/nomango/nomango/service/OAuthStateService.java
++++ b/src/main/java/com/nomango/nomango/service/OAuthStateService.java
+@@ -32,17 +32,21 @@ public class OAuthStateService {
+     }
+ 
+     public String issueState(AuthProvider provider) {
++        return issueState(provider, null);
++    }
++
++    public String issueState(AuthProvider provider, String redirectUri) {
+         validateProvider(provider);
+         cleanupExpired();
+ 
+         byte[] bytes = new byte[32];
+         secureRandom.nextBytes(bytes);
+         String state = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+-        issuedStates.put(state, new IssuedState(provider, clock.instant().plus(stateTtl)));
++        issuedStates.put(state, new IssuedState(provider, clock.instant().plus(stateTtl), redirectUri));
+         return state;
+     }
+ 
+-    public void validateAndConsume(AuthProvider provider, String state) {
++    public String validateAndConsume(AuthProvider provider, String state) {
+         validateProvider(provider);
+         if (state == null || state.isBlank()) {
+             throw new IllegalArgumentException("OAuth 로그인 state가 없습니다.");
+@@ -54,6 +58,7 @@ public class OAuthStateService {
+                 || !issuedState.expiresAt().isAfter(clock.instant())) {
+             throw new IllegalArgumentException("OAuth 로그인 요청이 만료되었거나 유효하지 않습니다.");
+         }
++        return issuedState.redirectUri();
+     }
+ 
+     private void cleanupExpired() {
+@@ -67,6 +72,6 @@ public class OAuthStateService {
+         }
+     }
+ 
+-    private record IssuedState(AuthProvider provider, Instant expiresAt) {
++    private record IssuedState(AuthProvider provider, Instant expiresAt, String redirectUri) {
+     }
+ }
+diff --git a/src/main/resources/application.yml b/src/main/resources/application.yml
+index 7320755..bc050e5 100644
+--- a/src/main/resources/application.yml
++++ b/src/main/resources/application.yml
+@@ -35,6 +35,7 @@ oauth:
+     client-id: ${KAKAO_CLIENT_ID:}
+     client-secret: ${KAKAO_CLIENT_SECRET:}
+     redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:3000/oauth/kakao/callback}
++    allowed-redirect-uris: ${KAKAO_ALLOWED_REDIRECT_URIS:http://localhost:3000/oauth/kakao/callback,https://noman-go.netlify.app/oauth/kakao/callback}
+   google:
+     client-id: ${GOOGLE_CLIENT_ID:}
+     client-secret: ${GOOGLE_CLIENT_SECRET:}
+diff --git a/src/test/java/com/nomango/nomango/controller/KakaoRedirectFlowTest.java b/src/test/java/com/nomango/nomango/controller/KakaoRedirectFlowTest.java
+new file mode 100644
+index 0000000..f557a2b
+--- /dev/null
++++ b/src/test/java/com/nomango/nomango/controller/KakaoRedirectFlowTest.java
+@@ -0,0 +1,110 @@
++package com.nomango.nomango.controller;
++
++import com.fasterxml.jackson.databind.ObjectMapper;
++import com.nomango.nomango.dto.SocialLoginResponseDto;
++import com.nomango.nomango.service.*;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++import org.springframework.http.MediaType;
++import org.springframework.test.web.client.MockRestServiceServer;
++import org.springframework.test.web.servlet.MockMvc;
++import org.springframework.test.web.servlet.setup.MockMvcBuilders;
++import org.springframework.web.client.RestClient;
++import org.springframework.web.util.UriComponentsBuilder;
++
++import java.net.URLEncoder;
++import java.nio.charset.StandardCharsets;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.hamcrest.Matchers.containsString;
++import static org.mockito.ArgumentMatchers.*;
++import static org.mockito.Mockito.*;
++import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
++import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
++import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
++
++// Real controller, URI policy, per-state storage and HTTP client. Only provider
++// HTTP responses and user persistence are substituted; this is not a real login.
++class KakaoRedirectFlowTest {
++    private static final String LOCAL = "http://localhost:3000/oauth/kakao/callback";
++    private static final String DEPLOYED = "https://noman-go.netlify.app/oauth/kakao/callback";
++    private final ObjectMapper json = new ObjectMapper();
++    private MockMvc mvc;
++    private MockRestServiceServer provider;
++
++    @BeforeEach
++    void setUp() {
++        RestClient.Builder builder = RestClient.builder();
++        provider = MockRestServiceServer.bindTo(builder).build();
++        var client = new KakaoOAuthClient(builder, "test-client", "", DEPLOYED);
++        var users = mock(SocialLoginUserService.class);
++        when(users.loginOrCreate(any(), anyString(), any(), any()))
++                .thenReturn(new SocialLoginResponseDto("test-only-jwt", "Bearer", false));
++        var kakao = new KakaoLoginService(client, new OAuthStateService(), users,
++                new KakaoRedirectUriPolicy(DEPLOYED, LOCAL + "," + DEPLOYED));
++        mvc = MockMvcBuilders.standaloneSetup(new AuthController(mock(SignupService.class),
++                        mock(LoginService.class), kakao, mock(GoogleLoginService.class), mock(PasswordResetService.class)))
++                .setControllerAdvice(new GlobalExceptionHandler()).build();
++    }
++
++    private String authorize(String requested, String expected) throws Exception {
++        var request = get("/api/auth/kakao/authorize");
++        if (requested != null) request.param("redirectUri", requested);
++        var result = mvc.perform(request).andExpect(status().isOk()).andReturn();
++        var body = json.readTree(result.getResponse().getContentAsString());
++        var params = UriComponentsBuilder.fromUriString(body.path("authorizationUrl").asText()).build().getQueryParams();
++        assertThat(params.getFirst("redirect_uri")).isEqualTo(expected);
++        return body.path("state").asText();
++    }
++
++    private void expectExchange(String redirectUri) {
++        provider.expect(requestTo("https://kauth.kakao.com/oauth/token"))
++                .andExpect(content().string(containsString("redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8))))
++                .andRespond(withSuccess("{\"access_token\":\"test-only-provider-token\"}", MediaType.APPLICATION_JSON));
++        provider.expect(requestTo("https://kapi.kakao.com/v2/user/me"))
++                .andRespond(withSuccess("{\"id\":\"123\",\"kakao_account\":{\"profile\":{\"nickname\":\"Tester\"}}}", MediaType.APPLICATION_JSON));
++    }
++
++    private void login(String state, String attemptedOverride) throws Exception {
++        var body = json.createObjectNode().put("code", "test-only-code").put("state", state);
++        // This field is deliberately outside the login DTO. It cannot override state.
++        body.put("redirectUri", attemptedOverride);
++        mvc.perform(post("/api/auth/kakao/login").contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsBytes(body)))
++                .andExpect(status().isOk());
++    }
++
++    @Test
++    void localAndDeploymentAttemptsKeepTheirOwnUriEvenWhenCompletedInReverseOrder() throws Exception {
++        String localState = authorize(LOCAL, LOCAL);
++        String deployedState = authorize(DEPLOYED, DEPLOYED);
++        expectExchange(DEPLOYED);
++        expectExchange(LOCAL);
++        login(deployedState, "https://outside.example/oauth/kakao/callback");
++        login(localState, DEPLOYED);
++        provider.verify();
++        mvc.perform(post("/api/auth/kakao/login").contentType(MediaType.APPLICATION_JSON)
++                        .content(json.writeValueAsBytes(json.createObjectNode().put("code", "test-only-code").put("state", localState))))
++                .andExpect(status().isBadRequest());
++    }
++
++    @Test
++    void oldDeploymentClientWithoutParameterKeepsDeploymentCallback() throws Exception {
++        String state = authorize(null, DEPLOYED);
++        expectExchange(DEPLOYED);
++        login(state, LOCAL);
++        provider.verify();
++    }
++
++    @Test
++    void untrustedCallbackAndMissingOrUnknownStateFailBeforeProviderRequests() throws Exception {
++        mvc.perform(get("/api/auth/kakao/authorize").param("redirectUri", "https://outside.example/oauth/kakao/callback"))
++                .andExpect(status().isBadRequest());
++        for (String state : new String[]{"", "unknown"}) {
++            mvc.perform(post("/api/auth/kakao/login").contentType(MediaType.APPLICATION_JSON)
++                            .content(json.writeValueAsBytes(json.createObjectNode().put("code", "test-only-code").put("state", state))))
++                    .andExpect(status().isBadRequest());
++        }
++        provider.verify();
++    }
++}
+diff --git a/src/test/java/com/nomango/nomango/service/KakaoLoginServiceTest.java b/src/test/java/com/nomango/nomango/service/KakaoLoginServiceTest.java
+index 1ab456c..e4d5922 100644
+--- a/src/test/java/com/nomango/nomango/service/KakaoLoginServiceTest.java
++++ b/src/test/java/com/nomango/nomango/service/KakaoLoginServiceTest.java
+@@ -16,6 +16,7 @@ import static org.mockito.Mockito.*;
+ 
+ @ExtendWith(MockitoExtension.class)
+ class KakaoLoginServiceTest {
++    private static final String REDIRECT_URI = "http://localhost:3000/oauth/kakao/callback";
+ 
+     @Mock
+     private KakaoOAuthClient kakaoOAuthClient;
+@@ -31,14 +32,15 @@ class KakaoLoginServiceTest {
+         kakaoLoginService = new KakaoLoginService(
+                 kakaoOAuthClient,
+                 stateService,
+-                socialLoginUserService
++                socialLoginUserService,
++                new KakaoRedirectUriPolicy(REDIRECT_URI, REDIRECT_URI)
+         );
+     }
+ 
+     @Test
+     void 인가_URL과_Kakao_state를_발급한다() {
+-        when(stateService.issueState(AuthProvider.KAKAO)).thenReturn("state-123");
+-        when(kakaoOAuthClient.buildAuthorizationUrl("state-123"))
++        when(stateService.issueState(AuthProvider.KAKAO, REDIRECT_URI)).thenReturn("state-123");
++        when(kakaoOAuthClient.buildAuthorizationUrl("state-123", REDIRECT_URI))
+                 .thenReturn("https://kauth.kakao.com/oauth/authorize?state=state-123");
+ 
+         OAuthAuthorizeResponseDto response = kakaoLoginService.getAuthorizationInfo();
+@@ -51,7 +53,8 @@ class KakaoLoginServiceTest {
+     void 검증된_카카오_이메일을_공통_소셜_사용자_서비스에_전달한다() {
+         OAuthLoginRequestDto request = new OAuthLoginRequestDto("code", "state");
+         SocialLoginResponseDto expected = new SocialLoginResponseDto("noman-jwt", "Bearer", true);
+-        when(kakaoOAuthClient.exchangeCodeForAccessToken("code")).thenReturn("kakao-token");
++        when(stateService.validateAndConsume(AuthProvider.KAKAO, "state")).thenReturn(REDIRECT_URI);
++        when(kakaoOAuthClient.exchangeCodeForAccessToken("code", REDIRECT_URI)).thenReturn("kakao-token");
+         when(kakaoOAuthClient.getUserProfile("kakao-token"))
+                 .thenReturn(new KakaoOAuthClient.KakaoProfile(
+                         "77777", "member@example.com", true, true, "카카오회원"));
+@@ -68,7 +71,8 @@ class KakaoLoginServiceTest {
+     @Test
+     void 미검증_카카오_이메일은_사용하지_않는다() {
+         OAuthLoginRequestDto request = new OAuthLoginRequestDto("code", "state");
+-        when(kakaoOAuthClient.exchangeCodeForAccessToken("code")).thenReturn("kakao-token");
++        when(stateService.validateAndConsume(AuthProvider.KAKAO, "state")).thenReturn(REDIRECT_URI);
++        when(kakaoOAuthClient.exchangeCodeForAccessToken("code", REDIRECT_URI)).thenReturn("kakao-token");
+         when(kakaoOAuthClient.getUserProfile("kakao-token"))
+                 .thenReturn(new KakaoOAuthClient.KakaoProfile(
+                         "55555", "member@example.com", true, false, "회원"));
+diff --git a/src/test/java/com/nomango/nomango/service/KakaoRedirectUriPolicyTest.java b/src/test/java/com/nomango/nomango/service/KakaoRedirectUriPolicyTest.java
+new file mode 100644
+index 0000000..c964e0a
+--- /dev/null
++++ b/src/test/java/com/nomango/nomango/service/KakaoRedirectUriPolicyTest.java
+@@ -0,0 +1,38 @@
++package com.nomango.nomango.service;
++
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.params.ParameterizedTest;
++import org.junit.jupiter.params.provider.ValueSource;
++
++import static org.assertj.core.api.Assertions.*;
++
++class KakaoRedirectUriPolicyTest {
++    private static final String LOCAL = "http://localhost:3000/oauth/kakao/callback";
++    private static final String DEPLOYED = "https://noman-go.netlify.app/oauth/kakao/callback";
++    private final KakaoRedirectUriPolicy policy = new KakaoRedirectUriPolicy(DEPLOYED, LOCAL + ", " + DEPLOYED);
++
++    @Test
++    void exactLocalAndDeploymentUrisAreAllowedAndOmissionKeepsLegacyDefault() {
++        assertThat(policy.resolve(LOCAL)).isEqualTo(LOCAL);
++        assertThat(policy.resolve(DEPLOYED)).isEqualTo(DEPLOYED);
++        assertThat(policy.resolve(null)).isEqualTo(DEPLOYED);
++    }
++
++    @ParameterizedTest
++    @ValueSource(strings = {"", " ", "https://outside.example/oauth/kakao/callback",
++            "//noman-go.netlify.app/oauth/kakao/callback",
++            "https://noman-go.netlify.app.evil.example/oauth/kakao/callback",
++            "https://user@noman-go.netlify.app/oauth/kakao/callback",
++            "http://localhost:3001/oauth/kakao/callback", "http://127.0.0.1:3000/oauth/kakao/callback",
++            "http://localhost:3000/oauth/kakao/callback/", "http://localhost:3000/oauth/kakao/callback?next=outside",
++            "http://localhost:3000/oauth/kakao/callback#fragment", "http://localhost:3000/oauth/google/callback"})
++    void arbitraryOrModifiedUrisAreRejected(String requested) {
++        assertThatThrownBy(() -> policy.resolve(requested)).isInstanceOf(IllegalArgumentException.class);
++    }
++
++    @Test
++    void defaultMustAlsoBeExplicitlyAllowed() {
++        var restricted = new KakaoRedirectUriPolicy(DEPLOYED, LOCAL);
++        assertThatThrownBy(() -> restricted.resolve(null)).isInstanceOf(IllegalArgumentException.class);
++    }
++}
+diff --git a/src/test/java/com/nomango/nomango/service/OAuthStateServiceTest.java b/src/test/java/com/nomango/nomango/service/OAuthStateServiceTest.java
+index ebe5010..082e2f3 100644
+--- a/src/test/java/com/nomango/nomango/service/OAuthStateServiceTest.java
++++ b/src/test/java/com/nomango/nomango/service/OAuthStateServiceTest.java
+@@ -12,6 +12,36 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
+ 
+ class OAuthStateServiceTest {
+ 
++    @Test
++    void concurrentAttemptsKeepTheirOwnRedirectUri() {
++        OAuthStateService service = new OAuthStateService();
++        String local = "http://localhost:3000/oauth/kakao/callback";
++        String deployed = "https://noman-go.netlify.app/oauth/kakao/callback";
++        String localState = service.issueState(AuthProvider.KAKAO, local);
++        String deployedState = service.issueState(AuthProvider.KAKAO, deployed);
++        assertThat(service.validateAndConsume(AuthProvider.KAKAO, deployedState)).isEqualTo(deployed);
++        assertThat(service.validateAndConsume(AuthProvider.KAKAO, localState)).isEqualTo(local);
++        assertThatThrownBy(() -> service.validateAndConsume(AuthProvider.KAKAO, localState))
++                .isInstanceOf(IllegalArgumentException.class);
++    }
++
++    @Test
++    void missingAndUnknownStatesAreRejected() {
++        OAuthStateService service = new OAuthStateService();
++        for (String state : new String[]{null, "", " ", "unknown"}) {
++            assertThatThrownBy(() -> service.validateAndConsume(AuthProvider.KAKAO, state))
++                    .isInstanceOf(IllegalArgumentException.class);
++        }
++    }
++
++    @Test
++    void expiredRedirectContextCannotBeConsumed() {
++        OAuthStateService service = new OAuthStateService(new SecureRandom(), Clock.systemUTC(), Duration.ZERO);
++        String state = service.issueState(AuthProvider.KAKAO, "http://localhost:3000/oauth/kakao/callback");
++        assertThatThrownBy(() -> service.validateAndConsume(AuthProvider.KAKAO, state))
++                .isInstanceOf(IllegalArgumentException.class);
++    }
++
+     @Test
+     void 발급한_state는_한번만_사용할_수_있다() {
+         OAuthStateService service = new OAuthStateService();

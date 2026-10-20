@@ -1,0 +1,26 @@
+cac8acf817f961d8f5e08572b781e52e
+"use strict";
+
+// Existing regression fixtures exercise real API/authentication contracts.
+// Mock integration suites opt in with their own mockConfig factory.
+_getJestObj().mock('./config/mockConfig', () => ({
+  USE_MOCK: false
+}));
+require("@testing-library/jest-dom");
+function _getJestObj() {
+  const {
+    jest
+  } = require("@jest/globals");
+  _getJestObj = () => jest;
+  return jest;
+} // jest-dom adds custom jest matchers for asserting on DOM nodes.
+// allows you to do things like:
+// expect(element).toHaveTextContent(/react/i)
+// learn more: https://github.com/testing-library/jest-dom
+const {
+  TextEncoder,
+  TextDecoder
+} = require('util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfZ2V0SmVzdE9iaiIsIm1vY2siLCJVU0VfTU9DSyIsInJlcXVpcmUiLCJqZXN0IiwiVGV4dEVuY29kZXIiLCJUZXh0RGVjb2RlciIsImdsb2JhbCJdLCJzb3VyY2VzIjpbInNldHVwVGVzdHMuanMiXSwic291cmNlc0NvbnRlbnQiOlsiLy8gamVzdC1kb20gYWRkcyBjdXN0b20gamVzdCBtYXRjaGVycyBmb3IgYXNzZXJ0aW5nIG9uIERPTSBub2Rlcy5cclxuLy8gYWxsb3dzIHlvdSB0byBkbyB0aGluZ3MgbGlrZTpcclxuLy8gZXhwZWN0KGVsZW1lbnQpLnRvSGF2ZVRleHRDb250ZW50KC9yZWFjdC9pKVxyXG4vLyBsZWFybiBtb3JlOiBodHRwczovL2dpdGh1Yi5jb20vdGVzdGluZy1saWJyYXJ5L2plc3QtZG9tXHJcbmltcG9ydCAnQHRlc3RpbmctbGlicmFyeS9qZXN0LWRvbSc7XG4vLyBFeGlzdGluZyByZWdyZXNzaW9uIGZpeHR1cmVzIGV4ZXJjaXNlIHJlYWwgQVBJL2F1dGhlbnRpY2F0aW9uIGNvbnRyYWN0cy5cbi8vIE1vY2sgaW50ZWdyYXRpb24gc3VpdGVzIG9wdCBpbiB3aXRoIHRoZWlyIG93biBtb2NrQ29uZmlnIGZhY3RvcnkuXG5qZXN0Lm1vY2soJy4vY29uZmlnL21vY2tDb25maWcnLCAoKSA9PiAoeyBVU0VfTU9DSzogZmFsc2UgfSkpO1xuY29uc3QgeyBUZXh0RW5jb2RlciwgVGV4dERlY29kZXIgfSA9IHJlcXVpcmUoJ3V0aWwnKTtcclxuZ2xvYmFsLlRleHRFbmNvZGVyID0gVGV4dEVuY29kZXI7XHJcbmdsb2JhbC5UZXh0RGVjb2RlciA9IFRleHREZWNvZGVyO1xyXG4iXSwibWFwcGluZ3MiOiI7O0FBS0E7QUFDQTtBQUNBQSxXQUFBLEdBQUtDLElBQUksQ0FBQyxxQkFBcUIsRUFBRSxPQUFPO0VBQUVDLFFBQVEsRUFBRTtBQUFNLENBQUMsQ0FBQyxDQUFDO0FBSDdEQyxPQUFBO0FBQW1DLFNBQUFILFlBQUE7RUFBQTtJQUFBSTtFQUFBLElBQUFELE9BQUE7RUFBQUgsV0FBQSxHQUFBQSxDQUFBLEtBQUFJLElBQUE7RUFBQSxPQUFBQSxJQUFBO0FBQUEsRUFKbkM7QUFDQTtBQUNBO0FBQ0E7QUFLQSxNQUFNO0VBQUVDLFdBQVc7RUFBRUM7QUFBWSxDQUFDLEdBQUdILE9BQU8sQ0FBQyxNQUFNLENBQUM7QUFDcERJLE1BQU0sQ0FBQ0YsV0FBVyxHQUFHQSxXQUFXO0FBQ2hDRSxNQUFNLENBQUNELFdBQVcsR0FBR0EsV0FBVyIsImlnbm9yZUxpc3QiOltdfQ==

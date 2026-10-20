@@ -15,6 +15,30 @@ test("same names in different countries use geographic identity; a conflicting s
   expect(resolve({ ...place(korea), address: "다른 주소" })).toBeNull();
 });
 
+// IDs from the supplied 01_existing_places sheet, not the older 375-place DB.
+test.each([
+  [291, "해운대 해수욕장", "부산"],
+  [292, "감천문화마을", "부산"],
+  [276, "첨성대", "경주"],
+  [367, "왓 아룬", "방콕"],
+  [126, "인트라무로스", "마닐라"],
+  [441, "익청 빌딩", "홍콩"],
+])("sheet ID %s resolves the correct photo for %s", (id, name, region) => {
+  const photo = images.find(image => image.placeName === name && image.region === region);
+  expect(photo.placeId).toBe(id);
+  const raw = { id, name, region, address: photo.address, latitude: photo.latitude, longitude: photo.longitude };
+  expect(resolvePlaceImage(raw)).toBe(photo);
+  expect(resolvePlaceImage({ ...raw, countryCode: photo.countryCode })).toBe(photo);
+  expect(withPlaceImage(raw)).toMatchObject({ id, name, region, imageUrl: photo.imageUrl });
+});
+
+test("remapped IDs still reject another place's identity instead of showing its photograph", () => {
+  const beach = images.find(image => image.placeName === "해운대 해수욕장");
+  const raw = { id: 441, name: beach.placeName, region: beach.region, address: beach.address, latitude: beach.latitude, longitude: beach.longitude };
+  expect(resolvePlaceImage(raw)).toBeNull();
+  expect(withPlaceImage(raw)).toBe(raw);
+});
+
 test("an unknown place, a name alone, invalid coordinates and ambiguous candidates never choose a photo", () => {
   expect(resolve({ name: korea.placeName })).toBeNull();
   expect(resolve({ ...place(korea), id: 999, name: "다른 장소" })).toBeNull();

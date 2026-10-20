@@ -1,0 +1,34 @@
+{
+  "source": {
+    "spreadsheetId": "1mTctuRa878S8pSW_XwhJJD5ylBkRRxECTrZAwPeSyJU",
+    "sheetId": 2102032234,
+    "tab": "01_existing_places",
+    "range": "'01_existing_places'!A1:M1000",
+    "checkedOn": "2026-10-20"
+  },
+  "sheetPlaces": 600,
+  "photos": 333,
+  "idsChanged": 296,
+  "oldIdsReassigned": 142,
+  "previouslyUnassignedIds": 154,
+  "formerlyBlockedPhotos": 80,
+  "photosResolvedBefore": 253,
+  "photosResolvedAfter": 333,
+  "remainingWithoutPhoto": 267,
+  "oldPhotosPreserved": true,
+  "allPhotoFilesExist": true,
+  "duplicateIds": 0,
+  "validation": {
+    "testSuites": 6,
+    "testsPassed": 72,
+    "eslint": "passed",
+    "productionBuild": "passed",
+    "diffCheck": "passed",
+    "photoFilesVerified": 333,
+    "initialDirtyFilesPreserved": 13,
+    "headUnchanged": true,
+    "committed": false,
+    "pushed": false,
+    "productionDeployed": false
+  }
+}

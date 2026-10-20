@@ -1,0 +1,3020 @@
+{
+  "source": {
+    "spreadsheetId": "1mTctuRa878S8pSW_XwhJJD5ylBkRRxECTrZAwPeSyJU",
+    "sheetId": 2102032234,
+    "tab": "01_existing_places",
+    "range": "'01_existing_places'!A1:M1000",
+    "checkedOn": "2026-10-20"
+  },
+  "sheetPlaces": 600,
+  "photos": 333,
+  "idsChanged": 296,
+  "oldIdsReassigned": 142,
+  "previouslyUnassignedIds": 154,
+  "formerlyBlockedPhotos": 80,
+  "photosResolvedBefore": 253,
+  "photosResolvedAfter": 333,
+  "remainingWithoutPhoto": 267,
+  "oldPhotosPreserved": true,
+  "allPhotoFilesExist": true,
+  "duplicateIds": 0,
+  "mapping": [
+    {
+      "sheetRow": 353,
+      "name": "도톤보리",
+      "region": "오사카",
+      "oldPlaceId": 2,
+      "placeId": 2,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-photos/dotonbori.jpg"
+    },
+    {
+      "sheetRow": 354,
+      "name": "오사카성",
+      "region": "오사카",
+      "oldPlaceId": 3,
+      "placeId": 3,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-3.jpg"
+    },
+    {
+      "sheetRow": 352,
+      "name": "유니버설 스튜디오 재팬",
+      "region": "오사카",
+      "oldPlaceId": 1,
+      "placeId": 1,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-1.jpg"
+    },
+    {
+      "sheetRow": 355,
+      "name": "우메다 공중정원",
+      "region": "오사카",
+      "oldPlaceId": 4,
+      "placeId": 4,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-4.jpg"
+    },
+    {
+      "sheetRow": 356,
+      "name": "하루카스 300",
+      "region": "오사카",
+      "oldPlaceId": 5,
+      "placeId": 5,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-5.jpg"
+    },
+    {
+      "sheetRow": 357,
+      "name": "신세카이",
+      "region": "오사카",
+      "oldPlaceId": 6,
+      "placeId": 6,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-6.jpg"
+    },
+    {
+      "sheetRow": 358,
+      "name": "오사카 가이유칸",
+      "region": "오사카",
+      "oldPlaceId": 7,
+      "placeId": 7,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-7.jpg"
+    },
+    {
+      "sheetRow": 359,
+      "name": "덴포잔 대관람차",
+      "region": "오사카",
+      "oldPlaceId": 8,
+      "placeId": 8,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-8.jpg"
+    },
+    {
+      "sheetRow": 364,
+      "name": "쓰텐카쿠",
+      "region": "오사카",
+      "oldPlaceId": 13,
+      "placeId": 13,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-13.jpg"
+    },
+    {
+      "sheetRow": 370,
+      "name": "시텐노지",
+      "region": "오사카",
+      "oldPlaceId": 19,
+      "placeId": 19,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-19.jpg"
+    },
+    {
+      "sheetRow": 503,
+      "name": "센소지",
+      "region": "도쿄",
+      "oldPlaceId": 27,
+      "placeId": 27,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-photos/sensoji.jpg"
+    },
+    {
+      "sheetRow": 505,
+      "name": "신주쿠 교엔",
+      "region": "도쿄",
+      "oldPlaceId": 29,
+      "placeId": 29,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-photos/shinjuku-gyoen.jpg"
+    },
+    {
+      "sheetRow": 527,
+      "name": "도쿄 스카이트리",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 51,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-photos/skytree.jpg"
+    },
+    {
+      "sheetRow": 502,
+      "name": "도쿄 타워",
+      "region": "도쿄",
+      "oldPlaceId": 26,
+      "placeId": 26,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-26.jpg"
+    },
+    {
+      "sheetRow": 506,
+      "name": "메이지 신궁",
+      "region": "도쿄",
+      "oldPlaceId": 30,
+      "placeId": 30,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-30.jpg"
+    },
+    {
+      "sheetRow": 512,
+      "name": "롯폰기 힐즈",
+      "region": "도쿄",
+      "oldPlaceId": 36,
+      "placeId": 36,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-36.jpg"
+    },
+    {
+      "sheetRow": 513,
+      "name": "우에노 온시 공원",
+      "region": "도쿄",
+      "oldPlaceId": 37,
+      "placeId": 37,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-37.jpg"
+    },
+    {
+      "sheetRow": 518,
+      "name": "도쿄역 마루노우치",
+      "region": "도쿄",
+      "oldPlaceId": 42,
+      "placeId": 42,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-42.jpg"
+    },
+    {
+      "sheetRow": 521,
+      "name": "지브리 미술관",
+      "region": "도쿄",
+      "oldPlaceId": 45,
+      "placeId": 45,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-45.jpg"
+    },
+    {
+      "sheetRow": 523,
+      "name": "도쿄 도청 전망대",
+      "region": "도쿄",
+      "oldPlaceId": 47,
+      "placeId": 47,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-47.jpg"
+    },
+    {
+      "sheetRow": 524,
+      "name": "이노카시라 온시 공원",
+      "region": "도쿄",
+      "oldPlaceId": 48,
+      "placeId": 48,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-48.jpg"
+    },
+    {
+      "sheetRow": 550,
+      "name": "레인보우 브리지",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 74,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-74.jpg"
+    },
+    {
+      "sheetRow": 551,
+      "name": "하마리큐 은사정원",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 75,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-75-c6e28f05.jpg"
+    },
+    {
+      "sheetRow": 553,
+      "name": "리쿠기엔",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 77,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-77.jpg"
+    },
+    {
+      "sheetRow": 562,
+      "name": "조조지",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 86,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-86.jpg"
+    },
+    {
+      "sheetRow": 564,
+      "name": "간다묘진",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 88,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-88.jpg"
+    },
+    {
+      "sheetRow": 565,
+      "name": "네즈신사",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 89,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-89.jpg"
+    },
+    {
+      "sheetRow": 567,
+      "name": "츠키지 혼간지",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 91,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-91.jpg"
+    },
+    {
+      "sheetRow": 568,
+      "name": "도쿄국립박물관",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 92,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-92.jpg"
+    },
+    {
+      "sheetRow": 575,
+      "name": "국립신미술관",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 99,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-99.jpg"
+    },
+    {
+      "sheetRow": 577,
+      "name": "일본과학미래관",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 101,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-101.jpg"
+    },
+    {
+      "sheetRow": 582,
+      "name": "우에노동물원",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 106,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-106.jpg"
+    },
+    {
+      "sheetRow": 594,
+      "name": "가부키자",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 118,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-118.jpg"
+    },
+    {
+      "sheetRow": 598,
+      "name": "도쿄 국제포럼",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 122,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-122.jpg"
+    },
+    {
+      "sheetRow": 302,
+      "name": "인트라무로스",
+      "region": "마닐라",
+      "oldPlaceId": 51,
+      "placeId": 126,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/ph-126.jpg"
+    },
+    {
+      "sheetRow": 303,
+      "name": "리잘 공원",
+      "region": "마닐라",
+      "oldPlaceId": 52,
+      "placeId": 127,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/ph-127.jpg"
+    },
+    {
+      "sheetRow": 306,
+      "name": "산 아구스틴 성당",
+      "region": "마닐라",
+      "oldPlaceId": 55,
+      "placeId": 130,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/ph-130.jpg"
+    },
+    {
+      "sheetRow": 307,
+      "name": "요새 산티아고",
+      "region": "마닐라",
+      "oldPlaceId": 56,
+      "placeId": 131,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/ph-131.jpg"
+    },
+    {
+      "sheetRow": 311,
+      "name": "마닐라 대성당",
+      "region": "마닐라",
+      "oldPlaceId": 60,
+      "placeId": 135,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/ph-135.jpg"
+    },
+    {
+      "sheetRow": 309,
+      "name": "몰 오브 아시아",
+      "region": "마닐라",
+      "oldPlaceId": 58,
+      "placeId": 133,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/ph-133.jpg"
+    },
+    {
+      "sheetRow": 317,
+      "name": "파코 공원",
+      "region": "마닐라",
+      "oldPlaceId": 66,
+      "placeId": 141,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/ph-141.jpg"
+    },
+    {
+      "sheetRow": 52,
+      "name": "산 페드로 요새",
+      "region": "세부",
+      "oldPlaceId": 76,
+      "placeId": 151,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/ph-151.jpg"
+    },
+    {
+      "sheetRow": 53,
+      "name": "마젤란의 십자가",
+      "region": "세부",
+      "oldPlaceId": 77,
+      "placeId": 152,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/ph-152.jpg"
+    },
+    {
+      "sheetRow": 54,
+      "name": "산토 니뇨 성당",
+      "region": "세부",
+      "oldPlaceId": 78,
+      "placeId": 153,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/ph-153.jpg"
+    },
+    {
+      "sheetRow": 59,
+      "name": "카와산 폭포",
+      "region": "세부",
+      "oldPlaceId": 83,
+      "placeId": 158,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/ph-158.jpg"
+    },
+    {
+      "sheetRow": 402,
+      "name": "경복궁 (향원정)",
+      "region": "서울",
+      "oldPlaceId": 101,
+      "placeId": 176,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-176.jpg"
+    },
+    {
+      "sheetRow": 403,
+      "name": "북촌한옥마을",
+      "region": "서울",
+      "oldPlaceId": 102,
+      "placeId": 177,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-photos/bukchon.jpg"
+    },
+    {
+      "sheetRow": 409,
+      "name": "광장시장",
+      "region": "서울",
+      "oldPlaceId": 108,
+      "placeId": 183,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-photos/gwangjang.jpg"
+    },
+    {
+      "sheetRow": 410,
+      "name": "남산서울타워",
+      "region": "서울",
+      "oldPlaceId": 109,
+      "placeId": 184,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-photos/n-seoul-tower.jpg"
+    },
+    {
+      "sheetRow": 416,
+      "name": "잠실 롯데월드 어드벤처",
+      "region": "서울",
+      "oldPlaceId": 115,
+      "placeId": 190,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-photos/lotte-world.jpg"
+    },
+    {
+      "sheetRow": 421,
+      "name": "서울숲 공원",
+      "region": "서울",
+      "oldPlaceId": 120,
+      "placeId": 195,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-photos/seoul-forest.jpg"
+    },
+    {
+      "sheetRow": 407,
+      "name": "동대문디자인플라자 (DDP)",
+      "region": "서울",
+      "oldPlaceId": 106,
+      "placeId": 181,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-181.jpg"
+    },
+    {
+      "sheetRow": 422,
+      "name": "창덕궁",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 196,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-196.jpg"
+    },
+    {
+      "sheetRow": 423,
+      "name": "창경궁",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 197,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-197-1605eee1.jpg"
+    },
+    {
+      "sheetRow": 424,
+      "name": "덕수궁",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 198,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-198.jpg"
+    },
+    {
+      "sheetRow": 425,
+      "name": "종묘",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 199,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-199.jpg"
+    },
+    {
+      "sheetRow": 426,
+      "name": "국립중앙박물관",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 200,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-200.jpg"
+    },
+    {
+      "sheetRow": 431,
+      "name": "전쟁기념관",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 205,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-205.jpg"
+    },
+    {
+      "sheetRow": 432,
+      "name": "서대문형무소역사관",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 206,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-206.jpg"
+    },
+    {
+      "sheetRow": 441,
+      "name": "운현궁",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 215,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-215.jpg"
+    },
+    {
+      "sheetRow": 442,
+      "name": "남산골한옥마을",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 216,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-216.jpg"
+    },
+    {
+      "sheetRow": 445,
+      "name": "흥인지문",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 219,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-219.jpg"
+    },
+    {
+      "sheetRow": 446,
+      "name": "숭례문",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 220,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-220.jpg"
+    },
+    {
+      "sheetRow": 447,
+      "name": "조계사",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 221,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-221.jpg"
+    },
+    {
+      "sheetRow": 448,
+      "name": "봉은사",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 222,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-222-b2b76cb5.jpg"
+    },
+    {
+      "sheetRow": 465,
+      "name": "올림픽공원",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 239,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-239.jpg"
+    },
+    {
+      "sheetRow": 478,
+      "name": "서울어린이대공원",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 252,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-252-7142a058.jpg"
+    },
+    {
+      "sheetRow": 479,
+      "name": "노들섬",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 253,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-253.jpg"
+    },
+    {
+      "sheetRow": 494,
+      "name": "세빛섬",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 268,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-268.jpg"
+    },
+    {
+      "sheetRow": 127,
+      "name": "불국사",
+      "region": "경주",
+      "oldPlaceId": 121,
+      "placeId": 271,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-271.jpg"
+    },
+    {
+      "sheetRow": 128,
+      "name": "동궁과 월지 (안압지)",
+      "region": "경주",
+      "oldPlaceId": 122,
+      "placeId": 272,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-272.jpg"
+    },
+    {
+      "sheetRow": 132,
+      "name": "첨성대",
+      "region": "경주",
+      "oldPlaceId": 126,
+      "placeId": 276,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-276.jpg"
+    },
+    {
+      "sheetRow": 133,
+      "name": "월정교",
+      "region": "경주",
+      "oldPlaceId": 127,
+      "placeId": 277,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-277.jpg"
+    },
+    {
+      "sheetRow": 136,
+      "name": "석굴암",
+      "region": "경주",
+      "oldPlaceId": 130,
+      "placeId": 280,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-280.jpg"
+    },
+    {
+      "sheetRow": 141,
+      "name": "양동마을",
+      "region": "경주",
+      "oldPlaceId": 135,
+      "placeId": 285,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-285.jpg"
+    },
+    {
+      "sheetRow": 27,
+      "name": "해운대 해수욕장",
+      "region": "부산",
+      "oldPlaceId": 141,
+      "placeId": 291,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-photos/haeundae.jpg"
+    },
+    {
+      "sheetRow": 28,
+      "name": "감천문화마을",
+      "region": "부산",
+      "oldPlaceId": 142,
+      "placeId": 292,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-photos/gamcheon.jpg"
+    },
+    {
+      "sheetRow": 31,
+      "name": "광안리 해수욕장",
+      "region": "부산",
+      "oldPlaceId": 145,
+      "placeId": 295,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-photos/gwangalli.jpg"
+    },
+    {
+      "sheetRow": 29,
+      "name": "자갈치시장",
+      "region": "부산",
+      "oldPlaceId": 143,
+      "placeId": 293,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-293.jpg"
+    },
+    {
+      "sheetRow": 32,
+      "name": "태종대 유원지",
+      "region": "부산",
+      "oldPlaceId": 146,
+      "placeId": 296,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-296.jpg"
+    },
+    {
+      "sheetRow": 35,
+      "name": "해동용궁사",
+      "region": "부산",
+      "oldPlaceId": 149,
+      "placeId": 299,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-299.jpg"
+    },
+    {
+      "sheetRow": 252,
+      "name": "성산일출봉",
+      "region": "제주",
+      "oldPlaceId": 161,
+      "placeId": 311,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-photos/seongsan.jpg"
+    },
+    {
+      "sheetRow": 253,
+      "name": "협재 해수욕장",
+      "region": "제주",
+      "oldPlaceId": 162,
+      "placeId": 312,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-photos/hyeopjae.jpg"
+    },
+    {
+      "sheetRow": 254,
+      "name": "제주동문재래시장 (야시장)",
+      "region": "제주",
+      "oldPlaceId": 163,
+      "placeId": 313,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-photos/dongmun.jpg"
+    },
+    {
+      "sheetRow": 259,
+      "name": "성읍민속마을",
+      "region": "제주",
+      "oldPlaceId": 168,
+      "placeId": 318,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-318.jpg"
+    },
+    {
+      "sheetRow": 266,
+      "name": "천제연 폭포",
+      "region": "제주",
+      "oldPlaceId": 175,
+      "placeId": 325,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-325.jpg"
+    },
+    {
+      "sheetRow": 2,
+      "name": "룸피니 공원",
+      "region": "방콕",
+      "oldPlaceId": 201,
+      "placeId": 351,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-351.jpg"
+    },
+    {
+      "sheetRow": 3,
+      "name": "벤자키티 공원",
+      "region": "방콕",
+      "oldPlaceId": 202,
+      "placeId": 352,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-352.jpg"
+    },
+    {
+      "sheetRow": 4,
+      "name": "짐 톰슨 하우스",
+      "region": "방콕",
+      "oldPlaceId": 203,
+      "placeId": 353,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-353.jpg"
+    },
+    {
+      "sheetRow": 5,
+      "name": "왓 포",
+      "region": "방콕",
+      "oldPlaceId": 204,
+      "placeId": 354,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-354.jpg"
+    },
+    {
+      "sheetRow": 7,
+      "name": "짜뚜짝 주말시장",
+      "region": "방콕",
+      "oldPlaceId": 206,
+      "placeId": 356,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-356.jpg"
+    },
+    {
+      "sheetRow": 18,
+      "name": "왓 아룬",
+      "region": "방콕",
+      "oldPlaceId": 217,
+      "placeId": 367,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/th-367.jpg"
+    },
+    {
+      "sheetRow": 277,
+      "name": "게티 센터",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 226,
+      "placeId": 376,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-376.jpg"
+    },
+    {
+      "sheetRow": 282,
+      "name": "그리피스 천문대",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 231,
+      "placeId": 381,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-381.jpg"
+    },
+    {
+      "sheetRow": 283,
+      "name": "산타모니카 피어",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 232,
+      "placeId": 382,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-382.jpg"
+    },
+    {
+      "sheetRow": 284,
+      "name": "유니버설 스튜디오 할리우드",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 233,
+      "placeId": 383,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-383.jpg"
+    },
+    {
+      "sheetRow": 293,
+      "name": "더 브로드",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 242,
+      "placeId": 392,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-392.jpg"
+    },
+    {
+      "sheetRow": 327,
+      "name": "센트럴 파크",
+      "region": "뉴욕",
+      "oldPlaceId": 251,
+      "placeId": 401,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-401.jpg"
+    },
+    {
+      "sheetRow": 328,
+      "name": "하이라인 공원",
+      "region": "뉴욕",
+      "oldPlaceId": 252,
+      "placeId": 402,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-402.jpg"
+    },
+    {
+      "sheetRow": 329,
+      "name": "거버너스 아일랜드",
+      "region": "뉴욕",
+      "oldPlaceId": 253,
+      "placeId": 403,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-403.jpg"
+    },
+    {
+      "sheetRow": 330,
+      "name": "브루클린 식물원",
+      "region": "뉴욕",
+      "oldPlaceId": 254,
+      "placeId": 404,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-404.jpg"
+    },
+    {
+      "sheetRow": 331,
+      "name": "브라이언트 파크",
+      "region": "뉴욕",
+      "oldPlaceId": 255,
+      "placeId": 405,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-405.jpg"
+    },
+    {
+      "sheetRow": 332,
+      "name": "브루클린 브리지",
+      "region": "뉴욕",
+      "oldPlaceId": 256,
+      "placeId": 406,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-406.jpg"
+    },
+    {
+      "sheetRow": 343,
+      "name": "타임스퀘어",
+      "region": "뉴욕",
+      "oldPlaceId": 267,
+      "placeId": 417,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-417.jpg"
+    },
+    {
+      "sheetRow": 345,
+      "name": "리틀 아일랜드",
+      "region": "뉴욕",
+      "oldPlaceId": 269,
+      "placeId": 419,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-419.jpg"
+    },
+    {
+      "sheetRow": 152,
+      "name": "난리안 정원",
+      "region": "홍콩",
+      "oldPlaceId": 276,
+      "placeId": 426,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-426.jpg"
+    },
+    {
+      "sheetRow": 153,
+      "name": "리펄스 베이",
+      "region": "홍콩",
+      "oldPlaceId": 277,
+      "placeId": 427,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-427.jpg"
+    },
+    {
+      "sheetRow": 155,
+      "name": "웡타이신 사원",
+      "region": "홍콩",
+      "oldPlaceId": 279,
+      "placeId": 429,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-429.jpg"
+    },
+    {
+      "sheetRow": 156,
+      "name": "빅토리아 파크",
+      "region": "홍콩",
+      "oldPlaceId": 280,
+      "placeId": 430,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-430.jpg"
+    },
+    {
+      "sheetRow": 158,
+      "name": "오션 파크",
+      "region": "홍콩",
+      "oldPlaceId": 282,
+      "placeId": 432,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-432.jpg"
+    },
+    {
+      "sheetRow": 159,
+      "name": "옹핑 360",
+      "region": "홍콩",
+      "oldPlaceId": 283,
+      "placeId": 433,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-433.jpg"
+    },
+    {
+      "sheetRow": 160,
+      "name": "미드레벨 에스컬레이터",
+      "region": "홍콩",
+      "oldPlaceId": 284,
+      "placeId": 434,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-434.jpg"
+    },
+    {
+      "sheetRow": 168,
+      "name": "초이홍 아파트",
+      "region": "홍콩",
+      "oldPlaceId": 292,
+      "placeId": 442,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-442.jpg"
+    },
+    {
+      "sheetRow": 171,
+      "name": "스타의 거리",
+      "region": "홍콩",
+      "oldPlaceId": 295,
+      "placeId": 445,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-445.jpg"
+    },
+    {
+      "sheetRow": 177,
+      "name": "빅토리아 피크",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 451,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-451.jpg"
+    },
+    {
+      "sheetRow": 180,
+      "name": "홍콩 디즈니랜드",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 454,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-454.jpg"
+    },
+    {
+      "sheetRow": 181,
+      "name": "M+",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 455,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-455.jpg"
+    },
+    {
+      "sheetRow": 184,
+      "name": "카오룽 공원",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 458,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-458.jpg"
+    },
+    {
+      "sheetRow": 192,
+      "name": "만모사원",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 466,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-466.jpg"
+    },
+    {
+      "sheetRow": 193,
+      "name": "치린 수도원",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 467,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-467.jpg"
+    },
+    {
+      "sheetRow": 194,
+      "name": "만불사",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 468,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-468.jpg"
+    },
+    {
+      "sheetRow": 196,
+      "name": "천단대불",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 470,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-470.jpg"
+    },
+    {
+      "sheetRow": 212,
+      "name": "홍콩 시계탑",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 486,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-486.jpg"
+    },
+    {
+      "sheetRow": 207,
+      "name": "홍콩공원",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 481,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-481.jpg"
+    },
+    {
+      "sheetRow": 208,
+      "name": "홍콩동식물공원",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 482,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-482.jpg"
+    },
+    {
+      "sheetRow": 245,
+      "name": "홍콩 철도박물관",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 519,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-519.jpg"
+    },
+    {
+      "sheetRow": 77,
+      "name": "왓 우몽",
+      "region": "치앙마이",
+      "oldPlaceId": 301,
+      "placeId": 526,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-526.jpg"
+    },
+    {
+      "sheetRow": 82,
+      "name": "도이인타논 국립공원",
+      "region": "치앙마이",
+      "oldPlaceId": 306,
+      "placeId": 531,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-531.jpg"
+    },
+    {
+      "sheetRow": 93,
+      "name": "왓 수안 독",
+      "region": "치앙마이",
+      "oldPlaceId": 317,
+      "placeId": 542,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-542.jpg"
+    },
+    {
+      "sheetRow": 96,
+      "name": "도이수텝 야경",
+      "region": "치앙마이",
+      "oldPlaceId": 320,
+      "placeId": 545,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-545.jpg"
+    },
+    {
+      "sheetRow": 118,
+      "name": "바나힐 골든 브릿지",
+      "region": "다낭",
+      "oldPlaceId": 367,
+      "placeId": 592,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/vn-592.jpg"
+    },
+    {
+      "sheetRow": 377,
+      "name": "사오 비치",
+      "region": "푸꾸옥",
+      "oldPlaceId": 326,
+      "placeId": 551,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/vn-551.jpg"
+    },
+    {
+      "sheetRow": 367,
+      "name": "린쿠 프리미엄 아울렛",
+      "region": "오사카",
+      "oldPlaceId": 16,
+      "placeId": 16,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-16-27c562dc.jpg"
+    },
+    {
+      "sheetRow": 361,
+      "name": "햅파이브 관람차",
+      "region": "오사카",
+      "oldPlaceId": 10,
+      "placeId": 10,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-10-add027c7.jpg"
+    },
+    {
+      "sheetRow": 363,
+      "name": "덴덴타운",
+      "region": "오사카",
+      "oldPlaceId": 12,
+      "placeId": 12,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-12-7d042db8.jpg"
+    },
+    {
+      "sheetRow": 372,
+      "name": "스위소텔 난카이 오사카",
+      "region": "오사카",
+      "oldPlaceId": 21,
+      "placeId": 21,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-21-0367a238.jpg"
+    },
+    {
+      "sheetRow": 504,
+      "name": "시부야 스카이",
+      "region": "도쿄",
+      "oldPlaceId": 28,
+      "placeId": 28,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-28-5dc585dd.jpg"
+    },
+    {
+      "sheetRow": 511,
+      "name": "아키하바라 전자상가",
+      "region": "도쿄",
+      "oldPlaceId": 35,
+      "placeId": 35,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-35-23c85aa7.png"
+    },
+    {
+      "sheetRow": 514,
+      "name": "긴자 식스",
+      "region": "도쿄",
+      "oldPlaceId": 38,
+      "placeId": 38,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-38-c8cf2826.jpg"
+    },
+    {
+      "sheetRow": 516,
+      "name": "오모테산도 힐즈",
+      "region": "도쿄",
+      "oldPlaceId": 40,
+      "placeId": 40,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-40-89aba671.jpg"
+    },
+    {
+      "sheetRow": 520,
+      "name": "메구로강 산책로",
+      "region": "도쿄",
+      "oldPlaceId": 44,
+      "placeId": 44,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-44-f9925c36.jpg"
+    },
+    {
+      "sheetRow": 522,
+      "name": "호텔 친잔소 도쿄",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 46,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-46-54016c2c.jpg"
+    },
+    {
+      "sheetRow": 526,
+      "name": "맥셀 아쿠아 파크 시나가와",
+      "region": "도쿄",
+      "oldPlaceId": 50,
+      "placeId": 50,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-50-ea8c166e.jpg"
+    },
+    {
+      "sheetRow": 528,
+      "name": "시부야 스크램블 교차로",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 52,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-52-d989cab0.jpg"
+    },
+    {
+      "sheetRow": 529,
+      "name": "가부키초",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 53,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-53-87860b4a.jpg"
+    },
+    {
+      "sheetRow": 530,
+      "name": "신주쿠 골든가이",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 54,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-54-d8088c9c.jpg"
+    },
+    {
+      "sheetRow": 532,
+      "name": "가구라자카",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 56,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-56-e9bd3718.jpg"
+    },
+    {
+      "sheetRow": 535,
+      "name": "아메요코",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 59,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-59-fd6df9f6.jpg"
+    },
+    {
+      "sheetRow": 537,
+      "name": "고엔지",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 61,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-61-a520496c.jpg"
+    },
+    {
+      "sheetRow": 538,
+      "name": "시모키타자와",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 62,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-62-051cc6c6.jpg"
+    },
+    {
+      "sheetRow": 539,
+      "name": "나카노 브로드웨이",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 63,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-63-714f3dbe.jpg"
+    },
+    {
+      "sheetRow": 543,
+      "name": "니혼바시",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 67,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-67-032cf6dd.jpg"
+    },
+    {
+      "sheetRow": 545,
+      "name": "도요스 시장",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 69,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-69-0a488fb9.jpg"
+    },
+    {
+      "sheetRow": 547,
+      "name": "다이버시티 도쿄 플라자",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 71,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-71-f33926f8.jpg"
+    },
+    {
+      "sheetRow": 548,
+      "name": "도쿄 조이폴리스",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 72,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-72-56aa6cb8.jpg"
+    },
+    {
+      "sheetRow": 554,
+      "name": "기요스미 정원",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 78,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-78-30582d0d.jpg"
+    },
+    {
+      "sheetRow": 556,
+      "name": "국영 쇼와기념공원",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 80,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-80-50495b5c.jpg"
+    },
+    {
+      "sheetRow": 557,
+      "name": "다카오산",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 81,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-81-b5c9497c.jpg"
+    },
+    {
+      "sheetRow": 559,
+      "name": "가사이 임해공원",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 83,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-83-760784bc.jpg"
+    },
+    {
+      "sheetRow": 563,
+      "name": "고토쿠지",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 87,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-87-bc468fdb.jpg"
+    },
+    {
+      "sheetRow": 566,
+      "name": "히에신사",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 90,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-90-e8c45df5.jpg"
+    },
+    {
+      "sheetRow": 569,
+      "name": "국립과학박물관",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 93,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-93-fe8ffddf.jpg"
+    },
+    {
+      "sheetRow": 570,
+      "name": "에도도쿄 건축박물관",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 94,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-94-de68ce60.jpg"
+    },
+    {
+      "sheetRow": 571,
+      "name": "스미다 호쿠사이 미술관",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 95,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-95-fc628354.jpg"
+    },
+    {
+      "sheetRow": 572,
+      "name": "모리미술관",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 96,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-96-8ec4747b.png"
+    },
+    {
+      "sheetRow": 573,
+      "name": "네즈미술관",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 97,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-97-e1625ade.jpg"
+    },
+    {
+      "sheetRow": 583,
+      "name": "다마동물공원",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 107,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-107-5e787062.jpg"
+    },
+    {
+      "sheetRow": 584,
+      "name": "선샤인 수족관",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 108,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-108-ce6c6221.jpg"
+    },
+    {
+      "sheetRow": 585,
+      "name": "도쿄돔시티",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 109,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-109-d8dd90c9.jpg"
+    },
+    {
+      "sheetRow": 586,
+      "name": "산리오 퓨로랜드",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 110,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-110-74fe4864.jpg"
+    },
+    {
+      "sheetRow": 587,
+      "name": "요미우리랜드",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 111,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-111-87c3deea.jpg"
+    },
+    {
+      "sheetRow": 588,
+      "name": "가사이 임해수족원",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 112,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-112-ec5eb458.jpg"
+    },
+    {
+      "sheetRow": 592,
+      "name": "도쿄 미드타운",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 116,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-116-7a5bc7c3.jpg"
+    },
+    {
+      "sheetRow": 593,
+      "name": "도쿄 미드타운 히비야",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 117,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-117-c954cfc9.jpg"
+    },
+    {
+      "sheetRow": 601,
+      "name": "아자부다이 힐즈",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 125,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-125-d9189eee.jpg"
+    },
+    {
+      "sheetRow": 305,
+      "name": "마닐라 베이 산책로",
+      "region": "마닐라",
+      "oldPlaceId": 54,
+      "placeId": 129,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/ph-129-dc67ba80.jpg"
+    },
+    {
+      "sheetRow": 308,
+      "name": "오카다 마닐라",
+      "region": "마닐라",
+      "oldPlaceId": 57,
+      "placeId": 132,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/ph-132-2d9cdded.jpg"
+    },
+    {
+      "sheetRow": 310,
+      "name": "보니파시오 글로벌 시티",
+      "region": "마닐라",
+      "oldPlaceId": 59,
+      "placeId": 134,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/ph-134-5c653fe1.jpg"
+    },
+    {
+      "sheetRow": 312,
+      "name": "베니스 그랜드 캐널 몰",
+      "region": "마닐라",
+      "oldPlaceId": 61,
+      "placeId": 136,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/ph-136-57aa4f45.jpg"
+    },
+    {
+      "sheetRow": 313,
+      "name": "차이나타운 (비논도)",
+      "region": "마닐라",
+      "oldPlaceId": 62,
+      "placeId": 137,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/ph-137-46e6333f.jpg"
+    },
+    {
+      "sheetRow": 314,
+      "name": "그린벨트 쇼핑몰",
+      "region": "마닐라",
+      "oldPlaceId": 63,
+      "placeId": 138,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/ph-138-98de79b3.jpg"
+    },
+    {
+      "sheetRow": 320,
+      "name": "국립 미술관",
+      "region": "마닐라",
+      "oldPlaceId": 69,
+      "placeId": 144,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/ph-144-d6d50b67.jpg"
+    },
+    {
+      "sheetRow": 321,
+      "name": "라 메사 에코파크",
+      "region": "마닐라",
+      "oldPlaceId": 70,
+      "placeId": 145,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/ph-145-8eebb709.jpg"
+    },
+    {
+      "sheetRow": 325,
+      "name": "뉴포트 월드 리조트",
+      "region": "마닐라",
+      "oldPlaceId": 74,
+      "placeId": 149,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/ph-149-434f85d4.jpg"
+    },
+    {
+      "sheetRow": 56,
+      "name": "레아 신전",
+      "region": "세부",
+      "oldPlaceId": 80,
+      "placeId": 155,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/ph-155-d29a0acc.jpg"
+    },
+    {
+      "sheetRow": 8,
+      "name": "라차담넌 무에타이 경기장",
+      "region": "방콕",
+      "oldPlaceId": 207,
+      "placeId": 357,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-357-1b354c93.jpg"
+    },
+    {
+      "sheetRow": 11,
+      "name": "씨라이프 방콕 오션월드",
+      "region": "방콕",
+      "oldPlaceId": 210,
+      "placeId": 360,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-360-a05f2d94.jpg"
+    },
+    {
+      "sheetRow": 12,
+      "name": "야오와랏 야시장",
+      "region": "방콕",
+      "oldPlaceId": 211,
+      "placeId": 361,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-361-1f759197.jpg"
+    },
+    {
+      "sheetRow": 13,
+      "name": "팁싸마이",
+      "region": "방콕",
+      "oldPlaceId": 212,
+      "placeId": 362,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-362-427b9a7c.jpg"
+    },
+    {
+      "sheetRow": 14,
+      "name": "제이 파이",
+      "region": "방콕",
+      "oldPlaceId": 213,
+      "placeId": 363,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-363-1a774a8b.jpg"
+    },
+    {
+      "sheetRow": 16,
+      "name": "터미널 이십일 피어 이십일",
+      "region": "방콕",
+      "oldPlaceId": 215,
+      "placeId": 365,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-365-23c847e6.jpg"
+    },
+    {
+      "sheetRow": 17,
+      "name": "왕궁과 에메랄드 사원",
+      "region": "방콕",
+      "oldPlaceId": 216,
+      "placeId": 366,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-366-cc6bb226.jpg"
+    },
+    {
+      "sheetRow": 21,
+      "name": "탈랏 노이",
+      "region": "방콕",
+      "oldPlaceId": 220,
+      "placeId": 370,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-370-6fef39e4.jpg"
+    },
+    {
+      "sheetRow": 22,
+      "name": "만다린 오리엔탈 방콕",
+      "region": "방콕",
+      "oldPlaceId": 221,
+      "placeId": 371,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/th-371-5135b0d4.jpg"
+    },
+    {
+      "sheetRow": 279,
+      "name": "데스칸소 가든",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 228,
+      "placeId": 378,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-378-2787d618.jpg"
+    },
+    {
+      "sheetRow": 280,
+      "name": "베니스 운하",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 229,
+      "placeId": 379,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-379-9c58cbac.jpg"
+    },
+    {
+      "sheetRow": 285,
+      "name": "러니언 캐니언 공원",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 234,
+      "placeId": 384,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-384-a7cbeefa.jpg"
+    },
+    {
+      "sheetRow": 287,
+      "name": "그랜드 센트럴 마켓",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 236,
+      "placeId": 386,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-386-cb41605b.jpg"
+    },
+    {
+      "sheetRow": 288,
+      "name": "오리지널 파머스 마켓",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 237,
+      "placeId": 387,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-387-06ee8576.jpg"
+    },
+    {
+      "sheetRow": 289,
+      "name": "필립 더 오리지널",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 238,
+      "placeId": 388,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-388-8ed12f7e.jpg"
+    },
+    {
+      "sheetRow": 295,
+      "name": "할리우드 사인 전망 포인트",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 244,
+      "placeId": 394,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-394-710cefbb.jpg"
+    },
+    {
+      "sheetRow": 296,
+      "name": "라스트 북스토어",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 245,
+      "placeId": 395,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-395-18ab9984.jpg"
+    },
+    {
+      "sheetRow": 297,
+      "name": "호텔 카사 델 마르",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 246,
+      "placeId": 396,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-396-aa7291fc.jpg"
+    },
+    {
+      "sheetRow": 300,
+      "name": "페어몬트 미라마 호텔 앤 방갈로",
+      "region": "로스앤젤레스",
+      "oldPlaceId": 249,
+      "placeId": 399,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-399-b19f4ce7.jpg"
+    },
+    {
+      "sheetRow": 333,
+      "name": "루스벨트 아일랜드 트램웨이",
+      "region": "뉴욕",
+      "oldPlaceId": 257,
+      "placeId": 407,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-407-0d468091.jpg"
+    },
+    {
+      "sheetRow": 335,
+      "name": "첼시 피어스",
+      "region": "뉴욕",
+      "oldPlaceId": 259,
+      "placeId": 409,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-409-60b5a948.jpg"
+    },
+    {
+      "sheetRow": 336,
+      "name": "스태튼아일랜드 페리",
+      "region": "뉴욕",
+      "oldPlaceId": 260,
+      "placeId": 410,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-410-5f1aa49e.jpg"
+    },
+    {
+      "sheetRow": 337,
+      "name": "첼시 마켓",
+      "region": "뉴욕",
+      "oldPlaceId": 261,
+      "placeId": 411,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-411-b31a5b7a.jpg"
+    },
+    {
+      "sheetRow": 338,
+      "name": "카츠 델리",
+      "region": "뉴욕",
+      "oldPlaceId": 262,
+      "placeId": 412,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-412-fd86e537.jpg"
+    },
+    {
+      "sheetRow": 340,
+      "name": "퀸즈 야시장",
+      "region": "뉴욕",
+      "oldPlaceId": 264,
+      "placeId": 414,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-414-56cdeec1.jpg"
+    },
+    {
+      "sheetRow": 341,
+      "name": "피터 루거 스테이크하우스",
+      "region": "뉴욕",
+      "oldPlaceId": 265,
+      "placeId": 415,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-415-b12f8014.jpg"
+    },
+    {
+      "sheetRow": 342,
+      "name": "덤보",
+      "region": "뉴욕",
+      "oldPlaceId": 266,
+      "placeId": 416,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-416-5ebc6036.jpg"
+    },
+    {
+      "sheetRow": 344,
+      "name": "서밋 원 밴더빌트",
+      "region": "뉴욕",
+      "oldPlaceId": 268,
+      "placeId": 418,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-418-c1d8d908.jpg"
+    },
+    {
+      "sheetRow": 346,
+      "name": "탑 오브 더 록",
+      "region": "뉴욕",
+      "oldPlaceId": 270,
+      "placeId": 420,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-420-b663b3c6.jpg"
+    },
+    {
+      "sheetRow": 350,
+      "name": "아만 뉴욕",
+      "region": "뉴욕",
+      "oldPlaceId": 274,
+      "placeId": 424,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-424-b4c3ce6d.jpg"
+    },
+    {
+      "sheetRow": 351,
+      "name": "파크 하얏트 뉴욕",
+      "region": "뉴욕",
+      "oldPlaceId": 275,
+      "placeId": 425,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/us-425-38c95894.png"
+    },
+    {
+      "sheetRow": 157,
+      "name": "드래곤스 백",
+      "region": "홍콩",
+      "oldPlaceId": 281,
+      "placeId": 431,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-431-1151bd10.jpg"
+    },
+    {
+      "sheetRow": 161,
+      "name": "스타 페리",
+      "region": "홍콩",
+      "oldPlaceId": 285,
+      "placeId": 435,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-435-d9e4d414.jpg"
+    },
+    {
+      "sheetRow": 162,
+      "name": "팀호완",
+      "region": "홍콩",
+      "oldPlaceId": 286,
+      "placeId": 436,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-436-598d1c43.jpg"
+    },
+    {
+      "sheetRow": 163,
+      "name": "템플 스트리트 야시장",
+      "region": "홍콩",
+      "oldPlaceId": 287,
+      "placeId": 437,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-437-70866ca0.jpg"
+    },
+    {
+      "sheetRow": 164,
+      "name": "막스 누들",
+      "region": "홍콩",
+      "oldPlaceId": 288,
+      "placeId": 438,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-438-ae8bf66e.jpg"
+    },
+    {
+      "sheetRow": 165,
+      "name": "란콰이펑",
+      "region": "홍콩",
+      "oldPlaceId": 289,
+      "placeId": 439,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-439-24339164.jpg"
+    },
+    {
+      "sheetRow": 167,
+      "name": "익청 빌딩",
+      "region": "홍콩",
+      "oldPlaceId": 291,
+      "placeId": 441,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-441-54f502bc.jpg"
+    },
+    {
+      "sheetRow": 169,
+      "name": "인스타그램 피어",
+      "region": "홍콩",
+      "oldPlaceId": 293,
+      "placeId": 443,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-443-521ddfb5.jpg"
+    },
+    {
+      "sheetRow": 170,
+      "name": "PMQ",
+      "region": "홍콩",
+      "oldPlaceId": 294,
+      "placeId": 444,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-444-6467c2b5.jpg"
+    },
+    {
+      "sheetRow": 172,
+      "name": "더 페닌슐라 홍콩",
+      "region": "홍콩",
+      "oldPlaceId": 296,
+      "placeId": 446,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-446-047d4d48.jpg"
+    },
+    {
+      "sheetRow": 174,
+      "name": "만다린 오리엔탈 홍콩",
+      "region": "홍콩",
+      "oldPlaceId": 298,
+      "placeId": 448,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-448-f9cfd7aa.jpg"
+    },
+    {
+      "sheetRow": 178,
+      "name": "피크 트램",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 452,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-452-46cf6861.jpg"
+    },
+    {
+      "sheetRow": 179,
+      "name": "스카이 테라스 428",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 453,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-453-dd045ac7.jpg"
+    },
+    {
+      "sheetRow": 182,
+      "name": "홍콩 고궁박물관",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 456,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-456-121a71cc.jpg"
+    },
+    {
+      "sheetRow": 186,
+      "name": "홍콩 과학관",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 460,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-460-da980690.jpg"
+    },
+    {
+      "sheetRow": 188,
+      "name": "홍콩 문화박물관",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 462,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-462-ae5b3806.jpg"
+    },
+    {
+      "sheetRow": 189,
+      "name": "홍콩 해사박물관",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 463,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-463-256d6c29.jpg"
+    },
+    {
+      "sheetRow": 191,
+      "name": "센트럴 마켓",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 465,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-465-c22bae30.jpg"
+    },
+    {
+      "sheetRow": 197,
+      "name": "타이오 어촌",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 471,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-471-ba6c319d.jpg"
+    },
+    {
+      "sheetRow": 199,
+      "name": "청차우",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 473,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-473-0ba28aee.jpg"
+    },
+    {
+      "sheetRow": 200,
+      "name": "펑차우",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 474,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-474-6fe1ad7c.jpg"
+    },
+    {
+      "sheetRow": 201,
+      "name": "사이쿵 타운",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 475,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-475-f6ec95e9.jpg"
+    },
+    {
+      "sheetRow": 202,
+      "name": "샤프 아일랜드",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 476,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-476-6f0f7c87.jpg"
+    },
+    {
+      "sheetRow": 204,
+      "name": "감산 컨트리 파크",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 478,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-478-86ad2356.jpg"
+    },
+    {
+      "sheetRow": 205,
+      "name": "라이언 록",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 479,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-479-df28cea4.jpg"
+    },
+    {
+      "sheetRow": 206,
+      "name": "구룡채성공원",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 480,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-480-be0a4a4a.jpg"
+    },
+    {
+      "sheetRow": 209,
+      "name": "타마르 공원",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 483,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-483-5587e4c3.jpg"
+    },
+    {
+      "sheetRow": 213,
+      "name": "홍콩 문화센터",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 487,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-487-434d7f42.jpg"
+    },
+    {
+      "sheetRow": 214,
+      "name": "K11 MUSEA",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 488,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-488-3a798484.jpg"
+    },
+    {
+      "sheetRow": 215,
+      "name": "1881 헤리티지",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 489,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-489-47082ce6.jpg"
+    },
+    {
+      "sheetRow": 216,
+      "name": "청킹맨션",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 490,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-490-00f26b29.jpg"
+    },
+    {
+      "sheetRow": 217,
+      "name": "레이디스 마켓",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 491,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-491-9e8ddfde.jpg"
+    },
+    {
+      "sheetRow": 220,
+      "name": "위엔포 새시장",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 494,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-494-e8a4baca.jpg"
+    },
+    {
+      "sheetRow": 223,
+      "name": "할리우드 로드",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 497,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-497-d2a5af0b.jpg"
+    },
+    {
+      "sheetRow": 224,
+      "name": "소호",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 498,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-498-c543a18b.jpg"
+    },
+    {
+      "sheetRow": 225,
+      "name": "셩완",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 499,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-499-a404143f.jpg"
+    },
+    {
+      "sheetRow": 226,
+      "name": "타임스퀘어 홍콩",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 500,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-500-846b0ba8.jpg"
+    },
+    {
+      "sheetRow": 227,
+      "name": "하이산 플레이스",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 501,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-501-dfc3b1c6.jpg"
+    },
+    {
+      "sheetRow": 229,
+      "name": "하버시티",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 503,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-503-648e4d09.jpg"
+    },
+    {
+      "sheetRow": 230,
+      "name": "시티게이트 아울렛",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 504,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-504-90affed8.jpg"
+    },
+    {
+      "sheetRow": 231,
+      "name": "스탠리 마켓",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 505,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-505-975690bc.jpg"
+    },
+    {
+      "sheetRow": 233,
+      "name": "머레이 하우스",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 507,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-507-cb82f3c7.jpg"
+    },
+    {
+      "sheetRow": 234,
+      "name": "블레이크 피어 앳 스탠리",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 508,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-508-32a50ae6.jpg"
+    },
+    {
+      "sheetRow": 235,
+      "name": "딥워터베이",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 509,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-509-41e0cc36.jpg"
+    },
+    {
+      "sheetRow": 236,
+      "name": "섹오 비치",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 510,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-510-c197a910.jpg"
+    },
+    {
+      "sheetRow": 239,
+      "name": "골든 보히니아 광장",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 513,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-513-8d6cc176.jpg"
+    },
+    {
+      "sheetRow": 240,
+      "name": "블루 하우스 클러스터",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 514,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-514-3c11cd33.jpg"
+    },
+    {
+      "sheetRow": 241,
+      "name": "눈 데이 건",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 515,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-515-1f48db23.jpg"
+    },
+    {
+      "sheetRow": 242,
+      "name": "해피밸리 경마장",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 516,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-516-8979dc5f.jpg"
+    },
+    {
+      "sheetRow": 243,
+      "name": "샤틴 경마장",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 517,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-517-e3e7f13e.jpg"
+    },
+    {
+      "sheetRow": 244,
+      "name": "홍콩 습지공원",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 518,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-518-3b1e89c0.jpg"
+    },
+    {
+      "sheetRow": 246,
+      "name": "홍콩 대관람차",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 520,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-520-be185796.jpg"
+    },
+    {
+      "sheetRow": 247,
+      "name": "루가드 로드",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 521,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-521-5683dcde.jpg"
+    },
+    {
+      "sheetRow": 248,
+      "name": "폭푸람 저수지",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 522,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-522-d7dfea93.jpg"
+    },
+    {
+      "sheetRow": 249,
+      "name": "타이탐 저수지",
+      "region": "홍콩",
+      "oldPlaceId": null,
+      "placeId": 523,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/hk-523-31a71749.jpg"
+    },
+    {
+      "sheetRow": 81,
+      "name": "보상 우산 마을",
+      "region": "치앙마이",
+      "oldPlaceId": 305,
+      "placeId": 530,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-530-39c42cf1.jpg"
+    },
+    {
+      "sheetRow": 92,
+      "name": "타패 게이트",
+      "region": "치앙마이",
+      "oldPlaceId": 316,
+      "placeId": 541,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/th-541-e1625080.jpg"
+    },
+    {
+      "sheetRow": 392,
+      "name": "그랜드 월드",
+      "region": "푸꾸옥",
+      "oldPlaceId": 341,
+      "placeId": 566,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/vn-566-3d3ea2f9.jpg"
+    },
+    {
+      "sheetRow": 106,
+      "name": "랑꼬 해변",
+      "region": "다낭",
+      "oldPlaceId": 355,
+      "placeId": 580,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/vn-580-f1ffdca6.jpg"
+    },
+    {
+      "sheetRow": 122,
+      "name": "인터컨티넨탈 다낭",
+      "region": "다낭",
+      "oldPlaceId": 371,
+      "placeId": 596,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/vn-596-5fa66ebc.jpg"
+    },
+    {
+      "sheetRow": 376,
+      "name": "더 파크 프론트 호텔",
+      "region": "오사카",
+      "oldPlaceId": 25,
+      "placeId": 25,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-25-26d57d98.jpg"
+    },
+    {
+      "sheetRow": 508,
+      "name": "오다이바 해변공원",
+      "region": "도쿄",
+      "oldPlaceId": 32,
+      "placeId": 32,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-32-051b13cd.jpg"
+    },
+    {
+      "sheetRow": 525,
+      "name": "시부야 파르코",
+      "region": "도쿄",
+      "oldPlaceId": 49,
+      "placeId": 49,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-49-ab1825e7.jpg"
+    },
+    {
+      "sheetRow": 546,
+      "name": "아리아케 가든",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 70,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-70-44905a18.jpg"
+    },
+    {
+      "sheetRow": 560,
+      "name": "고쿄 히가시교엔",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 84,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-84-e7541fdd.jpg"
+    },
+    {
+      "sheetRow": 561,
+      "name": "지도리가후치",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 85,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-85-f148bc68.jpg"
+    },
+    {
+      "sheetRow": 576,
+      "name": "아트 아쿠아리움 미술관 GINZA",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 100,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-100-205623e1.jpg"
+    },
+    {
+      "sheetRow": 578,
+      "name": "도쿄 장난감 미술관",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 102,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-102-ffab99db.jpg"
+    },
+    {
+      "sheetRow": 579,
+      "name": "소방박물관",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 103,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-103-78d3ec06.jpg"
+    },
+    {
+      "sheetRow": 580,
+      "name": "도쿄도 물의 과학관",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 104,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-104-53c16257.jpg"
+    },
+    {
+      "sheetRow": 591,
+      "name": "도요스 센캬쿠반라이",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 115,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-115-d4965cc4.jpg"
+    },
+    {
+      "sheetRow": 597,
+      "name": "KITTE 마루노우치",
+      "region": "도쿄",
+      "oldPlaceId": null,
+      "placeId": 121,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/jp-121-531d59f7.jpg"
+    },
+    {
+      "sheetRow": 404,
+      "name": "익선동 한옥거리",
+      "region": "서울",
+      "oldPlaceId": 103,
+      "placeId": 178,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-178-ca736a0f.jpg"
+    },
+    {
+      "sheetRow": 405,
+      "name": "롯데월드타워 서울스카이",
+      "region": "서울",
+      "oldPlaceId": 104,
+      "placeId": 179,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-179-ae75e767.jpg"
+    },
+    {
+      "sheetRow": 412,
+      "name": "연남동 경의선 숲길",
+      "region": "서울",
+      "oldPlaceId": 111,
+      "placeId": 186,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-186-a50b25bc.jpg"
+    },
+    {
+      "sheetRow": 419,
+      "name": "서울로 7017",
+      "region": "서울",
+      "oldPlaceId": 118,
+      "placeId": 193,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-193-760d6a03.jpg"
+    },
+    {
+      "sheetRow": 427,
+      "name": "국립민속박물관",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 201,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-201-08a5b578.jpg"
+    },
+    {
+      "sheetRow": 428,
+      "name": "리움미술관",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 202,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-202-63714c5d.jpg"
+    },
+    {
+      "sheetRow": 429,
+      "name": "국립현대미술관 서울",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 203,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-203-98ad3177.jpg"
+    },
+    {
+      "sheetRow": 430,
+      "name": "서울시립미술관",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 204,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-204-90422ded.jpg"
+    },
+    {
+      "sheetRow": 443,
+      "name": "경희궁",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 217,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-217-04527806.jpg"
+    },
+    {
+      "sheetRow": 444,
+      "name": "광화문광장",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 218,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-218-6b452c80.jpg"
+    },
+    {
+      "sheetRow": 449,
+      "name": "봉원사",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 223,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-223-2202313e.jpg"
+    },
+    {
+      "sheetRow": 451,
+      "name": "인사동",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 225,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-225-df3ffd5a.jpg"
+    },
+    {
+      "sheetRow": 454,
+      "name": "명동거리",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 228,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-228-c1c988cc.jpg"
+    },
+    {
+      "sheetRow": 458,
+      "name": "동묘벼룩시장",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 232,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-232-2372a128.jpg"
+    },
+    {
+      "sheetRow": 459,
+      "name": "남대문시장",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 233,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-233-4a599832.jpg"
+    },
+    {
+      "sheetRow": 460,
+      "name": "통인시장",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 234,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-234-5d665d68.jpg"
+    },
+    {
+      "sheetRow": 461,
+      "name": "노량진수산시장",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 235,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-235-7b93b8dd.jpg"
+    },
+    {
+      "sheetRow": 462,
+      "name": "경동시장",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 236,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-236-eba06b8c.jpg"
+    },
+    {
+      "sheetRow": 467,
+      "name": "북서울꿈의숲",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 241,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-241-58bbbe50.jpg"
+    },
+    {
+      "sheetRow": 468,
+      "name": "양재시민의숲",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 242,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-242-9012b4ff.jpg"
+    },
+    {
+      "sheetRow": 469,
+      "name": "낙산공원",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 243,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-243-a28e0ea2.jpg"
+    },
+    {
+      "sheetRow": 473,
+      "name": "난지한강공원",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 247,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-247-7659aa95.jpg"
+    },
+    {
+      "sheetRow": 475,
+      "name": "북한산국립공원",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 249,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-249-7890fc34.jpg"
+    },
+    {
+      "sheetRow": 476,
+      "name": "인왕산",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 250,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-250-febabcf7.jpg"
+    },
+    {
+      "sheetRow": 484,
+      "name": "코엑스 아쿠아리움",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 258,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-258-09aef0a0.jpg"
+    },
+    {
+      "sheetRow": 486,
+      "name": "예술의전당",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 260,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-260-e80792c4.jpg"
+    },
+    {
+      "sheetRow": 487,
+      "name": "국립국악원",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 261,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-261-108946e7.jpg"
+    },
+    {
+      "sheetRow": 491,
+      "name": "석촌호수",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 265,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-265-dc704940.jpg"
+    },
+    {
+      "sheetRow": 495,
+      "name": "세종문화회관",
+      "region": "서울",
+      "oldPlaceId": null,
+      "placeId": 269,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-269-9b21c2e6.jpg"
+    },
+    {
+      "sheetRow": 129,
+      "name": "황리단길",
+      "region": "경주",
+      "oldPlaceId": 123,
+      "placeId": 273,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-273-8d34fef0.jpg"
+    },
+    {
+      "sheetRow": 130,
+      "name": "대릉원 (천마총)",
+      "region": "경주",
+      "oldPlaceId": 124,
+      "placeId": 274,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-274-6174b9fb.jpg"
+    },
+    {
+      "sheetRow": 131,
+      "name": "경주월드",
+      "region": "경주",
+      "oldPlaceId": 125,
+      "placeId": 275,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-275-462c4380.jpg"
+    },
+    {
+      "sheetRow": 134,
+      "name": "교촌한옥마을",
+      "region": "경주",
+      "oldPlaceId": 128,
+      "placeId": 278,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-278-b609d539.jpg"
+    },
+    {
+      "sheetRow": 135,
+      "name": "보문관광단지 (보문호)",
+      "region": "경주",
+      "oldPlaceId": 129,
+      "placeId": 279,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-279-082a710b.jpg"
+    },
+    {
+      "sheetRow": 139,
+      "name": "성동시장",
+      "region": "경주",
+      "oldPlaceId": 133,
+      "placeId": 283,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-283-d1241b3b.jpg"
+    },
+    {
+      "sheetRow": 143,
+      "name": "문무대왕릉",
+      "region": "경주",
+      "oldPlaceId": 137,
+      "placeId": 287,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-287-003456a9.jpg"
+    },
+    {
+      "sheetRow": 145,
+      "name": "오릉",
+      "region": "경주",
+      "oldPlaceId": 139,
+      "placeId": 289,
+      "previouslyBlocked": true,
+      "imageUrl": "/place-images/kr-289-87741a8f.jpg"
+    },
+    {
+      "sheetRow": 43,
+      "name": "다대포 해수욕장",
+      "region": "부산",
+      "oldPlaceId": 157,
+      "placeId": 307,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-307-e3efde61.jpg"
+    },
+    {
+      "sheetRow": 262,
+      "name": "쇠소깍",
+      "region": "제주",
+      "oldPlaceId": 171,
+      "placeId": 321,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-321-c77a71bd.jpg"
+    },
+    {
+      "sheetRow": 263,
+      "name": "용머리해안",
+      "region": "제주",
+      "oldPlaceId": 172,
+      "placeId": 322,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-322-e3a1c310.jpg"
+    },
+    {
+      "sheetRow": 500,
+      "name": "그랜드 하얏트 서울",
+      "region": "서울",
+      "oldPlaceId": 184,
+      "placeId": 334,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/kr-334-828534ea.jpg"
+    },
+    {
+      "sheetRow": 360,
+      "name": "구로몬 시장",
+      "region": "오사카",
+      "oldPlaceId": 9,
+      "placeId": 9,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-9-1855a9dc.jpg"
+    },
+    {
+      "sheetRow": 365,
+      "name": "미노오 공원",
+      "region": "오사카",
+      "oldPlaceId": 14,
+      "placeId": 14,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-14-5f8cd0fe.jpg"
+    },
+    {
+      "sheetRow": 373,
+      "name": "호텔 닛코 오사카",
+      "region": "오사카",
+      "oldPlaceId": 22,
+      "placeId": 22,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-22-6bf6c6d3.jpg"
+    },
+    {
+      "sheetRow": 375,
+      "name": "리가 로얄 호텔 오사카",
+      "region": "오사카",
+      "oldPlaceId": 24,
+      "placeId": 24,
+      "previouslyBlocked": false,
+      "imageUrl": "/place-images/jp-24-0d7cb38b.jpg"
+    }
+  ]
+}

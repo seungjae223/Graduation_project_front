@@ -122,6 +122,31 @@ describe.each(["google", "kakao"])("%s OAuth JWT 유지", (provider) => {
     expect(localStorage.getItem("accessToken")).toBe(token);
     expect(localStorage.getItem("token")).toBeNull();
     expect(getAccessToken()).toBe(token);
+    // A fresh module instance models auth initialization after a reload.
+    jest.isolateModules(() => {
+      expect(require("./api").getAccessToken()).toBe(token);
+      expect(require("../utils/authState").getAuthSnapshot().authenticated).toBe(true);
+    });
+  });
+});
+
+describe("Kakao authorization callback selection", () => {
+  beforeEach(() => { api.get.mockReset(); localStorage.clear(); sessionStorage.clear(); notifyAuthChange(); });
+  test.each(["http://localhost:3000", "https://noman-go.netlify.app"])("sends the initiating callback for %s", async origin => {
+    const location = jest.spyOn(window, "location", "get").mockReturnValue({ origin });
+    try {
+      api.get.mockResolvedValue({ data: { authorizationUrl: "https://kauth.kakao.com/oauth/authorize", state: "test-state" } });
+      const controller = new AbortController();
+      await getSocialAuthorizationApi("kakao", { signal: controller.signal });
+      expect(api.get).toHaveBeenCalledWith("/api/auth/kakao/authorize", {
+        signal: controller.signal, params: { redirectUri: `${origin}/oauth/kakao/callback` },
+      });
+    } finally { location.mockRestore(); }
+  });
+  test("Google keeps its existing authorize request contract", async () => {
+    api.get.mockResolvedValue({ data: { authorizationUrl: "https://accounts.google.com/authorize", state: "test-state" } });
+    await getSocialAuthorizationApi("google");
+    expect(api.get).toHaveBeenCalledWith("/api/auth/google/authorize", undefined);
   });
 });
 

@@ -1,0 +1,38 @@
+[
+  {
+    "scenario": "local-request",
+    "requestOrigin": "https://nomango-backend-prod-3-27-110-86.nip.io",
+    "requestPath": "/api/auth/kakao/authorize",
+    "frontendOrigin": "http://localhost:3000",
+    "requestedRedirectUri": "http://localhost:3000/oauth/kakao/callback",
+    "status": 200,
+    "actualRedirectUri": "https://noman-go.netlify.app/oauth/kakao/callback"
+  },
+  {
+    "scenario": "deployment-request",
+    "requestOrigin": "https://nomango-backend-prod-3-27-110-86.nip.io",
+    "requestPath": "/api/auth/kakao/authorize",
+    "frontendOrigin": "https://noman-go.netlify.app",
+    "requestedRedirectUri": "https://noman-go.netlify.app/oauth/kakao/callback",
+    "status": 200,
+    "actualRedirectUri": "https://noman-go.netlify.app/oauth/kakao/callback"
+  },
+  {
+    "scenario": "legacy-request",
+    "requestOrigin": "https://nomango-backend-prod-3-27-110-86.nip.io",
+    "requestPath": "/api/auth/kakao/authorize",
+    "frontendOrigin": "https://noman-go.netlify.app",
+    "requestedRedirectUri": null,
+    "status": 200,
+    "actualRedirectUri": "https://noman-go.netlify.app/oauth/kakao/callback"
+  },
+  {
+    "scenario": "untrusted-request",
+    "requestOrigin": "https://nomango-backend-prod-3-27-110-86.nip.io",
+    "requestPath": "/api/auth/kakao/authorize",
+    "frontendOrigin": "http://localhost:3000",
+    "requestedRedirectUri": "https://outside.example/oauth/kakao/callback",
+    "status": 200,
+    "actualRedirectUri": "https://noman-go.netlify.app/oauth/kakao/callback"
+  }
+]

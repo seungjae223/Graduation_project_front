@@ -172,10 +172,12 @@ function Total() {
     }
   }, [location.pathname, location.search, location.state, navigate, persistedSettings]);
   const chooseSort = value => {
+    if (value === "거리순" && pickerOpen) { closePicker(); return; }
+    setPickerOpen(false);
     if (value === "거리순" && !origin) { setPickerOpen(true); return; }
     updateSettings({ sortBy: value, currentPage: 1, ...(value === "별점순" ? { ratingsRequested: true, ...(reviewRatings.data ? { appliedSort: value } : {}) } : { appliedSort: value }) });
   };
-  const closePicker = () => { setPickerOpen(false); distanceButton.current?.focus(); };
+  const closePicker = () => { setPickerOpen(false); distanceButton.current?.focus({ preventScroll: true }); };
   const changePage = page => {
     if (page < 1 || page > totalPages) return;
     updateSettings({ currentPage: page });
@@ -218,8 +220,7 @@ function Total() {
           onClick={() => chooseSort("거리순")}
           aria-pressed={sortBy === "거리순"}
           aria-expanded={pickerOpen}
-          aria-controls={pickerOpen ? "total-origin-dialog" : undefined}
-          aria-haspopup="dialog"
+          aria-controls={pickerOpen ? "total-origin-panel" : undefined}
         >
           거리순
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
@@ -236,14 +237,14 @@ function Total() {
         </button>
       </div>
 
-      {pickerOpen && <DistanceOriginPicker key={scope} places={places} reference={reference} anchorRef={distanceButton} onCancel={closePicker} onChoose={reference => {
+      {pickerOpen && <DistanceOriginPicker key={scope} places={places} reference={reference} onCancel={closePicker} onChoose={reference => {
         updateSettings({ reference, sortBy: "거리순", appliedSort: "거리순", currentPage: 1 });
         closePicker();
       }} />}
       {!isLoading && !errorMessage && <div className="total-sort-summary">
-        {sortBy === "거리순" ? <div className="total-distance-summary" aria-hidden={pickerOpen || undefined}>
+        {sortBy === "거리순" ? <div className="total-distance-summary">
           <p role="status">{origin ? `${origin.label} 기준 · 직선거리순` : "기준 장소를 다시 선택해 주세요."}</p>
-          <button type="button" onClick={() => setPickerOpen(true)} aria-haspopup="dialog">변경</button>
+          {!pickerOpen && <button type="button" onClick={() => setPickerOpen(true)} aria-expanded={false} aria-controls="total-origin-panel">변경</button>}
         </div> : <p role="status">{sortBy === "별점순" ? reviewRatings.status === "loading" ? "리뷰 평점을 확인하는 중이에요. 현재 목록을 유지해요."
             : reviewRatings.data && Object.values(reviewRatings.data).some(value => value.rating !== null) ? "등록된 리뷰의 평점순"
               : reviewRatings.status === "error" ? "별점순을 확인하지 못해 이전 정렬을 유지하고 있어요." : "등록된 리뷰 평점이 없어 기본 순서로 표시해요."

@@ -18,6 +18,15 @@ test("absent images do not request an unrelated fallback", () => {
   expect(screen.getByText("사진 정보 없음")).toBeInTheDocument();
 });
 
+test("the sheet's Haeundae ID displays its existing photo and source instead of the old ID collision placeholder", () => {
+  const place = { id: 291, name: "해운대 해수욕장", region: "부산", countryCode: "KR",
+    address: "부산광역시 해운대구 해운대해변로 264", latitude: 35.1587, longitude: 129.1604 };
+  render(<PlacePhoto place={place} alt={place.name} />);
+  expect(screen.getByRole("img", { name: place.name })).toHaveAttribute("src", "/place-photos/haeundae.jpg");
+  expect(screen.getByRole("link", { name: `${place.name} 사진 출처` })).toHaveAttribute("href", "/place-images/credits.html#verified-291");
+  expect(screen.queryByText("사진 정보 없음")).not.toBeInTheDocument();
+});
+
 test("verified identity supplies the same local photo and attribution; errors keep the fallback neutral", () => {
   const photo = images[0];
   expect(photo).toBeDefined();

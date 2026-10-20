@@ -4,6 +4,7 @@ import { loginMock, signupMock } from "../mocks/authMock";
 import { ACCESS_TOKEN_KEY, clearAuthenticatedUserStorage } from "../utils/authStorage";
 import { getAuthSnapshot, notifyAuthChange } from "../utils/authState";
 import { getMyProfileApi } from "./profileApi";
+import { getOAuthCallbackUri } from "../utils/oauthSecurity";
 
 const createResponseGuard = ({ signal, isCurrent } = {}) => {
   notifyAuthChange();
@@ -259,7 +260,10 @@ export const getSocialAuthorizationApi = async (provider, options = {}) => {
     return { ...result, profile: await refreshLoginProfile(options), authenticated: true };
   }
 
-  const response = await api.get(`/api/auth/${provider}/authorize`, requestConfig(options));
+  const config = provider === "kakao"
+    ? { ...requestConfig(options), params: { redirectUri: getOAuthCallbackUri(provider) } }
+    : requestConfig(options);
+  const response = await api.get(`/api/auth/${provider}/authorize`, config);
   assertCurrent();
   const authorizationUrl = response.data?.authorizationUrl;
   const state = response.data?.state;

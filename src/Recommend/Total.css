@@ -402,7 +402,6 @@
 .total-distance-summary { display: flex; align-items: center; gap: var(--space-2); }
 .total-distance-summary p { flex: 1; min-width: 0; margin: 0; }
 .total-distance-summary button { flex-shrink: 0; }
-.total-distance-summary[aria-hidden="true"] { visibility: hidden; }
 @media (hover: hover) { .total-sort-summary button:hover { background: var(--color-hover); } }
 .total-result-count { font-size: var(--font-caption); }
 .total-page .total-place-distance { margin: 8px 0 0; color: var(--color-accent-text); font-size: var(--font-body); }

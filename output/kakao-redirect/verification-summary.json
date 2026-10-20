@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-16",
+  "frontendApiOrigin": "https://nomango-backend-prod-3-27-110-86.nip.io",
+  "frontendBranch": "dev",
+  "backendBranch": "fix/kakao-environment-callback",
+  "backendCodeCommit": "c269ecc",
+  "backendDocumentationCommit": "6ae0557",
+  "frontendTests": {
+    "passed": 120,
+    "suites": 10
+  },
+  "backendTests": {
+    "suites": 26,
+    "errors": 0,
+    "passed": 106,
+    "failures": 0
+  },
+  "frontendProductionBuild": "passed",
+  "backendBootJar": "passed",
+  "eslint": "passed",
+  "diffCheck": "passed",
+  "staticReleaseCheck": "passed",
+  "browserCheck": "Real localhost:3000 login button with deployed API stayed on localhost and displayed callback mismatch",
+  "productionBackendUpdated": false,
+  "kakaoConsoleVerified": false,
+  "realAccountAuthenticationCompleted": false,
+  "githubPush": "blocked by automatic approval review pending explicit user approval",
+  "frontendExistingUncommittedChangesPreserved": true
+}

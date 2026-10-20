@@ -1,0 +1,28 @@
+abce5fa1f40b1196cdbc55a802b6e4c3
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getSignupFailure = getSignupFailure;
+const SIGNUP_FAILURES = new Map([["이메일 인증(6자리)을 먼저 완료해주세요.", {
+  reason: "email_verification",
+  message: "이메일 인증을 서버에서 확인하지 못했습니다. 인증번호를 다시 발송해 인증해주세요."
+}], ["이미 존재하는 이메일입니다.", {
+  reason: "email_exists",
+  message: "이미 가입된 이메일입니다. 로그인하거나 다른 이메일을 사용해주세요."
+}], ["비밀번호는 10자리 이상, 대소문자, 특수기호를 포함해야 합니다.", {
+  reason: "password_policy",
+  message: "비밀번호는 10자 이상이며 영문 대문자·소문자와 특수문자(@$!%*?&#~)를 포함해야 합니다."
+}], ["이메일을 입력해주세요.", {
+  reason: "email_required",
+  message: "이메일 주소를 입력해주세요."
+}]]);
+
+// Only known public validation messages are displayed; other server details stay hidden.
+function getSignupFailure(error) {
+  var _error$response, _error$response2, _error$response2$data;
+  if (Number(error === null || error === void 0 ? void 0 : (_error$response = error.response) === null || _error$response === void 0 ? void 0 : _error$response.status) !== 400) return null;
+  return SIGNUP_FAILURES.get(error === null || error === void 0 ? void 0 : (_error$response2 = error.response) === null || _error$response2 === void 0 ? void 0 : (_error$response2$data = _error$response2.data) === null || _error$response2$data === void 0 ? void 0 : _error$response2$data.message) || null;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJTSUdOVVBfRkFJTFVSRVMiLCJNYXAiLCJyZWFzb24iLCJtZXNzYWdlIiwiZ2V0U2lnbnVwRmFpbHVyZSIsImVycm9yIiwiX2Vycm9yJHJlc3BvbnNlIiwiX2Vycm9yJHJlc3BvbnNlMiIsIl9lcnJvciRyZXNwb25zZTIkZGF0YSIsIk51bWJlciIsInJlc3BvbnNlIiwic3RhdHVzIiwiZ2V0IiwiZGF0YSJdLCJzb3VyY2VzIjpbInNpZ251cEVycm9yLmpzIl0sInNvdXJjZXNDb250ZW50IjpbImNvbnN0IFNJR05VUF9GQUlMVVJFUyA9IG5ldyBNYXAoW1xuICBbXCLsnbTrqZTsnbwg7J247KadKDbsnpDrpqwp7J2EIOuovOyggCDsmYTro4ztlbTso7zshLjsmpQuXCIsIHtcbiAgICByZWFzb246IFwiZW1haWxfdmVyaWZpY2F0aW9uXCIsIG1lc3NhZ2U6IFwi7J2066mU7J28IOyduOymneydhCDshJzrsoTsl5DshJwg7ZmV7J247ZWY7KeAIOuqu+2WiOyKteuLiOuLpC4g7J247Kad67KI7Zi466W8IOuLpOyLnCDrsJzshqHtlbQg7J247Kad7ZW07KO87IS47JqULlwiLFxuICB9XSxcbiAgW1wi7J2066+4IOyhtOyerO2VmOuKlCDsnbTrqZTsnbzsnoXri4jri6QuXCIsIHtcbiAgICByZWFzb246IFwiZW1haWxfZXhpc3RzXCIsIG1lc3NhZ2U6IFwi7J2066+4IOqwgOyeheuQnCDsnbTrqZTsnbzsnoXri4jri6QuIOuhnOq3uOyduO2VmOqxsOuCmCDri6Trpbgg7J2066mU7J287J2EIOyCrOyaqe2VtOyjvOyEuOyalC5cIixcbiAgfV0sXG4gIFtcIuu5hOuwgOuyiO2YuOuKlCAxMOyekOumrCDsnbTsg4EsIOuMgOyGjOusuOyekCwg7Yq57IiY6riw7Zi466W8IO2PrO2VqO2VtOyVvCDtlanri4jri6QuXCIsIHtcbiAgICByZWFzb246IFwicGFzc3dvcmRfcG9saWN5XCIsIG1lc3NhZ2U6IFwi67mE67CA67KI7Zi464qUIDEw7J6QIOydtOyDgeydtOupsCDsmIHrrLgg64yA66y47J6QwrfshozrrLjsnpDsmYAg7Yq57IiY66y47J6QKEAkISUqPyYjfinrpbwg7Y+s7ZWo7ZW07JW8IO2VqeuLiOuLpC5cIixcbiAgfV0sXG4gIFtcIuydtOuplOydvOydhCDsnoXroKXtlbTso7zshLjsmpQuXCIsIHtcbiAgICByZWFzb246IFwiZW1haWxfcmVxdWlyZWRcIiwgbWVzc2FnZTogXCLsnbTrqZTsnbwg7KO87IaM66W8IOyeheugpe2VtOyjvOyEuOyalC5cIixcbiAgfV0sXG5dKTtcblxuLy8gT25seSBrbm93biBwdWJsaWMgdmFsaWRhdGlvbiBtZXNzYWdlcyBhcmUgZGlzcGxheWVkOyBvdGhlciBzZXJ2ZXIgZGV0YWlscyBzdGF5IGhpZGRlbi5cbmV4cG9ydCBmdW5jdGlvbiBnZXRTaWdudXBGYWlsdXJlKGVycm9yKSB7XG4gIGlmIChOdW1iZXIoZXJyb3I/LnJlc3BvbnNlPy5zdGF0dXMpICE9PSA0MDApIHJldHVybiBudWxsO1xuICByZXR1cm4gU0lHTlVQX0ZBSUxVUkVTLmdldChlcnJvcj8ucmVzcG9uc2U/LmRhdGE/Lm1lc3NhZ2UpIHx8IG51bGw7XG59XG4iXSwibWFwcGluZ3MiOiI7Ozs7OztBQUFBLE1BQU1BLGVBQWUsR0FBRyxJQUFJQyxHQUFHLENBQUMsQ0FDOUIsQ0FBQyx5QkFBeUIsRUFBRTtFQUMxQkMsTUFBTSxFQUFFLG9CQUFvQjtFQUFFQyxPQUFPLEVBQUU7QUFDekMsQ0FBQyxDQUFDLEVBQ0YsQ0FBQyxpQkFBaUIsRUFBRTtFQUNsQkQsTUFBTSxFQUFFLGNBQWM7RUFBRUMsT0FBTyxFQUFFO0FBQ25DLENBQUMsQ0FBQyxFQUNGLENBQUMsc0NBQXNDLEVBQUU7RUFDdkNELE1BQU0sRUFBRSxpQkFBaUI7RUFBRUMsT0FBTyxFQUFFO0FBQ3RDLENBQUMsQ0FBQyxFQUNGLENBQUMsY0FBYyxFQUFFO0VBQ2ZELE1BQU0sRUFBRSxnQkFBZ0I7RUFBRUMsT0FBTyxFQUFFO0FBQ3JDLENBQUMsQ0FBQyxDQUNILENBQUM7O0FBRUY7QUFDTyxTQUFTQyxnQkFBZ0JBLENBQUNDLEtBQUssRUFBRTtFQUFBLElBQUFDLGVBQUEsRUFBQUMsZ0JBQUEsRUFBQUMscUJBQUE7RUFDdEMsSUFBSUMsTUFBTSxDQUFDSixLQUFLLGFBQUxBLEtBQUssd0JBQUFDLGVBQUEsR0FBTEQsS0FBSyxDQUFFSyxRQUFRLGNBQUFKLGVBQUEsdUJBQWZBLGVBQUEsQ0FBaUJLLE1BQU0sQ0FBQyxLQUFLLEdBQUcsRUFBRSxPQUFPLElBQUk7RUFDeEQsT0FBT1gsZUFBZSxDQUFDWSxHQUFHLENBQUNQLEtBQUssYUFBTEEsS0FBSyx3QkFBQUUsZ0JBQUEsR0FBTEYsS0FBSyxDQUFFSyxRQUFRLGNBQUFILGdCQUFBLHdCQUFBQyxxQkFBQSxHQUFmRCxnQkFBQSxDQUFpQk0sSUFBSSxjQUFBTCxxQkFBQSx1QkFBckJBLHFCQUFBLENBQXVCTCxPQUFPLENBQUMsSUFBSSxJQUFJO0FBQ3BFIiwiaWdub3JlTGlzdCI6W119

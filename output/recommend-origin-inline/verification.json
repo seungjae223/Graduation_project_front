@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-14",
+  "scope": "/recommend 전체보기 → /total 거리 기준 선택을 모달에서 인라인 패널로 전환",
+  "productionFiles": ["src/Recommend/DistanceOriginPicker.jsx", "src/Recommend/DistanceOriginPicker.css", "src/Recommend/Total.jsx", "src/Recommend/Total.css"],
+  "testFile": "src/Recommend/Total.test.jsx",
+  "layout": "제목 → 정렬 버튼 → 거리 기준 선택 패널 → 적용된 정렬 기준/전체 개수 → 장소 카드 → 페이지네이션",
+  "removed": ["Portal", "전체 화면 오버레이", "fixed/바텀시트 배치", "배경 스크롤 잠금", "모달 포커스 가두기", "팝오버 위치 계산/화면 크기 이벤트"],
+  "design": { "width": "기존 콘텐츠 너비의 100%", "height": "auto", "titlePx": 18, "bodyPx": 14, "controlHeightPx": 44, "paddingPx": 16, "fieldGapPx": 12, "tokens": "기존 공통 색상, 간격, 폰트, 버튼, radius 토큰", "longNames": "드롭다운 아래 전체 선택 장소명을 줄바꿈 가능한 보조 문구로 표시" },
+  "behavior": ["기준이 없는 최초 클릭은 패널만 열고 기존 정렬 상태 유지", "적용 시 실제 거리순 정렬 및 첫 페이지로 이동, 패널 자동 접힘", "변경 시 기존 장소/GPS 기준 미리 선택", "취소/ESC/거리순 재클릭은 임시 선택을 버리고 기존 정렬·기준·페이지 보존", "다른 정렬 클릭 시 임시 선택 패널을 닫고 선택한 정렬로 전환", "유효한 기존 기준은 거리순으로 돌아올 때 재사용", "편집 중 현재 적용된 정렬 기준은 계속 표시하고 변경 버튼은 접힌 상태에만 표시", "닫힌 뒤 도착하는 GPS 결과 및 장소 선택으로 취소한 GPS 결과 무시"],
+  "responsive": {
+    "sizes": [[320,568],[375,667],[390,844],[768,1024],[1366,768],[1920,1080]],
+    "modes": ["light","dark"],
+    "cases": 12,
+    "method": "Chrome의 정확한 크기 iframe에서 실제 Recommend/Total/Detail 및 공통 CSS 렌더링. QA 전용 API 어댑터는 제공된 백엔드 SQL을 사용하며 운영 API 쓰기는 차단. 앱 빌드에는 포함되지 않음.",
+    "result": "12개 조합 모두 position:static, 페이지 내부 포함, 오버레이 없음, 가로 넘침 없음, 입력/버튼 높이 44px. 패널 개방 시 기존 스크롤 위치 유지, 아래 카드가 자연스럽게 이동.",
+    "measurements": "responsive-check.json",
+    "pageScroll": "320×568에서 열린 패널 상태로 실제 휠 스크롤 수행. 페이지 scrollTop 602.67px, 잠금 없음, 가로 넘침 없음.",
+    "longName": "320px에서 워너 브라더스 스튜디오 투어 도쿄의 전체 이름을 보조 문구에 표시, 글자 영역에 가로 넘침 없음."
+  },
+  "browser": ["추천의 액티비티/전체보기 클릭 후 실제 /total?theme=activity 이동", "오사카/린쿠 프리미엄 아울렛 선택 및 적용, 패널 자동 접힘", "실제 좌표 기준 0m → 31.4km → 34.1km → 384.2km → 398.9km 순서 유지", "페이지 2에서 기준 변경을 취소해 기존 기준과 페이지 2 유지", "적용 후 위치 요약은 하나만 표시", "Tab으로 패널 밖 사진 출처 링크로 이동, ESC 닫기 및 거리순 버튼 포커스 복귀", "별점순 클릭 시 열려 있던 패널을 닫고 정렬 전환", "현재 위치 조회 로딩/시간 초과 오류, 기존 정렬 유지 확인"],
+  "automated": { "passedSuites": 74, "passedTests": 543, "failedTests": 0, "productionBuild": "passed", "testSummary": "test-summary.json" },
+  "unchanged": ["백엔드 및 API 요청", "거리 계산 함수", "장소 이미지/출처", "즐겨찾기/상세보기", "5개 페이지네이션", "다른 페이지 및 공통 모달 컴포넌트"],
+  "limits": ["운영 API는 인증 없이 403이므로 이번 화면 검증은 제공 SQL 기반 로컬 QA 환경에서 수행", "실제 브라우저 GPS는 시간 초과. 성공/거부/취소/기준 재사용/늦은 응답은 자동화 테스트로 검증", "운영 계정으로 즐겨찾기 저장 완료까지는 이번 UI 변경 검증에 포함되지 않음"],
+  "commitOrPushExecutedByAgent": false
+}
