@@ -1,7 +1,7 @@
 import api from "./api";
 import { addPlaceToTripApi, createTripApi, getTripDayPlacesApi, getTripTimelineApi,
   mapTripToSavedRoute, optimizeTripDayApi, updateTripPlaceOrderApi, updateTripPlaceScheduleApi } from "./tripApi";
-import { createReviewApi, getPlacesApi, getRecommendationsApi, getReviewsApi } from "./placeApi";
+import { createReviewApi, createReviewWithPhotosApi, getReviewPageApi, getPlacesApi, getRecommendationsApi, getReviewsApi } from "./placeApi";
 jest.mock("./api", () => ({ __esModule: true, default: { get: jest.fn(), post: jest.fn(), patch: jest.fn() } }));
 beforeEach(() => jest.resetAllMocks());
 
@@ -99,7 +99,7 @@ test("saved route retains a next-day fixed arrival", () => {
   expect(route.placesByDate["2026-10-13"][0]).toMatchObject({ tripPlaceId: 91, isNextDay: true, isFixed: true });
 });
 
-test.each([{ comment: "", rating: 4 }, { comment: "리뷰", rating: 6 }, { comment: "리뷰", rating: null }])("invalid reviews prevent a server write", async values => {
+test.each([{ comment: "", rating: 4 }, { comment: "리뷰", rating: 6 }, { comment: "리뷰", rating: null }, { comment: "리뷰", rating: 0 }, { comment: "리뷰", rating: 2.5 }, { comment: "가".repeat(256), rating: 5 }])("invalid reviews prevent a server write", async values => {
   await expect(createReviewApi({ placeId: 4, ...values })).rejects.toThrow();
   expect(api.post).not.toHaveBeenCalled();
 });
@@ -108,4 +108,18 @@ test("place addition still uses placeId in the path and day/order query paramete
   api.post.mockResolvedValue({ data: { id: 91, placeId: 4, day: 1, visitOrder: 1 } });
   expect(await addPlaceToTripApi({ tripId: 7, placeId: 4, day: 1, visitOrder: 1 })).toMatchObject({ tripPlaceId: 91, placeId: 4 });
   expect(api.post).toHaveBeenCalledWith("/api/trips/7/places/4", null, { params: { day: 1, visitOrder: 1 } });
+});
+
+
+test("paged review responses reject malformed bodies, and no unbounded fetch is requested", async () => {
+  api.get.mockResolvedValueOnce({ data: { content: [], page: 0, totalPages: 0, totalElements: 0 } });
+  expect((await getReviewPageApi(4, 0)).content).toEqual([]);
+  expect(api.get).toHaveBeenCalledWith("/api/places/4/reviews/paged", { params: { page: 0, size: 5 } });
+  api.get.mockResolvedValueOnce({ data: [] });
+  await expect(getReviewPageApi(4, 1)).rejects.toThrow();
+});
+
+test("photo review rejects missing/oversized images before a POST", async () => {
+  await expect(createReviewWithPhotosApi({ placeId: 4, comment: "좋아요", rating: 4, photos: [] })).rejects.toThrow();
+  expect(api.post).not.toHaveBeenCalled();
 });

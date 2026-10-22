@@ -1,0 +1,87 @@
+/* Common location card for Search and DestinationExplore. */
+.place-explore-card.destination-place-card {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 12px;
+  min-height: 132px;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--color-surface);
+  box-shadow: 0 2px 12px rgba(20, 33, 61, 0.05);
+}
+.place-explore-card .place-explore-photo {
+  position: relative;
+  width: 116px;
+  min-width: 0;
+  height: 132px;
+  border-radius: 11px;
+  overflow: hidden;
+  background: var(--color-surface-muted);
+}
+.place-explore-card .place-explore-photo > img,
+.place-explore-card .place-explore-photo > .place-photo-placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.place-explore-card .place-explore-body { display: flex; flex-direction: column; min-width: 0; padding: 2px 0 0; }
+.place-explore-card .place-explore-topline { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 36px; }
+.place-explore-card .place-explore-topline .destination-place-kind { min-width: 0; color: var(--color-text-muted); font-size: 11px; line-height: 1.4; }
+.place-explore-card .place-explore-topline .favorite-heart-button { flex: 0 0 auto; }
+.place-explore-card .place-explore-body h3 { margin: 0 0 6px; font-size: 15px; line-height: 1.35; overflow-wrap: anywhere; }
+.place-explore-card .place-explore-actions {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0 8px;
+  margin-top: auto; min-width: 0;
+}
+.place-explore-card .place-explore-inline-actions { display: inline-flex; align-items: center; flex: 0 0 auto; }
+.place-explore-card .place-explore-actions .place-explore-action-link,
+.place-explore-card .place-explore-actions .place-explore-detail {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  margin: 0; min-height: 44px; padding: 4px 0;
+  border: 0; border-radius: 0; background: transparent; box-shadow: none;
+  color: var(--color-accent-text); font-size: 12px; font-weight: 700;
+  cursor: pointer; white-space: nowrap;
+}
+.place-explore-card .place-explore-actions .place-explore-action-link svg {
+  display: block; width: 15px; height: 15px; flex: 0 0 auto;
+  fill: none; stroke: currentColor; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.place-explore-card .place-explore-divider {
+  margin: 0 7px; color: var(--color-text-muted);
+  font-size: 12px; user-select: none;
+}
+.place-explore-card .place-explore-actions .place-explore-detail {
+  margin-left: auto; padding-left: 4px;
+}
+.place-explore-card .place-explore-actions button:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.place-explore-card .place-explore-actions button:disabled { opacity: 0.5; cursor: default; }
+@media (max-width: 350px) {
+  .place-explore-card.destination-place-card { grid-template-columns: 96px minmax(0, 1fr); gap: 10px; }
+  .place-explore-card .place-explore-photo { width: 96px; height: 122px; }
+  .place-explore-card .place-explore-body h3 { font-size: 14px; }
+  .place-explore-card .place-explore-actions { gap: 0 5px; }
+  .place-explore-card .place-explore-actions .place-explore-action-link,
+  .place-explore-card .place-explore-actions .place-explore-detail { font-size: 11px; }
+  .place-explore-card .place-explore-actions .place-explore-action-link svg { width: 14px; height: 14px; }
+  .place-explore-card .place-explore-divider { margin: 0 5px; font-size: 11px; }
+}
+@media (max-width: 440px) {
+  .place-explore-card .place-explore-actions .place-explore-action-link,
+  .place-explore-card .place-explore-actions .place-explore-detail { font-size: 11px; }
+  .place-explore-card .place-explore-divider { margin: 0 5px; }
+}
+
+/* Verified aggregate engagement, shown only when the count was fetched. */
+.place-explore-card .place-explore-favorite-stack { display:flex; flex:0 0 44px; width:44px; flex-direction:column; align-items:center; justify-content:flex-start; gap:0; }
+.place-explore-card .place-explore-favorite-stack .favorite-heart-button { margin:-5px 0 0; }
+.place-explore-card .place-explore-favorite-stack .place-explore-like-count { display:block; width:100%; margin-top:-3px; text-align:center; font-size:11px; line-height:1.3; font-weight:700; color:var(--color-text-muted); font-variant-numeric:tabular-nums; }
+
+/* Favorite verification temporarily blocks folder actions; never dim every card.
+   Keep the disabled click guard, but preserve the same visual weight. */
+.place-explore-card .place-explore-actions .place-explore-folder:disabled {
+  opacity:1; cursor:default;
+}

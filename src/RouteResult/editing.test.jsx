@@ -15,13 +15,13 @@ beforeEach(() => { jest.clearAllMocks(); getTripByIdApi.mockResolvedValue({ id: 
 const setup = () => render(<MemoryRouter initialEntries={["/route-result?id=7"]}><RouteResult /></MemoryRouter>);
 
 test("category labels and distance wording are shared by the visible and PDF content without mutating API types", async () => {
-  const categorized = places.map(p => ({ ...p, isFixed: false, placeType: p.id === 92 ? "ATTRACTION" : "RESTAURANT" }));
+  const categorized = places.map(p => ({ ...p, isFixed: false, placeCategory: p.id === 92 ? "LANDMARK" : "FOOD", placeCategoryLabel: p.id === 92 ? "명소" : "맛집" }));
   getTripPlacesApi.mockResolvedValue(categorized);
   setup(); await screen.findAllByText("방문 92");
-  expect(document.querySelector("#route-result-pdf")).toHaveTextContent("관광지");
+  expect(document.querySelector("#route-result-pdf")).toHaveTextContent("명소");
   expect(document.querySelector("#route-result-pdf")).toHaveTextContent("총 직선거리");
-  expect(document.querySelector("#route-result-pdf")).not.toHaveTextContent("ATTRACTION");
-  expect(categorized[1].placeType).toBe("ATTRACTION");
+  expect(document.querySelector("#route-result-pdf")).not.toHaveTextContent("LANDMARK");
+  expect(categorized[1].placeCategory).toBe("LANDMARK");
 });
 test("drag immediately updates visit order without remounting cards and locks while saving", async () => {
   let finishWrite;

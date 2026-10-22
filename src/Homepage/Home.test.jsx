@@ -1,128 +1,246 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
-import { StrictMode } from "react";
+import fs from "fs";
+import path from "path";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import Home from "./Home";
-import { loadKakaoMapsScript } from "../utils/kakaoMapLoader";
 
-jest.mock("../utils/kakaoMapLoader", () => ({ loadKakaoMapsScript: jest.fn() }));
-jest.mock("../api/placeApi", () => ({ getRecommendationsApi: jest.fn().mockResolvedValue([]) }));
+jest.mock("../api/homeRankingsApi", () => ({ getHomeRankingsApi: jest.fn() }));
+jest.mock("../api/tripApi", () => ({ getTripsApi: jest.fn() }));
+jest.mock("../utils/useSessionKey", () => ({ __esModule: true, default: jest.fn(() => "anonymous") }));
+jest.mock("../utils/authState", () => ({ getAuthSnapshot: jest.fn(() => ({ accountKey: "anonymous" })) }));
+const { getHomeRankingsApi } = require("../api/homeRankingsApi");
+const { getTripsApi } = require("../api/tripApi");
+const useSessionKey = require("../utils/useSessionKey").default;
+const { getAuthSnapshot } = require("../utils/authState");
 
-test("leaving Home prevents late location lookup and SDK loading", async () => {
-  const original = navigator.geolocation;
-  const permissions = navigator.permissions;
-  localStorage.setItem("locationPermissionAllowed", "true");
-  let success;
-  Object.defineProperty(navigator, "geolocation", { configurable: true, value: { getCurrentPosition: jest.fn(callback => { success = callback; }) } });
-  Object.defineProperty(navigator, "permissions", { configurable: true, value: { query: jest.fn().mockResolvedValue({ state: "granted" }) } });
-  const view = render(<MemoryRouter><Home /></MemoryRouter>);
-  fireEvent.click(screen.getByRole("button", { name: /내 주변 탐색/ }));
-  await waitFor(() => expect(navigator.geolocation.getCurrentPosition).toHaveBeenCalled());
-  view.unmount();
-  await act(async () => success({ coords: { latitude: 37, longitude: 127 } }));
-  expect(loadKakaoMapsScript).not.toHaveBeenCalled();
-  localStorage.removeItem("locationPermissionAllowed");
-  Object.defineProperty(navigator, "geolocation", { configurable: true, value: original });
-  Object.defineProperty(navigator, "permissions", { configurable: true, value: permissions });
-});
-
-const deferred = () => {
-  let resolve;
-  const promise = new Promise(done => { resolve = done; });
-  return { promise, resolve };
+const rankingFixture = {
+  windowDays: 30,
+  cities: [
+    { code: "osaka", name: "오사카", countryName: "일본", tripCount: 6 },
+    { code: "tokyo", name: "도쿄", countryName: "일본", tripCount: 3 },
+  ],
+  hotPlaces: [
+    { placeId: 61, name: "오사카성", region: "오사카", engagementCount: 4, likeCount: 3, reviewCount: 1 },
+    { placeId: 62, name: "도톤보리", region: "오사카", engagementCount: 2, likeCount: 2, reviewCount: 0 },
+  ],
 };
+const mount = () => render(<MemoryRouter><Home /></MemoryRouter>);
 
-function NearbyDestination() {
-  const { state } = useLocation();
-  return <output data-testid="nearby-destination">{JSON.stringify(state)}</output>;
-}
-
-describe("automatic and user location requests", () => {
-  let originalGeolocation;
-  let originalPermissions;
-  let getCurrentPosition;
-
+describe("V12 personalized home and real rankings", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    originalGeolocation = Object.getOwnPropertyDescriptor(navigator, "geolocation");
-    originalPermissions = Object.getOwnPropertyDescriptor(navigator, "permissions");
-    localStorage.setItem("locationPermissionAllowed", "true");
-    getCurrentPosition = jest.fn();
-    Object.defineProperty(navigator, "geolocation", { configurable: true, value: { getCurrentPosition } });
-    loadKakaoMapsScript.mockResolvedValue({ maps: { services: {
-      Status: { OK: "OK" },
-      Geocoder: function Geocoder() {
-        this.coord2RegionCode = (longitude, latitude, callback) => callback([
-          { region_type: "H", region_1depth_name: "서울", region_2depth_name: "성동구", region_3depth_name: "성수동" },
-        ], "OK");
-      },
-    } } });
+    useSessionKey.mockReturnValue("anonymous");
+    getAuthSnapshot.mockReturnValue({ accountKey: "anonymous" });
+    getTripsApi.mockResolvedValue([]);
+    getHomeRankingsApi.mockResolvedValue(rankingFixture);
   });
 
-  afterEach(() => {
-    localStorage.removeItem("locationPermissionAllowed");
-    localStorage.removeItem("currentLocation");
-    localStorage.removeItem("currentLocationLabel");
-    if (originalGeolocation) Object.defineProperty(navigator, "geolocation", originalGeolocation);
-    else delete navigator.geolocation;
-    if (originalPermissions) Object.defineProperty(navigator, "permissions", originalPermissions);
-    else delete navigator.permissions;
+  it("keeps search, shows start planning for guests and never reads private trips", async () => {
+    mount();
+    expect(screen.getByRole("searchbox", { name: "목적지 또는 테마 검색" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /여행 계획 시작하기/ })).toBeInTheDocument();
+    expect(getTripsApi).not.toHaveBeenCalled();
+    expect(await screen.findByRole("link", { name: "1위 오사카 여행지" })).toHaveAttribute("href", "/destinations/osaka");
+    expect(screen.getByText("지금 가볼 만한 장소")).toBeInTheDocument();
+    expect(screen.getByText("PLAN YOUR TRIP")).toBeInTheDocument();
+    expect(screen.getByText("MY NEXT TRIP")).toBeInTheDocument();
+    expect(screen.queryByText("여행지 둘러보기")).not.toBeInTheDocument();
   });
 
-  const renderHome = (query, strict = false) => {
-    Object.defineProperty(navigator, "permissions", { configurable: true, value: { query } });
-    const routes = <MemoryRouter initialEntries={["/home"]}><Routes>
-      <Route path="/home" element={<Home />} />
-      <Route path="/search" element={<NearbyDestination />} />
-    </Routes></MemoryRouter>;
-    return render(strict ? <StrictMode>{routes}</StrictMode> : routes);
-  };
+  it("shows multiple authenticated trips as a horizontally scrollable list", async () => {
+    useSessionKey.mockReturnValue("account:tester");
+    getAuthSnapshot.mockReturnValue({ accountKey: "account:tester" });
+    getTripsApi.mockResolvedValue([
+      { id: 5, title: "부산 가족여행", destination: "부산", startDate: "2026-12-12", endDate: "2026-12-14" },
+      { id: 2, title: "오사카 여행", destination: "오사카", startDate: "2026-11-12", endDate: "2026-11-15" },
+    ]);
+    mount();
+    expect(await screen.findByText("오사카 여행")).toBeInTheDocument();
+    expect(screen.getByText("부산 가족여행")).toBeInTheDocument();
+    const rail = screen.getByLabelText("내 여행 일정 목록");
+    expect(within(rail).getAllByRole("link", { name: /계속하기/ })).toHaveLength(2);
+    expect(within(rail).getAllByRole("link", { name: /계속하기/ })[0]).toHaveAttribute("href", "/route-result?id=2");
+    expect(screen.queryByRole("button", { name: /여행 계획 시작하기/ })).not.toBeInTheDocument();
+    expect(screen.getByText("이어서 계획하기")).toBeInTheDocument();
+    expect(screen.getAllByText("BOARDING PASS")).toHaveLength(2);
+    const firstTicket = screen.getAllByText("BOARDING PASS")[0].closest(".home-boarding-pass");
+    expect(firstTicket.querySelector(".home-ticket-perforation")).toBeInTheDocument();
+    expect(firstTicket.closest(".home-boarding-pass-shadow")).toBeInTheDocument();
+    expect(rail.querySelectorAll(":scope > .home-boarding-pass-shadow")).toHaveLength(2);
+    expect(screen.getByRole("slider", { name: "내 여행 목록 가로 이동" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "전체 일정" })).toHaveAttribute("href", "/schedule");
+  });
 
-  test.each([false, true])("late automatic permission does not cancel the user's nearby navigation (StrictMode=%s)", async strict => {
-    const automatic = [];
-    let manual;
-    const query = jest.fn(() => {
-      const pending = deferred();
-      if (manual) manual = pending;
-      else automatic.push(pending);
-      return pending.promise;
+  it("never offers an already-ended trip as continue planning", async () => {
+    useSessionKey.mockReturnValue("account:tester");
+    getAuthSnapshot.mockReturnValue({accountKey:"account:tester"});
+    getTripsApi.mockResolvedValue([
+      {id:1,title:"종료된 여행",destination:"서울",startDate:"2000-01-01",endDate:"2000-01-05"},
+      {id:2,title:"예정된 여행",destination:"도쿄",startDate:"2999-01-01",endDate:"2999-01-05"},
+    ]);
+    mount();
+    expect(await screen.findByText("예정된 여행")).toBeInTheDocument();
+    expect(screen.queryByText("종료된 여행")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("내 여행 일정 목록").querySelectorAll(".home-boarding-pass-shadow")).toHaveLength(1);
+  });
+
+  it("allows mouse dragging of ticket cards without accidentally opening a trip", async () => {
+    useSessionKey.mockReturnValue("account:tester");
+    getAuthSnapshot.mockReturnValue({accountKey:"account:tester"});
+    getTripsApi.mockResolvedValue([
+      {id:1,title:"여행 A",destination:"서울",startDate:"2999-01-01",endDate:"2999-01-05"},
+      {id:2,title:"여행 B",destination:"도쿄",startDate:"2999-02-01",endDate:"2999-02-05"},
+    ]);
+    mount();
+    await screen.findByText("여행 A");
+    const rail = screen.getByLabelText("내 여행 일정 목록");
+    Object.defineProperties(rail,{
+      scrollWidth:{configurable:true,value:800},
+      clientWidth:{configurable:true,value:350},
+      scrollLeft:{configurable:true,writable:true,value:0},
+      setPointerCapture:{configurable:true,value:jest.fn()},
+      hasPointerCapture:{configurable:true,value:()=>true},
+      releasePointerCapture:{configurable:true,value:jest.fn()},
     });
-    renderHome(query, strict);
-    manual = true;
-    fireEvent.click(screen.getByRole("button", { name: /내 주변 탐색/ }));
-    await act(async () => manual.resolve({ state: "granted" }));
-    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+    const pointer = (type,x) => {
+      const event = new MouseEvent(type,{bubbles:true,cancelable:true,clientX:x,button:0});
+      Object.defineProperties(event,{pointerId:{value:1},pointerType:{value:"mouse"}});
+      fireEvent(rail,event);
+    };
+    pointer("pointerdown",300);
+    pointer("pointermove",210);
+    expect(rail.scrollLeft).toBe(90);
+    pointer("pointerup",210);
+    expect(rail.releasePointerCapture).toHaveBeenCalledWith(1);
+    expect(rail).not.toHaveClass("is-dragging");
+  });
 
-    await act(async () => automatic.forEach(pending => pending.resolve({ state: "granted" })));
-    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
-    await act(async () => getCurrentPosition.mock.calls[0][0]({ coords: { latitude: 37.54, longitude: 127.04 } }));
+  it("shows all ten city numbers and clean recommendation rails without demo overlays", async () => {
+    getHomeRankingsApi.mockResolvedValue({ windowDays: 30, cities: [], hotPlaces: [] });
+    mount();
+    expect(await screen.findByRole("link", { name: "1위 오사카 여행지" })).toHaveAttribute("href", "/destinations/osaka");
+    expect(screen.getAllByText(/^\d+위$/)).toHaveLength(10);
+    expect(screen.queryByText("샘플")).not.toBeInTheDocument();
+    expect(screen.queryByText("샘플 포함")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("인기 도시 순위 가로 스크롤").children).toHaveLength(10);
+    expect(screen.getByLabelText("최근 인기 장소 자동 순환 가로 스크롤").querySelectorAll(".home-hot-card")).toHaveLength(21);
+    expect(screen.getByRole("button", { name: "1위 오사카성 검색 결과 보기" })).toBeInTheDocument();
+    expect(screen.getByRole("slider", { name: "인기 도시 가로 이동" })).toBeInTheDocument();
+    expect(screen.getByText("1위")).toBeInTheDocument();
+    expect(screen.getByRole("slider", { name: "지금 뜨는 장소 가로 이동" })).toBeInTheDocument();
+    expect(screen.queryByText("디자인 미리보기 · 예시 순서")).not.toBeInTheDocument();
+  });
 
-    expect(JSON.parse(screen.getByTestId("nearby-destination").textContent)).toEqual({
-      mode: "nearby", currentLocation: { lat: 37.54, lng: 127.04 }, locationLabel: "성동구 성수동",
+  it("renders hot places as auto-looping rail with real IDs and the scrollbar control", async () => {
+    mount();
+    const rail = await screen.findByLabelText("최근 인기 장소 자동 순환 가로 스크롤");
+    expect(within(rail).getAllByRole("button", { name: "1위 오사카성 상세 보기" })).toHaveLength(1);
+    expect(within(rail).getAllByRole("button", { name: "2위 도톤보리 상세 보기" })).toHaveLength(1);
+    expect(rail.querySelectorAll(".home-hot-card")).toHaveLength(21);
+    expect(rail.querySelectorAll(".home-hot-demo-card")).toHaveLength(15);
+    expect(within(rail).queryByText("샘플 · 실제 순위 아님")).not.toBeInTheDocument();
+    expect(rail.querySelector(".home-hot-rank")).toBeNull();
+    expect(rail).toHaveAttribute("aria-label", "최근 인기 장소 자동 순환 가로 스크롤");
+  });
+
+  it("preserves real ranked destinations while filling spare city slots with editorial suggestions", async () => {
+    mount();
+    const cityRail = await screen.findByLabelText("인기 도시 순위 가로 스크롤");
+    expect(cityRail.children).toHaveLength(10);
+    expect(within(cityRail).getByRole("link", { name: "1위 오사카 여행지" })).toBeInTheDocument();
+    expect(cityRail.querySelectorAll(".home-city-demo-tile")).toHaveLength(8);
+    expect(screen.queryByText("샘플 포함")).not.toBeInTheDocument();
+  });
+
+  it("keeps the fallback rails while allowing retry after network failure", async () => {
+    getHomeRankingsApi.mockRejectedValueOnce(new Error("unavailable"));
+    mount();
+    expect(await screen.findByRole("link", { name: "1위 오사카 여행지" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "다시 조회" })).toHaveLength(2);
+    fireEvent.click(screen.getAllByRole("button", { name: "다시 조회" })[0]);
+    await waitFor(() => expect(getHomeRankingsApi).toHaveBeenCalledTimes(2));
+  });
+  it("scrubbed scrollbar follows elastically and settles with the same spring at both ends", async () => {
+    mount();
+    const rail = await screen.findByLabelText("최근 인기 장소 자동 순환 가로 스크롤");
+    const slider = screen.getByRole("slider", { name: "지금 뜨는 장소 가로 이동" });
+    Array.from(rail.children).forEach((card, index) => {
+      Object.defineProperties(card, {
+        offsetLeft: { configurable: true, value: index * 100 },
+        offsetWidth: { configurable: true, value: 89 },
+      });
     });
-    expect(loadKakaoMapsScript).toHaveBeenCalledTimes(1);
+    const groupSpan = rail.children[rail.children.length / 3].offsetLeft - rail.children[0].offsetLeft;
+    Object.defineProperty(rail, "scrollWidth", { configurable: true, value: groupSpan * 3 });
+    Object.defineProperty(rail, "clientWidth", { configurable: true, value: 100 });
+    rail.scrollLeft = groupSpan;
+
+    // Control frames rather than relying on layout or real timers in jsdom.
+    const nativeRaf = window.requestAnimationFrame, nativeCancel = window.cancelAnimationFrame;
+    const frames = new Map();
+    let nextId = 0;
+    window.requestAnimationFrame = callback => { frames.set(++nextId, callback); return nextId; };
+    window.cancelAnimationFrame = id => { frames.delete(id); };
+    const tick = stamp => {
+      const pending = [...frames.values()];
+      frames.clear();
+      act(() => pending.forEach(callback => callback(stamp)));
+    };
+    try {
+      fireEvent.pointerDown(slider);
+      fireEvent.change(slider, { target: { value: "100" } });
+      expect(slider.value).toBe("100");
+      expect(rail.scrollLeft).toBe(groupSpan); // Thumb leads the smoothly-following photos.
+      tick(performance.now() + 16);
+      expect(rail.scrollLeft).toBeGreaterThan(groupSpan);
+      expect(rail.scrollLeft).toBeLessThan(groupSpan * 2);
+      fireEvent.pointerUp(slider);
+      tick(performance.now() + 1000);
+      expect(rail.scrollLeft).toBe(groupSpan * 2);
+
+      fireEvent.pointerDown(slider);
+      fireEvent.change(slider, { target: { value: "0" } });
+      tick(performance.now() + 16);
+      expect(rail.scrollLeft).toBeLessThan(groupSpan * 2);
+      fireEvent.pointerUp(slider);
+      tick(performance.now() + 1000);
+      expect(rail.scrollLeft).toBe(groupSpan);
+    } finally {
+      window.requestAnimationFrame = nativeRaf;
+      window.cancelAnimationFrame = nativeCancel;
+    }
   });
 
-  test("a user request can supersede an automatic geolocation already in progress", async () => {
-    const automatic = deferred();
-    const manual = deferred();
-    renderHome(jest.fn().mockReturnValueOnce(automatic.promise).mockReturnValueOnce(manual.promise));
-    await act(async () => automatic.resolve({ state: "granted" }));
-    fireEvent.click(screen.getByRole("button", { name: /내 주변 탐색/ }));
-    await act(async () => manual.resolve({ state: "granted" }));
-    expect(getCurrentPosition).toHaveBeenCalledTimes(2);
+});
 
-    await act(async () => getCurrentPosition.mock.calls[0][0]({ coords: { latitude: 35, longitude: 129 } }));
-    expect(loadKakaoMapsScript).not.toHaveBeenCalled();
-    expect(screen.queryByTestId("nearby-destination")).not.toBeInTheDocument();
-    await act(async () => getCurrentPosition.mock.calls[1][0]({ coords: { latitude: 37.54, longitude: 127.04 } }));
-    expect(JSON.parse(screen.getByTestId("nearby-destination").textContent).currentLocation).toEqual({ lat: 37.54, lng: 127.04 });
-  });
+test("boarding passes have real centered half notches with tear line on the color boundary", () => {
+  const css = fs.readFileSync(path.join(__dirname, "Home.css"), "utf8");
+  expect(css).toContain("width:calc(100% + 2 * var(--home-rail-gutter))");
+  expect(css).toContain("margin-inline:calc(-1 * var(--home-rail-gutter))");
+  expect(css).toContain("padding-inline:var(--home-rail-gutter)");
+  expect(css).toContain("scroll-padding-inline:var(--home-rail-gutter)");
+  expect(css).toContain("padding:7px 16px 12px;scroll-padding-inline:16px");
+  expect(css).toContain(".home-v12 .home-trip-rail>.home-boarding-pass-shadow{flex:0 0 calc(100% - 32px)");
+  expect(css).toContain("--home-notch-center:calc(100% - 49px)");
+  expect(css).toContain("radial-gradient(circle at 0 var(--home-notch-center)");
+  expect(css).toContain("radial-gradient(circle at 100% var(--home-notch-center)");
+  expect(css).toContain("flex:0 0 0;height:0;margin:0;border:0;position:relative");
+  expect(css).toContain("top:-1px;left:14px;right:14px;height:2px");
+  expect(css).toContain("background:repeating-linear-gradient(90deg,#a8c5d8");
+  expect(css).toContain("scroll-snap-align:center");
+});
 
-  test("automatic location still updates Home without navigating", async () => {
-    renderHome(jest.fn().mockResolvedValue({ state: "granted" }));
-    await waitFor(() => expect(getCurrentPosition).toHaveBeenCalledTimes(1));
-    await act(async () => getCurrentPosition.mock.calls[0][0]({ coords: { latitude: 37.54, longitude: 127.04 } }));
-    expect(screen.getByRole("button", { name: /현재 위치: 성동구 성수동/ })).toBeInTheDocument();
-    expect(screen.queryByTestId("nearby-destination")).not.toBeInTheDocument();
+it("click-only interaction does not steal the ticket Link pointer before drag",async()=>{
+  useSessionKey.mockReturnValue("account:tester");
+  getAuthSnapshot.mockReturnValue({accountKey:"account:tester"});
+  getTripsApi.mockResolvedValue([{id:21,title:"예정 여행",destination:"홍콩",startDate:"2999-01-01",endDate:"2999-01-05"}]);
+  mount();
+  const rail=await screen.findByLabelText("내 여행 일정 목록");
+  Object.defineProperties(rail,{
+    scrollWidth:{configurable:true,value:900},clientWidth:{configurable:true,value:350},
+    setPointerCapture:{configurable:true,value:jest.fn()}
   });
+  fireEvent.pointerDown(rail,{pointerType:"mouse",button:0,pointerId:1,clientX:220});
+  expect(rail.setPointerCapture).not.toHaveBeenCalled();
+  expect(within(rail).getByRole("link",{name:"계속하기"})).toHaveAttribute("href","/route-result?id=21");
 });

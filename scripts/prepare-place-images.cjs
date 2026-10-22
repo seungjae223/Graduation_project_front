@@ -54,8 +54,8 @@ function catalog() {
     }
     values.push(value.trim());
     if (values.length !== 8) throw new Error('Unexpected SQL row');
-    const [region, name, theme, description, address, latitude, longitude, placeType] = values;
-    rows.push({ placeId: null, sourceRow: rows.length+1, region, name, countryCode: countryCodes[region] || null, address, latitude: Number(latitude), longitude: Number(longitude), theme, placeType, description });
+    const [region, name, theme, description, address, latitude, longitude, placeCategory] = values;
+    rows.push({ placeId: null, sourceRow: rows.length+1, region, name, countryCode: countryCodes[region] || null, address, latitude: Number(latitude), longitude: Number(longitude), theme, placeCategory, description });
   }
   if (rows.length !== 600 || rows.some(p => !Number.isFinite(p.latitude) || !Number.isFinite(p.longitude))) throw new Error('Catalog requires review');
   save('catalog.json', { basis: 'provided SQL; production GET returned 403', sourceSha256: crypto.createHash('sha256').update(sql).digest('hex'), places: rows });

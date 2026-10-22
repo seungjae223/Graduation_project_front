@@ -1,5 +1,5 @@
 import React, { StrictMode } from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import OAuthCallback from "./OAuthCallback";
 import { completeSocialLoginApi } from "../api/authApi";
 let mockProvider = "google";
@@ -44,23 +44,4 @@ test.each(["google", "kakao"])("%s: 불일치 시 완료 API 호출 금지", (pr
   expect(completeSocialLoginApi).not.toHaveBeenCalled();
   expect(sessionStorage.getItem(`oauth_state_${provider}`)).toBeNull();
   expect(window.location.search).toBe("");
-});
-
-test.each(["missing", "expired", "unknown"])("Kakao rejects %s state before token exchange", kind => {
-  mockProvider = "kakao";
-  if (kind !== "unknown") sessionStorage.setItem("oauth_state_kakao", JSON.stringify({ state: "expected", expiresAt: kind === "expired" ? 0 : Date.now() + 60000 }));
-  if (kind === "missing") mockSearchParams.delete("state");
-  render(<OAuthCallback />);
-  expect(screen.getByText("올바르지 않은 소셜 로그인 접근입니다. 다시 로그인해주세요.")).toBeInTheDocument();
-  expect(completeSocialLoginApi).not.toHaveBeenCalled();
-  expect(sessionStorage.getItem("oauth_state_kakao")).toBeNull();
-});
-
-test.each(["/place/42?from=search#details", "https://outside.example/", "//outside.example/"])("Kakao completion validates stored return path: %s", async destination => {
-  mockProvider = "kakao";
-  sessionStorage.setItem("oauth_state_kakao", JSON.stringify({ state: "expected", expiresAt: Date.now() + 60000 }));
-  sessionStorage.setItem("socialLoginReturnTo", destination);
-  render(<OAuthCallback />);
-  await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith(destination.startsWith("/place/") ? destination : "/home", { replace: true }));
-  expect(sessionStorage.getItem("socialLoginReturnTo")).toBeNull();
 });

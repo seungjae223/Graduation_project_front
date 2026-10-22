@@ -72,6 +72,12 @@ const Inquiry = () => {
             <p>고객님의 소중한 의견을 기다리고 있습니다.</p>
           </header>
 
+          <div className="inquiry-write-area">
+            <button type="button" className="inquiry-write-button" onClick={handleWriteInquiry}>
+              문의하기
+            </button>
+          </div>
+
           <section className="inquiry-list" aria-label="문의사항 목록">
             {isLoading && (
               <article className="inquiry-card">
@@ -194,42 +200,7 @@ const Inquiry = () => {
           )}
         </div>
 
-        <div className="inquiry-write-area">
-          <button
-            type="button"
-            className="inquiry-write-button"
-            onClick={handleWriteInquiry}
-          >
-            <span className="inquiry-write-icon" aria-hidden="true">
-              <svg
-                viewBox="0 0 24 24"
-                width="19"
-                height="19"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M4.5 5.5H19.5V15.5H8.4L4.5 19V5.5Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M9 10.5H15"
-                  stroke="var(--color-primary)"
-                  strokeWidth="2.1"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M12 7.5V13.5"
-                  stroke="var(--color-primary)"
-                  strokeWidth="2.1"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </span>
 
-            문의하기
-          </button>
-        </div>
       </section>
     </main>
   );

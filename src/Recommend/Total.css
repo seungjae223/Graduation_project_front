@@ -137,6 +137,12 @@
   fill: #ffffff;
 }
 
+/* Separate the icon-only heart from folder selection. */
+.theme-total-image-wrap .theme-total-save-btn { background: rgba(255, 255, 255, .94); color: #414750; z-index: 2; }
+.theme-total-image-wrap .theme-total-save-btn.liked { color: #cf3655; }
+.theme-total-folder-save { min-height: var(--touch-target); border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-accent-text); border-radius: 10px; padding: 8px 14px; font: inherit; font-weight: 700; cursor: pointer; margin: 8px 8px 0 0; }
+.theme-total-folder-save:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+
 /* 카드 본문 */
 .total-card-body,
 .theme-total-body {
@@ -402,6 +408,7 @@
 .total-distance-summary { display: flex; align-items: center; gap: var(--space-2); }
 .total-distance-summary p { flex: 1; min-width: 0; margin: 0; }
 .total-distance-summary button { flex-shrink: 0; }
+.total-distance-summary[aria-hidden="true"] { visibility: hidden; }
 @media (hover: hover) { .total-sort-summary button:hover { background: var(--color-hover); } }
 .total-result-count { font-size: var(--font-caption); }
 .total-page .total-place-distance { margin: 8px 0 0; color: var(--color-accent-text); font-size: var(--font-body); }

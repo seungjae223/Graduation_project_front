@@ -1,0 +1,13 @@
+/* Managed folder membership uses checkboxes; legacy selection keeps its radio appearance. */
+.folder-select-option[role="checkbox"] { grid-template-columns: 52px minmax(0, 1fr) 28px; }
+.folder-select-option[role="checkbox"][aria-checked="true"] { background: var(--color-accent-soft); }
+.folder-select-checkbox {
+  display: inline-flex; align-items: center; justify-content: center; justify-self: end;
+  width: 25px; height: 25px; border: 2px solid var(--color-border-strong);
+  border-radius: 5px; background: var(--color-surface); color: #fff;
+}
+.folder-select-checkbox.checked { background: var(--color-accent-text); border-color: var(--color-accent-text); }
+.folder-select-checkbox svg { display: block; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.folder-select-option[role="checkbox"]:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.folder-select-retry { min-height: 44px; padding: 8px 12px; border: 1px solid var(--color-accent-text); color: var(--color-accent-text); background: var(--color-surface); border-radius: var(--radius-control); font-weight: 700; }
+.folder-select-retry:disabled { opacity: .5; }

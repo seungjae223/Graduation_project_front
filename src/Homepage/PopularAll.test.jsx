@@ -11,7 +11,7 @@ const mockToggle = jest.fn();
 jest.mock("../utils/usePlaceSaving", () => ({ __esModule: true, default: () => ({ isSaved: () => false, toggle: mockToggle, folders: { status: "idle" }, open: false }) }));
 
 const rows = (count, region = "도쿄", offset = 0) => Array.from({ length: count }, (_, index) => ({
-  id: offset + index + 1, name: `${region} 장소 ${index + 1}`, region, theme: "HEALING", placeType: "ATTRACTION",
+  id: offset + index + 1, name: `${region} 장소 ${index + 1}`, region, theme: "HEALING", placeCategory: "LANDMARK", placeCategoryLabel: "명소",
 }));
 const setup = () => render(<MemoryRouter><PopularAll /></MemoryRouter>);
 const more = () => screen.getByRole("region", { name: "더 많은 장소" });

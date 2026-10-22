@@ -1,6 +1,5 @@
 :root {
   color-scheme: light;
-  --app-width: 390px;
   --footer-height: 70px;
   --font-caption: 12px;
   --font-body: 14px;
@@ -204,9 +203,10 @@ svg {
 .app {
   width: 100%;
   max-width: none;
+  min-width: 0;
   min-height: 100vh;
   min-height: 100dvh;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
   background: var(--color-page);
   position: relative;
@@ -231,7 +231,9 @@ svg {
 
 .app-content {
   width: 100%;
+  max-width: var(--page-max-width);
   min-width: 0;
+  margin-inline: auto;
   flex: 1 0 auto;
   overflow-x: clip;
   overflow-y: visible;
@@ -247,7 +249,7 @@ svg {
 }
 
 .app-content.with-footer {
-  padding-bottom: 0;
+  padding-bottom: calc(var(--footer-height) + env(safe-area-inset-bottom));
 }
 
 .route-transition {
@@ -287,15 +289,13 @@ svg {
   }
 }
 
-/* PC에서만 모바일 앱처럼 가운데 고정 */
+/* The desktop canvas fills the viewport; only route content is bounded. */
 @media (min-width: 768px) {
-  body {
-    background: var(--color-page);
+  .app {
+    background: transparent;
   }
 
-  .app {
-    max-width: var(--app-width);
-    margin: 0 auto;
+  .app-content {
     box-shadow: 0 0 24px rgba(0, 0, 0, 0.08);
   }
 }
@@ -372,4 +372,61 @@ svg {
   font-size: 15px;
   font-weight: 700;
   text-decoration: none;
+}
+
+
+/* V7 detail route transition. Header/footer stay fixed; only route body slides. */
+.route-transition--detail-forward[data-page-entry="ready"] {
+  animation: nomango-detail-enter 240ms cubic-bezier(.22,1,.36,1) both;
+}
+.route-transition--detail-backward[data-page-entry="ready"] {
+  animation: nomango-detail-return 240ms cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes nomango-detail-enter {
+  from { transform: translateX(42px); opacity: .65; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes nomango-detail-return {
+  from { transform: translateX(-42px); opacity: .65; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-transition--detail-forward[data-page-entry="ready"],
+  .route-transition--detail-backward[data-page-entry="ready"] { animation: none; }
+}
+
+/* V10: fast horizontal entry only when moving between primary tabs. */
+.route-transition--tab-from-right[data-page-entry="ready"] {
+  animation: nomango-tab-enter-right 275ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.route-transition--tab-from-left[data-page-entry="ready"] {
+  animation: nomango-tab-enter-left 275ms cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes nomango-tab-enter-right {
+  from { opacity: .72; transform: translate3d(48px, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes nomango-tab-enter-left {
+  from { opacity: .72; transform: translate3d(-48px, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-transition--tab-from-right[data-page-entry="ready"],
+  .route-transition--tab-from-left[data-page-entry="ready"] { animation: none; }
+}
+
+
+/* MyPage -> subpage and subpage -> MyPage use the same slide as the bottom tabs. */
+.route-transition--subpage-from-right[data-page-entry="ready"]{
+  animation:nomango-tab-enter-right 275ms cubic-bezier(.22,1,.36,1) both;
+}
+.route-transition--subpage-from-left[data-page-entry="ready"]{
+  animation:nomango-tab-enter-left 275ms cubic-bezier(.22,1,.36,1) both;
+}
+/* SavedPlaces is keyed by folderId in the app. Avoid a second nested slide. */
+.route-transition--subpage-from-right .v14-saved-view--forward,
+.route-transition--subpage-from-left .v14-saved-view--backward{animation:none}
+@media(prefers-reduced-motion:reduce){
+  .route-transition--subpage-from-right[data-page-entry="ready"],
+  .route-transition--subpage-from-left[data-page-entry="ready"]{animation:none}
 }

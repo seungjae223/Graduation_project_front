@@ -1,6 +1,6 @@
 export function makeTripPlace(place, tripId, id, day, visitOrder) {
   return { id, tripPlaceId: id, tripId, placeId: place.id, placeName: place.name,
-    address: place.address, latitude: place.latitude, longitude: place.longitude, placeType: place.placeType,
+    address: place.address, latitude: place.latitude, longitude: place.longitude, placeCategory: place.placeCategory, placeCategoryLabel: place.placeCategoryLabel,
     imageUrl: place.imageUrl, day, visitOrder, isStartPoint: false,
     arrivalTime: "", departureTime: "", stayDuration: 60, isFixed: false, isNextDay: false, memo: "" };
 }
@@ -40,7 +40,7 @@ export function buildTimeline(trip, places, startTime = "10:00") {
     }
     const departure = arrival + (place.stayDuration ?? 60);
     cursor = departure;
-    return { visitOrder: place.visitOrder, placeName: place.placeName, placeType: place.placeType,
+    return { visitOrder: place.visitOrder, placeName: place.placeName, placeCategory: place.placeCategory, placeCategoryLabel: place.placeCategoryLabel,
       arrivalTime: clock(arrival), departureTime: clock(departure),
       arrivalDateTime: dateTime(place.day, arrival), departureDateTime: dateTime(place.day, departure),
       arrivalDayOffset: Math.floor(arrival / 1440), departureDayOffset: Math.floor(departure / 1440),

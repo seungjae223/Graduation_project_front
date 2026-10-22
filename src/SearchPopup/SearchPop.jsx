@@ -9,6 +9,7 @@ import { toApiTheme } from "../utils/placeTheme";
 import useReadQuery from "../utils/useReadQuery";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
+import { getPlaceCategoryLabel } from "../utils/placeCategory";
 
 const RECOMMENDATIONS_API = "/api/recommendations";
 const PLACE_SEARCH_API = "/api/places/search";
@@ -73,7 +74,8 @@ const normalizePlace = (place) => {
     description: place.description || "",
     region: place.region || "",
     theme: place.theme || "",
-    placeType: place.placeType || place.category || "PLACE",
+    placeCategory: place.placeCategory || "",
+    placeCategoryLabel: place.placeCategoryLabel || getPlaceCategoryLabel(place.placeCategory, "?μ냼"),
     latitude: Number(place.latitude ?? 0),
     longitude: Number(place.longitude ?? 0),
     originalData: place,
@@ -178,7 +180,8 @@ const SearchPop = ({ isOpen, onClose }) => {
           description: place.description,
           region: place.region,
           theme: place.theme,
-          placeType: place.placeType,
+          placeCategory: place.placeCategory,
+          placeCategoryLabel: place.placeCategoryLabel,
           latitude: place.latitude,
           longitude: place.longitude,
           originalData: place.originalData,

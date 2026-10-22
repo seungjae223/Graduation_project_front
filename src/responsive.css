@@ -1,31 +1,47 @@
 /*
  * Responsive application shell
  *
- * The original screens were drawn around a 390px-wide device. Keep that
- * density on phones and let the same layout grow proportionally on wider
- * screens without turning it into a separate desktop composition.
+ * The app uses the viewport. Each route has a content limit, shared with its
+ * header and fixed controls, while cards/forms retain their own proportions.
  */
 :root {
-  /* Mobile remains edge-to-edge; desktop values are set at the breakpoint. */
-  --app-width: 390px;
-  --page-max-width: 100%;
-  --page-gutter: clamp(12px, 4vw, 24px);
+  --compact-content-width: 390px;
+  --content-max-width: 640px;
+  --page-max-width: min(100vw, var(--content-max-width));
+  /* Compatibility for detail/auth styles that still use the old token. */
+  --app-width: var(--page-max-width);
+  --page-gutter: clamp(16px, 4vw, 24px);
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Route metadata is present during lazy loading, so navigation stays aligned. */
+:root:has(.app:is([data-page="/home"], [data-page="/login"])) {
+  --content-max-width: var(--compact-content-width);
+}
+
+:root:has(.app:is(
+  [data-page="/search"],
+  [data-page="/recommend"],
+  [data-page="/popular-all"],
+  [data-page="/total"],
+  [data-page^="/destinations/"]
+)) {
+  --content-max-width: 960px;
 }
 
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   /* Keep one document-level vertical scroller on every route. */
-  overflow-x: hidden !important;
+  overflow-x: clip;
   overflow-y: auto;
   background: var(--color-page);
 }
 
 body {
   /* A nested body scroller can stop touch scrolling in mobile emulation. */
-  overflow-x: clip !important;
+  overflow-x: clip;
   overflow-y: visible;
 }
 
@@ -59,57 +75,46 @@ button {
 }
 
 /*
- * Every route shares one fluid content column.  The explicit class list is
- * intentional: component cards and dialogs retain their designed max width.
+ * Full-width pages inherit the app column. Higher selector specificity keeps
+ * lazy-loaded page styles from restoring old device widths without !important.
+ * Auth forms and newer pages retain their individual inner max-width values.
  */
-.app,
-.header,
-.page-wrap,
-.home,
-.popular-all-page,
-.recommend-page,
-.total-page,
-.detail-page,
-.search-page,
-.schedule-empty-page,
-.calendar-page,
-.route-create-screen,
-.route-result-page:not(.is-exporting),
-.my-schedule-page,
-.mypage-page,
-.saved-places-page,
-.recent-places-page,
-.inquiry-screen,
-.inquiry-write-screen,
-.inquiry-detail-page,
-.login,
-.find-password-page,
-.signup-page,
-.signup-container,
-.verify-code-page,
-.landing,
-.admin-page,
-.admin-inquiry-page,
-.admin-inquiry-write-page {
-  width: min(100%, var(--page-max-width)) !important;
-  max-width: var(--page-max-width) !important;
+.app :is(
+  .page-wrap,
+  .popular-all-page,
+  .recommend-page,
+  .recommend-destination-page,
+  .destination-explore-page,
+  .total-page,
+  .detail-page,
+  .search-page,
+  .schedule-empty-page,
+  .calendar-page,
+  .route-create-screen,
+  .route-result-page:not(.is-exporting),
+  .my-schedule-page,
+  .mypage-page,
+  .saved-places-page,
+  .recent-places-page,
+  .inquiry-screen,
+  .inquiry-write-screen,
+  .inquiry-detail-page,
+  .signup-page,
+  .landing,
+  .admin-page,
+  .admin-inquiry-page,
+  .admin-inquiry-write-page
+) {
+  width: 100%;
+  max-width: 100%;
   margin-left: auto;
   margin-right: auto;
 }
 
-.app {
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-.header {
-  padding-top: max(18px, calc(18px + var(--safe-top)));
-}
-
 /* Fixed bottom controls stay aligned with the app column, not the viewport. */
 .detail-bottom-actions {
-  width: min(100%, var(--page-max-width)) !important;
-  max-width: var(--page-max-width) !important;
+  width: var(--page-max-width);
+  max-width: 100%;
 }
 
 /* Preserve image/card proportions as the available page width changes. */
@@ -215,54 +220,10 @@ button {
 
 /* 앱보다 큰 데스크톱 영역도 한 가지 캔버스 색으로 유지한다. */
 @media (min-width: 768px) {
-  :root {
-    /* Reference capture keeps the vertical app at roughly 27% of the screen. */
-    --app-width: clamp(390px, 27.25vw, 560px);
-    --page-max-width: var(--app-width);
-    --page-gutter: clamp(16px, 1.118vw, 23px);
-  }
-
   html,
   body,
   #root {
     background: var(--color-canvas);
-  }
-
-  .app,
-  .header,
-  .page-wrap,
-  .home,
-  .popular-all-page,
-  .recommend-page,
-  .total-page,
-  .detail-page,
-  .search-page,
-  .schedule-empty-page,
-  .calendar-page,
-  .route-create-screen,
-  .route-result-page:not(.is-exporting),
-  .my-schedule-page,
-  .mypage-page,
-  .saved-places-page,
-  .recent-places-page,
-  .inquiry-screen,
-  .inquiry-write-screen,
-  .inquiry-detail-page,
-  .login,
-  .find-password-page,
-  .signup-page,
-  .verify-code-page,
-  .landing,
-  .admin-page,
-  .admin-inquiry-page,
-  .admin-inquiry-write-page {
-    width: 100% !important;
-    max-width: var(--page-max-width) !important;
-  }
-
-  .signup-container {
-    width: 100% !important;
-    max-width: 100% !important;
   }
 
   .header,
@@ -284,13 +245,6 @@ button {
     padding-right: var(--page-gutter);
   }
 
-  .footer-nav,
-  .admin-footer-inner {
-    width: 100%;
-    max-width: var(--page-max-width);
-    margin-inline: auto;
-  }
-
   .detail-bottom-actions {
     left: 50%;
     transform: translateX(-50%);
@@ -301,65 +255,16 @@ button {
     max-height: 360px;
   }
 
-  .home-header h1 {
-    font-size: var(--font-page-title);
+  /* Wider discovery pages add columns instead of stretching each card. */
+  .app .recommend-destination-page .recommend-destination-grid,
+  .app .search-page .destination-place-grid,
+  .app .destination-explore-page .destination-place-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .home-header .subtitle {
-    font-size: var(--font-body);
-  }
-
-  .home-header .search-box {
-    height: clamp(52px, 3.633vw, 75px) !important;
-  }
-
-  .quick-menu {
-    gap: clamp(12px, 0.838vw, 17px) !important;
-    padding-left: var(--page-gutter);
-    padding-right: var(--page-gutter);
-  }
-
-  .quick-menu .menu-card {
-    min-height: clamp(140px, 9.782vw, 202px) !important;
-  }
-
-  .travel-list {
-    gap: clamp(18px, 1.258vw, 26px) !important;
-    padding-left: 24px;
-    padding-right: 24px;
-  }
-
-  .travel-card {
-    flex-basis: auto !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    border-radius: clamp(24px, 1.677vw, 35px) !important;
-  }
-
-  .travel-overlay span {
-    font-size: var(--font-section-title);
-  }
-
-  .theme-card {
-    height: auto;
-    min-height: clamp(120px, 8.384vw, 173px) !important;
-  }
-
-  .recommend-card-image-wrap,
-  .theme-total-image-wrap {
-    height: clamp(146px, 10.2vw, 210px) !important;
-  }
-
-  .popular-month-thumb,
-  .recent-place-thumb {
-    width: clamp(106px, 7.406vw, 153px) !important;
-    height: clamp(106px, 7.406vw, 153px) !important;
-  }
-
-  .route-map-mock,
-  .route-map-static-preview,
-  .route-map-static-fallback {
-    max-height: min(clamp(480px, 33.538vw, 690px), 68dvh) !important;
+  .search-page .search-input-wrap {
+    max-width: 640px;
   }
 }
 

@@ -53,7 +53,7 @@ test.each(["구글 로그인", "카카오 로그인"])("%s uses existing return 
   render(<App />);
   fireEvent.click(await screen.findByRole("button", { name: button }));
   // Return routing is independent of whether a fixed fixture trip is still upcoming.
-  expect(await screen.findByRole("heading", { name: /다가오는 일정/ })).toBeInTheDocument();
+  expect(await screen.findByRole("heading", { name: "내 여행 일정" })).toBeInTheDocument();
   expect(window.location.pathname).toBe("/my-schedule");
   expect(sessionStorage.getItem("oauth_state_google")).toBeNull();
   expect(sessionStorage.getItem("oauth_state_kakao")).toBeNull();
@@ -175,18 +175,22 @@ test("existing route generation flow saves and re-reads a multi-day itinerary", 
   expect(await getTripTimelineApi({ tripId: saved.id, day: 2 })).toHaveLength(1);
 });
 
-test.each([1, 2])("domestic Mock trip %s renders the Kakao map container without returning a DOM child", async id => {
+test.each([1, 2])("domestic Mock trip %s shows its owned detail itinerary after login", async id => {
+  await loginApi({ email: "test@example.com", password: "any-password" });
+  const current = await getTripByIdApi(id);
+  const stops = await getTripPlacesApi(id);
+  expect(stops.length).toBeGreaterThan(0);
   const log = jest.spyOn(console, "error").mockImplementation(() => {});
-  window.history.replaceState({}, "", `/route-result?id=${id}`);
-  render(<App />);
-  // Wait for the lazy result chunk as well as its server read model on a cold transform.
-  await screen.findAllByText(id === 1 ? "경복궁" : "사려니숲길", {}, { timeout: 5000 });
-  // The SDK's empty map container has no accessible role or text to query.
-  // eslint-disable-next-line testing-library/no-node-access
-  expect(document.querySelector(".route-result-map-section .route-map-real")).toBeInTheDocument();
-  expect(log.mock.calls.flat().join(" ")).not.toMatch(/Objects are not valid as a React child|HTMLBodyElement/);
-  log.mockRestore();
-});
+  try {
+    window.history.replaceState({}, "", `/route-result?id=${id}`);
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: current.title }, { timeout: 10000 })).toBeInTheDocument();
+    expect(await screen.findAllByText(stops[0].placeName, {}, { timeout: 10000 })).not.toHaveLength(0);
+    expect(log.mock.calls.flat().join(" ")).not.toMatch(/Objects are not valid as a React child|HTMLBodyElement/);
+  } finally {
+    log.mockRestore();
+  }
+}, 20000);
 
 test("inquiry creation and admin reply share the same data", async () => {
   const created = (await api.post("/api/inquiries", { title: "테스트 문의", content: "일정 질문" })).data;
@@ -222,7 +226,9 @@ test("place search and detail pages render the adapter data and review paginatio
   render(<App />);
   // The lazy detail chunk includes PDF support; a cold transform can exceed the default 1s wait.
   expect(await screen.findByRole("heading", { name: "경복궁" }, { timeout: 5000 })).toBeInTheDocument();
-  const more = await screen.findByRole("button", { name: "리뷰 더보기" });
-  fireEvent.click(more);
-  await waitFor(() => expect(screen.queryByRole("button", { name: "리뷰 더보기" })).not.toBeInTheDocument());
+  // Six mock reviews: the new paginated API returns five on page one and one on page two.
+  expect(await screen.findByText("1 / 2")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "다음" }));
+  expect(await screen.findByText("2 / 2")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "다음" })).toBeDisabled();
 });

@@ -24,7 +24,8 @@ export function createPlaceImageResolver(records) {
     // Normalizers preserve the original API object; tripPlace.id is a visit ID.
     const raw = { ...place, ...(place.originalData || place.rawPlace || {}) };
     const name = normalize(raw.name || raw.placeName || raw.title);
-    const id = raw.placeId ?? raw.originalId ?? raw.id;
+    const explicitId = raw.placeId ?? raw.originalId;
+    const id = explicitId ?? raw.id;
     const lat = numeric(raw.latitude ?? raw.lat), lng = numeric(raw.longitude ?? raw.lng ?? raw.lon);
     if (!name || lat === null || lng === null || lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
     const region = normalize(raw.region);
@@ -41,8 +42,16 @@ export function createPlaceImageResolver(records) {
       (!overseasGroup || record.countryCode !== "KR") &&
       (!address || address === normalize(record.address)) &&
       distanceKm(lat, lng, record) <= 0.25;
-    // An ID alone never overrides contradictory place identity/geography.
-    if (byId.has(String(id))) return matches(byId.get(String(id))) ? byId.get(String(id)) : null;
+    // Explicit placeId/originalId remains authoritative. A plain catalog id may
+    // drift after a local reseed, so a contradictory raw id falls back to
+    // unique name + geography matching instead of hiding a valid photo.
+    if (explicitId != null && byId.has(String(explicitId))) {
+      return matches(byId.get(String(explicitId))) ? byId.get(String(explicitId)) : null;
+    }
+    if (explicitId == null && id != null && byId.has(String(id))) {
+      const idRecord = byId.get(String(id));
+      if (matches(idRecord)) return idRecord;
+    }
     const candidates = [...new Set((byName.get(name) || []).filter(matches))];
     return candidates.length === 1 ? candidates[0] : null;
   };

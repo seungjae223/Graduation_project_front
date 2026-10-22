@@ -1,0 +1,36 @@
+/* V16.1: picker stays within the calendar while bottom action is portaled
+   outside animated route parents, keeping its viewport position stable. */
+.v16-create-page{box-sizing:border-box;width:100%;max-width:640px;margin:0 auto;padding:26px var(--page-gutter) calc(156px + env(safe-area-inset-bottom,0px));min-height:70vh;background:var(--color-page);color:var(--color-text)}
+.v16-create-heading{margin:0 0 26px}
+.v16-create-heading p{margin:0 0 8px;font-size:10px;font-weight:850;letter-spacing:1.35px;color:var(--color-accent-text)}
+.v16-create-heading h1{margin:0;font-size:24px;font-weight:850;line-height:1.3;color:var(--color-text-strong)}
+.v16-date-calendar{padding:18px 13px 22px;border:1px solid var(--color-border);border-radius:20px;background:var(--color-surface);min-height:340px}
+.v16-date-month{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:21px}
+.v16-date-month>button:not(.v16-date-period-switch){display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:0;border-radius:12px;background:transparent;color:var(--color-text);font:inherit;font-size:27px;cursor:pointer}
+.v16-date-period-switch{display:flex;align-items:center;justify-content:center;gap:9px;min-height:43px;padding:7px 12px;border:0;border-radius:11px;background:transparent;color:var(--color-text-strong);font:inherit;font-size:16px;font-weight:850;cursor:pointer}
+.v16-date-period-switch:hover{background:var(--color-hover)}
+.v16-date-period-switch span{font-size:13px;color:var(--color-text-muted)}
+.v16-date-period-title{font-size:15px;font-weight:800;color:var(--color-text-strong)}
+.v16-date-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.v16-date-weekday{display:grid;place-items:center;min-height:31px;color:var(--color-text-muted);font-size:11px;font-weight:650}
+.v16-date-day{display:grid;place-items:center;width:100%;height:41px;min-width:0;border:0;border-radius:11px;background:transparent;color:var(--color-text);font:inherit;font-size:13px;cursor:pointer}
+.v16-date-day.is-range{background:var(--color-accent-soft);border-radius:3px}
+.v16-date-day.is-start,.v16-date-day.is-end{background:var(--color-primary);color:var(--color-on-primary);border-radius:11px;font-weight:850}
+.v16-date-picker-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.v16-date-picker-grid button{height:54px;border:1px solid var(--color-border);border-radius:12px;background:var(--color-surface);color:var(--color-text-strong);font:inherit;font-size:14px;font-weight:750;cursor:pointer}
+.v16-date-picker-grid button.is-active{background:var(--color-accent-soft);color:var(--color-accent-text);border-color:var(--color-border-strong)}
+.v16-date-day:focus-visible,.v16-date-month button:focus-visible,.v16-date-picker-grid button:focus-visible{outline:3px solid var(--color-focus);outline-offset:2px}
+.v16-date-period{display:flex;align-items:center;justify-content:space-between;gap:13px;min-height:91px;margin:16px 0 12px;padding:17px 16px;border:1px solid var(--color-border-strong);border-radius:16px;background:var(--color-surface);box-shadow:0 3px 12px var(--color-shadow)}
+.v16-date-period-pair{display:flex;align-items:center;justify-content:flex-start;gap:10px;min-width:0}
+.v16-date-period-pair>div{display:flex;flex-direction:column;gap:7px}
+.v16-date-period-pair small{color:var(--color-text-muted);font-size:11px;font-weight:700}
+.v16-date-period-pair strong{color:var(--color-text-strong);font-size:14px;font-weight:850;white-space:nowrap;font-variant-numeric:tabular-nums}
+.v16-date-period-arrow{margin-top:14px;color:var(--color-text-muted);font-size:14px}
+.v16-date-stay{flex:0 0 auto;align-self:center;font-size:14px;font-weight:850;color:var(--color-accent-text);white-space:nowrap}
+.v16-date-error{font-size:12px;color:var(--color-danger)}
+.v16-date-actions{position:fixed;left:50%;bottom:calc(var(--footer-height) + env(safe-area-inset-bottom,0px) + 13px);transform:translateX(-50%);z-index:110;width:calc(var(--page-max-width) - 2 * var(--page-gutter))}
+.v16-date-actions button{width:100%;min-height:54px;border:0;border-radius:15px;background:var(--color-primary);color:var(--color-on-primary);font:inherit;font-size:15px;font-weight:850;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 8px 22px rgba(30,81,139,.22)}
+.v16-date-actions button:disabled{background:var(--color-disabled-bg);color:var(--color-disabled-text);box-shadow:none;cursor:not-allowed}
+.v16-date-actions button:focus-visible{outline:3px solid var(--color-focus);outline-offset:3px}
+@media(max-width:400px){.v16-date-period{flex-wrap:wrap}.v16-date-period-pair strong{font-size:13px}.v16-date-stay{margin-left:auto}}
+@media(max-width:360px){.v16-create-page{padding-left:12px;padding-right:12px}.v16-date-calendar{padding-left:8px;padding-right:8px}.v16-date-grid{gap:2px}.v16-date-picker-grid{gap:6px}}

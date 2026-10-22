@@ -1,157 +1,34 @@
-.recent-places-page {
-  width: 100%;
-  min-height: 100vh;
-  padding: 45px 16px 80px;
-  background-color: var(--color-page);
-  color: var(--color-text-strong);
-  box-sizing: border-box;
-}
+.v14-recent-page, .v14-recent-page * {box-sizing:border-box;}
+.v14-recent-page {width:100%;max-width:640px;min-height:calc(100dvh - 130px);margin:0 auto;padding:27px 17px calc(108px + env(safe-area-inset-bottom,0px));background:var(--color-page);color:var(--color-text);}
+.v14-recent-heading {margin-bottom:24px;}
+.v14-recent-heading > span {display:block;font-size:12px;font-weight:750;color:var(--color-accent-text);margin-bottom:7px;}
+.v14-recent-heading h1 {margin:0;color:var(--color-text-strong);font-size:25px;letter-spacing:-.5px;}
+.v14-recent-heading p {font-size:13px;margin:9px 0 0;color:var(--color-text-muted);}
+.v14-recent-section {margin:0 0 29px;}
+.v14-recent-section > h2 {margin:0 0 12px;color:var(--color-text-muted);font-size:12px;font-weight:750;}
+.v14-recent-list {list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+.v14-recent-list .recent-place-item {display:flex;align-items:center;gap:13px;min-height:107px;padding:13px;border:1px solid var(--color-border);border-radius:14px;background:var(--color-surface);}
+.v14-recent-list .recent-place-thumb {flex:0 0 76px;width:76px;height:76px;border-radius:11px;overflow:hidden;display:block;background:var(--color-surface-muted);}
+.v14-recent-list .recent-place-info {flex:1;min-width:0;}
+.v14-recent-list .recent-place-name {font-size:15px;line-height:1.35;margin:0 0 5px;color:var(--color-text-strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.v14-recent-list .recent-place-name a {text-decoration:none;color:inherit;}
+.v14-recent-list .recent-place-category {font-size:12px;margin:0 0 10px;color:var(--color-text-muted);}
+.v14-recent-list .recent-place-actions {display:flex;align-items:center;gap:9px;}
+.v14-recent-list .recent-route-button {display:flex;align-items:center;justify-content:center;gap:5px;height:34px;padding:0 10px;border:1px solid var(--color-border);border-radius:9px;background:var(--color-surface-muted);color:var(--color-text);font-size:11px;font-weight:700;cursor:pointer;}
+.v14-recent-list .recent-route-button svg {width:14px;height:14px;}
+.v14-recent-list .recent-bookmark-button {display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--color-border);border-radius:9px;background:var(--color-surface-muted);color:var(--color-text-muted);cursor:pointer;}
+.v14-recent-list .recent-bookmark-button.active {color:var(--color-accent-text);border-color:var(--color-accent-text);background:var(--color-accent-soft);}
+.v14-recent-list .recent-bookmark-button:disabled {opacity:1;cursor:default;}
+.v14-recent-status {font-size:13px;color:var(--color-text-muted);}
+.v14-recent-status button {border:0;background:none;color:var(--color-accent-text);font:inherit;font-weight:700;cursor:pointer;}
+.v14-recent-empty {padding:60px 12px;text-align:center;}
+.v14-recent-empty h2 {color:var(--color-text-strong);font-size:17px;}
+.v14-recent-empty p {font-size:13px;color:var(--color-text-muted);}
+.v14-recent-empty a {display:inline-block;margin-top:12px;padding:12px 18px;border-radius:12px;background:var(--color-accent-text);color:var(--color-on-primary);font-size:13px;font-weight:700;text-decoration:none;}
+.v14-recent-list a:focus-visible,.v14-recent-list button:focus-visible {outline:2px solid var(--color-focus);outline-offset:2px;}
+@media(max-width:360px){.v14-recent-page{padding-left:12px;padding-right:12px}.v14-recent-list .recent-place-thumb{width:62px;height:62px;flex-basis:62px}}
 
-.recent-places-section + .recent-places-section {
-  margin-top: 74px;
-}
-
-.recent-places-title {
-  margin: 0 0 32px;
-  font-size: var(--font-section-title);
-  font-weight: var(--weight-heading);
-  line-height: 1.2;
-  letter-spacing: -0.5px;
-  color: var(--color-text-strong);
-}
-
-.recent-places-list {
-  display: flex;
-  flex-direction: column;
-  gap: 36px;
-}
-
-.recent-place-item {
-  display: grid;
-  grid-template-columns: 103px minmax(0, 1fr);
-  column-gap: 20px;
-  cursor: pointer;
-}
-
-.recent-place-thumb {
-  width: 103px;
-  height: 103px;
-  border-radius: 14px;
-  object-fit: cover;
-  display: block;
-  background-color: var(--color-surface-muted);
-}
-
-.recent-place-thumb-fallback {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--color-surface-muted);
-}
-
-.recent-place-info {
-  min-width: 0;
-  padding-top: 1px;
-}
-
-.recent-place-name {
-  margin: 0 0 7px;
-  font-size: 21px;
-  font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -0.7px;
-  color: var(--color-text-strong);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.recent-place-category {
-  margin: 0 0 14px;
-  font-size: 17px;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.3px;
-  color: var(--color-text-muted);
-}
-
-.recent-place-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.recent-place-name a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.recent-place-name a:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
-.recent-bookmark-button:disabled {
-  opacity: 0.65;
-  cursor: default;
-}
-
-.recent-route-button {
-  height: 40px;
-  padding: 0 14px;
-  border: none;
-  border-radius: 9px;
-  background-color: var(--color-primary);
-  color: var(--color-on-primary);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: -0.3px;
-  cursor: pointer;
-}
-
-.recent-bookmark-button {
-  width: 42px;
-  height: 42px;
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  background-color: var(--color-surface-muted);
-  color: var(--color-text-muted);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.recent-bookmark-button.active {
-  border-color: var(--color-accent-text);
-  background-color: var(--color-accent-soft);
-  color: var(--color-accent-text);
-}
-
-.recent-route-button:focus-visible,
-.recent-bookmark-button:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 3px;
-}
-
-.recent-places-empty {
-  min-height: calc(100vh - 160px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-muted);
-  font-size: 16px;
-  font-weight: 600;
-}
-
-@media (min-width: 480px) {
-  .recent-places-page {
-    max-width: 390px;
-    margin: 0 auto;
-  }
-}
+/* V14 latest twenty use the exact same cards as Search and DestinationExplore. */
+.v14-recent-page .v14-recent-heading>span{display:none}
+.v14-recent-cards{display:flex;flex-direction:column;gap:12px;list-style:none;padding:0;margin:0}
+.v14-recent-cards>li{min-width:0}

@@ -89,3 +89,12 @@ test("reconciliation publishes authoritative data without confirming an unapplie
   expect(result.current.places).toEqual(places);
   expect(result.current.timelines[1].status).toBe("success");
 });
+
+test("in-place refresh does not replace the mounted itinerary with a loading screen",async()=>{
+  const {result}=renderHook(()=>useTripResult("1"));
+  await waitFor(()=>expect(result.current.status).toBe("success"));
+  getTripPlacesApi.mockResolvedValueOnce([{...places[0],memo:"새 메모"}]);
+  await act(async()=>{await result.current.refreshInPlace();});
+  expect(result.current.status).toBe("success");
+  expect(result.current.places[0].memo).toBe("새 메모");
+});

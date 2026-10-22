@@ -4,7 +4,7 @@ export function requireSearchPlaces(places) {
   if (!Array.isArray(places) || places.some(place =>
     !Number.isSafeInteger(Number(place?.id)) || Number(place.id) <= 0 ||
     typeof place.name !== "string" || !place.name.trim() ||
-    ["region", "address", "placeType"].some(key => place[key] != null && typeof place[key] !== "string")) ||
+    ["region", "address", "placeCategory", "placeCategoryLabel"].some(key => place[key] != null && typeof place[key] !== "string")) ||
     new Set(places.map(place => String(place.id))).size !== places.length) {
     throw new Error("장소 조회 응답을 확인할 수 없습니다.");
   }

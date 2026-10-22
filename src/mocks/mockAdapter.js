@@ -81,7 +81,26 @@ function handle(method, path, data, params) {
       return place;
     }
   }
-  let match = path.match(/^\/api\/places\/(\d+)(\/reviews)?$/);
+  // Match the production paginated review contract in mock mode as well.
+  let match = path.match(/^\/api\/places\/(\d+)\/reviews\/paged$/);
+  if (match && method === "get") {
+    const place = find(state.places, match[1]);
+    const page = Number(params.page ?? 0);
+    const size = Number(params.size ?? 5);
+    if (!Number.isInteger(page) || page < 0 || !Number.isInteger(size) || size < 1 || size > 10) {
+      throw Object.assign(new Error("리뷰 페이지 범위가 올바르지 않습니다."), { status: 400 });
+    }
+    const reviews = state.reviews.filter(review => review.placeId === place.id).sort((a, b) => b.id - a.id);
+    return {
+      content: reviews.slice(page * size, (page + 1) * size).map(review => ({ ...review, photos: review.photos || [] })),
+      page,
+      totalPages: Math.ceil(reviews.length / size),
+      totalElements: reviews.length,
+      averageRating: reviews.length
+        ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : null,
+    };
+  }
+  match = path.match(/^\/api\/places\/(\d+)(\/reviews)?$/);
   if (match) {
     const place = find(state.places, match[1]);
     if (match[2]) {
@@ -183,6 +202,41 @@ function handle(method, path, data, params) {
         return saveDayOrder(trip, dayPlaces, params.startTime);
       }
     }
+    part = suffix.match(/^\/days\/(\d+)\/places$/);
+    if (part && method === "delete") {
+      const dayPlaces = all.filter(row => row.day === Number(part[1]));
+      const ids = data?.tripPlaceIds;
+      if (!Array.isArray(ids) || !ids.length || ids.some(id => !Number.isInteger(id) || id < 1) ||
+          new Set(ids).size !== ids.length || ids.some(id => !dayPlaces.some(row => row.id === id))) {
+        throw Object.assign(new Error("해당 일차의 삭제 대상을 정확히 선택해 주세요."), { status: 400 });
+      }
+      const selection = new Set(ids);
+      const startDeleted = dayPlaces.some(row => selection.has(row.id) && row.isStartPoint);
+      state.tripPlaces = state.tripPlaces.filter(row => !selection.has(row.id) || row.tripId !== trip.id || row.day !== Number(part[1]));
+      const remaining = state.tripPlaces.filter(row => row.tripId === trip.id && row.day === Number(part[1]))
+        .sort((left, right) => left.visitOrder - right.visitOrder);
+      remaining.forEach((row, index) => {
+        row.visitOrder = index + 1;
+        if (startDeleted) row.isStartPoint = index === 0 && !row.isFixed;
+      });
+      return remaining;
+    }
+    part = suffix.match(/^\/days\/(\d+)\/places\/order\/manual$/);
+    if (part && method === "patch") {
+      const dayPlaces = all.filter(row => row.day === Number(part[1]));
+      const ids = data?.tripPlaceIds;
+      if (!Array.isArray(ids) || ids.length !== dayPlaces.length ||
+          new Set(ids).size !== ids.length || ids.some(id => !dayPlaces.some(row => row.id === id))) {
+        throw Object.assign(new Error("해당 날짜의 모든 방문 항목을 한 번씩 포함해 주세요."), { status: 400 });
+      }
+      const ordered = ids.map(id => find(dayPlaces, id));
+      const existingStart = ordered.some(row => row.isStartPoint);
+      ordered.forEach((row, index) => {
+        row.visitOrder = index + 1;
+        if (existingStart) row.isStartPoint = index === 0;
+      });
+      return ordered;
+    }
     part = suffix.match(/^\/days\/(\d+)\/places\/order$/);
     if (part && method === "patch") {
       const dayPlaces = all.filter(row => row.day === Number(part[1]));
@@ -203,7 +257,6 @@ function handle(method, path, data, params) {
       const dayPlaces = all.filter(row => row.day === Number(part[1]));
       const place = find(dayPlaces, part[2]);
       if (part[3] === "start" && method === "post") {
-        if (place.isFixed) throw Object.assign(new Error("고정 장소는 출발지로 지정할 수 없습니다."), { status: 400 });
         const ordered = [place, ...dayPlaces.filter(row => row !== place).sort((a, b) => a.visitOrder - b.visitOrder)];
         ordered.forEach((row, index) => { row.isStartPoint = row === place; row.visitOrder = index + 1; });
         return place;
@@ -211,7 +264,22 @@ function handle(method, path, data, params) {
       if (part[3] === "schedule" && method === "patch") {
         const updates = Object.fromEntries(Object.entries(data || {}).filter(([, value]) => value != null));
         Object.assign(place, updates, updates.fixed === undefined ? {} : { isFixed: updates.fixed });
+        if (updates.clearArrivalTime) { place.arrivalTime = null; place.departureTime = null; }
+        if (updates.fixed === true && !place.arrivalTime) {
+          throw Object.assign(new Error("고정 방문에는 방문 시각이 필요합니다."), { status:400 });
+        }
         if (updates.fixed === false) place.isNextDay = false;
+        if (updates.reorderByVisitTime) {
+          dayPlaces.sort((a,b)=>{
+            const aTime = a.arrivalTime || "99:99", bTime = b.arrivalTime || "99:99";
+            return aTime.localeCompare(bTime) || a.visitOrder - b.visitOrder;
+          });
+          const hadStart = dayPlaces.some(row => row.isStartPoint);
+          dayPlaces.forEach((row,index)=>{
+            row.visitOrder = index + 1;
+            if (hadStart) row.isStartPoint = index === 0;
+          });
+        }
         return place;
       }
       if (part[3] === "memo" && method === "patch") { place.memo = data.memo; return place; }

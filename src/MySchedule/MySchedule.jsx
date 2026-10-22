@@ -4,65 +4,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import "./MySchedule.css";
 import { getTripsApi } from "../api/tripApi";
-import useSessionKey from "../utils/useSessionKey"; import { getAuthSnapshot } from "../utils/authState"; import PlacePhoto from "../components/PlacePhoto";
-
-
-
-
-
-
-const ChevronRightIcon = () => (
-  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    <path
-      d="M9 6L15 12L9 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const PlusCircleIcon = () => (
-  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-    <circle
-      cx="12"
-      cy="12"
-      r="10"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
-    <path
-      d="M12 8V16M8 12H16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
-const PinIcon = () => (
-  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-    <path
-      d="M12 20C12 20 6.5 14.9 6.5 10.9C6.5 7.7 9.1 5 12.2 5C15.4 5 18 7.7 18 10.9C18 14.9 12.5 20 12.5 20H12Z"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-    />
-    <circle
-      cx="12.2"
-      cy="10.8"
-      r="2"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    />
-  </svg>
-);
+import useSessionKey from "../utils/useSessionKey";
+import { getAuthSnapshot } from "../utils/authState";
+import useTripDeletion from "../utils/useTripDeletion";
+import TripListCard from "../components/TripListCard";
 
 const isValidDate = (date) =>
   date instanceof Date && !Number.isNaN(date.getTime());
@@ -231,23 +176,24 @@ const getScheduleDateText = (schedule) => {
   return `${formatDateText(firstDate)} - ${formatDateText(lastDate, false)}`;
 };
 
-const getScheduleDday = (schedule) => {
+export const getScheduleDday = (schedule, referenceDate = new Date()) => {
   const dates = getScheduleDates(schedule);
 
   if (dates.length === 0) return "날짜 미정";
 
-  const today = normalizeDateOnly(new Date())?.getTime() || 0;
+  const today = normalizeDateOnly(referenceDate)?.getTime() || 0;
   const firstDate = normalizeDateOnly(dates[0])?.getTime() || 0;
   const lastDate =
     normalizeDateOnly(dates[dates.length - 1])?.getTime() || firstDate;
 
   if (today > lastDate) return "완료";
+  if (today >= firstDate) return `${Math.round((today - firstDate) / 86400000) + 1}일차`;
 
   const diff = Math.ceil((firstDate - today) / (1000 * 60 * 60 * 24));
 
   if (diff > 0) return `D-${diff}`;
 
-  return "D-Day";
+  return "1일차";
 };
 
 const getScheduleLocation = (schedule) => {
@@ -339,13 +285,24 @@ function MySchedule() {
   const account = useSessionKey();
   const currentAccount = useRef(account); currentAccount.current = account;
 
-  const [activeTab, setActiveTab] = useState("upcoming");
   const [scheduleList, setScheduleList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-
+  const [editing, setEditing] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const { deleteTrips, pendingId, busy, notice } = useTripDeletion(account, id => {
+    // A focus-triggered list fetch started before DELETE must not restore a removed ticket.
+    requestRef.current?.abort();
+    requestRef.current = null;
+    lastRefreshAt.current = Date.now();
+    setIsLoading(false);
+    setScheduleList(previous => previous.filter(trip => String(trip.id) !== id));
+    setSelectedIds(previous => previous.filter(selected => selected !== id));
+  });
   const requestRef = useRef(null);
   const mountedRef = useRef(false);
+  const lastRefreshAt = useRef(0);
+
   const loadSchedules = useCallback(async () => {
     if (requestRef.current) return;
     const request = new AbortController();
@@ -353,218 +310,174 @@ function MySchedule() {
     try {
       setIsLoading(true);
       setErrorMessage("");
-
       const serverTrips = await getTripsApi({ signal: request.signal });
-      if (!mountedRef.current || request.signal.aborted || getAuthSnapshot().accountKey !== account || currentAccount.current !== account || requestRef.current !== request) return;
+      if (!mountedRef.current || request.signal.aborted ||
+          getAuthSnapshot().accountKey !== account || currentAccount.current !== account ||
+          requestRef.current !== request) return;
       const scheduleMap = new Map();
-
-      serverTrips
-        .map((trip) => convertScheduleToCard(trip, "server"))
-        .filter(Boolean)
-        .forEach((card) => {
-          scheduleMap.set(String(card.routeId || card.id), card);
-        });
-
-      setScheduleList(
-        [...scheduleMap.values()].sort((a, b) => b.startTime - a.startTime),
-      );
+      serverTrips.map(trip => convertScheduleToCard(trip, "server")).filter(Boolean)
+        .forEach(card => scheduleMap.set(String(card.routeId || card.id), card));
+      setScheduleList([...scheduleMap.values()]);
+      lastRefreshAt.current = Date.now();
     } catch (error) {
-      if (!mountedRef.current || request.signal.aborted || error.code === "ERR_CANCELED" || getAuthSnapshot().accountKey !== account || currentAccount.current !== account || requestRef.current !== request) return;
+      if (!mountedRef.current || request.signal.aborted || error?.code === "ERR_CANCELED" ||
+          getAuthSnapshot().accountKey !== account || currentAccount.current !== account ||
+          requestRef.current !== request) return;
       logSafeApiError(error, "MySchedule.jsx");
-
-
       if (error.message?.includes("Network Error")) {
         setErrorMessage("네트워크 연결을 확인한 뒤 다시 시도해주세요.");
-        return;
+      } else if (error.response?.status === 401 || error.response?.status === 403) {
+        setErrorMessage("로그인 정보가 만료되었거나 권한이 없습니다. 다시 로그인해주세요.");
+      } else {
+        setErrorMessage(getErrorMessage(error,
+          "저장된 일정을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
       }
-
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        setErrorMessage(
-          "로그인 정보가 만료되었거나 권한이 없습니다. 다시 로그인해주세요.",
-        );
-        return;
-      }
-
-      setErrorMessage(
-        getErrorMessage(
-          error,
-          "저장된 일정을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
-        ),
-      );
     } finally {
       if (requestRef.current === request) requestRef.current = null;
-      if (mountedRef.current && !request.signal.aborted && getAuthSnapshot().accountKey === account && currentAccount.current === account) setIsLoading(false);
+      if (mountedRef.current && !request.signal.aborted &&
+          getAuthSnapshot().accountKey === account && currentAccount.current === account) setIsLoading(false);
     }
   }, [account]);
 
   useEffect(() => {
     setScheduleList([]); setErrorMessage("");
+    setEditing(false); setSelectedIds([]);
     mountedRef.current = true;
-    loadSchedules();
-    return () => { mountedRef.current = false; requestRef.current?.abort(); requestRef.current = null; };
+    void loadSchedules();
+    return () => {
+      mountedRef.current = false;
+      requestRef.current?.abort();
+      requestRef.current = null;
+    };
   }, [loadSchedules]);
 
   useEffect(() => {
-    const handleRefreshSchedules = () => {
-      loadSchedules();
+    const handleFocus = () => {
+      // Dialog dismissal and clicking the window must not flash the list with a fresh loader.
+      if (!editing && !busy && Date.now() - lastRefreshAt.current > 30000) void loadSchedules();
     };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [loadSchedules, editing, busy]);
 
-    window.addEventListener("focus", handleRefreshSchedules);
-
-    return () => {
-      window.removeEventListener("focus", handleRefreshSchedules);
-    };
-  }, [loadSchedules]);
-
-  const { upcomingScheduleList, pastScheduleList, undatedScheduleList } = useMemo(() => {
+  const { currentTrips, futureTrips, undatedTrips } = useMemo(() => {
     const today = normalizeDateOnly(new Date())?.getTime() || 0;
-
-    const upcoming = [];
-    const past = [];
-    const undated = [];
-
-    scheduleList.forEach((schedule) => {
-      if (!schedule.startTime || !schedule.endTime) {
-        undated.push(schedule);
-      } else if (schedule.endTime >= today) {
-        upcoming.push(schedule);
-      } else {
-        past.push(schedule);
-      }
+    const active = [], future = [], undated = [];
+    scheduleList.forEach(trip => {
+      if (trip.endTime && trip.endTime < today) return;
+      if (!trip.startTime || !trip.endTime) { undated.push(trip); return; }
+      if (trip.startTime <= today) active.push(trip); else future.push(trip);
     });
-
-    upcoming.sort((a, b) => a.startTime - b.startTime);
-    past.sort((a, b) => b.endTime - a.endTime);
-
-    return {
-      upcomingScheduleList: upcoming,
-      pastScheduleList: past,
-      undatedScheduleList: undated,
-    };
+    active.sort((a,b) => a.endTime - b.endTime || a.id.localeCompare(b.id));
+    future.sort((a,b) => a.startTime - b.startTime || a.id.localeCompare(b.id));
+    return { currentTrips: active, futureTrips: future, undatedTrips: undated };
   }, [scheduleList]);
 
-  const currentList =
-    activeTab === "upcoming" ? upcomingScheduleList : activeTab === "past" ? pastScheduleList : undatedScheduleList;
-
-  const handleOpenSchedule = (schedule) => {
-    const routeId = schedule.routeId || schedule.id;
-
-    navigate(`/route-result?id=${encodeURIComponent(routeId)}`, {
-      state: {
-        routeId,
-        tripId: routeId,
-        scheduleId: schedule.id,
-        savedRoute: schedule.route,
-      },
+  const featured = currentTrips[0] || futureTrips[0] || null;
+  const rest = [...currentTrips, ...futureTrips].filter(trip => trip.id !== featured?.id);
+  const toggleEditing = () => {
+    if (busy) return;
+    setEditing(previous => !previous);
+    setSelectedIds([]);
+  };
+  const toggleSelected = trip => {
+    if (busy) return;
+    const id = String(trip.id);
+    setSelectedIds(previous => previous.includes(id)
+      ? previous.filter(value => value !== id) : [...previous, id]);
+  };
+  const removeSelected = async () => {
+    const eligible = [...currentTrips, ...futureTrips, ...undatedTrips]
+      .filter(trip => selectedIds.includes(String(trip.id)));
+    const result = await deleteTrips(eligible);
+    if (result.complete) { setEditing(false); setSelectedIds([]); }
+  };
+  const openTrip = trip => {
+    const routeId = trip.routeId || trip.id;
+    navigate("/route-result?id=" + encodeURIComponent(routeId), {
+      state: { routeId, tripId: routeId, scheduleId: trip.id, savedRoute: trip.route },
     });
   };
-
-  const handleCreateSchedule = () => {
-    navigate("/route-create");
-  };
-
-  return (
-    <div className="my-schedule-page">
-      <div className="my-schedule-tabs">
-        <button
-          type="button"
-          className={`my-schedule-tab ${
-            activeTab === "upcoming" ? "active" : ""
-          }`}
-          aria-pressed={activeTab === "upcoming"} onClick={() => setActiveTab("upcoming")}
-        >
-          다가오는 일정
-        </button>
-
-        <button
-          type="button"
-          className={`my-schedule-tab ${activeTab === "past" ? "active" : ""}`}
-          aria-pressed={activeTab === "past"} onClick={() => setActiveTab("past")}
-        >
-          지난 일정
-        </button>
-        {undatedScheduleList.length > 0 && <button type="button" className={`my-schedule-tab ${activeTab === "undated" ? "active" : ""}`} aria-pressed={activeTab === "undated"} onClick={() => setActiveTab("undated")}>날짜 미정</button>}
-      </div>
-
-      <div className="my-schedule-content">
-        <button
-          type="button"
-          className="my-schedule-create-btn"
-          onClick={handleCreateSchedule}
-        >
-          <PlusCircleIcon />
-          <span>새 일정 만들기</span>
-        </button>
-
-        <div className="my-schedule-section-header">
-          <h2>
-            {activeTab === "upcoming" ? "다가오는 일정" : activeTab === "past" ? "지난 일정" : "날짜 미정"}
-            <span>{scheduleList.length || (!isLoading && !errorMessage) ? currentList.length : "—"}</span>
-          </h2>
+  return <main className="my-schedule-page">
+    <header className="v15-schedule-heading">
+      <div className="v15-schedule-heading-content">
+        <p className="v15-schedule-eyebrow">MY TRIPS</p>
+        <div className="v15-schedule-heading-row">
+          <h1>내 여행 일정</h1>
+          <button type="button" className="v15-schedule-create" aria-label="새 일정 만들기"
+            title="새 일정 만들기" onClick={() => navigate("/route-create")}>＋</button>
         </div>
-
-        {errorMessage && <div className="my-schedule-empty">
-          <p role="alert">{errorMessage}{scheduleList.length > 0 && " 마지막으로 확인한 일정을 표시합니다."}</p>
-          <button type="button" onClick={loadSchedules} disabled={isLoading}>다시 불러오기</button>
-        </div>}
-        {isLoading && scheduleList.length > 0 && <p role="status">저장된 일정을 갱신하는 중입니다.</p>}
-        {isLoading && scheduleList.length === 0 ? (
-          <div className="my-schedule-empty">
-            <p>저장된 일정을 불러오는 중입니다.</p>
-          </div>
-        ) : scheduleList.length > 0 || !errorMessage ? (
-          <>
-            <div className="my-schedule-list">
-              {currentList.map((schedule) => (
-                <article
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); handleOpenSchedule(schedule); } }}
-                  key={`${schedule.source}-${schedule.id}`}
-                  className="my-schedule-card"
-                  onClick={() => handleOpenSchedule(schedule)}
-                >
-                  <span className="place-photo-frame my-schedule-thumb"><PlacePhoto place={schedule.photoPlace} src={schedule.image} alt={schedule.title} className="place-photo-frame-image" /></span>
-
-                  <div className="my-schedule-card-body">
-                    <div className="my-schedule-card-top">
-                      <span className="my-schedule-dday">{schedule.dday}</span>
-                    </div>
-
-                    <h3>{schedule.title}</h3>
-                    <p className="my-schedule-date">{schedule.dateText}</p>
-
-                    <div className="my-schedule-location">
-                      <PinIcon />
-                      <span>{schedule.location}</span>
-                    </div>
-                  </div>
-
-                  <div className="my-schedule-chevron">
-                    <ChevronRightIcon />
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            {currentList.length === 0 && (
-              <div className="my-schedule-empty">
-                <p>{scheduleList.length ? (activeTab === "upcoming" ? "다가오는 일정이 없어요. 지난 일정 탭에서 확인해 주세요." : "지난 일정이 없어요. 다가오는 일정 탭에서 확인해 주세요.") : "저장된 일정이 없습니다."}</p>
-              </div>
-            )}
-          </>
-        ) : null}
-
-        <div className="my-schedule-recommend-card">
-          <h3>어디로 떠나볼까요?</h3>
-          <p>너만 오면 go가 추천하는 맞춤형 여행 코스</p>
-          <button type="button" onClick={() => navigate("/recommend")}>
-            추천 받기
-          </button>
-        </div>
+        <p>준비 중인 여행을 한눈에 확인하세요.</p>
       </div>
+    </header>
+
+    {errorMessage && <div className="v15-schedule-notice" role="alert">
+      <p>{errorMessage}{scheduleList.length > 0 ? " 마지막으로 확인한 일정을 표시합니다." : ""}</p>
+      <button type="button" onClick={loadSchedules} disabled={isLoading}>다시 불러오기</button>
+    </div>}
+    {notice && <p className="v15-schedule-notice" role="status">{notice}</p>}
+    {isLoading && <p className="v15-schedule-substatus" role="status">
+      {scheduleList.length ? "일정을 갱신하는 중..." : "저장된 일정을 불러오는 중입니다."}
+    </p>}
+
+    {featured && <section className="v15-schedule-featured" aria-label="가장 가까운 여행">
+      <div className="v15-schedule-section-title">
+        <h2>가장 가까운 여행</h2>
+        <button type="button" className="v15-schedule-edit" aria-pressed={editing}
+          disabled={busy} onClick={toggleEditing}>{editing ? "완료" : "편집"}</button>
+      </div>
+      <TripListCard trip={featured} featured onOpen={openTrip}
+        editing={editing} selected={selectedIds.includes(String(featured.id))}
+        onToggleSelected={toggleSelected} deleting={pendingId === String(featured.id)} />
+    </section>}
+
+    {rest.length > 0 && <section className="v15-schedule-other" aria-label="다른 여행 목록">
+      <div className="v15-schedule-section-title"><h2>다가오는 여행</h2><span>{rest.length}개</span></div>
+      <div className="v15-schedule-cards">{rest.map(trip =>
+        <TripListCard key={trip.id} trip={trip} onOpen={openTrip}
+          editing={editing} selected={selectedIds.includes(String(trip.id))}
+          onToggleSelected={toggleSelected} deleting={pendingId === String(trip.id)} />)}
+      </div>
+    </section>}
+
+    {undatedTrips.length > 0 && <section className="v15-schedule-other" aria-label="날짜 확인 필요">
+      <div className="v15-schedule-section-title"><h2>날짜 확인 필요</h2>
+        {!featured ? <button type="button" className="v15-schedule-edit" aria-pressed={editing}
+          disabled={busy} onClick={toggleEditing}>{editing ? "완료" : "편집"}</button> : <span>{undatedTrips.length}개</span>}
+      </div>
+      <p className="v15-schedule-substatus">저장된 날짜가 확인되지 않은 일정을 표시합니다.</p>
+      <div className="v15-schedule-cards">{undatedTrips.map(trip =>
+        <TripListCard key={trip.id} trip={trip} onOpen={openTrip}
+          editing={editing} selected={selectedIds.includes(String(trip.id))}
+          onToggleSelected={toggleSelected} deleting={pendingId === String(trip.id)} />)}
+      </div>
+    </section>}
+
+    {!isLoading && !errorMessage && !featured && undatedTrips.length === 0 &&
+      <section className="v15-schedule-empty">
+        <span aria-hidden="true">✈</span>
+        <h2>준비 중인 여행이 없어요</h2>
+        <p>저장된 일정이 없습니다.</p>
+        <button type="button" onClick={() => navigate("/route-create")}>새 여행 계획하기</button>
+      </section>}
+
+    <div className={`v15-bulk-delete ${editing && selectedIds.length > 0 ? "is-visible" : ""}`}
+      role="region" aria-label="선택한 여행 일정 삭제"
+      aria-hidden={!(editing && selectedIds.length > 0)}
+      inert={!(editing && selectedIds.length > 0)}>
+      <button type="button" disabled={busy || !selectedIds.length} onClick={removeSelected}
+        aria-label={`선택한 일정 ${selectedIds.length}개 삭제하기`}>
+        삭제하기 <strong>{selectedIds.length}</strong>
+      </button>
     </div>
-  );
+    <nav className="v15-schedule-past-nav" aria-label="지난 여행 바로가기">
+      <button type="button" onClick={() => navigate("/mypage/past-trips")}>
+        <span className="v15-schedule-past-icon" aria-hidden="true">↺</span>
+        <span><strong>지난 여행 보기</strong><small>예전에 계획했던 여행 확인하기</small></span>
+        <span className="v15-schedule-past-arrow" aria-hidden="true">›</span>
+      </button>
+    </nav>
+  </main>;
 }
 
 export default MySchedule;

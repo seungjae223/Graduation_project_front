@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { logSafeApiError } from "../utils/safeLog";
-import { beginOAuth, OAUTH_REDIRECT_MISMATCH_MESSAGE } from "../utils/oauthSecurity";
+import { beginOAuth } from "../utils/oauthSecurity";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getApiErrorMessage } from "../api/api";
 import { getSocialAuthorizationApi, loginApi } from "../api/authApi";
@@ -79,7 +79,6 @@ const Login = () => {
   const handleSocialLogin = async (provider) => {
     const request = task.begin("social");
     if (!request) return;
-    setLoginError("");
     try {
       const result = await getSocialAuthorizationApi(provider, request.options);
       if (!request.isCurrent()) return;
@@ -89,16 +88,11 @@ const Login = () => {
         return;
       }
       const { authorizationUrl, state } = result;
-      const destination = beginOAuth(provider, authorizationUrl, state);
       saveSocialLoginReturnPath(returnPath);
-      window.location.assign(destination);
+      window.location.assign(beginOAuth(provider, authorizationUrl, state));
     } catch (error) {
       if (!request.isCurrent() || isCanceledAuthRequest(error)) return;
       logSafeApiError(error, "oauth-start");
-      if (error.code === "OAUTH_REDIRECT_MISMATCH") {
-        setLoginError(OAUTH_REDIRECT_MISMATCH_MESSAGE);
-        return;
-      }
       alert(getApiErrorMessage(error, "소셜 로그인을 시작하지 못했습니다."));
     } finally {
       task.end(request);

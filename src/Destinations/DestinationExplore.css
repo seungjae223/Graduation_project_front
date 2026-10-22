@@ -1,0 +1,233 @@
+/* Full-width city cover: no PlacePhoto object-fit/portrait overrides. */
+.destination-explore-page {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px calc(108px + env(safe-area-inset-bottom, 0px));
+  color: var(--color-text-strong);
+  background: var(--color-page);
+  min-height: 100%;
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+}
+.destination-explore-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  margin-bottom: 12px;
+  color: var(--color-accent-text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+}
+.destination-explore-page > .destination-explore-back { margin: 10px 0 16px; }
+.destination-explore-hero {
+  isolation: isolate;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 310px;
+  margin: 0 -16px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #174d75, #2d86a7 60%, #73a9b6);
+  color: #fff;
+}
+.destination-hero-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+.destination-hero-media > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center 50%;
+}
+.destination-hero-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8, 23, 38, .32) 0%, rgba(8, 23, 38, .08) 30%, rgba(8, 23, 38, .78) 100%);
+}
+.destination-hero-back {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  left: 16px;
+  margin: 0;
+  padding: 0 12px;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, .32);
+  border: 1px solid rgba(255,255,255,.6);
+  border-radius: 999px;
+  background: rgba(9, 23, 42, .42);
+}
+.destination-hero-copy { position: relative; padding: 118px 20px 44px; z-index: 1; }
+.destination-hero-copy p { margin: 0; color: rgba(255,255,255,.94); font-size: 15px; line-height: 1.5; font-weight: 500; }
+.destination-hero-copy .destination-explore-country { color: #fff; font-size: 14px; font-weight: 700; }
+.destination-hero-copy h1 { margin: 7px 0 8px; font-size: 34px; line-height: 1.16; font-weight: 800; letter-spacing: -.035em; }
+.destination-hero-total {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 13px;
+  padding: 5px 10px;
+  border: 1px solid rgba(255,255,255,.5);
+  border-radius: 999px;
+  background: rgba(9, 23, 42, .3);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+.destination-hero-credit {
+  position: absolute;
+  z-index: 2;
+  right: 12px;
+  bottom: 9px;
+  max-width: calc(100% - 24px);
+  color: rgba(255,255,255,.92);
+  font-size: 11px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-shadow: 0 1px 3px #15253b;
+}
+.destination-explore-section { margin-top: 24px; }
+.destination-explore-section h2 { margin: 0 0 14px; font-size: 18px; line-height: 1.35; font-weight: 800; }
+.destination-place-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  height: 50px;
+  padding: 0 13px;
+  border: 1px solid var(--color-border);
+  border-radius: 13px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+.destination-place-search:focus-within { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.destination-place-search svg { width: 19px; height: 19px; flex: 0 0 auto; }
+.destination-place-search input { width: 100%; min-width: 0; height: 100%; border: none; outline: none; background: transparent; font: inherit; font-size: 16px; color: var(--color-text-strong); }
+.destination-place-search input::placeholder { color: var(--color-text-muted); }
+.destination-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.destination-category-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding: 14px 1px 8px;
+  scrollbar-width: thin;
+}
+.destination-category-chips button {
+  flex: 0 0 auto;
+  min-height: var(--touch-target);
+  padding: 7px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.destination-category-chips button[aria-pressed="true"] { border-color: var(--color-accent-text); background: var(--color-accent-text); color: white; }
+.destination-results { margin-top: 20px; }
+.destination-result-summary {
+  margin: 0 0 12px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+.destination-place-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; list-style: none; margin: 0; padding: 0; }
+.destination-place-grid li { min-width: 0; }
+.destination-place-card {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 12px;
+  min-height: 132px;
+  padding: 10px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: 0 2px 12px rgba(20, 33, 61, 0.06);
+}
+.destination-place-photo { min-width: 0; height: 132px; overflow: hidden; border-radius: 11px; background: var(--color-page); }
+.destination-place-photo > img,
+.destination-place-photo > .place-photo-placeholder { width: 100%; height: 100%; object-fit: cover; }
+.destination-place-body { display: flex; flex-direction: column; min-width: 0; padding: 3px 0 1px; }
+.destination-place-kind { font-size: 12px; color: var(--color-accent-text); font-weight: 700; overflow-wrap: anywhere; }
+.destination-place-body h3 { margin: 5px 0 6px; font-size: 17px; font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; }
+.destination-place-actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 1px 6px;
+  margin-top: auto;
+}
+.destination-place-body .destination-place-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: var(--touch-target);
+  padding: 4px 2px;
+  border: 0;
+  background: transparent;
+  color: var(--color-accent-text);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.destination-place-actions .destination-place-folder svg,
+.destination-place-actions .destination-place-schedule svg {
+  width: 17px;
+  height: 17px;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+.destination-action-separator { height: 14px; width: 1px; align-self: center; background: var(--color-border-strong); opacity: .65; }
+.destination-place-actions button:disabled { opacity: .5; cursor: wait; }
+.destination-place-body .destination-place-detail { margin-left: auto; }
+.destination-place-body .destination-place-detail span { margin-left: 3px; }
+.destination-explore-empty { padding: 20px 15px; border-radius: 14px; background: var(--color-surface); text-align: center; color: var(--color-text-muted); font-size: 13px; }
+.destination-explore-empty button { min-height: var(--touch-target); margin-top: 6px; border: none; background: transparent; color: var(--color-accent-text); font-weight: 700; cursor: pointer; }
+.destination-load-more { display: block; margin: 22px auto 0; padding: 10px 24px; min-height: var(--touch-target); border: 1px solid var(--color-accent-text); border-radius: 12px; background: var(--color-surface); color: var(--color-accent-text); cursor: pointer; }
+.destination-explore-page button:focus-visible,
+.destination-explore-back:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 3px; }
+@media (max-width: 350px) {
+  .destination-place-card { grid-template-columns: 96px minmax(0, 1fr); gap: 10px; }
+  .destination-place-photo { height: 122px; }
+  .destination-place-body h3 { font-size: 16px; }
+}
+
+/* nomango-destination-save-stable-disabled-v1 */
+/* Keep the action beneath the modal from flashing during folder changes. */
+.destination-place-actions button:disabled {
+  opacity: 1 !important;
+}
+
+/* V13: light icon+label sort control, no separate category headings. */
+.destination-results-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:40px; margin:0 0 10px; }
+.destination-results-toolbar .destination-result-summary { margin:0; }
+.destination-sort-button {
+  margin-left:auto; display:inline-flex; align-items:center; gap:6px;
+  min-height:40px; padding:6px 8px; border:0; border-radius:9px;
+  background:transparent; color:var(--color-text-strong); font:inherit;
+  font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
+}
+.destination-sort-button svg { width:18px; height:18px; color:var(--color-accent-text); }
+.destination-sort-button:hover { background:var(--color-surface-muted); }
+.destination-sort-button:focus-visible { outline:2px solid var(--color-focus); outline-offset:2px; }
+.destination-sort-status { margin:4px 0 12px; color:var(--color-text-muted); font-size:13px; }
+.destination-sort-status button { margin-left:6px; border:0; background:none; color:var(--color-accent-text); font:inherit; font-weight:700; cursor:pointer; }

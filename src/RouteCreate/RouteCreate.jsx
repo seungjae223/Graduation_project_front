@@ -1036,7 +1036,8 @@ const createPlaceItem = (place, orderIndex = 0) => {
     tags: place.tags || [],
     latitude: coordinate.latitude,
     longitude: coordinate.longitude,
-    placeType: place.placeType || place.type || "",
+    placeCategory: place.placeCategory || "",
+    placeCategoryLabel: place.placeCategoryLabel || "",
     timeLabel:
       place.timeLabel ||
       DEFAULT_TIME_SLOTS[orderIndex % DEFAULT_TIME_SLOTS.length],
@@ -1133,7 +1134,8 @@ const normalizeIncomingRoutePlace = (place) => {
     tags: place.tags || [],
     latitude: place.latitude || place.lat || null,
     longitude: place.longitude || place.lng || null,
-    placeType: place.placeType || place.type || "",
+    placeCategory: place.placeCategory || "",
+    placeCategoryLabel: place.placeCategoryLabel || "",
   };
 };
 
@@ -1269,7 +1271,8 @@ const normalizeSearchPlace = (place) => {
     tags: place.tags || place.hashtags || [],
     latitude: place.latitude ?? place.lat ?? null,
     longitude: place.longitude ?? place.lng ?? null,
-    placeType: place.placeType || place.type || "",
+    placeCategory: place.placeCategory || "",
+    placeCategoryLabel: place.placeCategoryLabel || "",
   };
 };
 
@@ -1632,7 +1635,8 @@ const mapOptimizedPlacesToSavedRoute = (
           desc: tripPlace.address || matchedPlace.desc || "주소 정보 없음",
           latitude: tripPlace.latitude ?? matchedPlace.latitude ?? null,
           longitude: tripPlace.longitude ?? matchedPlace.longitude ?? null,
-          placeType: tripPlace.placeType || matchedPlace.placeType || "",
+          placeCategory: tripPlace.placeCategory || matchedPlace.placeCategory || "",
+          placeCategoryLabel: tripPlace.placeCategoryLabel || matchedPlace.placeCategoryLabel || "",
           visitOrder: tripPlace.visitOrder || index + 1,
           isStartPoint: Boolean(tripPlace.isStartPoint),
         };

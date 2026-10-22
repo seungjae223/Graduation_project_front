@@ -13,9 +13,10 @@ test("ID-less success has no name-based selection and duplicate submits only POS
   let complete; api.post.mockImplementation(() => new Promise(resolve => { complete = resolve; }));
   userEvent.click(screen.getByLabelText("폴더 이름")); userEvent.keyboard("{Enter}"); userEvent.click(screen.getByLabelText("폴더 이름")); userEvent.keyboard("{Enter}"); expect(api.post).toHaveBeenCalledTimes(1);
   expect(screen.getByRole("button", { name: "새 폴더 만들기 닫기" })).toBeDisabled();
-  await act(async () => complete({ data: "폴더 생성 완료" })); await screen.findByText(/목록으로 돌아가 직접 폴더/);
-  fireEvent.click(screen.getByRole("button", { name: "목록으로" }));
-  expect(save).not.toHaveBeenCalled(); expect(screen.getByRole("button", { name: /저장/ })).toBeDisabled();
+  await act(async () => complete({ data: "폴더 생성 완료" }));
+  expect(await screen.findByText(/새 폴더가 생성됐어요/)).toBeInTheDocument();
+  expect(screen.queryByRole("heading", { name: "새 폴더 만들기" })).not.toBeInTheDocument();
+  expect(save).not.toHaveBeenCalled(); expect(screen.getByRole("button", { name: "저장", exact: true })).toBeDisabled();
   fireEvent.click(screen.getAllByRole("button", { name: "같은 이름" })[1]);
   fireEvent.click(screen.getByRole("button", { name: "저장", exact: true }));
   expect(save).toHaveBeenCalledWith(expect.objectContaining({ id: "2" }));
@@ -23,7 +24,9 @@ test("ID-less success has no name-based selection and duplicate submits only POS
 test("confirmed create with failed list retries GET only", async () => {
   render(<FolderSelectModal open onClose={jest.fn()} />); await openCreate(); api.post.mockResolvedValue({ data: "폴더 생성 완료" }); api.get.mockRejectedValueOnce(new Error("read failed"));
   userEvent.click(screen.getByLabelText("폴더 이름")); userEvent.keyboard("{Enter}"); await screen.findByText("폴더는 생성됐지만 목록을 불러오지 못했어요.");
-  fireEvent.click(screen.getByRole("button", { name: "목록 다시 확인" })); await screen.findByText(/목록으로 돌아가 직접 폴더/); expect(api.post).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole("button", { name: "목록 다시 확인" }));
+  expect(await screen.findByText(/새 폴더가 생성됐어요/)).toBeInTheDocument();
+  expect(api.post).toHaveBeenCalledTimes(1);
 });
 
 test("lost response retains input and only permits list reads, never automatic recreation", async () => {
@@ -63,4 +66,25 @@ test("cancelling folder creation returns keyboard focus to the create-folder but
   userEvent.tab();
   expect(screen.getByRole("button", { name: "취소" })).toHaveFocus();
   expect(api.post).not.toHaveBeenCalled();
+});
+
+test("이미 저장한 폴더를 목록에 표시하고 중복 저장을 막되 다른 폴더는 저장 가능", async () => {
+  const save = jest.fn();
+  render(<FolderSelectModal open onClose={jest.fn()} onSave={save} savedFolderIds={[1]} />);
+  await waitFor(() => expect(screen.getByText(/이미 저장한 폴더/)).toHaveTextContent("같은 이름"));
+  expect(screen.getByText(/저장됨/)).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "저장", exact: true })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "같은 이름", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "저장", exact: true }));
+  expect(save).toHaveBeenCalledWith(expect.objectContaining({ id: "2" }));
+});
+
+test("successful folder message fades, then leaves the modal without hiding persistent warnings",async()=>{
+  jest.useFakeTimers();
+  try{
+    render(<FolderSelectModal open onClose={jest.fn()} membershipMessage="선택한 폴더에 저장했습니다."/>);
+    expect(screen.getByText("선택한 폴더에 저장했습니다.")).toHaveClass("folder-select-toast");
+    act(()=>jest.advanceTimersByTime(4500));
+    expect(screen.queryByText("선택한 폴더에 저장했습니다.")).not.toBeInTheDocument();
+  }finally{jest.useRealTimers()}
 });

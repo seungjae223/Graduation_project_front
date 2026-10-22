@@ -6,12 +6,8 @@ body,
   height: 100%;
 }
 
-:root {
-  --footer-height: 70px;
-}
-
 .page-wrap {
-  width: min(100%, 390px);
+  width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0 auto;
@@ -33,16 +29,26 @@ body,
 }
 
 .footer {
-  width: 100%;
+  width: var(--page-max-width);
+  max-width: 100%;
   background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-  margin-top: auto;
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -5px 18px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+  margin-top: 0;
   flex-shrink: 0;
+  position: fixed;
+  left: 50vw;
+  bottom: 0;
+  z-index: 100;
+  transform: translateX(-50%);
 }
 
 .footer-nav {
   width: 100%;
-  height: calc(70px + env(safe-area-inset-bottom));
+  height: calc(var(--footer-height) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
   background: var(--color-surface);
 
@@ -50,14 +56,12 @@ body,
   justify-content: space-around;
   align-items: center;
 
-  position: static;
-  left: auto;
-  bottom: auto;
-  transform: none;
+  position: relative;
 }
 
 .tab {
   flex: 1;
+  min-width: 0;
   height: 100%;
   border: none;
   background: transparent;
@@ -238,4 +242,33 @@ body,
     opacity: 1;
     transform: translateX(-50%) scaleX(1);
   }
+}
+
+
+/* V7: one fixed shell, two horizontal rails. The active rail swaps in 240ms. */
+.footer { background: #fff; transition: background-color 240ms ease, border-color 240ms ease; }
+.footer--detail { background: #f1f0ed; border-top-color: #e2e0dc; }
+.footer-nav { overflow: hidden; background: transparent; transition: background-color 240ms ease; }
+.footer-rail {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: space-around;
+  transition: transform 240ms cubic-bezier(.22,1,.36,1), opacity 240ms ease;
+  will-change: transform;
+}
+.footer-rail--main { transform: translateX(0); opacity: 1; }
+.footer-rail--detail { transform: translateX(105%); opacity: 0; pointer-events: none; }
+.footer-nav--detail .footer-rail--main { transform: translateX(-105%); opacity: 0; pointer-events: none; }
+.footer-nav--detail .footer-rail--detail { transform: translateX(0); opacity: 1; pointer-events: auto; }
+.detail-nav-tab {
+  flex: 1; min-width: 0; height: 100%;
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  background: transparent; border: 0; color: #30343b;
+  font-size: 12px; font-weight: 650; text-decoration: none; cursor: pointer;
+}
+.detail-nav-tab svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+/* Saving and background refreshes may temporarily disable the action. Keep its tone steady. */
+.detail-nav-tab:disabled { color: #30343b; cursor: default; }
+.detail-nav-tab:focus-visible { outline: 3px solid #666e78; outline-offset: -4px; border-radius: 8px; }
+@media (prefers-reduced-motion: reduce) {
+  .footer, .footer-nav, .footer-rail { transition: none !important; }
 }

@@ -1,0 +1,48 @@
+/* Icon-only heart; a 44px hit target remains even without visible text. */
+.favorite-heart-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted, #555);
+  font: inherit;
+  cursor: pointer;
+}
+.favorite-heart-button svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+.favorite-heart-button.liked { color: #cf3655; }
+.favorite-heart-button.liked svg { fill: currentColor; }
+.favorite-heart-button:disabled { opacity: 1 !important; cursor: default; }
+.favorite-heart-button:focus-visible {
+  outline: 3px solid var(--color-focus, #437ecc);
+  outline-offset: 2px;
+}
+
+/* Align the heart to the top-right of the full horizontal place card. */
+.destination-place-topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+}
+.destination-place-topline .destination-place-kind {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.destination-place-topline .favorite-heart-button {
+  margin: -5px -5px 0 0;
+}

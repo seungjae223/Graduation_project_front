@@ -6,7 +6,7 @@
 .login {
   color: var(--color-text);
   width: 100%;
-  max-width: 430px;
+  max-width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0 auto;
@@ -305,12 +305,8 @@
   }
 }
 
-/* PC에서 모바일 앱처럼 보이게 */
+/* Keep the form readable independently of the wider application column. */
 @media (min-width: 768px) {
-  .login {
-    max-width: var(--app-width, 390px);
-  }
-
   .login-card {
     max-width: 340px;
   }

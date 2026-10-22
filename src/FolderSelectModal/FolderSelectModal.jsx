@@ -12,6 +12,20 @@ import { requireList } from "../api/responseContract";
 
 const FOLDERS_API = "/api/folders";
 
+// Confirmation fades out; warnings and incomplete-save errors stay visible.
+function TimedFolderNotice({ message }) {
+  const [visible, setVisible] = useState(Boolean(message));
+  const transient = /(?:저장|제거|생성).*(?:했|됐|완료)/.test(message || "");
+  useEffect(() => {
+    setVisible(Boolean(message));
+    if (!message || !transient) return undefined;
+    const timer = setTimeout(() => setVisible(false), 4400);
+    return () => clearTimeout(timer);
+  }, [message, transient]);
+  return visible ? <p role="status" className={"folder-select-notice" +
+    (transient ? " folder-select-toast" : "")}>{message}</p> : null;
+}
+
 const getObjectData = (data) => {
   if (!data || Array.isArray(data)) return data;
 
@@ -123,10 +137,15 @@ function FolderSelectModal({
   open,
   onClose,
   onSave,
+  onToggleFolder,
+  membershipMessage = "",
+  onRetryMembership,
   isSaving = false,
   defaultSelectedFolderId = "",
   folders: foldersProp,
   onCreateFolder,
+  savedFolderIds = [],
+  membershipComplete = true,
   contextKey = "",
   title = "폴더 선택",
   saveText = "저장",
@@ -144,6 +163,9 @@ function FolderSelectModal({
   const [folderOwner, setFolderOwner] = useState(taskKey);
   const [createOwner, setCreateOwner] = useState(taskKey);
   const visibleFolders = useMemo(() => folderOwner === taskKey ? folders : [], [folderOwner, taskKey, folders]);
+  const savedIds = useMemo(() => new Set(savedFolderIds.map(String)), [savedFolderIds]);
+  const [createdNotice, setCreatedNotice] = useState("");
+  const isCheckboxMode = typeof onToggleFolder === "function";
   const showCreate = isCreateFolderOpen && createOwner === taskKey;
   const createTask = useMutationTask(taskKey);
   const isCreatingFolder = createTask.status === "running";
@@ -210,7 +232,7 @@ function FolderSelectModal({
       else { setFolderOwner(taskKey); setFolders(listQuery.data); setSelectedFolderId(""); }
     }
   }, [listQuery.status, listQuery.data, applyFolders, taskKey]);
-  useEffect(() => { setFolders([]); setSelectedFolderId(""); setIsCreateFolderOpen(false); }, [taskKey]);
+  useEffect(() => { setFolders([]); setSelectedFolderId(""); setIsCreateFolderOpen(false); setCreatedNotice(""); }, [taskKey, open]);
   useEffect(() => {
     if (!open || isCreateFolderOpen) return;
 
@@ -244,8 +266,9 @@ function FolderSelectModal({
   };
 
   const handleOpenCreateFolder = () => {
-    if (isSaving || isCreatingFolder || isLoadingFolders) return;
+    if (isSaving || isCreatingFolder || isLoadingFolders || saveDisabled) return;
 
+    setCreatedNotice("");
     createTask.reset();
     setCreateOwner(taskKey);
     setIsCreateFolderOpen(true);
@@ -273,15 +296,18 @@ function FolderSelectModal({
         const next = await readFolders();
         if (!current.current.open || current.current.taskKey !== taskKey || current.current.epoch !== epoch || getAuthSnapshot().accountKey !== account) throw new Error("화면 변경");
         setFolderOwner(taskKey); setFolders(next); setSelectedFolderId("");
+        setCreatedNotice("새 폴더가 생성됐어요. 폴더를 선택하고 저장해 주세요.");
+        setIsCreateFolderOpen(false);
       }, {
         failure: "새 폴더 생성에 실패했어요. 입력은 유지됩니다.",
-        success: "폴더가 생성됐어요. 목록으로 돌아가 직접 폴더를 선택해 주세요. 장소는 아직 저장되지 않았습니다.",
+        success: "폴더 생성 완료. 장소를 저장할 폴더를 선택해 주세요.",
         refreshFailure: "폴더는 생성됐지만 목록을 불러오지 못했어요.",
       }
     );
   };
   const handleSaveClick = () => {
-    if (!selectedFolder || saveDisabled || isSaving || isCreatingFolder || isLoadingFolders) {
+    if (!selectedFolder || saveDisabled || isSaving || isCreatingFolder || isLoadingFolders ||
+        !membershipComplete || savedIds.has(String(selectedFolder.id))) {
       return;
     }
 
@@ -413,6 +439,14 @@ function FolderSelectModal({
           </header>
 
           <div className="folder-select-body">
+            {createdNotice && <TimedFolderNotice message={createdNotice}/>}
+            {membershipMessage && <TimedFolderNotice message={membershipMessage}/>}
+            {onRetryMembership && <button type="button" className="folder-select-retry" onClick={onRetryMembership} disabled={isSaving}>저장 상태 다시 확인</button>}
+            {!membershipComplete && <p role="alert" className="folder-select-notice">저장 상태가 일부 확인되지 않았어요. 목록을 다시 확인해 주세요.</p>}
+            {isCheckboxMode && <p className="folder-select-notice">체크하면 저장되고, 체크 해제하면 해당 폴더에서 제거돼요.</p>}
+            {!isCheckboxMode && membershipComplete && savedIds.size > 0 && <p className="folder-select-notice" role="status">
+              이미 저장한 폴더: {visibleFolders.filter(folder => savedIds.has(String(folder.id))).map(folder => folder.name).join(", ") || "확인 중"}
+            </p>}
             <div className="folder-select-list">
               {isLoadingFolders ? (
                 <p className="folder-select-empty-text">
@@ -427,7 +461,8 @@ function FolderSelectModal({
               ) : (
                 visibleFolders.map((folder) => {
                   const selected =
-                    String(selectedFolderId) === String(folder.id);
+                    !isCheckboxMode && String(selectedFolderId) === String(folder.id);
+                  const alreadySaved = savedIds.has(String(folder.id));
 
                   return (
                     <button
@@ -437,9 +472,20 @@ function FolderSelectModal({
                       className={`folder-select-option ${
                         selected ? "selected" : ""
                       }`}
-                      onClick={() => setSelectedFolderId(folder.id)}
-                      aria-pressed={selected}
-                      disabled={isSaving || isCreatingFolder || isLoadingFolders}
+                      onClick={() => {
+                        // Keep the focused checkbox mounted and focusable while its mutation is in flight.
+                        if (isSaving || isCreatingFolder || isLoadingFolders ||
+                            (isCheckboxMode && (!membershipComplete || saveDisabled))) return;
+                        if (isCheckboxMode) onToggleFolder(folder, !alreadySaved);
+                        else setSelectedFolderId(folder.id);
+                      }}
+                      role={isCheckboxMode ? "checkbox" : undefined}
+                      aria-checked={isCheckboxMode ? alreadySaved : undefined}
+                      aria-pressed={isCheckboxMode ? undefined : selected}
+                      aria-label={isCheckboxMode ? `${folder.name} ${alreadySaved ? "저장 해제" : "저장"}` : undefined}
+                      aria-disabled={isCheckboxMode && isSaving ? true : undefined}
+                      disabled={isCreatingFolder || isLoadingFolders ||
+                        (isCheckboxMode ? !membershipComplete || (saveDisabled && !isSaving) : isSaving)}
                     >
                       <span className="folder-select-icon-circle">
                         <FolderIcon />
@@ -447,13 +493,14 @@ function FolderSelectModal({
 
                       <span className="folder-select-option-name">
                         {folder.name}
+                        {alreadySaved && <span className="folder-select-saved-label"> · 저장됨</span>}
                       </span>
 
-                      <span className="folder-select-radio" aria-hidden="true">
-                        {selected && (
-                          <span className="folder-select-radio-dot" />
-                        )}
-                      </span>
+                      {isCheckboxMode ? <span className={`folder-select-checkbox ${alreadySaved ? "checked" : ""}`} aria-hidden="true">
+                        {alreadySaved && <svg viewBox="0 0 24 24" focusable="false"><path d="m5 12 5 5L19 7" /></svg>}
+                      </span> : <span className="folder-select-radio" aria-hidden="true">
+                        {selected && <span className="folder-select-radio-dot" />}
+                      </span>}
                     </button>
                   );
                 })
@@ -465,7 +512,7 @@ function FolderSelectModal({
               className="folder-select-create-btn"
               onClick={handleOpenCreateFolder}
               ref={createButtonRef}
-              disabled={isSaving || isCreatingFolder || isLoadingFolders}
+              disabled={isSaving || isCreatingFolder || isLoadingFolders || saveDisabled}
             >
               + 새 폴더 만들기
             </button>}
@@ -478,10 +525,10 @@ function FolderSelectModal({
               onClick={onClose}
               disabled={isSaving || isCreatingFolder}
             >
-              취소
+              {isCheckboxMode ? "완료" : "취소"}
             </button>
 
-            <button
+            {!isCheckboxMode && <button
               type="button"
               className="folder-select-save-btn"
               onClick={handleSaveClick}
@@ -490,11 +537,13 @@ function FolderSelectModal({
                 isCreatingFolder ||
                 isLoadingFolders ||
                 saveDisabled ||
-                !selectedFolder
+                !membershipComplete ||
+                !selectedFolder ||
+                savedIds.has(String(selectedFolder?.id))
               }
             >
               {isSaving ? "처리 중..." : saveText}
-            </button>
+            </button>}
           </footer>
         </section>
       )}

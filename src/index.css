@@ -18,22 +18,3 @@ body {
   display: block;
 }
 
-/* 앱 전체 감싸는 박스 */
-.app {
-  width: 100%;
-  max-width: 390px; /* 아이폰 크기 */
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: var(--color-surface);
-  padding-bottom: 80px;
-  box-sizing: border-box;
-
-  display: flex;
-  flex-direction: column;
-}
-
-.app-content {
-  flex: 1;
-  min-height: 0;
-  background: var(--color-surface);
-}

@@ -53,3 +53,16 @@ test('initial Suspense waits for content, and reduced motion shows the final pos
   expect(entry.dataset.pageEntry).toBe('settled');
   expect(screen.getByText('Ready')).toBeInTheDocument();
 });
+
+
+test('main tab slide marks the route as settled after the animation finishes', () => {
+  render(<PageTransition className="route-transition route-transition--tab-from-right">
+    <RouteContentReady><p>Tab content</p></RouteContentReady>
+  </PageTransition>);
+  const entry = pageEntryFor('Tab content');
+  expect(entry.dataset.pageEntry).toBe('ready');
+  const end = new Event('animationend', { bubbles: true });
+  Object.defineProperty(end, 'animationName', { value: 'nomango-tab-enter-right' });
+  act(() => { entry.dispatchEvent(end); });
+  expect(entry.dataset.pageEntry).toBe('settled');
+});

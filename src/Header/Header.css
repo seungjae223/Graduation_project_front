@@ -4,16 +4,17 @@
   justify-content: space-between;
 
   width: 100%;
-  max-width: 390px;
+  max-width: var(--page-max-width);
   min-height: 82px;
   margin: 0 auto;
-  padding: 18px 16px;
+  padding: calc(18px + var(--safe-top, 0px)) var(--page-gutter);
 
   box-sizing: border-box;
   background-color: var(--color-surface);
 
-  /* 페이지랑 같이 움직이게 고정 제거 */
-  position: static;
+  position: sticky;
+  top: 0;
+  z-index: 110;
   flex-shrink: 0;
 }
 
@@ -166,7 +167,7 @@ svg.menu-icon {
 
 @media (max-width: 360px) {
   .header {
-    padding: 16px 12px;
+    padding: calc(16px + var(--safe-top, 0px)) 12px;
     min-height: 74px;
   }
 

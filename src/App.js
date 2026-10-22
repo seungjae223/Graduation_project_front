@@ -15,6 +15,7 @@ import {
 
 import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
+import { DetailFooterProvider } from "./components/DetailFooterContext";
 import SearchPop from "./SearchPopup/SearchPop";
 import EarthLoader from "./Loading/EarthLoader";
 import RouteErrorBoundary from "./Loading/RouteErrorBoundary";
@@ -27,6 +28,9 @@ import OnBoarding2 from "./OnBoarding/OnBoarding2";
 import OnBoarding3 from "./OnBoarding/OnBoarding3";
 import AdminAccessGuard from "./Admin/AdminAccessGuard";
 import useKeyboardRouteFocus from "./utils/useKeyboardRouteFocus";
+import getRouteBoundaryKey from "./utils/routeBoundaryKey";
+import getMainTabTransition from "./utils/mainTabTransition";
+import getSubpageTransition from "./utils/subpageTransition";
 
 // 관리자 전용 푸터
 import AdminFooter from "./Admin/AdminFooter/AdminFooter";
@@ -42,20 +46,31 @@ const OAuthCallback = lazy(() => import("./Login/OAuthCallback"));
 
 const Home = lazy(() => import("./Homepage/Home"));
 const Search = lazy(() => import("./Search/Search"));
+const DestinationExplore = lazy(() => import("./Destinations/DestinationExplore"));
 const Recommend = lazy(() => import("./Recommend/Recommend"));
 const Total = lazy(() => import("./Recommend/Total"));
 const Detail = lazy(() => import("./Recommend/Detail"));
+const ReviewWrite = lazy(() => import("./Recommend/ReviewWrite"));
 const PopularAll = lazy(() => import("./Homepage/PopularAll"));
 
 const MyPage = lazy(() => import("./Mypage/MyPage"));
+const MyReviews = lazy(() => import("./Mypage/MyReviews"));
+const PastTrips = lazy(() => import("./Mypage/PastTrips"));
+const MyProfile = lazy(() => import("./Mypage/MyProfile"));
+const MyPasswordChange = lazy(() => import("./Mypage/MyPasswordChange"));
 const SavedPlaces = lazy(() => import("./Mypage/SavedPlaces"));
 const RecentPlacesPage = lazy(() =>
   import("./RecentPlacesPage/RecentPlacesPage")
 );
 const MySchedule = lazy(() => import("./MySchedule/MySchedule"));
 
-const RouteCreate = lazy(() => import("./RouteCreate/RouteCreate"));
-const RouteResult = lazy(() => import("./RouteResult/RouteResult"));
+const TripDatePage = lazy(() => import("./RouteCreate/TripDatePage"));
+const TripRegionSelect = lazy(() => import("./RouteCreate/TripRegionSelect"));
+// V16.4 read-only itinerary detail; preserve legacy RouteResult source for later map migration.
+const TripDetailPage = lazy(() => import("./RouteResult/TripDetailPage"));
+const TripOptimizationPage = lazy(() => import("./RouteResult/TripOptimizationPage"));
+const TripEditPage = lazy(() => import("./RouteResult/TripEditPage"));
+const TripPlacePickerPage = lazy(() => import("./RouteResult/TripPlacePickerPage"));
 const Schedule = lazy(() => import("./Schedule/Schedule"));
 
 const Inquiry = lazy(() => import("./Mypage/Inquiry"));
@@ -105,6 +120,7 @@ function Layout() {
   const navigationType = useNavigationType();
   useKeyboardRouteFocus(location.pathname, navigationType);
   const previousPathRef = useRef(null);
+  const previousSearchRef = useRef("");
   useLayoutEffect(() => { syncOnboardingTransitionRoute(location.pathname); }, [location.pathname, location.key]);
   useEffect(() => () => cancelOnboardingTransition(), []);
 
@@ -132,7 +148,8 @@ function Layout() {
 
   useEffect(() => {
     previousPathRef.current = pathname;
-  }, [pathname]);
+    previousSearchRef.current = location.search;
+  }, [pathname, location.search]);
 
   const hideFooterPaths = [
     "/",
@@ -143,8 +160,8 @@ function Layout() {
     "/find-password",
     "/verify-code",
     "/landing",
-    "/detail",
     "/signup",
+    "/detail/review",
   ];
 
   const hideHeaderPaths = ["/login"];
@@ -152,6 +169,26 @@ function Layout() {
   const shouldHideFooter = hideFooterPaths.includes(pathname);
   const shouldShowDefaultFooter =
     !shouldHideFooter && !isAdminPage && !isOAuthCallbackPage;
+  const isDetailRoute = pathname === "/detail";
+  // Hold the transition direction for the lifetime of a history entry.
+  // Async reads, tab state or closing a popup must not cancel the slide mid-flight.
+  const { mainTabTransition, detailTransition, subpageTransition } = useMemo(() => {
+    const previousRoute = previousPathRef.current;
+    const tab = getMainTabTransition(previousRoute, pathname);
+    return {
+      mainTabTransition: tab,
+      subpageTransition: tab ? "" : getSubpageTransition(
+        previousRoute, pathname, previousSearchRef.current, location.search),
+      detailTransition: isDetailRoute && previousRoute && previousRoute !== "/detail"
+        ? "route-transition--detail-forward"
+        : !isDetailRoute && previousRoute === "/detail"
+          ? "route-transition--detail-backward" : "",
+    };
+  }, [location.key, pathname, location.search, isDetailRoute]);
+  // Only folderId identifies another full saved-places view. Search/filters do not.
+  const transitionKey = pathname === "/saved-places"
+    ? `${pathname}:${new URLSearchParams(location.search).get("folderId") || "list"}`
+    : pathname;
   const shouldShowAdminFooter = isAdminPage && hasAccessToken;
 
   // 로그인, 관리자 화면에서만 Header 숨김
@@ -160,7 +197,7 @@ function Layout() {
     hideHeaderPaths.includes(pathname) || isAdminPage || isOAuthCallbackPage;
 
   return (
-    <div className="app">
+    <div className="app" data-page={pathname}>
       {!shouldHideHeader && (
         <Header onSearchClick={() => setIsSearchPopOpen(true)} />
       )}
@@ -171,14 +208,14 @@ function Layout() {
         }`}
       >
         <PageTransition
-          key={location.pathname}
-          className={`route-transition ${
+          key={transitionKey}
+          className={`route-transition ${detailTransition} ${mainTabTransition} ${subpageTransition} ${
             pathname === "/" || pathname.startsWith("/onboarding")
               ? `onboarding-route onboarding-route--${onboardingDirection}`
               : ""
           }`}
         >
-          <RouteErrorBoundary key={`${location.pathname}${location.search}`}>
+          <RouteErrorBoundary key={getRouteBoundaryKey(location.pathname, location.search)}>
           <Suspense fallback={<EarthLoader variant="page" text="화면을 불러오는 중..." />}>
             <RouteContentReady>
             <Routes>
@@ -201,17 +238,27 @@ function Layout() {
 
               <Route path="/home" element={<Home />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/destinations/:code" element={<DestinationExplore />} />
               <Route path="/recommend" element={<Recommend />} />
               <Route path="/total" element={<Total />} />
               <Route path="/mypage" element={<RequireAuth><MyPage /></RequireAuth>} />
+              <Route path="/mypage/reviews" element={<RequireAuth><MyReviews /></RequireAuth>} />
+              <Route path="/mypage/past-trips" element={<RequireAuth><PastTrips /></RequireAuth>} />
+              <Route path="/mypage/profile" element={<RequireAuth><MyProfile /></RequireAuth>} />
+              <Route path="/mypage/password" element={<RequireAuth><MyPasswordChange /></RequireAuth>} />
               <Route path="/saved-places" element={<RequireAuth><SavedPlaces /></RequireAuth>} />
               <Route
                 path="/mypage/recent-places"
                 element={<RequireAuth><RecentPlacesPage /></RequireAuth>}
               />
-              <Route path="/route-create" element={<RouteCreate />} />
+              <Route path="/route-create" element={<RequireAuth><TripDatePage /></RequireAuth>} />
+              <Route path="/route-create/region" element={<RequireAuth><TripRegionSelect /></RequireAuth>} />
               <Route path="/detail" element={<Detail />} />
-              <Route path="/route-result" element={<RouteResult />} />
+              <Route path="/detail/review" element={<ReviewWrite />} />
+              <Route path="/route-result" element={<RequireAuth><TripDetailPage /></RequireAuth>} />
+              <Route path="/route-optimize" element={<RequireAuth><TripOptimizationPage /></RequireAuth>} />
+              <Route path="/route-edit" element={<RequireAuth><TripEditPage /></RequireAuth>} />
+              <Route path="/route-add-places" element={<RequireAuth><TripPlacePickerPage /></RequireAuth>} />
               <Route path="/schedule" element={<RequireAuth><Schedule /></RequireAuth>} />
               <Route path="/popular-all" element={<PopularAll />} />
               <Route path="/my-schedule" element={<RequireAuth><MySchedule /></RequireAuth>} />
@@ -254,7 +301,7 @@ function App() {
   return (
     <SavedPlacesProvider>
       <BrowserRouter>
-        <Layout />
+        <DetailFooterProvider><Layout /></DetailFooterProvider>
       </BrowserRouter>
     </SavedPlacesProvider>
   );

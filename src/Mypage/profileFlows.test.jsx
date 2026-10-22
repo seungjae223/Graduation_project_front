@@ -19,7 +19,7 @@ jest.mock("../utils/useSessionKey", () => ({ __esModule: true, default: () => "a
 jest.mock("../utils/authState", () => ({ getAuthSnapshot: () => ({ accountKey: "account:test" }) }));
 jest.mock("../config/mockConfig", () => ({ USE_MOCK: true }));
 jest.mock("../mocks/authMock", () => ({ getMockUser: jest.fn(() => ({ name: "테스트", role: "USER" })), saveMockUser: jest.fn() }));
-jest.mock("../api/api", () => ({ __esModule: true, default: { get: jest.fn(), post: jest.fn(), delete: jest.fn() }, getAccessToken: () => "test-session", getApiErrorMessage: (_, fallback) => fallback }));
+jest.mock("../api/api", () => ({ __esModule: true, default: { get: jest.fn(), post: jest.fn(), patch: jest.fn(), delete: jest.fn() }, getAccessToken: () => "test-session", getApiErrorMessage: (_, fallback) => fallback }));
 const pending = (id = 2) => ({ id, title: "대기 문의 " + id, content: "전체 문의 내용 " + id, answer: "", answered: false, status: "waiting" });
 const answered = () => ({ id: 1, title: "완료 문의", content: "문의 본문", answer: "실제 서버 답변", answered: true, status: "answered" });
 const deferred = () => { let resolve, reject; const promise = new Promise((a,b) => { resolve=a; reject=b; }); return { promise, resolve, reject }; };
@@ -109,66 +109,252 @@ test("answer committed then response lost is confirmed by reading, never re-post
   expect(await screen.findByRole('alertdialog')).toBeInTheDocument(); expect(api.post).toHaveBeenCalledTimes(1);
   expect(screen.getByLabelText('문의 답변')).toHaveValue('실제 반영된 답변');
 });
-test("folder counts provided by API do not fetch every place list", async () => {
+test("folder counts provided by API avoid extra count reads beyond saved-state hydration", async () => {
   api.get.mockResolvedValue({data:[{id:1,name:'폴더 A',count:0}]}); setup(<SavedPlaces />, '/saved-places');
-  await screen.findByText('폴더 A'); expect(api.get.mock.calls.map(([url])=>url)).toEqual(['/api/folders']);
+  await screen.findByText('폴더 A');
+  // Saving state is hydrated once for hearts/folder membership. With an API
+  // count the folder-list UI must not independently fetch its place count.
+  await waitFor(() => expect(api.get.mock.calls.filter(([url]) =>
+    url === '/api/folders/1/places')).toHaveLength(1));
+  expect(api.get.mock.calls.filter(([url]) => url === '/api/folders/1/places')).toHaveLength(1);
 });
 test("one failed count leaves normal folders visible; failed place list retries the same folder", async () => {
   api.get.mockImplementation(async url => { if(url==='/api/folders')return{data:[{id:1,name:'폴더 A'},{id:2,name:'폴더 B'}]};if(url==='/api/folders/2/places')throw new Error('failed');return{data:[{id:71,name:'A 장소'}]};});
-  setup(<SavedPlaces />, '/saved-places'); fireEvent.click(await screen.findByText('폴더 B'));
+  setup(<SavedPlaces />, '/saved-places');
+  // The title edits the name; the chevron explicitly opens the folder.
+  fireEvent.click(await screen.findByRole('button',{name:'폴더 B 폴더로 이동'}));
   expect(await screen.findByRole('button',{name:'장소 목록 다시 불러오기'})).toBeInTheDocument();
-  expect(screen.getByText('장소 개수 미확인',{exact:true})).toBeInTheDocument();
+  expect(screen.getByText('일부 폴더의 장소 개수를 확인하지 못했어요.')).toBeInTheDocument();
   expect(screen.queryByText('이 폴더에 저장된 장소가 없습니다.')).not.toBeInTheDocument();
   api.get.mockImplementation(async url => ({data:url==='/api/folders'?[{id:1,name:'폴더 A',count:1},{id:2,name:'폴더 B',count:1}]:[{id:72,name:'B 장소'}]}));
   fireEvent.click(screen.getByRole('button',{name:'장소 목록 다시 불러오기'}));
-  expect(await screen.findByRole('heading',{name:'B 장소'})).toBeInTheDocument();
+  expect(await screen.findByText('B 장소')).toBeInTheDocument();
 });
 test("an unconfirmed folder list does not display a real zero count", async () => {
   api.get.mockRejectedValue(new Error('failed')); setup(<SavedPlaces />, '/saved-places');
   expect(await screen.findByRole('button',{name:'폴더 목록 다시 불러오기'})).toBeInTheDocument();
-  expect(screen.getByText('저장한 장소 개수 미확인')).toBeInTheDocument();
+  expect(screen.getByText('폴더 목록을 불러오지 못했어요.')).toBeInTheDocument();
   expect(screen.queryByText('총 0개의 장소를 저장했습니다')).not.toBeInTheDocument();
 });
-test.each([['Enter','{Enter}'],['Space',' ']])("saved deletion %s never bubbles into detail navigation; missing rating/photo stay absent", async (_name, key) => {
-  let places=[{id:71,name:'서울 장소',placeType:'ATTRACTION'}]; api.get.mockImplementation(async url=>({data:url==='/api/folders'?[{id:1,name:'폴더 A',count:1}]:places}));
-  api.delete.mockImplementation(async()=>{places=[];return{data:{}};}); const confirm=jest.spyOn(window,'confirm').mockReturnValue(true);
+test("folder entry animates forward without a redundant in-page back button", async () => {
+  api.get.mockImplementation(async url => ({data:
+    url==="/api/folders" ? [{id:13,name:"도쿄 모음",count:1}] :
+    [{id:71,name:"도쿄 장소",region:"도쿄",placeCategory:"LANDMARK"}]}));
+  setup(<SavedPlaces />, "/saved-places");
+  await screen.findByText("도쿄 모음");
+  const folderButton = screen.getByRole("button",{name:"도쿄 모음 폴더로 이동"});
+  expect(folderButton).toHaveClass("v14-saved-folder-forward");
+  fireEvent.click(folderButton);
+  expect(document.querySelector(".v14-saved-view")).toHaveClass("v14-saved-view--forward");
+  expect(screen.queryByRole("button",{name:/^폴더 목록$/})).not.toBeInTheDocument();
+  // Header owns backward navigation; SavedPlaces no longer renders a second Back control.
+});
+
+test("favorite folder stays first and protected in bulk delete mode", async () => {
+  let folders = [
+    {id:1,name:"일반 폴더 A",systemType:null,count:0},
+    {id:2,name:"일반 폴더 B",systemType:null,count:0},
+    {id:3,name:"좋아하는 장소",systemType:"FAVORITES",count:0},
+  ];
+  api.get.mockImplementation(async url => ({data:
+    url === "/api/folders" ? folders : []}));
+  const confirm = jest.spyOn(window, "confirm").mockReturnValue(true);
+  api.delete.mockImplementation(async url => {
+    const id = Number(url.split("/").pop());
+    folders = folders.filter(folder => folder.id !== id);
+    return {data:"삭제 완료"};
+  });
+  setup(<SavedPlaces />, "/saved-places");
+  await screen.findByText("좋아하는 장소");
+  const list = document.querySelector(".v14-saved-folders");
+  expect(list.firstElementChild).toHaveClass("is-favorites");
+  expect(list.firstElementChild).toHaveTextContent("좋아하는 장소");
+  expect(list.firstElementChild.querySelector(".v14-saved-folder-icon svg")).not.toBeNull();
+  expect(screen.queryByRole("button", {name:"좋아하는 장소 폴더 삭제"})).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", {name:/선택한 폴더 \d+개 삭제하기/})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"폴더 삭제 선택"}));
+  expect(screen.getByRole("button",{name:"폴더 선택 완료"})).toBeInTheDocument();
+  expect(screen.getByRole("checkbox",{name:"좋아하는 장소 폴더 선택"})).toBeDisabled();
+  fireEvent.click(screen.getByRole("checkbox",{name:"일반 폴더 A 폴더 선택"}));
+  fireEvent.click(screen.getByRole("checkbox",{name:"일반 폴더 B 폴더 선택"}));
+  const deleteButton = screen.getByRole("button",{name:"선택한 폴더 2개 삭제하기"});
+  expect(deleteButton.closest(".v14-saved-floating-delete")).not.toBeNull();
+  fireEvent.click(deleteButton);
+  await waitFor(() => expect(api.delete).toHaveBeenCalledTimes(2));
+  expect(api.delete.mock.calls.map(([url])=>url))
+    .toEqual(["/api/folders/1","/api/folders/2"]);
+  confirm.mockRestore();
+});
+
+test("folder delete pill remains mounted and slides down when all folders are unchecked", async () => {
+  api.get.mockImplementation(async url => ({data: url === "/api/folders"
+    ? [{id:1,name:"체크할 폴더",count:0},{id:2,name:"좋아하는 장소",systemType:"FAVORITES",count:0}]
+    : []}));
+  setup(<SavedPlaces />, "/saved-places");
+  await screen.findByText("체크할 폴더");
+  const pill = document.querySelector(".v14-saved-floating-delete");
+  expect(pill).toBeInTheDocument();
+  expect(pill).not.toHaveClass("is-visible");
+  expect(pill).toHaveAttribute("aria-hidden","true");
+  fireEvent.click(screen.getByRole("button",{name:"폴더 삭제 선택"}));
+  fireEvent.click(screen.getByRole("checkbox",{name:"체크할 폴더 폴더 선택"}));
+  expect(pill).toHaveClass("is-visible");
+  expect(pill).toHaveAttribute("aria-hidden","false");
+  fireEvent.click(screen.getByRole("checkbox",{name:"체크할 폴더 폴더 선택"}));
+  expect(pill).toBeInTheDocument();
+  expect(pill).not.toHaveClass("is-visible");
+  expect(pill).toHaveAttribute("aria-hidden","true");
+});
+
+test("place delete pill stays mounted while the last selection is cleared", async () => {
+  api.get.mockImplementation(async url => ({data:
+    url==="/api/folders" ? [{id:1,name:"테스트 폴더",count:1}] :
+    url==="/api/places/engagement" ? [{placeId:71,likeCount:0,reviewCount:0}] :
+    [{id:71,name:"체험 장소",region:"오사카",placeCategory:"EXPERIENCE",placeCategoryLabel:"체험"}]}));
+  setup(<SavedPlaces />, "/saved-places?folderId=1");
+  await screen.findByRole("button",{name:"기본순 정렬, 누르면 좋아요순"});
+  const pill = document.querySelector(".v14-saved-floating-delete");
+  expect(pill).not.toHaveClass("is-visible");
+  fireEvent.click(screen.getByRole("button",{name:"장소 삭제 선택"}));
+  fireEvent.click(screen.getByRole("checkbox",{name:"체험 장소 선택"}));
+  expect(pill).toHaveClass("is-visible");
+  fireEvent.click(screen.getByRole("checkbox",{name:"체험 장소 선택"}));
+  expect(pill).toBeInTheDocument();
+  expect(pill).not.toHaveClass("is-visible");
+  expect(pill).toHaveAttribute("aria-hidden","true");
+});
+
+test("folder favorite state changes do not render expanding success banners", async () => {
+  const { default: PlaceSavingFeedback } = require("../components/PlaceSavingFeedback");
+  const fake = {
+    folders:{account:"account:test",status:"success",data:{complete:true}},
+    favoriteStatus:"success",favoriteMessage:"좋아하는 장소에 추가했어요.",
+    message:"",uncertain:false,
+  };
+  const { rerender } = render(<PlaceSavingFeedback saving={fake} suppressFolderLoading />);
+  expect(screen.queryByText("좋아하는 장소에 추가했어요.")).not.toBeInTheDocument();
+  rerender(<PlaceSavingFeedback saving={{...fake,favoriteMessage:"좋아요를 해제했어요."}}
+    suppressFavoriteSuccess suppressFolderLoading />);
+  expect(screen.queryByText("좋아요를 해제했어요.")).not.toBeInTheDocument();
+  rerender(<PlaceSavingFeedback saving={{...fake,favoriteStatus:"error",favoriteMessage:"좋아요를 변경하지 못했어요."}}
+    suppressFavoriteSuccess suppressFolderLoading />);
+  expect(screen.getByText("좋아요를 변경하지 못했어요.")).toBeInTheDocument();
+});
+
+test("folder body opens from outside the narrow rename title", async () => {
+  api.get.mockImplementation(async url => ({ data: url === "/api/folders"
+    ? [{ id: 3, name: "일본 여행", count: 0 }] : [] }));
+  setup(<SavedPlaces />, "/saved-places");
+  fireEvent.click(await screen.findByRole("button", { name: "일본 여행 폴더 카드 열기" }));
+  expect(screen.getByTestId("location")).toHaveTextContent("/saved-places?folderId=3");
+  expect(screen.queryByRole("textbox", { name: "일본 여행 새 폴더 이름" })).not.toBeInTheDocument();
+});
+
+test("ordinary folders can be renamed, but favorites cannot", async () => {
+  let folderName = "오사카 여행";
+  api.get.mockImplementation(async url => ({data: url==="/api/folders"
+    ? [{id:1,name:"좋아하는 장소",systemType:"FAVORITES",count:0},
+       {id:3,name:folderName,systemType:null,count:0}]
+    : []}));
+  api.patch.mockImplementation(async (url,body) => {
+    if(url==="/api/folders/3") folderName=body.name;
+    return {data:"폴더 이름 변경 완료"};
+  });
+  setup(<SavedPlaces />, "/saved-places");
+  await screen.findByText("오사카 여행");
+  expect(screen.queryByRole("button",{name:"좋아하는 장소 폴더 이름 수정"})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"오사카 여행 폴더 이름 수정"}));
+  const input = screen.getByRole("textbox",{name:"오사카 여행 새 폴더 이름"});
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  fireEvent.change(input,{target:{value:"일본 여행"}});
+  fireEvent.click(screen.getByRole("button",{name:"폴더 이름 저장"}));
+  await waitFor(() => expect(api.patch).toHaveBeenCalledWith("/api/folders/3",{name:"일본 여행"}));
+  expect(await screen.findByRole("button",{name:"일본 여행 폴더 이름 수정"})).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"일본 여행 폴더로 이동"})).toBeInTheDocument();
+});
+
+test("folder details cycle the same default, likes and reviews sort controls as DestinationExplore", async () => {
+  api.get.mockImplementation(async url => ({data:
+    url === "/api/folders" ? [{id:1,name:"오사카 폴더",count:2}] :
+    url === "/api/places/engagement" ?
+      [{placeId:71,likeCount:2,reviewCount:8},{placeId:72,likeCount:7,reviewCount:1}] :
+      [{id:71,name:"오사카 A",region:"오사카",placeCategory:"EXPERIENCE",placeCategoryLabel:"체험"},
+       {id:72,name:"오사카 B",region:"오사카",placeCategory:"LANDMARK",placeCategoryLabel:"명소"}]}));
+  setup(<SavedPlaces />, "/saved-places?folderId=1");
+  const first = await screen.findByRole("button", {name:"기본순 정렬, 누르면 좋아요순"});
+  expect(screen.getByRole("button",{name:"전체"})).toHaveAttribute("aria-pressed","true");
+  expect(screen.getByRole("button",{name:"체험"})).toBeInTheDocument();
+  fireEvent.click(first);
+  expect(screen.getByRole("button",{name:"좋아요순 정렬, 누르면 리뷰순"})).toBeInTheDocument();
+  await waitFor(() => expect([...document.querySelectorAll(".v14-saved-items > li h3")]
+    .map(node => node.textContent)).toEqual(["오사카 B", "오사카 A"]));
+  fireEvent.click(screen.getByRole("button",{name:"좋아요순 정렬, 누르면 리뷰순"}));
+  expect(screen.getByRole("button",{name:"리뷰순 정렬, 누르면 기본순"})).toBeInTheDocument();
+  await waitFor(() => expect([...document.querySelectorAll(".v14-saved-items > li h3")]
+    .map(node => node.textContent)).toEqual(["오사카 A", "오사카 B"]));
+  fireEvent.click(screen.getByRole("button",{name:"리뷰순 정렬, 누르면 기본순"}));
+  expect(screen.getByRole("button",{name:"기본순 정렬, 누르면 좋아요순"})).toBeInTheDocument();
+});
+
+test("selection delete removes only checked places within the folder", async () => {
+  let places=[{id:71,name:'서울 장소',placeCategory:'LANDMARK',placeCategoryLabel:'명소'}];
+  api.get.mockImplementation(async url=>({data:url==='/api/folders'?[{id:1,name:'폴더 A',count:1}]:url.includes('/engagement')?[{placeId:71,likeCount:2,reviewCount:1}]:places}));
+  api.delete.mockImplementation(async()=>{places=[];return{data:{}};});
+  const confirm=jest.spyOn(window,'confirm').mockReturnValue(true);
   setup(<SavedPlaces />, '/saved-places?folderId=1');
-  const remove=await screen.findByRole('button',{name:'장소 삭제'}); expect(screen.getByText('관광지')).toBeInTheDocument(); expect(screen.queryByText('4.8')).not.toBeInTheDocument();
-  expect(screen.getByRole('img',{name:'서울 장소 사진 정보 없음'})).toBeInTheDocument();
-  remove.focus(); userEvent.keyboard(key);
-  await waitFor(()=>expect(api.delete).toHaveBeenCalledTimes(1)); expect(screen.getByTestId('location')).toHaveTextContent('/saved-places?folderId=1');
+  expect(await screen.findByRole('button',{name:'기본순 정렬, 누르면 좋아요순'})).toBeInTheDocument();
+  expect(screen.getByRole('button',{name:'+ 새 장소 추가'})).toBeInTheDocument();
+  expect(screen.queryByRole('button',{name:/선택한 장소 \d+개 삭제하기/})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button',{name:'장소 삭제 선택'}));
+  expect(screen.getByRole('button',{name:'장소 선택 완료'})).toBeInTheDocument();
+  expect(document.querySelector('.v14-saved-card-shell.is-selecting')).not.toBeNull();
+  fireEvent.click(screen.getByRole('checkbox',{name:'서울 장소 선택'}));
+  const deleteButton = screen.getByRole('button',{name:'선택한 장소 1개 삭제하기'});
+  expect(deleteButton.closest('.v14-saved-floating-delete')).not.toBeNull();
+  fireEvent.click(deleteButton);
+  await waitFor(()=>expect(api.delete).toHaveBeenCalledWith('/api/folders/1/places/71'));
+  expect(screen.getByTestId('location')).toHaveTextContent('/saved-places?folderId=1');
   confirm.mockRestore();
 });
 test("recent server empty does not resurrect local records; loading/error remain distinct", async () => {
   localStorage.setItem('recentPlaces',JSON.stringify([{id:99,name:'오래된 로컬 장소'}])); api.get.mockResolvedValue({data:[]});
   const view=setup(<RecentPlacesPage />, '/mypage/recent-places'); await screen.findByText('최근 본 장소가 없어요.'); expect(screen.queryByText('오래된 로컬 장소')).not.toBeInTheDocument(); view.unmount();
   api.get.mockImplementation(async url=>{if(url==='/api/recent-places')throw new Error('failed');return{data:[]};}); setup(<RecentPlacesPage />,'/mypage/recent-places');
-  expect(await screen.findByText('최근 본 장소를 불러오지 못했습니다.')).toBeInTheDocument(); expect(screen.queryByText('최근 본 장소가 없어요.')).not.toBeInTheDocument();
+  expect(await screen.findByText('최근 본 장소를 불러오지 못했어요.')).toBeInTheDocument(); expect(screen.queryByText('최근 본 장소가 없어요.')).not.toBeInTheDocument();
 });
-test("recent photo aliases and category label render; saving calls the folder API and detail uses a link", async () => {
-  let places=[]; api.get.mockImplementation(async url=>({data:url==='/api/recent-places'?[{id:71,name:'최근 장소',imageUrl:'/actual-photo.jpg',placeType:'RESTAURANT'}]:url==='/api/folders'?[{id:1,name:'폴더 A'}]:places}));
-  api.post.mockImplementation(async()=>{places=[{id:71,name:'최근 장소'}];return{data:{}};}); setup(<RecentPlacesPage />,'/mypage/recent-places');
-  expect(await screen.findByRole('img',{name:'최근 장소',exact:true})).toHaveAttribute('src','/actual-photo.jpg'); expect(screen.getByText('음식점')).toBeInTheDocument();
-  const save=screen.getByRole('button',{name:'최근 장소 저장',exact:true}); await waitFor(()=>expect(save).toBeEnabled()); fireEvent.click(save);
-  const confirmSave=await screen.findByRole('button',{name:'저장',exact:true}); await waitFor(()=>expect(confirmSave).toBeEnabled()); fireEvent.click(confirmSave);
-  await waitFor(()=>expect(api.post).toHaveBeenCalledWith('/api/folders/1/places/71'));
-  expect(await screen.findByRole('button',{name:'최근 장소 저장 해제'})).toHaveAttribute('aria-pressed','true');
-  expect(screen.getByRole('link',{name:'최근 장소',exact:true})).toHaveAttribute('href','/detail?id=71');
+test("recent place uses the shared explore card with folder saving and detail action", async () => {
+  let places=[];
+  api.get.mockImplementation(async url=>({data:url==='/api/recent-places'?
+    [{id:71,name:'최근 장소',imageUrl:'/actual-photo.jpg',placeCategory:'FOOD',placeCategoryLabel:'맛집'}]:
+    url==='/api/folders'?[{id:1,name:'폴더 A'}]:places}));
+  api.post.mockImplementation(async()=>{places=[{id:71,name:'최근 장소'}];return{data:{}};});
+  setup(<RecentPlacesPage />,'/mypage/recent-places');
+  expect(await screen.findByRole('img',{name:'최근 장소',exact:true})).toHaveAttribute('src','/actual-photo.jpg');
+  expect(screen.getByText(/맛집/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button',{name:'최근 장소 상세 보기'}));
+  expect(screen.getByTestId('location')).toHaveTextContent('/detail?id=71');
 });
-test("statistics error never becomes zero; retry preserves a real zero value", async () => {
-  api.get.mockRejectedValue(new Error('failed')); setup(<MyPage />,'/mypage'); await screen.findByText('활동 통계를 불러오지 못했습니다.');
-  expect(screen.queryByText('0',{selector:'strong'})).not.toBeInTheDocument();
-  api.get.mockResolvedValue({data:{visitedPlacesCount:0,savedPlacesCount:3,reviewsCount:1}}); fireEvent.click(screen.getByRole('button',{name:'통계 다시 불러오기'}));
-  expect(await screen.findByText('0',{selector:'strong'})).toBeInTheDocument();
-  expect(screen.getByText('여행 일정')).toBeInTheDocument();
-  expect(screen.queryByText('다녀온 곳')).not.toBeInTheDocument();
+
+test("mypage removes statistics and duplicate schedule settings, retaining useful links", async () => {
+  api.get.mockResolvedValue({ data: { nickname: "여행자", email: "user@example.com", emailAvailable: true, provider: "LOCAL" } });
+  setup(<MyPage />, "/mypage");
+  await screen.findByRole("heading", { name: "여행자" });
+  expect(screen.getByRole("link", { name: /저장한 장소/ })).toHaveAttribute("href", "/saved-places");
+  expect(screen.getByRole("link", { name: /최근 본 장소/ })).toHaveAttribute("href", "/mypage/recent-places");
+  expect(screen.getByRole("link", { name: /작성한 리뷰/ })).toHaveAttribute("href", "/mypage/reviews");
+  expect(screen.getByRole("link", { name: /1:1 문의/ })).toHaveAttribute("href", "/inquiry");
+  expect(screen.queryByText("화면 설정")).not.toBeInTheDocument();
+  expect(screen.queryByText("내 일정 관리")).not.toBeInTheDocument();
+  expect(screen.queryByText("활동 통계")).not.toBeInTheDocument();
+  expect(api.get.mock.calls.map(([url]) => url)).toEqual(["/api/mypage/profile"]);
 });
 
 test("recent places retain the server's newest-first order without timestamp fields", async () => {
   api.get.mockResolvedValue({ data: [{ id: 71, name: "최근 A" }, { id: 72, name: "최근 B" }] });
   setup(<RecentPlacesPage />, '/mypage/recent-places');
-  await screen.findByRole('link', { name: '최근 A', exact: true });
-  expect(screen.getAllByRole('link', { name: /최근 [AB]/ }).map(link => link.textContent)).toEqual(['최근 A', '최근 B']);
+  await screen.findByRole('button', { name: '최근 A 상세 보기' });
+  expect(screen.getAllByRole('button', { name: /최근 [AB] 상세 보기/ }).map(button => button.getAttribute('aria-label')))
+    .toEqual(['최근 A 상세 보기', '최근 B 상세 보기']);
 });
 test("admin role states deny user and unknown, allow ADMIN", async () => {
   const view=setup(<AdminAccessGuard><p>관리자 내용</p></AdminAccessGuard>,'/admin'); await screen.findByRole('heading',{name:'관리자 권한이 필요합니다'}); expect(screen.queryByText('관리자 내용')).not.toBeInTheDocument(); view.unmount();
@@ -176,10 +362,12 @@ test("admin role states deny user and unknown, allow ADMIN", async () => {
   getMockUser.mockReturnValue({}); setup(<AdminAccessGuard><p>관리자 내용</p></AdminAccessGuard>,'/admin'); expect(await screen.findByRole('heading',{name:'관리자 권한을 확인하지 못했습니다'})).toBeInTheDocument();
   expect(roleFromUser({authorities:[{authority:'ROLE_ADMIN'}]})).toBe('admin');
 });
-test("undated trips are separate from upcoming and use no fabricated photo", async () => {
+test("undated server record remains accessible without a date-unknown tab or fake D-day", async () => {
   api.get.mockResolvedValue({data:[{id:1,title:'날짜 없는 일정'}]}); setup(<MySchedule />,'/my-schedule');
-  fireEvent.click(await screen.findByRole('button',{name:'날짜 미정'}));
-  expect(await screen.findByRole('heading',{name:'날짜 없는 일정'})).toBeInTheDocument(); expect(screen.queryByText('D-Day')).not.toBeInTheDocument();
+  expect(await screen.findByRole('heading',{name:'날짜 없는 일정'})).toBeInTheDocument();
+  expect(screen.getByRole('heading',{name:'날짜 확인 필요'})).toBeInTheDocument();
+  expect(screen.queryByRole('button',{name:'날짜 미정'})).not.toBeInTheDocument();
+  expect(screen.queryByText('D-Day')).not.toBeInTheDocument();
 });
 test("schedule refresh failure retains the same account's confirmed list", async () => {
   api.get.mockResolvedValue({data:[{id:1,title:'확인된 일정',selectedDates:['2099-01-01']}]}); setup(<MySchedule />,'/my-schedule');

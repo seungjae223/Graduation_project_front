@@ -216,8 +216,11 @@ const normalizeTripRequest = (tripRequest = {}) => {
     destination: String(tripRequest.destination || "서울").trim(),
     startDate: typeof tripRequest.startDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(tripRequest.startDate) ? tripRequest.startDate : startDate,
     endDate: typeof tripRequest.endDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(tripRequest.endDate) ? tripRequest.endDate : endDate,
-    latitude: Number(tripRequest.latitude ?? tripRequest.lat ?? DEFAULT_COORDS.latitude),
-    longitude: Number(tripRequest.longitude ?? tripRequest.lng ?? tripRequest.lon ?? DEFAULT_COORDS.longitude),
+    // V16 explicit null pair records unknown location; never invent Seoul map coordinates.
+    latitude: Object.prototype.hasOwnProperty.call(tripRequest, "latitude") && tripRequest.latitude === null
+      ? null : Number(tripRequest.latitude ?? tripRequest.lat ?? DEFAULT_COORDS.latitude),
+    longitude: Object.prototype.hasOwnProperty.call(tripRequest, "longitude") && tripRequest.longitude === null
+      ? null : Number(tripRequest.longitude ?? tripRequest.lng ?? tripRequest.lon ?? DEFAULT_COORDS.longitude),
   };
   return validateTripRequest(request);
 };
@@ -280,7 +283,8 @@ export const normalizeTripPlace = (place = {}, fallbackDay = 1) => {
     latitude,
     longitude,
     address: place.address || place.roadAddress || place.location || "",
-    placeType: place.placeType || place.category || place.categoryName || "",
+    placeCategory: place.placeCategory || "",
+    placeCategoryLabel: place.placeCategoryLabel || "",
     day,
     visitOrder,
     isStartPoint: toBoolean(place.isStartPoint ?? place.startPoint),
@@ -297,7 +301,8 @@ export const normalizeTimelineItem = (item = {}) => {
   return {
     visitOrder: item.visitOrder ?? 0,
     placeName: item.placeName || item.name || "장소명 없음",
-    placeType: item.placeType || "",
+    placeCategory: item.placeCategory || "",
+    placeCategoryLabel: item.placeCategoryLabel || "",
     arrivalTime: item.arrivalTime || "",
     departureTime: item.departureTime || "",
     arrivalDateTime: item.arrivalDateTime || "",
@@ -316,6 +321,16 @@ export const createTripApi = async (tripRequest) => {
   );
 
   return normalizeTrip(unwrapData(response.data));
+};
+
+// Change only the owned trip's title; never resubmit destination, dates or coordinates.
+export const renameTripTitleApi = async ({ tripId, title }) => {
+  const safeId = assertPositiveInteger(tripId, "여행 id가 필요합니다.");
+  if (typeof title !== "string" || !title.trim() || title.trim().length > 100) {
+    throw new Error("일정명은 1~100자로 입력해 주세요.");
+  }
+  const response = await api.patch(`${TRIP_BASE_URL}/${safeId}/title`, { title: title.trim() });
+  return normalizeTrip(requireTrip(response.data, safeId));
 };
 
 export const updateTripApi = async (id, tripRequest) => {
@@ -491,12 +506,16 @@ export const updateTripPlaceScheduleApi = async ({
     if (typeof schedule.fixed !== "boolean") throw new Error("고정 시간 설정을 확인해주세요.");
     payload.fixed = schedule.fixed;
   }
-  if (schedule?.arrivalTime != null) {
+  if (schedule?.clearArrivalTime === true) {
+    if (schedule.arrivalTime != null) throw new Error("시간을 입력하거나 삭제해 주세요.");
+    payload.clearArrivalTime = true;
+  } else if (schedule?.arrivalTime != null) {
     if (!/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(schedule.arrivalTime)) {
       throw new Error("도착 시간을 확인해주세요.");
     }
     payload.arrivalTime = schedule.arrivalTime;
   }
+  if (schedule?.reorderByVisitTime === true) payload.reorderByVisitTime = true;
   if (schedule?.stayDuration != null) {
     const minutes = Number(schedule.stayDuration);
     if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440) {
@@ -564,6 +583,44 @@ export const optimizeTripDayApi = async ({
   return requireList(response.data).map((place) =>
     normalizeTripPlace(place, safeDay)
   );
+};
+
+// Manual editing must preserve user-entered visit times. The legacy order API
+// recomputes timelines and remains available to legacy clients.
+export const deleteTripDayPlacesApi = async ({ tripId, day, tripPlaceIds }) => {
+  const safeTripId = assertPositiveInteger(tripId, "여행 ID가 필요합니다.");
+  const safeDay = assertPositiveInteger(day, "일차가 필요합니다.");
+  if (!Array.isArray(tripPlaceIds) || !tripPlaceIds.length) {
+    throw new Error("삭제할 장소를 선택해 주세요.");
+  }
+  const ids = tripPlaceIds.map(id => assertPositiveInteger(id, "방문 항목 ID가 필요합니다."));
+  if (new Set(ids).size !== ids.length) throw new Error("삭제 장소가 중복됐어요.");
+  const response = await api.delete(
+    `${TRIP_BASE_URL}/${safeTripId}/days/${safeDay}/places`,
+    { data: { tripPlaceIds: ids } }
+  );
+  return requireList(response.data).map(p => normalizeTripPlace(p, safeDay))
+    .sort((a, b) => a.visitOrder - b.visitOrder);
+};
+
+export const updateTripPlaceManualOrderApi = async ({ tripId, day, tripPlaceIds }) => {
+  const safeTripId = assertPositiveInteger(tripId, "여행 id가 필요합니다.");
+  const safeDay = assertPositiveInteger(day, "일차 day 값이 필요합니다.");
+  if (!Array.isArray(tripPlaceIds) || !tripPlaceIds.length) throw new Error("방문 순서를 확인해주세요.");
+  const ids = tripPlaceIds.map(id => assertPositiveInteger(id, "방문 항목 ID가 필요합니다."));
+  if (new Set(ids).size !== ids.length) throw new Error("방문 항목 ID는 중복될 수 없습니다.");
+  const response = await api.patch(
+    `${TRIP_BASE_URL}/${safeTripId}/days/${safeDay}/places/order/manual`,
+    { tripPlaceIds: ids }
+  );
+  const rows = requireList(response.data);
+  const ordered = rows.map(p => normalizeTripPlace(p, safeDay)).sort((a, b) => a.visitOrder - b.visitOrder);
+  if (ordered.length !== ids.length || ordered.some((place, i) =>
+    String(place.tripPlaceId) !== String(ids[i]) || Number(place.visitOrder) !== i + 1 ||
+    Number(place.day) !== safeDay)) {
+    throw new Error("방문 순서 저장 결과를 확인하지 못했습니다.");
+  }
+  return ordered;
 };
 
 export const updateTripPlaceOrderApi = async ({
@@ -689,7 +746,8 @@ export const mapTripToSavedRoute = (
           address: place.address || "",
           latitude: place.latitude,
           longitude: place.longitude,
-          placeType: place.placeType || "",
+          placeCategory: place.placeCategory || "",
+          placeCategoryLabel: place.placeCategoryLabel || "",
           visitOrder: place.visitOrder || 0,
           timeLabel: toDisplayTimeLabel(place.arrivalTime),
           arrivalTime: place.arrivalTime || "",

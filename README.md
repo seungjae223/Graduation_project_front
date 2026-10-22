@@ -261,10 +261,6 @@ Graduation_project_front/
 
 실제 연결 주소는 `https://nomango-backend-prod-3-27-110-86.nip.io`이며, 로컬 `.env`에 이 주소와 `REACT_APP_USE_MOCK=false`를 적용했습니다. HTTPS 인증서 검증을 유지한 공개 OpenAPI 조회는 200이었고, 명세의 44개 API 경로·메서드와 모두 일치했습니다. 인증 없는 여행 조회는 명세대로 403이며, 로컬 프론트(`http://localhost:3000`)와 배포 프론트(`https://noman-go.netlify.app`)의 PATCH CORS 사전 요청은 모두 200으로 Authorization·Content-Type 헤더를 허용했습니다. 상세 결과는 `output/deployed-https-api-connection-check.json`에 기록했습니다. 환경 변수 변경 후 개발 서버를 다시 시작해야 적용됩니다.
 
-2026-10-16 카카오 로그인 콜백 수정: 로컬도 위 배포 API를 사용하므로 `GET /api/auth/kakao/authorize`에 현재 origin의 `/oauth/kakao/callback`을 `redirectUri` 쿼리로 전달합니다. `POST /api/auth/kakao/login`은 기존처럼 `code`, `state`만 전송합니다. 인가 URL의 콜백이 현재 환경과 다르면 이동 전에 중단하고 오류를 표시합니다. 인증 서버·state 검증, 내부 복귀 경로 검증, JWT 저장 방식, Google API 계약은 유지합니다.
-
-이 계약은 백엔드의 콜백 allowlist 및 state별 URI 저장 구현이 함께 배포되어야 동작합니다. 점검 시 운영 API는 새 파라미터를 무시하고 배포 콜백을 반환했으며, 이 상태에서는 로컬 카카오 로그인이 오류 안내로 중단됩니다. 운영 `KAKAO_REDIRECT_URI=https://noman-go.netlify.app/oauth/kakao/callback`은 유지하고, `KAKAO_ALLOWED_REDIRECT_URIS=http://localhost:3000/oauth/kakao/callback,https://noman-go.netlify.app/oauth/kakao/callback`을 사용합니다. 백엔드 수정본은 같은 작업 폴더의 `../noman-go`에 있으며, 적용 순서와 수동 검증은 그 저장소의 `docs/KAKAO_REDIRECT_URIS.md`에 기록합니다. 카카오 콘솔의 현재 로그인 REST API 키에 두 **로그인 Redirect URI**가 등록되어 있는지 별도로 확인해야 합니다. 사이트/JavaScript SDK 도메인 및 지도 설정과 별개이며, 이번 작업에서는 콘솔 등록 상태를 확인하지 않았습니다. 네트워크 증거에는 인증 값을 제외하고 origin·경로·콜백·HTTP 상태만 저장했습니다(`output/kakao-redirect/deployed-api-check.json`).
-
 이 점검에서 실제 계정 로그인·일정 변경·OAuth 흐름은 수행하지 않았습니다. 일반 사용자 리뷰 작성과 최근 본 장소 자동 기록은 제공된 명세상 서버 제약이 남아 있습니다.
 
 2026-10-14 제공된 `API_SPEC_2026-10-14.md`의 변경 사항을 반영했습니다. 배포 서버의 공개 OpenAPI에서도 전체 46개 API와 새 경로 두 개를 확인했고, 비밀번호 재설정 PATCH의 로컬·배포 프론트 CORS 사전 요청은 모두 200입니다. 확인 자료는 `output/api-update-2026-10-14-live-check.json`, `output/api-update-2026-10-14-cors-check.json`에 있습니다.

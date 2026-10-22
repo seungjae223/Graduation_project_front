@@ -60,7 +60,7 @@ const getPlaceTags = (place = {}) => {
     return place.tags;
   }
 
-  const tags = [place.theme, place.placeType, place.region]
+  const tags = [place.theme, place.placeCategoryLabel || place.placeCategory, place.region]
     .filter(Boolean)
     .flatMap((value) =>
       String(value)
@@ -113,7 +113,8 @@ const normalizePlace = (place = {}, index = 0) => {
     lng: longitude,
     theme: place.theme || "",
     description: place.description || "",
-    placeType: place.placeType || "",
+    placeCategory: place.placeCategory || "",
+    placeCategoryLabel: place.placeCategoryLabel || "",
   };
 };
 

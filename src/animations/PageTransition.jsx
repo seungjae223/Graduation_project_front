@@ -13,7 +13,7 @@ export default function PageTransition({ className, children }) {
   useLayoutEffect(() => { markReady(entry); }, []);
   return <div ref={entry} className={className} data-page-entry="pending"
     onAnimationEnd={event => {
-      if (event.target === entry.current && event.animationName === "pageFadeUp") entry.current.dataset.pageEntry = "settled";
+      if (event.target === entry.current && ["pageFadeUp", "nomango-detail-enter", "nomango-detail-return", "nomango-tab-enter-right", "nomango-tab-enter-left"].includes(event.animationName)) entry.current.dataset.pageEntry = "settled";
     }}>
     <EntryContext.Provider value={entry}>{children}</EntryContext.Provider>
   </div>;

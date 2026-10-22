@@ -44,7 +44,7 @@ export default function useTripResult(id, demo = false) {
     } finally { busy.current.delete(key); }
   }, []);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async ({ preserveScreen = false } = {}) => {
     if (busy.current.has("detail")) return;
     controller.current?.abort();
     const request = new AbortController();
@@ -61,7 +61,9 @@ export default function useTripResult(id, demo = false) {
     }
     busy.current.add("detail");
     const alive = () => generation.current === version && !request.signal.aborted && String(current.current.id) === String(id) && current.current.account === account && getAuthSnapshot().accountKey === account;
-    setState({ id, account, status: "loading", trip: null, places: [], timelines: {}, error: "" });
+    setState(previous => preserveScreen && String(previous.id) === String(id) &&
+      previous.account === account && previous.status === "success"
+      ? previous : { id, account, status: "loading", trip: null, places: [], timelines: {}, error: "" });
     try {
       const [trip, places] = await Promise.all([
         getTripByIdApi(id, { signal: request.signal }),
@@ -128,5 +130,7 @@ export default function useTripResult(id, demo = false) {
       throw error;
     }
   };
-  return { ...(String(state.id) === String(id) && state.account === account ? state : EMPTY), retry: load, retryTimeline, refreshDayOrder };
+  const refreshInPlace = () => load({ preserveScreen: true });
+  return { ...(String(state.id) === String(id) && state.account === account ? state : EMPTY),
+    retry: load, refreshInPlace, retryTimeline, refreshDayOrder };
 }

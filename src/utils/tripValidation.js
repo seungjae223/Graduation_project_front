@@ -8,8 +8,9 @@ export function validateTripRequest(request) {
   if (!validDate(request.startDate) || !validDate(request.endDate) || request.endDate < request.startDate) {
     throw new Error("여행 시작일과 종료일을 확인해주세요.");
   }
-  if (!Number.isFinite(request.latitude) || Math.abs(request.latitude) > 90 ||
-      !Number.isFinite(request.longitude) || Math.abs(request.longitude) > 180) {
+  const bothUnknown = request.latitude === null && request.longitude === null;
+  if (!bothUnknown && (!Number.isFinite(request.latitude) || Math.abs(request.latitude) > 90 ||
+      !Number.isFinite(request.longitude) || Math.abs(request.longitude) > 180)) {
     throw new Error("여행 좌표를 확인해주세요.");
   }
   return request;

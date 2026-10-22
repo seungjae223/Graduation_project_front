@@ -1,5 +1,5 @@
 import { loadKakaoMapsScript } from "../utils/kakaoMapLoader";
-import { getPlaceTypeLabel } from "../utils/placeType";
+import { getPlaceCategoryLabel } from "../utils/placeCategory";
 import { logSafeApiError } from "../utils/safeLog";
 import { isMapUrlForProvider } from "../utils/mapUrl";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -1095,7 +1095,10 @@ const normalizeServerTripPlace = (place = {}, fallbackDay = 1) => {
     latitude,
     longitude,
     address: place.address || place.roadAddress || place.location || "",
-    placeType: place.placeType || place.category || place.categoryName || "",
+    placeCategory: place.placeCategory || "",
+    placeCategoryLabel:
+      place.placeCategoryLabel ||
+      getPlaceCategoryLabel(place.placeCategory, "장소"),
     day: normalizedDay,
     visitOrder: normalizedVisitOrder,
     isStartPoint: Boolean(place.isStartPoint || place.startPoint),
@@ -1203,7 +1206,7 @@ const buildDaysFromServerData = (trip, places = []) => {
             ? "출발"
             : isFixedSchedule
               ? "고정 일정"
-              : getPlaceTypeLabel(place.placeType),
+              : place.placeCategoryLabel,
         move: isLast ? "" : getStraightDistanceText(place, nextPlace),
         moveType: "distance",
         lat: place.latitude,
@@ -1211,7 +1214,8 @@ const buildDaysFromServerData = (trip, places = []) => {
         latitude: place.latitude,
         longitude: place.longitude,
         address: place.address || "",
-        placeType: place.placeType || "",
+        placeCategory: place.placeCategory || "",
+        placeCategoryLabel: place.placeCategoryLabel || "장소",
         day: place.day,
         visitOrder: place.visitOrder,
         isStartPoint: Boolean(place.isStartPoint),

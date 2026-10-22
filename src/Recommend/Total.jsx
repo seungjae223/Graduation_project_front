@@ -2,12 +2,13 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import AnimatedHeart from "../AnimatedHeart/AnimatedHeart";
+import FavoriteHeart from "../components/FavoriteHeart";
 import useReadQuery from "../utils/useReadQuery";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
 import { requireList } from "../api/responseContract";
 import { toApiTheme } from "../utils/placeTheme";
+import { getPlaceCategoryLabel } from "../utils/placeCategory";
 import usePlaceSaving from "../utils/usePlaceSaving";
 import PlaceSavingFeedback, { PlaceSaveModal } from "../components/PlaceSavingFeedback";
 import "./Total.css";
@@ -55,12 +56,9 @@ const normalizeTags = (tags) => {
 
 const normalizePlace = (place) => {
   const id = place.id || place.placeId || place.destinationId;
-  const placeType =
-    place.placeType ||
-    place.category ||
-    place.categoryName ||
-    place.type ||
-    "명소";
+  const placeCategory = place.placeCategory || "";
+  const placeCategoryLabel =
+    place.placeCategoryLabel || getPlaceCategoryLabel(placeCategory, "명소");
 
   return {
     id,
@@ -80,7 +78,8 @@ const normalizePlace = (place) => {
     latitude: readCoordinates(place)?.latitude ?? null,
     longitude: readCoordinates(place)?.longitude ?? null,
     region: String(place.region || ""),
-    placeType,
+    placeCategory,
+    placeCategoryLabel,
     theme: place.theme || place.themeName || "",
     rating: validRating(place.rating ?? place.score ?? place.avgRating),
     image:
@@ -114,7 +113,7 @@ function Total() {
   const location = useLocation();
   const account = useSessionKey();
   const saving = usePlaceSaving();
-  const { isSaved, isSavingId } = saving;
+  const { isSaved } = saving;
   const [searchParams] = useSearchParams();
 
   const selectedTheme = searchParams.get("theme") || "healing";
@@ -172,12 +171,10 @@ function Total() {
     }
   }, [location.pathname, location.search, location.state, navigate, persistedSettings]);
   const chooseSort = value => {
-    if (value === "거리순" && pickerOpen) { closePicker(); return; }
-    setPickerOpen(false);
     if (value === "거리순" && !origin) { setPickerOpen(true); return; }
     updateSettings({ sortBy: value, currentPage: 1, ...(value === "별점순" ? { ratingsRequested: true, ...(reviewRatings.data ? { appliedSort: value } : {}) } : { appliedSort: value }) });
   };
-  const closePicker = () => { setPickerOpen(false); distanceButton.current?.focus({ preventScroll: true }); };
+  const closePicker = () => { setPickerOpen(false); distanceButton.current?.focus(); };
   const changePage = page => {
     if (page < 1 || page > totalPages) return;
     updateSettings({ currentPage: page });
@@ -189,7 +186,7 @@ function Total() {
     });
   };
 
-  const handleToggleSaved = saving.toggle;
+  const openFolderPicker = saving.openFolderPicker;
   const themeLabel = { healing: "힐링", activity: "액티비티", food: "맛집 탐방", photo: "인스타 감성" }[selectedTheme] || selectedTheme;
   const pageTitle = searchKeyword ? `"${searchKeyword}" 검색 결과` : `${themeLabel} 추천 장소`;
 
@@ -220,7 +217,8 @@ function Total() {
           onClick={() => chooseSort("거리순")}
           aria-pressed={sortBy === "거리순"}
           aria-expanded={pickerOpen}
-          aria-controls={pickerOpen ? "total-origin-panel" : undefined}
+          aria-controls={pickerOpen ? "total-origin-dialog" : undefined}
+          aria-haspopup="dialog"
         >
           거리순
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
@@ -237,14 +235,14 @@ function Total() {
         </button>
       </div>
 
-      {pickerOpen && <DistanceOriginPicker key={scope} places={places} reference={reference} onCancel={closePicker} onChoose={reference => {
+      {pickerOpen && <DistanceOriginPicker key={scope} places={places} reference={reference} anchorRef={distanceButton} onCancel={closePicker} onChoose={reference => {
         updateSettings({ reference, sortBy: "거리순", appliedSort: "거리순", currentPage: 1 });
         closePicker();
       }} />}
       {!isLoading && !errorMessage && <div className="total-sort-summary">
-        {sortBy === "거리순" ? <div className="total-distance-summary">
+        {sortBy === "거리순" ? <div className="total-distance-summary" aria-hidden={pickerOpen || undefined}>
           <p role="status">{origin ? `${origin.label} 기준 · 직선거리순` : "기준 장소를 다시 선택해 주세요."}</p>
-          {!pickerOpen && <button type="button" onClick={() => setPickerOpen(true)} aria-expanded={false} aria-controls="total-origin-panel">변경</button>}
+          <button type="button" onClick={() => setPickerOpen(true)} aria-haspopup="dialog">변경</button>
         </div> : <p role="status">{sortBy === "별점순" ? reviewRatings.status === "loading" ? "리뷰 평점을 확인하는 중이에요. 현재 목록을 유지해요."
             : reviewRatings.data && Object.values(reviewRatings.data).some(value => value.rating !== null) ? "등록된 리뷰의 평점순"
               : reviewRatings.status === "error" ? "별점순을 확인하지 못해 이전 정렬을 유지하고 있어요." : "등록된 리뷰 평점이 없어 기본 순서로 표시해요."
@@ -280,16 +278,7 @@ function Total() {
                   credit={place.image === getPlacePhoto(place.title).image ? getPlacePhoto(place.title).credit : undefined}
                 />
 
-                <button
-                  type="button"
-                  className="theme-total-save-btn"
-                  onClick={(event) => handleToggleSaved(event, place, saved)}
-                  disabled={saving.blocked || saving.folders.status === "loading" || isSavingId === place.id}
-                  aria-pressed={saved}
-                  aria-label={saved ? "저장 취소" : "저장"}
-                >
-                  <AnimatedHeart active={saved} />
-                </button>
+                <FavoriteHeart place={place} saving={saving} className="theme-total-save-btn" />
               </div>
 
               <div className="theme-total-body">
@@ -314,6 +303,9 @@ function Total() {
                   </div>
                 )}
 
+                <button type="button" className="theme-total-folder-save" onClick={event => openFolderPicker(event, place)}>
+                  {saved ? "폴더 저장 관리" : "폴더 저장"}
+                </button>
                 <button
                   type="button"
                   className="theme-total-detail-btn"

@@ -1,0 +1,32 @@
+/* The review editor is intentionally separate from the detail reading view. */
+.review-write-page { max-width: var(--app-width, 430px); margin: 0 auto; padding: 22px 22px 54px; background: #fff; min-height: calc(100dvh - 70px); color: #30343b; }
+.review-write-page h1 { margin: 10px 0 6px; font-size: 24px; letter-spacing: -.5px; }
+.review-write-place { margin: 0 0 30px; color: #72777d; font-size: 14px; }
+.review-write-page form { display: flex; flex-direction: column; }
+.review-write-rating { border: 0; margin: 0 0 27px; padding: 0; min-width: 0; }
+.review-write-rating legend, .review-write-page label { margin-bottom: 12px; font-size: 15px; font-weight: 700; }
+.review-write-stars { display: flex; justify-content: flex-start; gap: 3px; }
+.review-write-stars button { width: 50px; height: 52px; background: none; border: 0; color: #d5d5d5; font-size: 38px; line-height: 1; cursor: pointer; }
+.review-write-stars button.selected { color: #e8af43; }
+.review-write-help { margin: 9px 0 0; font-size: 13px; color: #747a82; }
+.review-write-page textarea { border: 1px solid #d7dbe0; border-radius: 12px; padding: 14px; height: 124px; min-height: 124px; max-height: 124px; resize: none; font: inherit; font-size: 14px; color: #30343b; }
+.review-write-count { margin: 8px 0 0; align-self: flex-end; font-size: 12px; color: #7b828a; }
+.review-write-media-note { font-size: 12px; color: #858990; line-height: 1.55; margin: 24px 0; }
+.review-write-submit, .review-write-login { width: 100%; height: 50px; border-radius: 12px; border: 0; background: #30343b; color: #fff; font-weight: 700; cursor: pointer; }
+.review-write-submit:disabled { background: #d1d4d8; color: #70747a; cursor: default; }
+.review-write-page button:focus-visible, .review-write-page textarea:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+
+.review-write-media { padding: 18px 0 24px; }
+.review-write-media-heading { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
+.review-write-media > p { font-size: 12px; color: #747a82; line-height: 1.5; }
+/* Keep the native picker accessible, but never expose browser-specific file input chrome. */
+.review-write-file-input { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.review-write-add-photo { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 0 17px; background: #faf9f7; border: 1px solid #dddeda; border-radius: 12px; color: #30343b; font: inherit; font-size: 14px; font-weight: 650; cursor: pointer; }
+.review-write-add-photo:hover:not(:disabled) { background: #f1f0ed; }
+.review-write-add-photo:disabled { opacity: .55; cursor: default; }
+.review-write-add-photo-icon { font-size: 22px; font-weight: 400; line-height: 1; }
+.review-write-add-photo:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.review-write-media-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+.review-write-media-thumb { position: relative; aspect-ratio: 1; min-width: 0; }
+.review-write-media-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; }
+.review-write-media-thumb button { position: absolute; right: 2px; top: 2px; width: 26px; height: 26px; border: 0; border-radius: 50%; background: #1b1c1ec9; color: white; cursor: pointer; }

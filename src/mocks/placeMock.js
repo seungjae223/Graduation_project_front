@@ -29,7 +29,8 @@ export function seedPlaces() {
   ];
   return rows.map(([name, address, region, theme, latitude, longitude], i) => ({
     id: i + 1, name, address, region, theme: theme.toUpperCase(), latitude, longitude, imageUrl: getPlacePhoto(name).image,
-    placeType: theme === "food" ? "RESTAURANT" : "ATTRACTION",
+    placeCategory: { food: "FOOD", activity: "EXPERIENCE", healing: "NATURE", photo: "LANDMARK" }[theme],
+    placeCategoryLabel: { food: "留쏆쭛", activity: "泥댄뿕", healing: "?먯뿰", photo: "紐낆냼" }[theme],
     description: `${name}에서 여유롭게 여행을 즐겨보세요.`,
     tags: [region, { healing: "힐링", photo: "사진", food: "맛집", activity: "액티비티" }[theme]],
     rating: 4.5 + (i % 5) / 10, reviewCount: 6,

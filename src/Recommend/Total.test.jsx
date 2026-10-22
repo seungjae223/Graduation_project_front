@@ -9,12 +9,14 @@ let mockAccount = "account:A";
 jest.mock("../utils/useSessionKey", () => ({ __esModule: true, default: () => mockAccount }));
 jest.mock("../utils/authState", () => ({ getAuthSnapshot: () => ({ accountKey: mockAccount }) }));
 const mockToggle = jest.fn();
-jest.mock("../utils/usePlaceSaving", () => ({ __esModule: true, default: () => ({ isSaved: () => false, toggle: mockToggle, folders: { account: mockAccount, status: "success" }, open: false }) }));
+const mockFavorite = jest.fn();
+jest.mock("../utils/usePlaceSaving", () => ({ __esModule: true, default: () => ({ isSaved: () => false, isLiked: () => false, toggle: mockToggle, openFolderPicker: mockToggle, toggleFavorite: mockFavorite, folders: { account: mockAccount, status: "success" }, open: false }) }));
 const places = [6, 5, 4, 3, 2, 1, 0, null].map((offset, index) => ({ id: index + 1, name: `장소 ${index + 1}`, region: "오사카", address: `실제 응답 주소 ${index + 1}`, latitude: offset === null ? null : 34.6 + offset / 10, longitude: 135.5, theme: "ACTIVITY" }));
 const geoDescriptor = Object.getOwnPropertyDescriptor(navigator, "geolocation");
 const titles = () => screen.getAllByRole("heading", { level: 3 }).map(h => h.textContent);
 function Detail() { const location = useLocation(), navigate = useNavigate(); return <><p>상세 도착 {location.search}</p><button onClick={() => navigate(-1)}>돌아가기</button></>; }
-const view = (entry = "/total?theme=activity") => <MemoryRouter initialEntries={[entry]}><Routes><Route path="/recommend" element={<Recommend />} /><Route path="/total" element={<Total />} /><Route path="/detail" element={<Detail />} /></Routes></MemoryRouter>;
+function Destination() { const location = useLocation(); return <p>여행지 도착 {location.pathname}{location.search}</p>; }
+const view = (entry = "/total?theme=activity") => <MemoryRouter initialEntries={[entry]}><Routes><Route path="/recommend" element={<Recommend />} /><Route path="/total" element={<Total />} /><Route path="/detail" element={<Detail />} /><Route path="/destinations/:code" element={<Destination />} /></Routes></MemoryRouter>;
 const chooseOrigin = async () => {
   fireEvent.click(screen.getByRole("button", { name: /거리순/ }));
   userEvent.selectOptions(screen.getByLabelText("기준 장소", { exact: true }), "7");
@@ -24,17 +26,29 @@ const chooseOrigin = async () => {
 beforeEach(() => {
   mockAccount = "account:A"; jest.clearAllMocks();
   mockToggle.mockImplementation(event => event.stopPropagation());
+  mockFavorite.mockImplementation(event => event.stopPropagation());
   api.get.mockImplementation(url => Promise.resolve({ data: url.endsWith("/reviews") ? [{ rating: Number(url.split("/")[3]) / 2 }] : places }));
 });
 afterEach(() => { if (geoDescriptor) Object.defineProperty(navigator, "geolocation", geoDescriptor); else delete navigator.geolocation; });
 
-test("the actual recommend view-all route leads to Total and preserves its API theme", async () => {
-  render(view("/recommend")); await screen.findByRole("heading", { name: "장소 1" });
-  fireEvent.click(screen.getByRole("button", { name: /액티비티/ }));
-  await waitFor(() => expect(api.get).toHaveBeenLastCalledWith("/api/recommendations", expect.objectContaining({ params: { theme: "ACTIVITY" } })));
-  fireEvent.click(screen.getByRole("button", { name: "전체보기" }));
-  await screen.findByRole("heading", { name: "액티비티 추천 장소" });
-  expect(screen.getByRole("button", { name: /거리순/ })).toBeEnabled();
+test("the current recommend tab discovers destinations and preserves its origin in the city route", async () => {
+  const destinations = [
+    { code: "osaka", name: "오사카", countryName: "일본", countryCode: "jp", scope: "OVERSEAS" },
+    { code: "seoul", name: "서울", countryName: "대한민국", countryCode: "kr", scope: "DOMESTIC" },
+  ];
+  api.get.mockImplementation(url => Promise.resolve({
+    data: url === "/api/destinations" ? destinations : places,
+  }));
+  render(view("/recommend"));
+  const osaka = await screen.findByRole("link", { name: "오사카 여행지 보기" });
+  expect(screen.queryByRole("link", { name: "서울 여행지 보기" })).not.toBeInTheDocument();
+  expect(api.get).toHaveBeenCalledWith("/api/destinations", expect.objectContaining({ signal: expect.anything() }));
+  expect(osaka).toHaveAttribute("href", "/destinations/osaka?from=recommend");
+  fireEvent.click(screen.getByRole("button", { name: "국내" }));
+  expect(screen.getByRole("link", { name: "서울 여행지 보기" })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "해외" }));
+  fireEvent.click(screen.getByRole("link", { name: "오사카 여행지 보기" }));
+  expect(screen.getByText("여행지 도착 /destinations/osaka?from=recommend")).toBeInTheDocument();
 });
 
 test("distance sorts all API places before five-item pagination, retains basis and resets other sorts to page one without refetch", async () => {
@@ -74,8 +88,10 @@ test("review sort uses all actual review scores, caches them across sorting and 
 test("save/detail preserve original IDs and detail/back restores page and distance state", async () => {
   render(view()); await screen.findByText("총 8개 · 1/2 페이지"); await chooseOrigin();
   const first = screen.getByRole("heading", { name: "장소 7" }).closest("article");
-  fireEvent.click(within(first).getByRole("button", { name: "저장" }));
-  expect(mockToggle).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ id: 7, originalData: places[6] }), false);
+  fireEvent.click(within(first).getByRole("button", { name: "장소 7 좋아요 추가" }));
+  expect(mockFavorite).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ id: 7, originalData: places[6] }));
+  fireEvent.click(within(first).getByRole("button", { name: "폴더 저장" }));
+  expect(mockToggle).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ id: 7, originalData: places[6] }));
   fireEvent.click(screen.getByRole("button", { name: "2페이지" }));
   fireEvent.click(within(screen.getByRole("heading", { name: "장소 2" }).closest("article")).getByRole("button", { name: "상세보기" }));
   await screen.findByText("상세 도착 ?id=2");
@@ -142,12 +158,12 @@ test("a successful GPS selection stays in browser entry state, and changing acco
   fireEvent.click(screen.getByRole("button", { name: /거리순/ }));
   fireEvent.click(screen.getByRole("button", { name: "내 현재 위치 사용" }));
   act(() => geolocation.getCurrentPosition.mock.calls[0][0]({ coords: { latitude: 34.6, longitude: 135.5 } }));
-  expect(screen.getByRole("region", { name: "거리 기준 선택" })).toBeInTheDocument();
+  expect(screen.getByRole("dialog", { name: "거리 기준 선택" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /인기순/ })).toHaveAttribute("aria-pressed", "true");
   expect(titles()[0]).toBe("장소 1");
   expect(screen.getByRole("button", { name: "내 현재 위치 사용" })).toHaveAttribute("aria-pressed", "true");
   fireEvent.click(screen.getByRole("button", { name: "이 위치로 정렬" }));
-  expect(screen.queryByRole("region", { name: "거리 기준 선택" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(screen.getByText("현재 위치 기준 · 직선거리순")).toBeInTheDocument();
   expect(titles()[0]).toBe("장소 7");
   expect(api.get).toHaveBeenCalledWith("/api/recommendations", expect.objectContaining({ params: { theme: "ACTIVITY" } }));
@@ -166,8 +182,7 @@ test("reference edits are drafts: GPS success and cancel preserve the applied pl
   fireEvent.click(screen.getByRole("button", { name: "변경" }));
   expect(screen.getByLabelText("기준 장소", { exact: true })).toHaveValue("7");
   expect(screen.getByLabelText("기준 장소의 지역")).toHaveValue("오사카");
-  expect(screen.getByText("장소 7 기준 · 직선거리순")).toBeVisible();
-  expect(screen.queryByRole("button", { name: "변경" })).not.toBeInTheDocument();
+  expect(screen.getByText("장소 7 기준 · 직선거리순").parentElement).toHaveAttribute("aria-hidden", "true");
   fireEvent.click(screen.getByRole("button", { name: "내 현재 위치 사용" }));
   expect(screen.getByRole("button", { name: "이 위치로 정렬" })).toBeDisabled();
   act(() => geolocation.getCurrentPosition.mock.calls[0][0]({ coords: { latitude: 35.2, longitude: 135.5 } }));
@@ -179,54 +194,30 @@ test("reference edits are drafts: GPS success and cancel preserve the applied pl
   expect(screen.getAllByText(/ 기준 · 직선거리순/)).toHaveLength(1);
   fireEvent.click(screen.getByRole("button", { name: /인기순/ }));
   fireEvent.click(screen.getByRole("button", { name: /거리순/ }));
-  expect(screen.queryByRole("region", { name: "거리 기준 선택" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(titles()[0]).toBe("장소 7");
   expect(api.get).toHaveBeenCalledTimes(1);
 });
 
-test("the inline picker preserves page scrolling and allows keyboard focus to leave; ESC and the sort button cancel", async () => {
+test("the picker traps keyboard focus, closes with ESC/backdrop and releases background scroll", async () => {
   render(view()); await screen.findByText("총 8개 · 1/2 페이지");
   const distance = screen.getByRole("button", { name: /거리순/ });
-  const scroller = document.scrollingElement || document.documentElement;
-  const originalOverflow = scroller.style.overflowY;
   distance.focus(); fireEvent.click(distance);
-  const panel = screen.getByRole("region", { name: "거리 기준 선택" });
-  expect(panel.closest(".total-page")).toBeInTheDocument();
-  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-  expect(distance).toHaveAttribute("aria-controls", panel.id);
-  expect(distance).not.toHaveAttribute("aria-haspopup");
   const region = screen.getByLabelText("기준 장소의 지역");
   expect(region).toHaveFocus();
-  expect(scroller.style.overflowY).toBe(originalOverflow);
-  userEvent.selectOptions(screen.getByLabelText("기준 장소", { exact: true }), "7");
-  screen.getByRole("button", { name: "이 위치로 정렬" }).focus();
-  userEvent.tab();
-  expect(panel.contains(document.activeElement)).toBe(false);
-  fireEvent.click(screen.getByRole("heading", { name: "장소 1" }));
-  expect(panel).toBeInTheDocument();
-  fireEvent.keyDown(region, { key: "Escape" });
-  expect(screen.queryByRole("region", { name: "거리 기준 선택" })).not.toBeInTheDocument();
+  const scroller = document.scrollingElement || document.documentElement;
+  expect(scroller.style.overflowY).toBe("hidden");
+  const close = screen.getByRole("button", { name: "거리 기준 선택 닫기" });
+  close.focus(); userEvent.tab({ shift: true });
+  expect(screen.getByRole("button", { name: "취소" })).toHaveFocus();
+  fireEvent.keyDown(document.activeElement, { key: "Escape" });
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(distance).toHaveFocus();
-  expect(scroller.style.overflowY).toBe(originalOverflow);
+  expect(scroller.style.overflowY).not.toBe("hidden");
   fireEvent.click(distance);
-  fireEvent.click(distance);
-  expect(screen.queryByRole("region", { name: "거리 기준 선택" })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("dialog").parentElement);
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(distance).toHaveAttribute("aria-pressed", "false");
-});
-
-test("choosing another sort dismisses a draft picker without applying its location", async () => {
-  render(view()); await screen.findByText("총 8개 · 1/2 페이지");
-  fireEvent.click(screen.getByRole("button", { name: /거리순/ }));
-  userEvent.selectOptions(screen.getByLabelText("기준 장소", { exact: true }), "7");
-  fireEvent.click(screen.getByRole("button", { name: /별점순/ }));
-  await screen.findByText("등록된 리뷰의 평점순");
-  expect(screen.queryByRole("region", { name: "거리 기준 선택" })).not.toBeInTheDocument();
-  expect(screen.queryByText("장소 7 기준 · 직선거리순")).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: /거리순/ }));
-  expect(screen.getByLabelText("기준 장소", { exact: true })).toHaveValue("");
-  expect(screen.getByRole("button", { name: /별점순/ })).toHaveAttribute("aria-pressed", "true");
-  fireEvent.click(screen.getByRole("button", { name: "취소" }));
-  expect(screen.getByRole("button", { name: /별점순/ })).toHaveAttribute("aria-pressed", "true");
 });
 
 test("a saved GPS reference is preselected on change and changing to a place ignores a pending GPS result", async () => {

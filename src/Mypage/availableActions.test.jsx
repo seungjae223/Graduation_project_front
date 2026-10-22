@@ -15,7 +15,7 @@ beforeEach(() => {
 });
 test("unsupported folder menu is absent; folder creation and place removal still work", async () => {
   render(<MemoryRouter><SavedPlacesProvider><SavedPlaces /></SavedPlacesProvider></MemoryRouter>);
-  const folder = await screen.findByText("내 폴더");
+  const folder = await screen.findByRole("button", { name: "내 폴더 폴더로 이동" });
   expect(screen.queryByRole("button", { name: "폴더 관리 열기" })).not.toBeInTheDocument();
   api.post.mockResolvedValue({ data: "폴더 생성 완료" });
   fireEvent.click(screen.getByRole("button", { name: /새 폴더 만들기/ }));
@@ -25,10 +25,14 @@ test("unsupported folder menu is absent; folder creation and place removal still
   await screen.findByText(/폴더가 생성됐어요/);
   fireEvent.click(screen.getByRole("button", { name: "닫기" }));
   fireEvent.click(folder);
-  await screen.findByRole("heading", { name: "저장 장소" });
+  await screen.findByText("저장 장소");
   const confirm = jest.spyOn(window, "confirm").mockReturnValue(true);
   api.delete.mockResolvedValue({ data: "장소 삭제 완료" });
-  fireEvent.click(screen.getByRole("button", { name: /장소 삭제|장소 제거|더보기/ }));
+  expect(screen.getByRole("button", { name: "장소 삭제 선택" })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "장소 삭제 선택" }));
+  fireEvent.click(screen.getByRole("checkbox", { name: "저장 장소 선택" }));
+  expect(screen.getByRole("button", { name: "장소 선택 완료" })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "선택한 장소 1개 삭제하기" }));
   await waitFor(() => expect(api.delete).toHaveBeenCalledWith("/api/folders/3/places/71"));
   confirm.mockRestore();
 });

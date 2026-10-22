@@ -23,27 +23,12 @@ const BackIcon = () => (
   </svg>
 );
 
-const SearchIcon = () => (
-  <svg className="header-icon" viewBox="0 0 24 24" aria-hidden="true">
-    <circle cx="11" cy="11" r="6.5" />
-    <path d="m16 16 4 4" />
-  </svg>
-);
-
 const ShareIcon = () => (
   <svg className="header-icon" viewBox="0 0 24 24" aria-hidden="true">
     <circle cx="18" cy="5" r="2.25" />
     <circle cx="6" cy="12" r="2.25" />
     <circle cx="18" cy="19" r="2.25" />
     <path d="m8 11 7.8-4.6M8 13l7.8 4.6" />
-  </svg>
-);
-
-const ProfileIcon = () => (
-  <svg className="my-icon" viewBox="0 0 32 32" aria-hidden="true">
-    <circle cx="16" cy="16" r="13" />
-    <circle cx="16" cy="12" r="4" />
-    <path d="M8.5 25c1.4-4.1 4-6.1 7.5-6.1s6.1 2 7.5 6.1" />
   </svg>
 );
 
@@ -92,7 +77,7 @@ const BlackTrashIcon = () => (
   </svg>
 );
 
-const Header = ({ onSearchClick }) => {
+const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -149,29 +134,51 @@ const Header = ({ onSearchClick }) => {
     setIsDeleteOpen(false);
   }, [isRouteResultPage, deleteKey]);
 
+  useEffect(() => {
+    if (!isRouteResultPage) return;
+    const open = () => setIsShareOpen(true);
+    window.addEventListener("nomango:open-trip-share", open);
+    return () => window.removeEventListener("nomango:open-trip-share", open);
+  }, [isRouteResultPage]);
+
   const handleBackClick = () => {
     setIsShareOpen(false);
     setIsDeleteOpen(false);
 
-    if (path === "/detail") returnFromDetail(navigate);
-    else navigate(-1);
+    if (path === "/route-optimize") {
+      const tripId = new URLSearchParams(location.search).get("id");
+      navigate(tripId && /^[1-9]\d*$/.test(tripId)
+        ? "/route-result?id=" + encodeURIComponent(tripId) : "/schedule");
+    } else if (path === "/route-add-places") {
+      const query = new URLSearchParams(location.search);
+      const tripId = query.get("id");
+      const day = Number(query.get("day")) || 1;
+      const optimized = query.get("version") === "optimized" ? "&version=optimized" : "";
+      const origin = query.get("origin") === "past" ? "&origin=past" : "";
+      navigate(tripId && /^[1-9]\d*$/.test(tripId)
+        ? "/route-result?id=" + encodeURIComponent(tripId) + "&edit=1&day=" + day + optimized + origin
+        : "/schedule");
+    } else if (path === "/route-result") {
+      const query = new URLSearchParams(location.search);
+      const tripId = query.get("id");
+      const past = query.get("origin") === "past" || location.state?.from === "/mypage/past-trips";
+      navigate(query.get("edit") === "1" && tripId
+        ? "/route-result?id=" + encodeURIComponent(tripId) + (past ? "&origin=past" : "")
+        : past ? "/mypage/past-trips" : "/schedule");
+    } else if (path === "/detail") returnFromDetail(navigate);
+    else if (path === "/saved-places") {
+      // The back action must be deterministic, even after direct links or refresh.
+      const inFolder = new URLSearchParams(location.search).has("folderId");
+      navigate(inFolder ? "/saved-places" : "/mypage");
+    } else navigate(-1);
   };
 
   const handleOnboardingBackClick = () => {
     navigateWithOnboardingTransition(navigate, window.history.state?.idx > 0 ? -1 : "/onboarding2", "backward");
   };
 
-  const handleSearchClick = () => {
-    if (typeof onSearchClick === "function") {
-      onSearchClick();
-      return;
-    }
-
-    navigate("/search");
-  };
-
   const handleSavePdfFromShare = async ({ isCurrent = () => true } = {}) => {
-    const target = document.getElementById("route-result-pdf");
+    const target = document.getElementById("route-result-pdf") || document.getElementById("v16-detail-export");
 
     if (!target) {
       throw new Error("PDF로 저장할 내용을 찾지 못했어요.");
@@ -182,7 +189,10 @@ const Header = ({ onSearchClick }) => {
     const account = getAuthSnapshot().accountKey;
     const wrapper = document.createElement("div");
     wrapper.style.cssText = "position:fixed;left:-100000px;top:0;width:" + (target.clientWidth || 390) + "px";
-    const clone = clonePdfContent(target, ".route-result-screen"); clone.classList.add("is-exporting");
+    const exclusion = target.id === "v16-detail-export"
+      ? ".v16-detail-actions,.v16-detail-view-toolbar,.v16-detail-day-actions,.v16-detail-local-note,.v16-detail-day-time-controls,.v16-detail-title-action svg"
+      : ".route-result-screen";
+    const clone = clonePdfContent(target, exclusion); clone.classList.add("is-exporting");
     wrapper.appendChild(clone); document.body.appendChild(wrapper);
 
     try {
@@ -278,16 +288,18 @@ const Header = ({ onSearchClick }) => {
             <BrandWordmark />
           </div>
 
-          <div className="header-side">
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={() => navigate("/mypage")}
-              aria-label="마이페이지"
-            >
-              <ProfileIcon />
-            </button>
-          </div>
+          <div className="header-side" />
+        </>
+      );
+    }
+
+    // Main navigation roots do not have a meaningful parent to return to.
+    if (["/search", "/schedule", "/mypage"].includes(path)) {
+      return (
+        <>
+          <div className="header-side" />
+          <div className="header-center"><BrandWordmark /></div>
+          <div className="header-side" />
         </>
       );
     }
@@ -295,31 +307,18 @@ const Header = ({ onSearchClick }) => {
     if (path === "/recommend") {
       return (
         <>
-          <div className="header-side">
-            <button type="button" className="icon-btn" onClick={handleBackClick} aria-label="뒤로 가기">
-              <BackIcon />
-            </button>
-          </div>
+          <div className="header-side" />
 
           <div className="header-center">
-            <h2 className="header-title">테마 선택</h2>
+            <BrandWordmark />
           </div>
 
-          <div className="header-side">
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={handleSearchClick}
-              aria-label="검색"
-            >
-              <SearchIcon />
-            </button>
-          </div>
+          <div className="header-side" />
         </>
       );
     }
 
-    if (path === "/route-create") {
+    if (path === "/route-create" || path === "/route-create/region") {
       return (
         <>
           <div className="header-side">
@@ -329,7 +328,7 @@ const Header = ({ onSearchClick }) => {
           </div>
 
           <div className="header-center">
-            <h2 className="header-title">경로 만들기</h2>
+            <h2 className="header-title">일정 만들기</h2>
           </div>
 
           <div className="header-side" />
@@ -337,6 +336,33 @@ const Header = ({ onSearchClick }) => {
       );
     }
 
+    if (path === "/route-add-places") {
+      return (
+        <>
+          <div className="header-side">
+            <button type="button" className="icon-btn" onClick={handleBackClick} aria-label="뒤로 가기">
+              <BackIcon />
+            </button>
+          </div>
+          <div className="header-center">
+            <h2 className="header-title">장소 추가</h2>
+          </div>
+          <div className="header-side" />
+        </>
+      );
+    }
+
+    if (path === "/route-optimize") {
+      return <>
+        <div className="header-side">
+          <button type="button" className="icon-btn" onClick={handleBackClick} aria-label="뒤로 가기">
+            <BackIcon/>
+          </button>
+        </div>
+        <div className="header-center"><h2 className="header-title">경로 최적화</h2></div>
+        <div className="header-side"/>
+      </>;
+    }
     if (path === "/route-result") {
       return (
         <>
@@ -347,28 +373,10 @@ const Header = ({ onSearchClick }) => {
           </div>
 
           <div className="header-center">
-            <h2 className="header-title result-title">최적 경로 결과</h2>
+            <h2 className="header-title result-title">여행 일정</h2>
           </div>
 
-          <div className="header-side route-result-header-actions">
-            <button
-              type="button"
-              className="icon-btn header-trash-button"
-              onClick={handleDeleteClick}
-              aria-label="일정 삭제"
-            >
-              <BlackTrashIcon />
-            </button>
-
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={handleShare}
-              aria-label="일정 공유"
-            >
-              <ShareIcon />
-            </button>
-          </div>
+          <div className="header-side" />
         </>
       );
     }

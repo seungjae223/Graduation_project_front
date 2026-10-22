@@ -15,10 +15,17 @@ import api from "../api/api";
 import useReadQuery from "../utils/useReadQuery";
 import usePlaceSaving from "../utils/usePlaceSaving";
 import PlaceSavingFeedback, { PlaceSaveModal } from "../components/PlaceSavingFeedback";
+import FavoriteHeart from "../components/FavoriteHeart";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
 import { buildLoginPath } from "../utils/authRedirect";
-import { requireList } from "../api/responseContract";
+import { getReviewPageApi } from "../api/placeApi";
+import { getPlaceEngagementApi } from "../api/placeEngagementApi";
+import { useDetailFooter } from "../components/DetailFooterContext";
+import { getPlaceCategoryLabel } from "../utils/placeCategory";
+import QuickTripAddModal from "../Destinations/QuickTripAddModal";
+import { getPlaceDirections } from "../utils/placeDirections";
+import { placeImageUrl, resolvePlaceImage } from "../utils/placeImageResolver";
 
 import PlacePhoto from "../components/PlacePhoto";
 import { getPlacePhoto } from "../data/placePhotos";
@@ -58,18 +65,6 @@ const ShareIcon = () => (
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
-    />
-  </svg>
-);
-
-const HeartIcon = ({ active = false }) => (
-  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    <path
-      d="M12 21s-6.8-4.35-9.4-8.1C.3 9.55 1.1 5.2 5.4 4.3c2.3-.5 4.3.5 5.6 2.1 1.3-1.6 3.3-2.6 5.6-2.1 4.3.9 5.1 5.25 2.8 8.6C18.8 16.65 12 21 12 21z"
-      fill={active ? "#ffffff" : "none"}
-      stroke="#ffffff"
-      strokeWidth="2"
-      strokeLinejoin="round"
     />
   </svg>
 );
@@ -347,7 +342,7 @@ const buildDetailTags = (place, special, fallbackPlace) => {
   if (hashTags.length > 0) return hashTags;
 
   const fieldTags = normalizeTags(
-    [place?.region, place?.theme, place?.placeType || place?.category].filter(
+    [place?.region, place?.theme, place?.placeCategoryLabel || place?.placeCategory].filter(
       Boolean
     )
   );
@@ -412,11 +407,10 @@ const normalizePlaceDetail = (place, fallbackPlace) => {
 
   const region = place?.region || fallbackPlace.region || "";
   const theme = place?.theme || place?.themeName || fallbackPlace.theme || "";
-  const placeType =
-    place?.placeType ||
-    place?.category ||
-    place?.categoryName ||
-    fallbackPlace.placeType ||
+  const placeCategory = place?.placeCategory || fallbackPlace.placeCategory || "";
+  const placeCategoryLabel =
+    place?.placeCategoryLabel ||
+    fallbackPlace.placeCategoryLabel ||
     "";
 
   const tags = buildDetailTags(place, special, fallbackPlace);
@@ -433,7 +427,8 @@ const normalizePlaceDetail = (place, fallbackPlace) => {
     image,
     region,
     theme,
-    placeType,
+    placeCategory,
+    placeCategoryLabel,
     tags,
   };
 
@@ -458,7 +453,8 @@ const normalizePlaceDetail = (place, fallbackPlace) => {
     address,
     latitude: toNumber(place?.latitude ?? fallbackPlace.latitude, 0),
     longitude: toNumber(place?.longitude ?? fallbackPlace.longitude, 0),
-    placeType,
+    placeCategory,
+    placeCategoryLabel,
     image,
     rating,
     reviewCount,
@@ -480,7 +476,8 @@ const EMPTY_DETAIL_PLACE = {
   intro: "",
   latitude: 0,
   longitude: 0,
-  placeType: "",
+  placeCategory: "",
+  placeCategoryLabel: "",
   rating: 0,
   reviewCount: 0,
   image: "",
@@ -493,6 +490,8 @@ function Detail() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const saving = usePlaceSaving();
+  const detailFooter = useDetailFooter();
+  const setFooterActions = detailFooter?.setActions;
 
   const idParam = Number(searchParams.get("id"));
 
@@ -507,17 +506,27 @@ function Detail() {
     if (!place || Number(place.id) !== idParam || !place.name) throw new Error("장소 응답 오류");
     return { ...normalizePlaceDetail(place, EMPTY_DETAIL_PLACE), hasServerRating: typeof place.rating === "number", serverReviewCount: typeof place.reviewCount === "number" ? place.reviewCount : null };
   }, validPlace, identityMatches);
-  const reviewQuery = useReadQuery(requestKey, async signal => {
-    const response = await api.get(PLACES_API + "/" + idParam + "/reviews", { signal });
-    return requireList(response.data);
-  }, validPlace, identityMatches);
-  const [visibleReviews, setVisibleReviews] = useState(3);
-  useEffect(() => { setVisibleReviews(3); }, [requestKey]);
+  const engagementQuery = useReadQuery(requestKey + ":engagement",
+    signal => getPlaceEngagementApi([idParam], { signal }), validPlace, identityMatches);
+  useEffect(() => {
+    if (saving.favoriteStatus === "success") void engagementQuery.retry();
+  }, [saving.favoriteStatus, engagementQuery.retry]);
+  const likeCount = engagementQuery.data?.[0]?.likeCount ?? null;
+  const [reviewPage, setReviewPage] = useState(0);
+  const reviewQuery = useReadQuery(requestKey + ":reviewPage:" + reviewPage,
+    signal => getReviewPageApi(idParam, reviewPage, { signal }), validPlace, identityMatches);
+  const [quickTripPlace, setQuickTripPlace] = useState(null);
+  useEffect(() => {
+    setReviewPage(0);
+    setQuickTripPlace(null);
+  }, [requestKey]);
+
   const detailPlace = {
     ...(basicQuery.data || EMPTY_DETAIL_PLACE),
-    reviews: reviewQuery.status === "success" ? reviewQuery.data.map(review => ({
+    reviews: reviewQuery.status === "success" ? reviewQuery.data.content.map(review => ({
       id: review.id, name: review.nickname || review.userName || "여행자",
       badge: "", rating: review.rating, content: review.comment || review.content || "",
+      photos: Array.isArray(review.photos) ? review.photos : [],
     })) : [],
   };
   const hasResolvedDetail = basicQuery.data !== null;
@@ -541,7 +550,8 @@ function Detail() {
       address: detailPlace.address,
       latitude: detailPlace.latitude,
       longitude: detailPlace.longitude,
-      placeType: detailPlace.placeType,
+      placeCategory: detailPlace.placeCategory,
+      placeCategoryLabel: detailPlace.placeCategoryLabel,
       rating: detailPlace.rating,
       image: detailPlace.image,
       tags: detailPlace.tags,
@@ -550,13 +560,11 @@ function Detail() {
 
     saveRecentPlace(recentPlace);
 
-    api
-      .post(RECENT_PLACES_API, {
-        placeId: detailPlace.id,
-      })
-      .catch((error) => {
-        logSafeApiError(error, "Detail.jsx");
-      });
+    // Local-only anonymous browsing should not send a guaranteed 401 write.
+    if (getAuthSnapshot().accountKey !== "anonymous") {
+      api.post(RECENT_PLACES_API, { placeId: detailPlace.id })
+        .catch(error => logSafeApiError(error, "Detail.jsx"));
+    }
   }, [
     detailPlace.id,
     detailPlace.title,
@@ -567,7 +575,8 @@ function Detail() {
     detailPlace.address,
     detailPlace.latitude,
     detailPlace.longitude,
-    detailPlace.placeType,
+    detailPlace.placeCategory,
+    detailPlace.placeCategoryLabel,
     detailPlace.rating,
     detailPlace.image,
     detailPlace.tags,
@@ -576,6 +585,14 @@ function Detail() {
 
   const saved = saving.isSaved(detailPlace.id);
   const saveDisabled = saving.blocked || saving.folders.status !== "success";
+  // Stable map metadata: re-reading favorite or folder state must not rebuild the footer actions.
+  const directions = useMemo(() => getPlaceDirections({
+    name: detailPlace.name, address: detailPlace.address, region: detailPlace.region,
+    latitude: detailPlace.latitude, longitude: detailPlace.longitude,
+  }), [detailPlace.name, detailPlace.address, detailPlace.region,
+    detailPlace.latitude, detailPlace.longitude]);
+  const verifiedPhoto = resolvePlaceImage(detailPlace);
+  const heroImage = verifiedPhoto ? placeImageUrl(verifiedPhoto) : detailPlace.image;
 
   const shareUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -583,13 +600,38 @@ function Detail() {
     return `${window.location.origin}${location.pathname}?id=${detailPlace.id}`;
   }, [location.pathname, detailPlace.id]);
 
-  const handleToggleSaved = event => {
-    if (!saveDisabled) saving.toggle(event, detailPlace);
+  const handleOpenFolderPicker = event => {
+    if (!saveDisabled) saving.openFolderPicker(event, detailPlace);
   };
 
   const handleOpenShareModal = () => {
     setShareModalOpen(true);
   };
+
+  // Footer stays mounted during navigation. Keep the current Detail callbacks behind
+  // a ref so only validated primitive state updates re-register the action bar.
+  const footerCallbacks = React.useRef(null);
+  footerCallbacks.current = {
+    folder: event => handleOpenFolderPicker(event),
+    trip: () => setQuickTripPlace(detailPlace),
+  };
+  useEffect(() => {
+    if (!setFooterActions) return;
+    setFooterActions({
+      placeId: hasResolvedDetail ? detailPlace.id : null,
+      directions: hasResolvedDetail ? directions : null,
+      folderDisabled: !hasResolvedDetail || saveDisabled,
+      saving: isSavingPlace,
+      openFolder: event => footerCallbacks.current?.folder(event),
+      openTrip: () => footerCallbacks.current?.trip(),
+    });
+  }, [setFooterActions, detailPlace.id, hasResolvedDetail, directions, saveDisabled, isSavingPlace]);
+
+  // Clear the shared bar only when Detail unmounts, not after every save-state update.
+  useEffect(() => {
+    if (!setFooterActions) return undefined;
+    return () => setFooterActions(null);
+  }, [setFooterActions]);
 
   const handleSavePdf = async ({ isCurrent = () => true } = {}) => {
     const target = document.getElementById("detail-pdf");
@@ -675,6 +717,7 @@ function Detail() {
     <>
       <div id="detail-pdf" className="detail-page">
         <section className="detail-hero">
+          {heroImage && <img className="detail-hero-backdrop" src={heroImage} alt="" aria-hidden="true" />}
           <PlacePhoto place={detailPlace} src={detailPlace.image} alt={detailPlace.title} className="detail-hero-image"
             credit={detailPlace.image === getPlacePhoto(detailPlace.title).image ? getPlacePhoto(detailPlace.title).credit : undefined} />
 
@@ -689,16 +732,13 @@ function Detail() {
                 <ShareIcon />
               </button>
 
-              <button
-                type="button"
-                className="detail-action-btn"
-                onClick={handleToggleSaved}
-                disabled={saveDisabled}
-                aria-pressed={saved}
-                aria-label={saved ? "관심 장소 해제" : "관심 장소 추가"}
-              >
-                <HeartIcon active={saved} />
-              </button>
+              <div className="detail-favorite-stack">
+                <FavoriteHeart place={detailPlace} saving={saving} className="detail-action-btn detail-favorite-heart" />
+                {Number.isSafeInteger(likeCount) && likeCount >= 0 &&
+                  <span className="detail-favorite-count" aria-label={`${detailPlace.title} 좋아요 ${likeCount}개`}>
+                    {likeCount.toLocaleString("ko-KR")}
+                  </span>}
+              </div>
             </div>
           </div>
         </section>
@@ -708,42 +748,58 @@ function Detail() {
             {isLoading ? "장소 정보를 불러오는 중..." : detailPlace.title}
           </h1>
 
-          <div className="detail-location-row">
-            <PinIcon />
-            <span>{detailPlace.address}</span>
-          </div>
-
-          <div className="detail-tag-row">
-            {detailPlace.tags.map((tag) => (
-              <span key={tag} className="detail-tag">
-                {tag}
-              </span>
-            ))}
-          </div>
+          <p className="detail-place-meta">{[detailPlace.region, detailPlace.placeCategoryLabel || getPlaceCategoryLabel(detailPlace.placeCategory)].filter(Boolean).join(" · ") || "여행 장소"}</p>
+          {basicQuery.data?.hasServerRating && <p className="detail-place-rating">
+            <span aria-hidden="true">★</span> {Number(detailPlace.rating).toFixed(1)}
+            <span className="detail-place-reviewcount"> · 리뷰 {reviewQuery.status === "success" ? reviewQuery.data.totalElements : basicQuery.data?.serverReviewCount ?? 0}개</span>
+          </p>}
 
           <section className="detail-section">
             <h2 className="detail-section-title">장소 소개</h2>
             <p className="detail-section-text">{detailPlace.intro}</p>
           </section>
 
+          <section className="detail-section detail-facts-section">
+            <h2 className="detail-section-title">기본 정보</h2>
+            <div className="detail-facts-row"><PinIcon /><div><strong>주소</strong><p>{detailPlace.address}</p></div></div>
+          </section>
+
           <section className="detail-section">
             <div className="detail-review-header">
-              <h2 className="detail-section-title">방문자 리뷰</h2>
+              <h2 className="detail-section-title">리뷰</h2>
 
               <div className="detail-review-summary">
-                <span className="detail-review-star">★</span>
-                <span>{basicQuery.data?.hasServerRating ? Number(detailPlace.rating).toFixed(1) : "평점 미제공"}</span>
+                <span className="detail-review-star" aria-hidden="true">★</span>
+                <span>{reviewQuery.status === "success"
+                  ? reviewQuery.data.totalElements === 0 || reviewQuery.data.averageRating == null
+                    ? "평점 미제공" : Number(reviewQuery.data.averageRating).toFixed(1)
+                  : basicQuery.data?.serverReviewCount === 0
+                    ? "평점 미제공"
+                    : basicQuery.data?.hasServerRating ? Number(detailPlace.rating).toFixed(1) : "평점 미제공"}</span>
                 <small>
-                  ({reviewQuery.status === "success" ? reviewQuery.data.length.toLocaleString("ko-KR") : basicQuery.data?.serverReviewCount ?? "리뷰 수 미확인"})
+                  ({reviewQuery.status === "success" ? reviewQuery.data.totalElements.toLocaleString("ko-KR")
+                    : basicQuery.data?.serverReviewCount != null ? basicQuery.data.serverReviewCount.toLocaleString("ko-KR") : "—"})
                 </small>
               </div>
             </div>
 
+            <button type="button" className="detail-review-write-link" onClick={() => {
+              const url = `/detail/review?id=${encodeURIComponent(detailPlace.id)}`;
+              navigate(sessionKey === "anonymous" ? buildLoginPath(url) : url, { state: { returnState: location.state } });
+            }}>리뷰 작성하기 <span aria-hidden="true">→</span></button>
+
             {reviewQuery.status === "loading" && <p role="status">리뷰를 불러오는 중이에요.</p>}
-            {reviewQuery.status === "error" && <div role="alert"><p>리뷰를 불러오지 못했어요. 다시 시도해 주세요.</p><button type="button" onClick={reviewQuery.retry}>리뷰 다시 불러오기</button></div>}
-            {reviewQuery.status === "success" && reviewQuery.data.length === 0 && <p>아직 리뷰가 없어요.</p>}
+            {reviewQuery.status === "error" && <div className="detail-review-status" role="alert">
+              <p>리뷰를 잠시 불러올 수 없어요.</p>
+              <button type="button" className="detail-review-retry" aria-label="리뷰 다시 시도" onClick={reviewQuery.retry}>다시 시도</button>
+            </div>}
+            {reviewQuery.status === "success" && reviewQuery.data.totalElements === 0 &&
+              <div className="detail-review-empty" role="status">
+                <p>아직 리뷰가 없어요!</p>
+                <span>첫 리뷰를 남겨보세요.</span>
+              </div>}
             <div className="detail-review-list">
-              {detailPlace.reviews.slice(0, visibleReviews).map((review) => (
+              {detailPlace.reviews.map((review) => (
                 <article key={review.id} className="detail-review-card">
                   <div className="detail-review-top">
                     <div className="detail-review-author">
@@ -763,32 +819,41 @@ function Detail() {
                   </div>
 
                   <p className="detail-review-text">{review.content}</p>
+                  {review.photos?.length > 0 && <div className="detail-review-photos">
+                    {review.photos.map((src, i) => <a key={src} href={src} target="_blank" rel="noreferrer noopener"
+                      aria-label={`${review.name} 리뷰 사진 ${i + 1} 크게 보기`}>
+                      <img src={src} alt={`${review.name} 리뷰 사진 ${i + 1}`} loading="lazy" />
+                    </a>)}
+                  </div>}
                 </article>
               ))}
             </div>
 
-            {reviewQuery.status === "success" && visibleReviews < detailPlace.reviews.length && <button type="button" className="detail-review-more-btn" onClick={() => setVisibleReviews(count => Math.min(count + 3, detailPlace.reviews.length))}>리뷰 더보기</button>}
+            {reviewQuery.status === "success" && reviewQuery.data.totalPages > 1 && <nav className="detail-review-pagination" aria-label="리뷰 페이지">
+              <button type="button" disabled={reviewPage === 0} onClick={() => setReviewPage(n => n - 1)}>이전</button>
+              <span>{reviewPage + 1} / {reviewQuery.data.totalPages}</span>
+              <button type="button" disabled={reviewPage + 1 >= reviewQuery.data.totalPages}
+                onClick={() => setReviewPage(n => n + 1)}>다음</button>
+            </nav>}
           </section>
         </section>
 
-        <div className="detail-bottom-bar">
-          <button
-            type="button"
-            className={`detail-save-btn ${saved ? "saved" : ""}`}
-            onClick={handleToggleSaved}
-            disabled={saveDisabled}
-            aria-pressed={saved}
-          >
+        {!setFooterActions && <div className="detail-bottom-bar">
+          {directions ? <a className="detail-save-btn detail-directions-btn" href={directions.url}
+            target="_blank" rel="noopener noreferrer" aria-label={`${directions.provider === "kakao" ? "카카오맵" : "구글맵"} 길찾기`}>
+            길찾기
+          </a> : <span className="detail-save-btn detail-directions-btn detail-unavailable" aria-label="길찾기 지원 지역 확인 필요">
+            길찾기 불가
+          </span>}
+          <button type="button" className={`detail-save-btn ${saved ? "saved" : ""}`}
+            onClick={handleOpenFolderPicker} disabled={saveDisabled}>
             <SavePlaceIcon active={saved} />
-            <span>
-              {isSavingPlace
-                ? "처리 중..."
-                : saved
-                ? "관심 장소에 저장됨"
-                : "관심 장소에 추가하기"}
-            </span>
+            <span>{isSavingPlace ? "처리 중..." : "폴더 저장"}</span>
           </button>
-        </div>
+          <button type="button" className="detail-save-btn detail-trip-btn" onClick={() => setQuickTripPlace(detailPlace)}>
+            일정 추가
+          </button>
+        </div>}
       </div>
 
       <PlaceSavingFeedback saving={saving} />
@@ -808,6 +873,7 @@ function Detail() {
       />
 
       <PlaceSaveModal saving={saving} />
+      <QuickTripAddModal place={quickTripPlace} onClose={() => setQuickTripPlace(null)} />
     </>
   );
 }

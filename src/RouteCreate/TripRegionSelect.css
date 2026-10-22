@@ -1,0 +1,36 @@
+.v16-create-region{box-sizing:border-box;width:100%;max-width:640px;margin:0 auto;padding:25px var(--page-gutter) calc(143px + env(safe-area-inset-bottom,0px));color:var(--color-text);background:var(--color-page)}
+.v16-create-region-heading h1{margin:0;font-size:24px;font-weight:850;line-height:1.35;color:var(--color-text-strong)}
+.v16-region-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;padding:0;margin:0;list-style:none}
+.v16-region-item{position:relative;min-width:0;border-radius:17px;background:var(--color-surface);border:2px solid transparent;box-shadow:0 3px 12px var(--color-shadow);overflow:hidden}
+.v16-region-item.is-selected{border-color:var(--color-accent-text);box-shadow:0 0 0 1px var(--color-accent-text),0 3px 13px rgba(40,133,234,.12)}
+.v16-region-card{display:block;width:100%;height:100%;border:0;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer;background:var(--color-surface)}
+.v16-region-photo{display:block;position:relative;height:132px;overflow:hidden;background:linear-gradient(145deg,#819fb8,#2c536f)}
+.v16-region-photo img{display:block;width:100%;height:100%;object-fit:cover}
+.v16-region-photo-fallback{display:block;position:absolute;inset:0;background:linear-gradient(140deg,#99b5c9,#426f8f,#214562)}
+.v16-region-copy{display:flex;flex-direction:column;gap:4px;padding:12px 12px 14px}
+.v16-region-copy small{font-size:11px;color:var(--color-text-muted)}
+.v16-region-copy strong{font-size:17px;font-weight:800;line-height:1.3;color:var(--color-text-strong)}
+.v16-region-credit{position:absolute;top:7px;right:7px;padding:4px 6px;border-radius:5px;background:rgba(13,26,42,.58);color:#fff;font-size:9px;text-decoration:none}
+.v16-region-card:focus-visible,.v16-region-credit:focus-visible{outline:3px solid var(--color-focus);outline-offset:-3px}
+.v16-region-next{position:fixed;left:50%;bottom:calc(var(--footer-height) + env(safe-area-inset-bottom,0px) + 13px);z-index:110;width:calc(var(--page-max-width) - 2 * var(--page-gutter));transform:translate(-50%,32px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .23s ease,transform .27s ease,visibility 0s linear .27s}
+.v16-region-next.is-visible{opacity:1;visibility:visible;transform:translate(-50%,0);pointer-events:auto;transition:opacity .23s ease,transform .27s ease,visibility 0s linear 0s}
+.v16-region-next button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:49px;width:100%;border:0;border-radius:15px;background:var(--color-primary);color:var(--color-on-primary);font:inherit;font-size:14px;font-weight:800;box-shadow:0 5px 19px rgba(34,94,159,.2);cursor:pointer}
+.v16-region-next button:disabled{opacity:.68;cursor:wait}
+.v16-region-next button:focus-visible{outline:3px solid var(--color-focus);outline-offset:3px}
+.v16-region-error{margin:16px 0;font-size:12px;color:var(--color-danger)}
+.v16-region-error button{padding:9px 13px;border:1px solid var(--color-border);border-radius:8px;background:var(--color-surface);font:inherit;color:var(--color-accent-text);cursor:pointer}
+@media(max-width:350px){.v16-region-grid{gap:9px}.v16-region-photo{height:110px}.v16-region-copy strong{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.v16-region-next{transition:none}}
+
+/* V16.2 - selection action: compact white button, thin blue halo, soft sky hover. */
+.v16-region-next button{min-height:48px;border-radius:13px;background:#fff;color:#247bd7;
+  border:1px solid #8bc2f2;font-size:14px;font-weight:800;letter-spacing:0;
+  box-shadow:0 0 0 2px rgba(69,159,250,.10),0 5px 16px rgba(49,130,212,.15);
+  transition:background-color .3s ease,border-color .3s ease,box-shadow .3s ease,color .3s ease}
+.v16-region-next button:not(:disabled):hover{background:#e9f5ff;color:#1664b5;
+  border-color:#71b7f2;box-shadow:0 0 0 3px rgba(87,177,254,.14),0 5px 19px rgba(52,135,220,.16)}
+.v16-region-next button:focus-visible{outline:3px solid var(--color-focus);outline-offset:3px}
+.v16-region-error{margin:0 0 9px;border:1px solid #e4a6a6;border-radius:12px;padding:11px 14px;
+  background:var(--color-surface);box-shadow:0 4px 13px rgba(19,33,52,.16);
+  color:#a92735;font-size:12px;font-weight:700;line-height:1.55}
+@media(prefers-reduced-motion:reduce){.v16-region-next button{transition:none}}

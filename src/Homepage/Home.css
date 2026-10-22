@@ -3,24 +3,10 @@
   box-sizing: border-box;
 }
 
-html,
-body,
-#root {
-  width: 100%;
-  min-height: 100%;
-  margin: 0;
-  background: var(--color-page);
-}
-
-body {
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
 /* 홈 전체 */
 .home {
   width: 100%;
-  max-width: 430px;
+  max-width: 100%;
   min-height: 0;
   height: auto;
   margin: 0 auto;
@@ -33,7 +19,7 @@ body {
 /* 상단 그라데이션 영역 */
 .home-header {
   width: 100%;
-  padding: 32px 20px 28px;
+  padding: 32px var(--page-gutter) 28px;
   border-radius: 0 0 28px 28px;
 
   background: linear-gradient(
@@ -74,13 +60,13 @@ body {
 
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 
   border: 1px solid transparent;
   background: var(--color-input);
   box-shadow: 0 8px 24px var(--color-shadow);
   border-radius: 28px;
-  padding: 0 22px;
+  padding: 0 16px;
 }
 
 .search-icon-frame {
@@ -151,7 +137,7 @@ body {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
-  padding: 22px 20px 0;
+  padding: 22px var(--page-gutter) 0;
 }
 
 .menu-card {
@@ -200,6 +186,9 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* Crisp vector icons for the two home actions. */
+.home-quick-symbol { color:var(--color-accent-text); width:27px; height:27px; display:block; }
+
 .icon-circle img {
   width: 24px;
   height: 24px;
@@ -221,172 +210,85 @@ body {
   margin: 0;
   font-size: 13px;
   line-height: 1.4;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
-/* 인기 여행지 제목 */
-.section-header,
-.home-popular-header {
-  width: 100%;
-  padding: 26px 24px 14px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+/* Travel discovery is driven by the destination catalog, not place recommendations. */
+.home-destinations { padding: 26px var(--page-gutter) 2px; }
+.home-destinations-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.home-destinations-heading h2, .home-section-heading h2 {
+  margin: 4px 0 6px; color: var(--color-text-strong);
+  font-size: var(--font-section-title); font-weight: var(--weight-heading);
+  line-height: 1.35; letter-spacing: -0.5px;
 }
-
-.home .section-header > h2,
-.home .home-popular-header > h2 {
-  margin: 0;
-  color: var(--color-text-strong);
-  font-size: var(--font-section-title);
-  font-weight: var(--weight-heading);
-  line-height: var(--line-heading);
-  letter-spacing: -1px;
-  white-space: nowrap;
+.home-destinations-heading p:not(.home-destinations-eyebrow), .home-section-heading p {
+  margin: 0; font-size: 13px; line-height: 1.5; color: var(--color-text-muted);
+  word-break: keep-all;
 }
-
-.home .section-header > span,
-.home .section-header > button,
-.home .section-more-btn,
-.home .home-popular-more-button {
-  flex-shrink: 0;
-  margin: 0;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--color-accent-text);
-  font-size: var(--font-body);
-  font-weight: var(--weight-semibold);
-  line-height: 1.5;
-  letter-spacing: -0.7px;
-  cursor: pointer;
-  white-space: nowrap;
-
-  min-height: var(--touch-target);
+.home-destinations-eyebrow { margin: 0; color: var(--color-accent-text);
+  font-size: 10px; letter-spacing: 1.3px; font-weight: 800; }
+.home-destinations-more {
+  min-height: var(--touch-target); display: inline-flex; align-items: center;
+  color: var(--color-accent-text); font-size: 13px; font-weight: 700;
+  text-decoration: none; flex-shrink: 0; cursor: pointer; font-family: inherit;
+  border: 0; padding: 0; background: transparent;
 }
-
-/* 여행지 리스트 - 가로 1행 */
-.travel-list {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-  padding: 0 24px 24px;
-}
-
-.travel-list::-webkit-scrollbar {
-  display: none;
-}
-
-/* 여행지 카드 */
-.travel-card {
-  position: relative;
-  width: 100%;
-  min-width: 0;
-  aspect-ratio: 5 / 6;
-
-  border-radius: 24px;
-  overflow: hidden;
-  background: var(--color-surface-muted);
-  box-shadow: 0 8px 20px var(--color-shadow);
-  scroll-snap-align: start;
-}
-
-.travel-card img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
-.travel-card > .place-photo-placeholder { width: 100%; height: 100%; }
-
-/* 사진 위 제목 */
-.travel-overlay {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  padding: 14px 16px;
-  background: linear-gradient(transparent, rgba(15, 23, 42, 0.76));
-}
-
-.travel-overlay span {
-  color: #ffffff;
-  font-size: var(--font-section-title);
-  font-weight: 800;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-
-  line-height: var(--line-heading);
-
-  overflow-wrap: anywhere;
-}
-
-/* 내 주변 탐색 카드 */
-.nearby-location-card {
-  width: calc(100% - 32px);
-  min-height: 84px;
-  margin: 20px 15px 0;
-  padding: 14px 20px;
-
-  display: flex;
-  align-items: center;
-  gap: 20px;
-
-  border: 1.5px solid color-mix(in srgb, var(--color-accent) 32%, var(--color-border));
-  border-radius: 20px;
-  background: var(--color-accent-soft);
-  box-shadow: none;
+.home-destination-filters { display: flex; gap: 8px; margin: 19px 0 16px; }
+.home-destination-filters button {
+  min-width: 68px; min-height: 40px; padding: 8px 16px; border-radius: 999px;
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  color: var(--color-text); font: inherit; font-size: 13px; font-weight: 700;
   cursor: pointer;
 }
-
-.nearby-location-icon {
-  width: 50px;
-  height: 50px;
-  flex-shrink: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-  background: var(--color-primary);
-  box-shadow: 0 8px 16px rgba(24, 168, 237, 0.22);
+.home-destination-filters button[aria-pressed="true"] {
+  background: var(--color-primary); border-color: var(--color-primary);
+  color: var(--color-on-primary);
 }
-
-.nearby-location-text {
-  flex: 1;
-  min-width: 0;
-
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+.home-destinations-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.home-destination-card { position: relative; min-width: 0; background: var(--color-surface);
+  border: 1px solid var(--color-border); border-radius: 20px; overflow: hidden;
+  box-shadow: 0 4px 15px var(--color-shadow);
 }
-
-.nearby-location-text span {
-  margin-bottom: 4px;
-  color: var(--color-text-muted);
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.2;
+.home-destination-link { display: block; color: inherit; text-decoration: none; }
+.home-destination-photo { position: relative; overflow: hidden; height: 130px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #b6d9e8, #e5eff5);
 }
-
-.nearby-location-text strong {
-  color: var(--color-text-strong);
-  font-size: 18px;
-  font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: -0.7px;
-  white-space: nowrap;
+.home-destination-overseas .home-destination-photo {
+  background: linear-gradient(135deg, #d1c7e7, #f2e4dd);
 }
-
-.nearby-location-arrow {
-  flex-shrink: 0;
-  color: var(--color-text-muted);
-  font-size: 34px;
-  font-weight: 300;
-  line-height: 1;
+.home-destination-photo img { position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 1; }
+.home-destination-photo-mark { font-size: 64px; font-weight: 800; opacity: 0.3;
+  color: #28465d; user-select: none;
+}
+.home-destination-caption { display: flex; flex-direction: column; padding: 13px 13px 16px; min-height: 105px; }
+.home-destination-caption > span:first-child { color: var(--color-text-muted); font-size: 12px; }
+.home-destination-caption strong { margin-top: 3px; font-size: 19px;
+  color: var(--color-text-strong); line-height: 1.3; overflow-wrap: anywhere; }
+.home-destination-action { margin-top: auto; padding-top: 8px;
+  color: var(--color-accent-text); font-size: 12px; font-weight: 700; }
+.home-destination-photo-credit { position: absolute; z-index: 2; right: 8px; top: 100px;
+  padding: 3px 6px; font-size: 9px; line-height: 1.5; border-radius: 6px;
+  background: rgba(0,0,0,.55); color: white; text-decoration: none;
+}
+.home-destination-card:focus-within { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.home-destinations-message { margin: 16px 0; color: var(--color-text-muted); line-height: 1.6; }
+.home-destinations-message button { margin-top: 8px; min-height: var(--touch-target);
+  border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface); color: var(--color-text); }
+.home-destinations-bottom-more { display: flex; align-items: center; justify-content: center;
+  min-height: 46px; margin-top: 16px; border-radius: 12px;
+  color: var(--color-accent-text); font-size: 13px; font-weight: 700;
+  background: var(--color-surface); border: 1px solid var(--color-border); text-decoration: none;
+  width: 100%; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700;
+}
+.home-quick-section { padding-top: 22px; }
+.home-section-heading { padding: 0 var(--page-gutter); }
+.home-quick-section .quick-menu { padding-top: 16px; }
+.home-destination-card:hover { transform: translateY(-2px); }
+@media (prefers-reduced-motion: no-preference) {
+  .home-destination-card { transition: transform 150ms ease; }
 }
 
 html[data-theme="dark"] .home {
@@ -412,97 +314,9 @@ html[data-theme="dark"] .travel-list {
   background: var(--color-page);
 }
 
-/* ================================
-   홈 화면 전체 요소 Fade-up 애니메이션
-================================ */
-
-.home-header h1,
-.home-header .subtitle,
-.home-header .search-box,
-.quick-menu .menu-card,
-.home-popular-header,
-.travel-list .travel-card,
-.nearby-location-card {
-  opacity: 0;
-  transform: translateY(18px);
-  animation: homeFadeUp 0.65s ease forwards;
-  will-change: opacity, transform;
-}
-
-/* 상단 문구 */
-.home-header h1 {
-  animation-delay: 0.05s;
-}
-
-.home-header .subtitle {
-  animation-delay: 0.15s;
-}
-
-.home-header .search-box {
-  animation-delay: 0.25s;
-}
-
-/* 테마 추천 / 경로 생성 카드 */
-.quick-menu .menu-card:nth-child(1) {
-  animation-delay: 0.35s;
-}
-
-.quick-menu .menu-card:nth-child(2) {
-  animation-delay: 0.45s;
-}
-
-/* 인기 급상승 여행지 제목 */
-.home-popular-header {
-  animation-delay: 0.55s;
-}
-
-/* 인기 여행지 카드 */
-.travel-list .travel-card:nth-child(1) {
-  animation-delay: 0.65s;
-}
-
-.travel-list .travel-card:nth-child(2) {
-  animation-delay: 0.75s;
-}
-
-.travel-list .travel-card:nth-child(3) {
-  animation-delay: 0.85s;
-}
-
-.travel-list .travel-card:nth-child(4) {
-  animation-delay: 0.95s;
-}
-
-/* 내 주변 탐색 카드 */
-.nearby-location-card {
-  animation-delay: 1.05s;
-}
-
-@keyframes homeFadeUp {
-  0% {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 모션 줄이기 설정 사용자를 위한 처리 */
+/* Main-tab transition owns page motion; avoid replaying staggered fades on return. */
 @media (prefers-reduced-motion: reduce) {
-  .home-header h1,
-  .home-header .subtitle,
-  .home-header .search-box,
-  .quick-menu .menu-card,
-  .home-popular-header,
-  .travel-list .travel-card,
-  .nearby-location-card {
-    opacity: 1;
-    transform: none;
-    animation: none;
-  }
+  .home-destination-card { transition: none; }
 }
 
 /* 작은 모바일 */
@@ -512,12 +326,12 @@ html[data-theme="dark"] .travel-list {
   }
 
   .home-header {
-    padding: 28px 16px 24px;
+    padding: 28px var(--page-gutter) 24px;
   }
 
   .quick-menu {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: var(--page-gutter);
+    padding-right: var(--page-gutter);
     gap: 12px;
   }
 
@@ -526,47 +340,11 @@ html[data-theme="dark"] .travel-list {
     padding: 16px 12px;
   }
 
-  .section-header,
-  .home-popular-header {
-    padding: 24px 24px 14px;
-  }
+  .home-destinations { padding-left: var(--page-gutter); padding-right: var(--page-gutter); }
+  .home-destinations-grid { gap: 10px; }
+  .home-destination-photo { height: 116px; }
+  .home-destination-caption { padding: 12px; }
 
-  .home .section-header > h2,
-  .home .home-popular-header > h2 {
-    font-size: var(--font-section-title);
-  }
-
-  .home .section-header > span,
-  .home .section-header > button,
-  .home .section-more-btn,
-  .home .home-popular-more-button {
-    font-size: var(--font-body);
-
-  font-weight: var(--weight-semibold);
-
-  min-height: var(--touch-target);
-
-  line-height: 1.5;
-}
-
-  .travel-list {
-    padding-left: 24px;
-    padding-right: 24px;
-  }
-
-  .travel-card {
-    border-radius: 22px;
-  }
-
-  .nearby-location-card {
-    width: calc(100% - 32px);
-    margin: 26px 16px 0;
-    padding: 14px 18px;
-  }
-
-  .nearby-location-text strong {
-    font-size: 17px;
-  }
 }
 
 /* 아주 작은 화면 */
@@ -588,63 +366,238 @@ html[data-theme="dark"] .travel-list {
     font-size: 12px;
   }
 
-  .section-header,
-  .home-popular-header {
-    padding-left: 18px;
-    padding-right: 18px;
-  }
-
-  .home .section-header > h2,
-  .home .home-popular-header > h2 {
-    font-size: var(--font-section-title);
-  }
-
-  .home .section-header > span,
-  .home .section-header > button,
-  .home .section-more-btn,
-  .home .home-popular-more-button {
-    font-size: var(--font-body);
-
-  font-weight: var(--weight-semibold);
-
-  min-height: var(--touch-target);
-
-  line-height: 1.5;
+  .home-destinations { padding-left: 14px; padding-right: 14px; }
+  .home-destination-filters button { min-width: 60px; padding: 8px 12px; }
 }
 
-  .travel-card {
-    width: 100%;
-    min-width: 0;
-  }
+/* V12: personal trip progress and genuine aggregate rankings. */
+.home-v12 { padding-bottom: 32px; }
+.home-v12-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+.home-v12-heading h2, .home-trip-section h2 { margin:2px 0 3px; font-size:19px; line-height:1.35; color:var(--color-text-strong); }
+.home-v12-heading p:not(.home-v12-eyebrow) { margin:4px 0 0; font-size:12px; line-height:1.5; color:var(--color-text-muted); }
+.home-v12-eyebrow, .home-trip-kicker { font-size:10px; letter-spacing:1.2px; font-weight:800; color:var(--color-accent-text); }
+.home-text-action { padding:10px 0; color:var(--color-accent-text); background:none; border:0; text-decoration:none; font:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+.home-trip-section { padding:22px var(--page-gutter) 4px; }
+.home-trip-section > p { font-size:13px; color:var(--color-text-muted); }
+.home-trip-empty { padding:22px 19px; border-radius:22px; border:1px solid var(--color-border); background:var(--color-surface); box-shadow:0 7px 20px var(--color-shadow); }
+.home-trip-empty h2 { margin:8px 0; font-size:20px; }
+.home-trip-empty p { margin:0 0 18px; font-size:13px; color:var(--color-text-muted); line-height:1.6; }
+.home-primary-action { min-height:45px; width:100%; padding:10px 14px; border:0; border-radius:12px; font:inherit; font-size:14px; font-weight:700; cursor:pointer; background:var(--color-primary); color:var(--color-on-primary); display:flex; align-items:center; justify-content:space-between; }
+.home-v12-rail { display:flex; gap:11px; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; scroll-snap-type:x mandatory; overscroll-behavior-x:contain; touch-action:pan-x pan-y; }
+.home-v12-rail::-webkit-scrollbar { display:none; }
+/* The thumb is the explicit horizontal control; photos remain clickable. */
+.home-rail-slider { padding:5px 2px 1px; display:flex; align-items:center; min-height:22px; }
+.home-rail-slider input[type="range"] {
+  -webkit-appearance:none; appearance:none; width:100%; height:22px; border:0;
+  margin:0; background:transparent; cursor:pointer; touch-action:none;
+}
+.home-rail-slider input[type="range"]::-webkit-slider-runnable-track {
+  height:4px; border:0; background:transparent;
+}
+.home-rail-slider input[type="range"]::-moz-range-track {
+  height:4px; border:0; background:transparent;
+}
+.home-rail-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance:none; appearance:none; width:38px; height:4px; border:0;
+  margin-top:0; border-radius:999px; background:var(--color-accent-text);
+  opacity:.3; box-shadow:none; transition:opacity 150ms ease;
+}
+.home-rail-slider input[type="range"]::-moz-range-thumb {
+  width:38px; height:4px; border:0; border-radius:999px;
+  background:var(--color-accent-text); opacity:.3; box-shadow:none;
+  transition:opacity 150ms ease;
+}
+.home-rail-slider input[type="range"]:hover::-webkit-slider-thumb,
+.home-rail-slider input[type="range"]:focus-visible::-webkit-slider-thumb,
+.home-rail-slider input[type="range"]:active::-webkit-slider-thumb { opacity:.9; }
+.home-rail-slider input[type="range"]:hover::-moz-range-thumb,
+.home-rail-slider input[type="range"]:focus-visible::-moz-range-thumb,
+.home-rail-slider input[type="range"]:active::-moz-range-thumb { opacity:.9; }
+.home-rail-slider input[type="range"]:focus-visible { outline:2px solid var(--color-focus); outline-offset:2px; border-radius:999px; }
+.home-v12-rail > * { scroll-snap-align:start; }
+.home-trip-card { min-height:140px; flex:0 0 88%; padding:16px; display:flex; flex-direction:column; justify-content:space-between; background:var(--color-surface); border:1px solid var(--color-border); border-radius:19px; box-shadow:0 3px 12px var(--color-shadow); }
+.home-single-rail > * { flex-basis:100%; }
+.home-trip-destination { font-size:11px; color:var(--color-accent-text); font-weight:700; }
+.home-trip-card h3 { font-size:17px; margin:5px 0; color:var(--color-text-strong); }
+.home-trip-card p { font-size:12px; color:var(--color-text-muted); margin:0; }
+.home-trip-continue { align-self:flex-end; color:var(--color-accent-text); font-size:13px; font-weight:700; text-decoration:none; }
+.home-v12 .home-quick-section { padding-top:23px; }
+.home-v12 .quick-menu { padding-top:12px; }
+.home-v12 .menu-card { min-height:122px; }
+.home-rank-section { padding:28px var(--page-gutter) 4px; }
+.home-rank-empty { margin:0; padding:20px 12px; border-radius:14px; background:var(--color-surface); color:var(--color-text-muted); font-size:13px; line-height:1.6; }
+.home-rank-empty button { display:block; background:none; border:0; margin-top:8px; padding:10px 0; color:var(--color-accent-text); font-weight:700; cursor:pointer; }
+.home-city-rail { padding:2px 0 9px; }
+.home-city-tile { position:relative; flex:0 0 102px; min-width:0; }
+.home-city-link { color:inherit; text-decoration:none; display:flex; flex-direction:column; gap:3px; }
+.home-city-photo { position:relative; width:102px; height:98px; overflow:hidden; display:flex; justify-content:center; align-items:center; background:linear-gradient(140deg,#cfdfed,#eae7f4); border-radius:15px; color:#355373; font-size:32px; font-weight:700; }
+.home-city-photo img { width:100%; height:100%; object-fit:cover; }
+.home-rank-badge { position:absolute; left:6px; top:6px; font-size:12px; font-weight:900; color:white; background:rgba(0,0,0,.65); border:0; border-radius:6px; padding:4px 6px; line-height:1.1; }
+.home-city-tile:nth-child(1) .home-rank-badge { color:#f4d04d; }
+.home-city-tile:nth-child(2) .home-rank-badge { color:#82d3f4; }
+.home-city-tile:nth-child(3) .home-rank-badge { color:#d29165; }
+.home-city-link strong { padding-top:5px; color:var(--color-text-strong); font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.home-city-link small { font-size:11px; color:var(--color-text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.home-city-credit { position:absolute; top:78px; right:5px; color:white; padding:2px 3px; font-size:8px; background:rgba(0,0,0,.5); z-index:2; border-radius:4px; text-decoration:none; }
+.home-hot-section { padding-top:28px; }
+.home-hot-rail { padding:2px 0 8px; }
+.home-hot-card { position:relative; flex:0 0 86%; height:248px; overflow:hidden; border-radius:21px; background:linear-gradient(125deg,#8294a4,#394f5b); isolation:isolate; }
+.home-hot-card .home-hot-photo { width:100%; height:100%; display:block; object-fit:cover; }
+.home-hot-card .place-photo-placeholder { display:flex; justify-content:center; align-items:center; flex-direction:column; }
+.home-hot-shade { position:absolute; inset:0; pointer-events:none; background:linear-gradient(180deg,rgba(0,0,0,.12) 10%,rgba(0,0,0,.05) 45%,rgba(0,0,0,.7) 100%); }
+.home-hot-caption { position:absolute; bottom:19px; left:16px; right:16px; pointer-events:none; display:flex; flex-direction:column; gap:4px; color:white; }
+.home-hot-caption span { font-size:12px; opacity:.88; }
+.home-hot-caption strong { font-size:22px; line-height:1.3; word-break:keep-all; text-shadow:0 1px 5px rgba(0,0,0,.25); }
+.home-hot-open { position:absolute; inset:0; width:100%; height:100%; border:0; cursor:pointer; background:transparent; z-index:1; }
+.home-hot-open:focus-visible { outline:3px solid var(--color-focus); outline-offset:-4px; border-radius:21px; }
+.home-hot-card .place-photo-credit { z-index:3; }
+.home-hot-hint { font-size:11px; margin:5px 2px 0; color:var(--color-text-muted); }
+.home-v12 .home-quick-section .home-section-heading { padding:0 var(--page-gutter); }
+@media (max-width:390px) {
+  .home-trip-section,.home-rank-section { padding-left:var(--page-gutter); padding-right:var(--page-gutter); }
+  .home-city-tile { flex-basis:95px; }
+  .home-city-photo { width:95px; height:92px; }
+  .home-hot-card { height:225px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-v12-rail { scroll-behavior:auto; }
+}
+/* Full-bleed photos in the trending rail, including portrait originals. */
+.home-hot-card img.home-hot-photo { object-fit:cover !important; }
 
-  .travel-list {
-    padding-left: 18px;
-    padding-right: 18px;
-  }
+/* V12.1: boarding-pass styling and transparently labelled preview rankings. */
+.home-ticket, .home-boarding-pass {
+  border:1px solid #cadce7;
+  border-radius:20px;
+  overflow:hidden;
+  background:var(--color-surface);
+  box-shadow:0 7px 22px var(--color-shadow);
+}
+.home-trip-empty.home-ticket { padding:0; }
+.home-ticket-main, .home-pass-main { padding:16px 18px 13px; background:linear-gradient(140deg,#edf7fc 0%,var(--color-surface) 86%); }
+.home-ticket-topline { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.home-ticket-symbol { font-size:19px; color:#386b8e; }
+.home-ticket-main h2 { font-size:19px; margin:5px 0; }
+.home-ticket-main p { margin:0; line-height:1.5; font-size:12px; }
+.home-ticket-route { display:flex; align-items:center; justify-content:space-between; gap:12px; color:#42657a; font-size:12px; font-weight:700; padding-top:14px; }
+.home-ticket-flight-line { flex:1; text-align:center; color:#2b739b; font-size:17px; border-top:1px dashed #9fbcca; height:1px; line-height:0; }
+.home-ticket-flight-line::first-letter { background:#f1f8fc; }
+.home-ticket-perforation { position:relative; z-index:2; border-top:1.5px dashed #adc6d3; margin:0 12px; height:0; }
+.home-ticket-perforation::before,.home-ticket-perforation::after { content:""; position:absolute; z-index:3; top:-12px; width:24px; height:24px; border-radius:50%; background:var(--color-page); border:0; box-shadow:none; pointer-events:none; }
+.home-ticket-perforation::before { left:-24px; }
+.home-ticket-perforation::after { right:-24px; }
+.home-ticket-bottom { display:flex; align-items:center; gap:14px; padding:13px 17px; }
+.home-ticket-bottom-label { font-size:10px; font-weight:800; letter-spacing:1.1px; color:#607987; white-space:nowrap; }
+.home-ticket-bottom .home-primary-action { width:auto; flex:1; min-height:42px; font-size:12px; padding:10px 12px; }
+.home-v12-rail .home-trip-card.home-boarding-pass-shadow {
+  display:block; position:relative; flex:0 0 88%; min-height:168px; padding:0;
+  border:0; border-radius:20px; overflow:visible; background:transparent; box-shadow:none;
+  /* Shadow belongs to the whole clipped ticket silhouette, not its notches. */
+  filter:drop-shadow(2px 5px 5px rgba(24,52,76,.14));
+}
+.home-trip-rail.home-single-rail { justify-content:center; }
+.home-trip-rail.home-single-rail > .home-boarding-pass-shadow {
+  flex:0 0 100%; width:100%; max-width:440px; margin-inline:auto;
+}
+.home-pass-main { flex:1; padding-bottom:14px; }
+.home-pass-main .home-trip-destination { display:block; margin-top:8px; }
+.home-pass-bottom { height:48px; min-height:48px; flex:0 0 48px; display:flex; justify-content:space-between; gap:8px; align-items:center; padding:9px 16px; }
+.home-pass-bottom .home-trip-continue { min-height:24px; align-self:center; display:flex; align-items:center; }
+.home-v12 .home-quick-section .home-section-heading .home-v12-eyebrow { margin:0 0 4px; color:var(--color-accent-text); font-size:10px; font-weight:800; letter-spacing:1.2px; }
+.home-preview-note { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 9px; margin:0 0 14px; font-size:11px; color:var(--color-text-muted); line-height:1.5; }
+.home-preview-note strong { color:var(--color-accent-text); font-size:11px; }
+.home-preview-note button { color:var(--color-accent-text); border:0; background:transparent; padding:2px 0; cursor:pointer; font:inherit; font-weight:700; text-decoration:underline; }
+.home-hot-demo-card .home-hot-photo { display:block; }
+.home-hot-demo-credit { position:absolute; right:10px; bottom:8px; z-index:4; color:#fff; background:rgba(0,0,0,.55); border-radius:5px; padding:3px 5px; font-size:9px; text-decoration:none; }
+.home-hot-demo-credit:focus-visible { outline:2px solid white; outline-offset:2px; }
+@media(max-width:390px) { .home-ticket-bottom-label { font-size:9px; letter-spacing:.4px; } .home-ticket-bottom .home-primary-action { font-size:11px; } }
 
-  .nearby-location-card {
-    padding-left: 16px;
-    padding-right: 16px;
-    gap: 12px;
-  }
+/* Both cutouts and their outlines share the same centre, radius and footer baseline. */
+.home-boarding-pass-shape {
+  --home-notch-center: calc(100% - 49px);
+  -webkit-mask-image:
+    radial-gradient(circle at 0 var(--home-notch-center), transparent 0 11.45px, #000 12px),
+    radial-gradient(circle at 100% var(--home-notch-center), transparent 0 11.45px, #000 12px);
+  mask-image:
+    radial-gradient(circle at 0 var(--home-notch-center), transparent 0 11.45px, #000 12px),
+    radial-gradient(circle at 100% var(--home-notch-center), transparent 0 11.45px, #000 12px);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+.home-boarding-pass .home-ticket-perforation::before,
+.home-boarding-pass .home-ticket-perforation::after { content:none; }
 
-  .nearby-location-icon {
-    width: 46px;
-    height: 46px;
-  }
-
-  .nearby-location-text span {
-    font-size: 12px;
-  }
-
-  .nearby-location-text strong {
-    font-size: 15px;
-  }
-
-  .nearby-location-arrow {
-    font-size: 30px;
-  }
+/* A fine line follows each notch; the surrounding whole-ticket shadow lives outside the mask. */
+.home-boarding-pass-shape {
+  display:flex; flex-direction:column; justify-content:space-between;
+  min-height:168px; height:100%; padding:0; position:relative; box-shadow:none; filter:none;
+}
+.home-boarding-pass-shape::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 0 var(--home-notch-center),
+      transparent 0 11.85px, #cadce7 12px 13px, transparent 13.15px),
+    radial-gradient(circle at 100% var(--home-notch-center),
+      transparent 0 11.85px, #cadce7 12px 13px, transparent 13.15px);
 }
 
-.home .travel-card { border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; background: var(--color-surface); }
-.home .menu-card:focus-visible, .home .travel-card:focus-visible, .home .search-icon-frame:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 3px; }
+/* Symmetric gutters plus center snapping make the current pass visually centered. */
+.home-trip-rail { padding:7px 6% 10px; scroll-padding-inline:6%; }
+.home-trip-rail > .home-boarding-pass-shadow { scroll-snap-align:center; }
+.home-trip-rail.home-single-rail { scroll-snap-type:none; }
+
+
+/* Rails are swipe surfaces. Never select/drag their text or native photos when panning. */
+.home-v12-rail,.home-v12-rail *{-webkit-user-select:none;user-select:none}
+.home-v12-rail img{-webkit-user-drag:none}
+.home-v12-rail.is-dragging{scroll-snap-type:none !important;cursor:grabbing}
+.home-v12-rail.is-dragging *{cursor:grabbing}
+
+/* Pointer dragging complements keyboard-scrollable range sliders on desktop. */
+@media(hover:hover) and (pointer:fine){
+  .home-trip-rail,.home-city-rail,.home-hot-rail{cursor:grab}
+  .home-trip-rail:active,.home-city-rail:active,.home-hot-rail:active{cursor:grabbing}
+}
+.home-hot-count{display:block;font-size:10px;font-weight:700;line-height:1.35;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.7)}
+
+/* Carousels extend to the right viewport edge without an empty trailing corner. */
+.home-v12 .home-trip-section,.home-v12 .home-rank-section{--home-rail-gutter:var(--page-gutter)}
+.home-v12 .home-rail-wrap{width:calc(100% + 2 * var(--home-rail-gutter));margin-inline:calc(-1 * var(--home-rail-gutter));min-width:0}
+.home-v12 .home-rail-slider{padding-inline:var(--home-rail-gutter)}
+/* On entry and at the final card keep breathing room; while moving,
+   the rail's first/last padding scrolls away instead of becoming a fixed inset. */
+.home-v12 .home-city-rail,.home-v12 .home-hot-rail{
+  box-sizing:border-box;
+  padding-inline:var(--home-rail-gutter);
+  scroll-padding-inline:var(--home-rail-gutter);
+}
+/* Each boarding pass has the same visible left and right breathing room. */
+.home-v12 .home-trip-rail{box-sizing:border-box;padding:7px 16px 12px;scroll-padding-inline:16px}
+.home-v12 .home-trip-rail>.home-boarding-pass-shadow{flex:0 0 calc(100% - 32px);box-sizing:border-box}
+.home-v12 .home-trip-rail.home-single-rail>.home-boarding-pass-shadow{flex:0 0 calc(100% - 32px);max-width:none;margin:0}
+.home-v12 .home-trip-rail.home-single-rail{justify-content:center}
+/* A boarding pass has two genuine half-round punch-outs at the exact
+   seam between its flexible upper panel and 48px footer (49px includes border).
+   The whole ticket is masked as one piece so the cutouts also clip the shadow. */
+.home-v12 .home-boarding-pass-shape{--home-notch-center:calc(100% - 49px)}
+/* Keep the upper panel distinctly pale blue and the fixed footer white:
+   their color transition is exactly the cutout and perforation boundary. */
+.home-v12 .home-boarding-pass .home-pass-main{background:linear-gradient(140deg,#e8f5ff,#f0f8ff)}
+.home-v12 .home-boarding-pass .home-pass-bottom{background:var(--color-surface)}
+/* The zero-height seam is between the two differently colored flex siblings.
+   Its dashed line overlays their shared boundary without shifting either. */
+.home-v12 .home-boarding-pass .home-ticket-perforation{
+  flex:0 0 0;height:0;margin:0;border:0;position:relative;
+  background:none;overflow:visible;
+  -webkit-mask-image:none;mask-image:none;
+}
+.home-v12 .home-boarding-pass .home-ticket-perforation::after{
+  content:"";position:absolute;z-index:3;top:-1px;left:14px;right:14px;height:2px;
+  border:0;border-radius:0;box-shadow:none;
+  background:repeating-linear-gradient(90deg,#a8c5d8 0 4px,transparent 4px 8px);
+  pointer-events:none;
+}
