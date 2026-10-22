@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /** Native rail scrolling, a dedicated draggable range thumb and seamless auto-loop clones. */
 export default function useHomeCarousel(count, { loop = false, auto = false } = {}) {
@@ -19,13 +19,13 @@ export default function useHomeCarousel(count, { loop = false, auto = false } = 
     const items = el?.children || [];
     return items.length > 1 ? items[1].offsetLeft - items[0].offsetLeft : 0;
   };
-  const groupSize = el => {
+  const groupSize = useCallback(el => {
     const items = el?.children || [];
     return items.length > count ? items[count].offsetLeft - items[0].offsetLeft : 0;
-  };
+  }, [count]);
 
   const pauseAutoplay = () => { pauseUntil.current = Date.now() + 6000; };
-  const sync = () => {
+  const sync = useCallback(() => {
     const el = ref.current;
     if (!el) return;
     const span = loop && count > 1 ? groupSize(el) : 0;
@@ -34,7 +34,7 @@ export default function useHomeCarousel(count, { loop = false, auto = false } = 
     const location = span ? Math.max(0, Math.min(span, el.scrollLeft - span)) : Math.max(0, el.scrollLeft);
     const next = max > 0 ? Math.round(location / max * 100) : 0;
     updateProgress(old => old === next ? old : next);
-  };
+  }, [count, loop, groupSize]);
 
   useEffect(() => {
     const el = ref.current;
@@ -42,7 +42,7 @@ export default function useHomeCarousel(count, { loop = false, auto = false } = 
     const frame = window.requestAnimationFrame(sync);
     window.addEventListener("resize", sync);
     return () => { window.cancelAnimationFrame(frame); window.removeEventListener("resize", sync); };
-  }, [count, loop]);
+  }, [sync]);
 
   useEffect(() => {
     const el = ref.current;
@@ -51,7 +51,7 @@ export default function useHomeCarousel(count, { loop = false, auto = false } = 
     start();
     const frame = window.requestAnimationFrame(start);
     return () => window.cancelAnimationFrame(frame);
-  }, [count, loop]);
+  }, [count, loop, groupSize, sync]);
 
   useEffect(() => {
     const el = ref.current;

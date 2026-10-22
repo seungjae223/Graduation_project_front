@@ -145,9 +145,10 @@ function Search() {
   const pagePlaces = sortedResults.slice((currentPage - 1) * SEARCH_PAGE_SIZE, currentPage * SEARCH_PAGE_SIZE);
   const sortingUnavailable = sort !== "default" && results.length > 0 && !hasEngagement;
   const likeCounts = new Map((engagement.data || []).map(item => [Number(item.placeId), item.likeCount]));
+  const { retry: retryEngagement } = engagement;
   useEffect(() => {
-    if (saving.favoriteStatus === "success") void engagement.retry();
-  }, [saving.favoriteStatus, engagement.retry]);
+    if (saving.favoriteStatus === "success") void retryEngagement();
+  }, [saving.favoriteStatus, retryEngagement]);
 
   // An entry's search query/page live in the URL. Scroll is saved only when
   // leaving for a detail/destination, and consumed after the results return.

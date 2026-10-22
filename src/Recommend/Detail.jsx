@@ -508,9 +508,10 @@ function Detail() {
   }, validPlace, identityMatches);
   const engagementQuery = useReadQuery(requestKey + ":engagement",
     signal => getPlaceEngagementApi([idParam], { signal }), validPlace, identityMatches);
+  const { retry: retryEngagement } = engagementQuery;
   useEffect(() => {
-    if (saving.favoriteStatus === "success") void engagementQuery.retry();
-  }, [saving.favoriteStatus, engagementQuery.retry]);
+    if (saving.favoriteStatus === "success") void retryEngagement();
+  }, [saving.favoriteStatus, retryEngagement]);
   const likeCount = engagementQuery.data?.[0]?.likeCount ?? null;
   const [reviewPage, setReviewPage] = useState(0);
   const reviewQuery = useReadQuery(requestKey + ":reviewPage:" + reviewPage,

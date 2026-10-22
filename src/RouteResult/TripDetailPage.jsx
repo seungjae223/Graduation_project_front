@@ -166,6 +166,8 @@ export default function TripDetailPage() {
   const [optimizedRevision, setOptimizedRevision] = useState(0);
   const optimizedVersions = useMemo(() =>
     result.status === "success" ? readOptimizedVersions(id, account, result.places) : {},
+    // A local draft save increments this revision to invalidate the storage snapshot.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [result.status, result.places, id, account, optimizedRevision]);
   const hasOptimized = Object.keys(optimizedVersions).length > 0;
   const activeVersion = editMode ? editVersion : version;

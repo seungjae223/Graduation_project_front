@@ -42,9 +42,10 @@ function ExploreContent({ destination, places }) {
   const engagement = useReadQuery(`destination:${destination.code}:engagement:${engagementKey}`,
     signal => getPlaceEngagementApi(places.map(place => place.id), { signal }),
     places.length > 0);
+  const { retry: retryEngagement } = engagement;
   useEffect(() => {
-    if (saving.favoriteStatus === "success") void engagement.retry();
-  }, [saving.favoriteStatus, engagement.retry]);
+    if (saving.favoriteStatus === "success") void retryEngagement();
+  }, [saving.favoriteStatus, retryEngagement]);
   const requestedCount = Number(params.get("shown"));
   const visibleCount = Number.isSafeInteger(requestedCount) && requestedCount > PAGE_SIZE
     ? Math.ceil(Math.min(requestedCount, 10000) / PAGE_SIZE) * PAGE_SIZE : PAGE_SIZE;

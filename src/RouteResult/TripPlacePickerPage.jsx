@@ -117,12 +117,13 @@ export default function TripPlacePickerPage() {
     owner.current.account === account && String(owner.current.tripId) === String(tripId);
   const days = useMemo(() => tripDays(trip, tripPlaces, {}), [trip, tripPlaces]);
   const actualDay = days.length ? (days.some(d => d.day === day) ? day : days[0].day) : day;
-  const known = useMemo(() => new Map(catalog.map(place => [placeIdOf(place), place])), [catalog]);
   // Every folder is read to rank its matching destination records, rather than
   // pretending the optional folder-wide count is the region count.
   const currentSource = sources.find(item => item.id === source);
-  const regional = query.trim() || source === "all" ? catalog : (currentSource?.places || []);
-  const visible = useMemo(() => filterPlaceList(regional, category, query), [regional, category, query]);
+  const visible = useMemo(() => {
+    const regional = query.trim() || source === "all" ? catalog : (currentSource?.places || []);
+    return filterPlaceList(regional, category, query);
+  }, [catalog, currentSource, source, category, query]);
 
   const selectedIds = selection.filter(id =>
     (catalog.some(p => p.id === id) || sources.some(item => item.places.some(p => p.id === id))));

@@ -23,60 +23,6 @@ const BackIcon = () => (
   </svg>
 );
 
-const ShareIcon = () => (
-  <svg className="header-icon" viewBox="0 0 24 24" aria-hidden="true">
-    <circle cx="18" cy="5" r="2.25" />
-    <circle cx="6" cy="12" r="2.25" />
-    <circle cx="18" cy="19" r="2.25" />
-    <path d="m8 11 7.8-4.6M8 13l7.8 4.6" />
-  </svg>
-);
-
-const BlackTrashIcon = () => (
-  <svg
-    className="header-icon trash-icon"
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-  >
-    <path
-      d="M9 4H15"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M5 7H19"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M7.2 7.5L8.1 20H15.9L16.8 7.5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M10.3 11V17"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M13.7 11V17"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -235,21 +181,6 @@ const Header = () => {
     } finally {
       wrapper.remove();
     }
-  };
-
-  const handleShare = () => {
-    if (!isRouteResultPage) return;
-
-    setIsDeleteOpen(false);
-    setIsShareOpen(true);
-  };
-
-  const handleDeleteClick = () => {
-    if (!isRouteResultPage) return;
-
-    deleteTask.reset();
-    setIsShareOpen(false);
-    setIsDeleteOpen(true);
   };
 
   const handleDeleteConfirm = async () => {

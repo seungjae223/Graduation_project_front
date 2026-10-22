@@ -226,8 +226,9 @@ export default function TripOptimizationPage() {
   }, [day, signature, result.status, id, account]);
   const initial = useMemo(() => initializeOptimization(places, { startTime, endTime }), [places, startTime, endTime]);
   const quickRoute = useMemo(() => quickOrder(places), [places]);
-  const order = mode === "quick" ? quickRoute :
-    segments.length ? [segments[0].from, ...segments.flatMap(s => [...s.items, s.to])] : null;
+  const order = useMemo(() => mode === "quick" ? quickRoute :
+    segments.length ? [segments[0].from, ...segments.flatMap(s => [...s.items, s.to])] : null,
+  [mode, quickRoute, segments]);
   const plan = order ? evaluatePlan({
     places, segments, order, stays, travelOverrides: overrides, startTime, endTime,
     respectFixed: mode === "careful",

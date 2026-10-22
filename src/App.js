@@ -184,7 +184,7 @@ function Layout() {
         : !isDetailRoute && previousRoute === "/detail"
           ? "route-transition--detail-backward" : "",
     };
-  }, [location.key, pathname, location.search, isDetailRoute]);
+  }, [location, pathname, isDetailRoute]);
   // Only folderId identifies another full saved-places view. Search/filters do not.
   const transitionKey = pathname === "/saved-places"
     ? `${pathname}:${new URLSearchParams(location.search).get("folderId") || "list"}`

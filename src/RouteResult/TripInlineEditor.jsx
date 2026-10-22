@@ -89,10 +89,11 @@ export default function TripInlineEditor({
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor));
 
+  const canonicalOrder = places.map(p => placeKey(p) + ":" + p.visitOrder).join("|");
   useEffect(() => {
     // Keep local drag preview until the server emits the new canonical order.
     setOrderDraft(null);
-  }, [places.map(p => placeKey(p) + ":" + p.visitOrder).join("|")]);
+  }, [canonicalOrder]);
 
   useEffect(() => {
     if (deleteMode || openedFirst.current !== null) return;

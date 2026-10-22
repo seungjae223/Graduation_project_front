@@ -156,7 +156,8 @@ export function quickOrder(places) {
   const free = sorted.filter(p => p !== start && p !== end);
   const result = [placeKey(start)]; let current = start;
   while (free.length) {
-    free.sort((a, b) => distanceKm(current, a) - distanceKm(current, b));
+    const origin = current;
+    free.sort((a, b) => distanceKm(origin, a) - distanceKm(origin, b));
     current = free.shift(); result.push(placeKey(current));
   }
   // Improve nearest-neighbour loops without moving the pinned start/end.
