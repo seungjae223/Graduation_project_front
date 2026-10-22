@@ -1,30 +1,24 @@
 export const THEME_STORAGE_KEY = "site-theme";
 
-export const normalizeTheme = (value) =>
-  value === "dark" || value === "light" ? value : "light";
+// Compatibility for older callers: the application now only supports light.
+export const normalizeTheme = () => "light";
 
-export const getStoredTheme = () => {
-  try {
-    return normalizeTheme(window.localStorage.getItem(THEME_STORAGE_KEY));
-  } catch (error) {
-    return "light";
-  }
-};
+export const getStoredTheme = () => "light";
 
-export const applyTheme = (value) => {
-  const theme = normalizeTheme(value);
+export const applyTheme = () => {
+  const theme = "light";
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
   return theme;
 };
 
-export const saveTheme = (value) => {
-  const theme = applyTheme(value);
+export const saveTheme = () => {
+  const theme = applyTheme();
 
   try {
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    window.localStorage.removeItem(THEME_STORAGE_KEY);
   } catch (error) {
-    // The selected theme still applies for this page when storage is blocked.
+    // Light still applies when browser storage is blocked.
   }
 
   return theme;

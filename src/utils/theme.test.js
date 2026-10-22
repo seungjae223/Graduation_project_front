@@ -14,7 +14,7 @@ beforeEach(() => {
 
 test.each([
   ["light", "light"],
-  ["dark", "dark"],
+  ["dark", "light"],
   [null, "light"],
   ["", "light"],
   ["abc", "light"],
@@ -28,18 +28,19 @@ test("a missing saved theme always defaults to light without consulting the OS",
   expect(window.matchMedia).not.toHaveBeenCalled();
 });
 
-test("saved app theme wins regardless of the mocked OS theme", () => {
+test("a legacy dark preference cannot reactivate the removed mode", () => {
   window.matchMedia = jest.fn(() => ({ matches: false }));
   localStorage.setItem(THEME_STORAGE_KEY, "dark");
-  expect(getStoredTheme()).toBe("dark");
+  expect(getStoredTheme()).toBe("light");
   expect(window.matchMedia).not.toHaveBeenCalled();
 });
 
-test("saveTheme persists and applies one normalized theme", () => {
-  expect(saveTheme("dark")).toBe("dark");
-  expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe("dark");
-  expect(document.documentElement.dataset.theme).toBe("dark");
-  expect(document.documentElement.style.colorScheme).toBe("dark");
+test("older theme callers clear the legacy preference and keep light", () => {
+  localStorage.setItem(THEME_STORAGE_KEY, "dark");
+  expect(saveTheme("dark")).toBe("light");
+  expect(localStorage.getItem(THEME_STORAGE_KEY)).toBeNull();
+  expect(document.documentElement.dataset.theme).toBe("light");
+  expect(document.documentElement.style.colorScheme).toBe("light");
 
   expect(applyTheme("invalid")).toBe("light");
   expect(document.documentElement.dataset.theme).toBe("light");

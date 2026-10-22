@@ -291,29 +291,6 @@
   .home-destination-card { transition: transform 150ms ease; }
 }
 
-html[data-theme="dark"] .home {
-  --home-hero-start: #14283a;
-  --home-hero-middle: #17293a;
-  --home-hero-end: var(--color-page);
-}
-
-html[data-theme="dark"] .home-header {
-  border-bottom: 1px solid var(--color-border);
-}
-
-html[data-theme="dark"] .search-icon-frame img {
-  filter: brightness(0) saturate(100%) invert(70%) sepia(75%) saturate(1321%) hue-rotate(171deg) brightness(99%);
-}
-
-html[data-theme="dark"] .menu-card:not(.active) .icon-circle {
-  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
-}
-
-html[data-theme="dark"] .home-popular-header,
-html[data-theme="dark"] .travel-list {
-  background: var(--color-page);
-}
-
 /* Main-tab transition owns page motion; avoid replaying staggered fades on return. */
 @media (prefers-reduced-motion: reduce) {
   .home-destination-card { transition: none; }

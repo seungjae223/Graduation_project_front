@@ -84,10 +84,6 @@
   filter: none;
 }
 
-html[data-theme="dark"] .theme-card:not(.active) .theme-icon {
-  filter: brightness(0) invert(0.8);
-}
-
 .theme-label {
   font-size: 15px;
   font-weight: 700;

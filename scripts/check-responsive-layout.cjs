@@ -9,7 +9,8 @@ const baseURL = process.env.LAYOUT_BASE_URL || 'http://127.0.0.1:3009';
 const label = process.argv[2] || 'after';
 const output = path.resolve('output/responsive-layout', label);
 const widths = process.env.LAYOUT_WIDTHS ? process.env.LAYOUT_WIDTHS.split(',').map(Number) : [360, 390, 430, 768, 1440, 1920];
-const themes = process.env.LAYOUT_THEMES ? process.env.LAYOUT_THEMES.split(',') : ['light', 'dark'];
+// LAYOUT_THEMES=dark can still seed the old preference to verify its migration.
+const themes = process.env.LAYOUT_THEMES ? process.env.LAYOUT_THEMES.split(',') : ['light'];
 const routes = [
   ['home', '/home', '.home'],
   ['login', '/login', '.login-card'],
@@ -176,7 +177,7 @@ const catalog = TRAVEL_DESTINATIONS.map(item => ({ code: item.id, name: item.nam
         });
         const failures = [];
         if (Math.abs(metrics.app.width - width) > 1) failures.push('app constrained to a narrow column');
-        if (metrics.theme !== theme || metrics.colorScheme !== theme) failures.push('theme changed');
+        if (metrics.theme !== 'light' || metrics.colorScheme !== 'light') failures.push('removed dark mode reactivated');
         if (metrics.documentWidth > width) failures.push('document horizontal overflow');
         if (metrics.overflow.length) failures.push('content exceeds app');
         for (const part of ['header', 'main', 'footer']) {
