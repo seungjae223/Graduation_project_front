@@ -123,7 +123,7 @@ function ExploreContent({ destination, places }) {
     <header className="destination-explore-hero">
       <div className="destination-hero-media">
         {hero && !heroFailed && <img src={hero.src} alt={`${destination.name} 도시 전경`}
-          loading="eager" decoding="async" onError={() => setHeroFailed(true)} />}
+          loading="eager" decoding="async" style={{ objectPosition: hero.position }} onError={() => setHeroFailed(true)} />}
       </div>
       <div className="destination-hero-copy">
         <p className="destination-explore-country">{destination.countryName}</p>

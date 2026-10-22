@@ -130,7 +130,7 @@ function CityTile({ city, rank }) {
     <Link to={`/destinations/${encodeURIComponent(city.code)}`} className="home-city-link"
       aria-label={`${rank}위 ${city.name} 여행지`}>
       <div className="home-city-photo">
-        {photo?.src && !photoFailed ? <img src={photo.src} alt="" loading="lazy" decoding="async"
+        {photo?.src && !photoFailed ? <img src={photo.src} alt="" loading="lazy" decoding="async" style={{ objectPosition: photo.position }}
           onError={() => setPhotoFailed(true)} /> : <span aria-hidden="true">{city.name.slice(0, 1)}</span>}
         <span className="home-rank-badge">{rank}위</span>
       </div>
@@ -138,7 +138,8 @@ function CityTile({ city, rank }) {
       <small>{city.countryName}</small>
     </Link>
     {photo?.src && !photoFailed && <a className="home-city-credit" href={photo.source}
-      target="_blank" rel="noopener noreferrer" aria-label={`${city.name} 사진 출처`}>사진 출처</a>}
+      target="_blank" rel="noopener noreferrer" aria-label={`${city.name} 사진 출처`}
+      title={photo.author && photo.license ? `${photo.author} · ${photo.license} (가로 크롭 표시)` : undefined}>사진 출처</a>}
   </article>;
 }
 

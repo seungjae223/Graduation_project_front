@@ -17,7 +17,7 @@ function DestinationCard({ destination }) {
       aria-label={`${destination.name} 여행지 보기`}>
       <div className="recommend-destination-photo">
         {showPhoto
-          ? <img src={hero.src} alt="" loading="lazy" decoding="async"
+          ? <img src={hero.src} alt="" loading="lazy" decoding="async" style={{ objectPosition: hero.position }}
               onError={() => setImageFailed(true)} />
           : <span className="recommend-destination-photo-fallback" aria-hidden="true" />}
       </div>
@@ -29,7 +29,7 @@ function DestinationCard({ destination }) {
     </Link>
     {showPhoto && <a className="recommend-destination-credit" href={hero.source}
       target="_blank" rel="noopener noreferrer"
-      aria-label={`${destination.name} 대표 사진 출처`}>사진 출처</a>}
+      aria-label={`${destination.name} 대표 사진 출처`} title={`${hero.author} · ${hero.license} (가로 크롭 표시)`}>사진 출처</a>}
   </li>;
 }
 

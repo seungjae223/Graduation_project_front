@@ -1,5 +1,5 @@
-// Licensed city panoramas. These are NOT derived from individual Place photos.
-// The 1280px thumbnail URLs are the preview targets shown on the Commons file pages.
+// Licensed destination photos, deliberately selected independently of Place photos.
+// Locally hosted selections retain their full attribution in /destination-photos/sources.json.
 // If an asset is unavailable the caller must render a neutral background, never a random Place photo.
 const HERO_PHOTOS = Object.freeze({
   tokyo: {
@@ -32,24 +32,28 @@ const ADDITIONAL_PHOTOS = Object.freeze({
     author: "S h y numis", license: "CC BY-SA 4.0"
   },
   "jeju": {
-    src: "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent("Jeju Island seacoast.jpg")+"?width=960",
-    source: "https://commons.wikimedia.org/wiki/File:"+encodeURIComponent("Jeju Island seacoast.jpg"),
-    author: "Wikimedia Commons contributor", license: "See source"
+    src: "/destination-photos/jeju.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Seongsan_Ilchulbong_from_the_air.jpg",
+    author: "Korea.net / Korean Culture and Information Service", license: "CC BY-SA 2.0",
+    position: "50% 65%"
   },
   "gyeongju": {
-    src: "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent("Bulguksa Temple, Gyeongju - Bulguska2654.jpg")+"?width=960",
-    source: "https://commons.wikimedia.org/wiki/File:"+encodeURIComponent("Bulguksa Temple, Gyeongju - Bulguska2654.jpg"),
-    author: "lumoplank", license: "See source"
+    src: "/destination-photos/gyeongju.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Field_of_Iceland_poppies_in_the_flower_garden_near_Cheomseongdae_Observatory_in_Gyeongju_South_Korea.jpg",
+    author: "Basile Morin", license: "CC BY-SA 4.0",
+    position: "50% 25%"
   },
   "bangkok": {
-    src: "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent("Bangkok Skyline (MK).jpg")+"?width=960",
-    source: "https://commons.wikimedia.org/wiki/File:"+encodeURIComponent("Bangkok Skyline (MK).jpg"),
-    author: "Mathias Krumbholz", license: "See source"
+    src: "/destination-photos/bangkok.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:"+encodeURIComponent("เจดีย์ประธานทรงปรางค์วัดอรุณ2.jpg"),
+    author: "Mastertongapollo", license: "CC BY-SA 4.0",
+    position: "50% 10%"
   },
   "chiang-mai": {
-    src: "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent("Chiang Mai Panorama.jpg")+"?width=960",
-    source: "https://commons.wikimedia.org/wiki/File:"+encodeURIComponent("Chiang Mai Panorama.jpg"),
-    author: "Jan Beck", license: "See source"
+    src: "/destination-photos/chiang-mai.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Wat_Phra_That_Doi_Suthep_(I).jpg",
+    author: "Supanut Arunoprayote", license: "CC BY 4.0",
+    position: "50% 20%"
   },
   "da-nang": {
     src: "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent("Da Nang International Fireworks Festival DIFF Dragon Bridge Han River night skyline Vietnam.jpg")+"?width=960",
@@ -62,9 +66,10 @@ const ADDITIONAL_PHOTOS = Object.freeze({
     author: "FrogsLegs71", license: "See source"
   },
   "manila": {
-    src: "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent("Manila skyline from Doroteo Jose, Santa Cruz, Manila, May 2026.jpg")+"?width=960",
-    source: "https://commons.wikimedia.org/wiki/File:"+encodeURIComponent("Manila skyline from Doroteo Jose, Santa Cruz, Manila, May 2026.jpg"),
-    author: "Ralff Nestor Nacor", license: "See source"
+    src: "/destination-photos/manila.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Front_view_of_the_Manila_Cathedral.jpg",
+    author: "Bobbet21", license: "CC BY-SA 4.0",
+    position: "50% 15%"
   },
   "cebu": {
     src: "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent("Cebu City (Aerial).jpg")+"?width=960",
@@ -72,14 +77,16 @@ const ADDITIONAL_PHOTOS = Object.freeze({
     author: "Herbertkikoy", license: "CC BY-SA 4.0"
   },
   "new-york": {
-    src: "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent("New York City, Skyline.jpg")+"?width=960",
-    source: "https://commons.wikimedia.org/wiki/File:"+encodeURIComponent("New York City, Skyline.jpg"),
-    author: "Davidswiki", license: "CC BY-SA 4.0"
+    src: "/destination-photos/new-york.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Lady_Liberty_under_a_blue_sky.jpg",
+    author: "Mcj1800", license: "CC BY-SA 4.0",
+    position: "50% 12%"
   },
   "los-angeles": {
-    src: "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent("Downtown Los Angeles skyline.jpg")+"?width=960",
-    source: "https://commons.wikimedia.org/wiki/File:"+encodeURIComponent("Downtown Los Angeles skyline.jpg"),
-    author: "Serouj", license: "Public domain"
+    src: "/destination-photos/los-angeles.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Hollywood_Sign.jpg",
+    author: "Thomas Wolf, www.foto-tw.de", license: "CC BY-SA 3.0",
+    position: "50% 60%"
   }
 });
 

@@ -23,14 +23,15 @@ function SelectableDestination({ destination, selected, onSelect }) {
       aria-label={destination.name} aria-pressed={selected} onClick={()=>onSelect(destination.code)}>
       <span className="v16-region-photo">
         {hero && !imageFailed
-          ? <img src={hero.src} alt="" loading="lazy" decoding="async"
+          ? <img src={hero.src} alt="" loading="lazy" decoding="async" style={{ objectPosition: hero.position }}
               onError={()=>setImageFailed(true)} />
           : <span className="v16-region-photo-fallback" aria-hidden="true"/>}
       </span>
       <span className="v16-region-copy"><small>{destination.countryName}</small><strong>{destination.name}</strong></span>
     </button>
     {hero && !imageFailed && <a className="v16-region-credit" href={hero.source}
-      target="_blank" rel="noopener noreferrer" aria-label={destination.name+" 대표 사진 출처"}>사진 출처</a>}
+      target="_blank" rel="noopener noreferrer" aria-label={destination.name+" 대표 사진 출처"}
+      title={`${hero.author} · ${hero.license} (가로 크롭 표시)`}>사진 출처</a>}
   </li>;
 }
 
