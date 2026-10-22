@@ -108,13 +108,28 @@ function TripSection({ trips, status, retry, isSignedIn }) {
       {trips.map(trip => <article className="home-trip-card home-boarding-pass-shadow" key={trip.id}>
         <div className="home-boarding-pass home-boarding-pass-shape">
         <div className="home-pass-main">
-          <div className="home-ticket-topline"><span className="home-trip-kicker">BOARDING PASS</span><span className="home-ticket-symbol" aria-hidden="true">✈</span></div>
+          <div className="home-pass-spine">
+            <svg className="home-pass-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" /><ellipse cx="12" cy="12" rx="4" ry="9" />
+              <path d="M3 12h18M5 6.5c4 2 10 2 14 0M5 17.5c4-2 10-2 14 0" />
+            </svg>
+            <span className="home-trip-kicker">BOARDING PASS</span>
+            <svg className="home-pass-spine-plane" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="m22 12-8-3-4-7H7l3 7-6 1-2-3H0l2 5-2 5h2l2-3 6 1-3 7h3l4-7 8-3Z" />
+            </svg>
+          </div>
+          <div className="home-pass-heading"><span>DESTINATION</span><span className="home-pass-flight" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="m22 12-8-3-4-7H7l3 7-6 1-2-3H0l2 5-2 5h2l2-3 6 1-3 7h3l4-7 8-3Z" /></svg>
+          </span></div>
           <div className="home-trip-info"><span className="home-trip-destination">{trip.destination || "여행지 미정"}</span>
             <h3>{trip.title}</h3>
             <div className="home-trip-footer">
-              <p>{displayDate(trip.startDate)} ~ {displayDate(trip.endDate)}</p>
+              <dl className="home-pass-dates">
+                <div><dt>출발일</dt><dd>{displayDate(trip.startDate)}</dd></div>
+                <div><dt>도착일</dt><dd>{displayDate(trip.endDate)}</dd></div>
+              </dl>
               <Link className="home-trip-continue" to={`/route-result?id=${encodeURIComponent(trip.id)}`}
-                state={{ routeId: trip.id, tripId: trip.id, scheduleId: trip.id }}>계속하기</Link>
+                state={{ routeId: trip.id, tripId: trip.id, scheduleId: trip.id }}>계속하기 <span aria-hidden="true">↗</span></Link>
             </div>
           </div>
         </div>
