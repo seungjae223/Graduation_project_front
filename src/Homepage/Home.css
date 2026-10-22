@@ -489,22 +489,30 @@
 .home-hot-demo-credit:focus-visible { outline:2px solid white; outline-offset:2px; }
 @media(max-width:390px) { .home-ticket-bottom-label { font-size:9px; letter-spacing:.4px; } .home-ticket-bottom .home-primary-action { font-size:11px; } }
 
-/* Both cutouts and their outlines share the same centre, radius and footer baseline. */
+/* Keep the left punch-out; the right edge is the torn-off boarding-pass stub. */
 .home-boarding-pass-shape {
   --home-notch-center: calc(100% - 49px);
+  --home-tear-depth: 6px;
+  --home-tear-pitch: 12px;
+  border-radius:20px 0 0 20px;
+  border-right:0;
   -webkit-mask-image:
     radial-gradient(circle at 0 var(--home-notch-center), transparent 0 11.45px, #000 12px),
-    radial-gradient(circle at 100% var(--home-notch-center), transparent 0 11.45px, #000 12px);
+    conic-gradient(from 45deg at calc(100% - var(--home-tear-depth)) 50%, transparent 0 90deg, #000 0);
   mask-image:
     radial-gradient(circle at 0 var(--home-notch-center), transparent 0 11.45px, #000 12px),
-    radial-gradient(circle at 100% var(--home-notch-center), transparent 0 11.45px, #000 12px);
+    conic-gradient(from 45deg at calc(100% - var(--home-tear-depth)) 50%, transparent 0 90deg, #000 0);
+  -webkit-mask-size:100% 100%,100% var(--home-tear-pitch);
+  mask-size:100% 100%,100% var(--home-tear-pitch);
+  -webkit-mask-repeat:no-repeat,repeat-y;
+  mask-repeat:no-repeat,repeat-y;
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
 }
 .home-boarding-pass .home-ticket-perforation::before,
 .home-boarding-pass .home-ticket-perforation::after { content:none; }
 
-/* A fine line follows each notch; the surrounding whole-ticket shadow lives outside the mask. */
+/* Outline the preserved left notch and each tooth of the torn right edge. */
 .home-boarding-pass-shape {
   display:flex; flex-direction:column; justify-content:space-between;
   min-height:168px; height:100%; padding:0; position:relative; box-shadow:none; filter:none;
@@ -517,9 +525,8 @@
   pointer-events: none;
   background:
     radial-gradient(circle at 0 var(--home-notch-center),
-      transparent 0 11.85px, #cadce7 12px 13px, transparent 13.15px),
-    radial-gradient(circle at 100% var(--home-notch-center),
-      transparent 0 11.85px, #cadce7 12px 13px, transparent 13.15px);
+      transparent 0 11.85px, #cadce7 12px 13px, transparent 13.15px) no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='12' viewBox='0 0 7 12'%3E%3Cpath d='M6.5 0 .5 6 6.5 12' fill='none' stroke='%23cadce7' stroke-width='1'/%3E%3C/svg%3E") right top / 7px 12px repeat-y;
 }
 
 /* Symmetric gutters plus center snapping make the current pass visually centered. */
@@ -557,9 +564,8 @@
 .home-v12 .home-trip-rail>.home-boarding-pass-shadow{flex:0 0 calc(100% - 32px);box-sizing:border-box}
 .home-v12 .home-trip-rail.home-single-rail>.home-boarding-pass-shadow{flex:0 0 calc(100% - 32px);max-width:none;margin:0}
 .home-v12 .home-trip-rail.home-single-rail{justify-content:center}
-/* A boarding pass has two genuine half-round punch-outs at the exact
-   seam between its flexible upper panel and 48px footer (49px includes border).
-   The whole ticket is masked as one piece so the cutouts also clip the shadow. */
+/* The left punch-out remains aligned with the upper panel/footer seam.
+   Mask the whole ticket so its shadow follows the notch and torn edge. */
 .home-v12 .home-boarding-pass-shape{--home-notch-center:calc(100% - 49px)}
 /* Keep the upper panel distinctly pale blue and the fixed footer white:
    their color transition is exactly the cutout and perforation boundary. */
@@ -573,7 +579,7 @@
   -webkit-mask-image:none;mask-image:none;
 }
 .home-v12 .home-boarding-pass .home-ticket-perforation::after{
-  content:"";position:absolute;z-index:3;top:-1px;left:14px;right:14px;height:2px;
+  content:"";position:absolute;z-index:3;top:-1px;left:14px;right:14px;width:auto;height:2px;
   border:0;border-radius:0;box-shadow:none;
   background:repeating-linear-gradient(90deg,#a8c5d8 0 4px,transparent 4px 8px);
   pointer-events:none;
