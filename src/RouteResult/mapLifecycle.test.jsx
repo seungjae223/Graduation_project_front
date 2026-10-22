@@ -17,7 +17,7 @@ const makeSdk = () => {
     attribution.textContent = "SDK map attribution";
     container.appendChild(attribution);
     this.addListener = jest.fn(() => listener);
-    this.fitBounds = jest.fn(); this.setBounds = jest.fn();
+    this.fitBounds = jest.fn(); this.setBounds = jest.fn(); this.relayout = jest.fn();
     maps.push(this);
   });
   const Overlay = jest.fn(function () { this.setMap = jest.fn(); overlays.push(this); });
@@ -28,7 +28,7 @@ const makeSdk = () => {
   return { sdk, overlays, maps, listener };
 };
 beforeEach(() => { jest.clearAllMocks(); process.env.REACT_APP_GOOGLE_MAPS_BROWSER_KEY = "test-key"; });
-afterEach(() => { delete window.google; delete window.kakao; delete process.env.REACT_APP_GOOGLE_MAPS_BROWSER_KEY; });
+afterEach(() => { delete window.google; delete window.kakao; delete window.ResizeObserver; delete process.env.REACT_APP_GOOGLE_MAPS_BROWSER_KEY; });
 
 test.each(["google", "kakao"])("%s attaches markers once, retains the map for callback changes, and releases overlays", async provider => {
   const { sdk, overlays, listener } = makeSdk();
@@ -87,6 +87,31 @@ test("unmounted Kakao consumer ignores SDK completion", async () => {
   view.unmount();
   await act(async () => finish({ maps: sdk }));
   expect(sdk.Map).not.toHaveBeenCalled();
+});
+
+test.each(["google", "kakao"])("%s refits all visits after the map container resizes and releases its observer", async provider => {
+  const { sdk } = makeSdk();
+  window.google = { maps: sdk }; window.kakao = { maps: sdk };
+  importLibrary.mockImplementation(async library => ({
+    maps: { Map: sdk.Map }, marker: { Marker: sdk.Marker }, geocoding: { Geocoder: sdk.Geocoder },
+  }[library]));
+  loadKakaoMapsScript.mockResolvedValue(window.kakao);
+  let resize;
+  const disconnect = jest.fn();
+  window.ResizeObserver = jest.fn(callback => {
+    resize = callback;
+    return { observe: jest.fn(), disconnect };
+  });
+  const Box = provider === "google" ? GoogleMapBox : KakaoMapBox;
+  const view = render(<Box dayData={day} dayIndex={0}/>);
+  await waitFor(() => expect(window.ResizeObserver).toHaveBeenCalledTimes(1));
+  const map = sdk.Map.mock.instances[0];
+  const fit = provider === "google" ? map.fitBounds : map.setBounds;
+  const before = fit.mock.calls.length;
+  act(() => resize());
+  expect(fit).toHaveBeenCalledTimes(before + 1);
+  view.unmount();
+  expect(disconnect).toHaveBeenCalledTimes(1);
 });
 
 test.each([

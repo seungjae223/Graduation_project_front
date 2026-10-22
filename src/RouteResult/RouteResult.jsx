@@ -1740,6 +1740,7 @@ export const GoogleMapBox = ({ dayData, dayIndex, onOpenMap, coordinateOwner, on
     let polylines = [];
     let mapClickListener = null;
     let idleListener = null;
+    let resizeObserver = null;
     const drawStraightLine = (gm, line, bounds) => {
       line.path.forEach((point) => bounds.extend(point));
 
@@ -1834,6 +1835,14 @@ export const GoogleMapBox = ({ dayData, dayIndex, onOpenMap, coordinateOwner, on
           map.setCenter(mapData.center);
           map.setZoom(11);
         }
+        if (typeof ResizeObserver !== "undefined") {
+          resizeObserver = new ResizeObserver(() => {
+            if (!mounted || !map) return;
+            if (mapData.markers.length > 1) map.fitBounds(bounds, 60);
+            else map.setCenter(mapData.center);
+          });
+          resizeObserver.observe(mapRef.current);
+        }
         setMapError(mapData.markers.length < mapDayData.items.length ? "일부 장소의 지도 위치를 확인하지 못했어요." : "");
       } catch (error) {
         if (!mounted) return;
@@ -1845,6 +1854,7 @@ export const GoogleMapBox = ({ dayData, dayIndex, onOpenMap, coordinateOwner, on
     })();
     return () => {
       mounted = false;
+      resizeObserver?.disconnect();
       if (mapClickListener) {
         mapClickListener.remove();
       }
@@ -1890,6 +1900,7 @@ export const KakaoMapBox = ({ dayData, dayIndex, onOpenMap, coordinateOwner, onR
     let sdk = null;
     let clickHandler = null;
     let resizeTimer = null;
+    let resizeObserver = null;
     const markers = [];
     const polylines = [];
 
@@ -2027,6 +2038,15 @@ export const KakaoMapBox = ({ dayData, dayIndex, onOpenMap, coordinateOwner, onR
           map.setLevel(7);
         }
 
+        if (typeof ResizeObserver !== "undefined") {
+          resizeObserver = new ResizeObserver(() => {
+            if (!mounted || !map) return;
+            map.relayout();
+            if (mapData.markers.length > 1) map.setBounds(bounds);
+            else map.setCenter(new kakao.maps.LatLng(mapData.center.lat, mapData.center.lng));
+          });
+          resizeObserver.observe(mapRef.current);
+        }
         setMapError(mapData.markers.length < mapDayData.items.length ? "일부 장소의 지도 위치를 확인하지 못했어요." : "");
       })
       .catch((error) => {
@@ -2039,6 +2059,7 @@ export const KakaoMapBox = ({ dayData, dayIndex, onOpenMap, coordinateOwner, onR
 
     return () => {
       mounted = false;
+      resizeObserver?.disconnect();
       if (resizeTimer) {
         clearTimeout(resizeTimer);
       }

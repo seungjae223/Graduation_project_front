@@ -17,4 +17,4 @@
 .trip-map-footer p{margin:0;font-size:14px;font-weight:700}
 .trip-map-footer span{display:block;margin-top:4px;font-size:12px;font-weight:400;color:var(--color-text-muted)}
 .trip-map-footer a{display:flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border-radius:12px;background:var(--color-primary);color:var(--color-on-primary);font-size:14px;font-weight:700;text-decoration:none}
-@media(max-width:430px){.trip-map-backdrop{padding:10px}.trip-map-dialog{padding:14px;max-height:calc(100dvh - 20px)}.trip-map-heading h2{font-size:18px}.trip-map-footer a{width:100%}}
+@media(max-width:430px){.trip-map-backdrop{padding:10px}.trip-map-dialog{padding:14px;max-height:calc(100dvh - 20px)}.trip-map-heading h2{font-size:18px}.trip-map-days button{min-width:88px;flex:1 0 auto;gap:6px;padding:8px 10px;font-size:14px}.trip-map-footer a{width:100%}}
