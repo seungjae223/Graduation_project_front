@@ -565,7 +565,7 @@ const getExplicitMapProviderFromContext = (savedRoute, routeState) => {
   return "";
 };
 
-const getMapProviderForDay = (day, dayIndex, tripLevelMapProvider = "") => {
+export const getMapProviderForDay = (day, dayIndex, tripLevelMapProvider = "") => {
   const sourceItems = getSourceItemsForDay(day, dayIndex);
 
   // 좌표가 있으면 좌표 기준을 최우선으로 사용합니다.
@@ -630,7 +630,7 @@ const buildGoogleMapsPlaceUrl = (title = "", itemOrCoord = null) => {
 
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 };
-const buildGoogleMapsRouteUrl = (day) => {
+export const buildGoogleMapsRouteUrl = (day) => {
   const placeQueries = (day?.items || [])
     .map((item) => getCoordinateQueryText(item) || normalizeTitle(item.title))
     .filter(Boolean);

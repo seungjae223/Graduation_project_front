@@ -134,7 +134,7 @@ button {
   aspect-ratio: 0.77 / 1 !important;
 }
 
-.route-map-mock,
+.route-result-page .route-map-mock,
 .route-map-static-preview,
 .route-map-static-fallback {
   height: auto !important;

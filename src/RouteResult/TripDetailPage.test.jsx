@@ -64,6 +64,19 @@ test("approved detail has only list/button view switch, no redundant heading or 
   expect(screen.getAllByRole("heading", { name: /일차/ })).toHaveLength(4);
   expect(screen.getByText("도톤보리")).toBeInTheDocument();
 });
+
+test("map action opens the itinerary map instead of the old placeholder and restores focus on close", () => {
+  mount();
+  const trigger = screen.getByRole("button", { name: "지도 보기" });
+  trigger.focus();
+  fireEvent.click(trigger);
+  expect(screen.getByRole("dialog", { name: "여행 일정 지도" })).toBeInTheDocument();
+  expect(screen.getByRole("region", { name: "구글맵 일정 지도" })).toBeInTheDocument();
+  expect(screen.queryByText("지도 전용 화면은 다음 단계에서 연결할 예정이에요.")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "지도 닫기" }));
+  expect(screen.queryByRole("dialog", { name: "여행 일정 지도" })).not.toBeInTheDocument();
+  expect(trigger).toHaveFocus();
+});
 test("date pencil opens the animated calendar and updates the selected range only after confirmation",async()=>{
   mount();
   fireEvent.click(screen.getByRole("button",{name:"여행 날짜 수정"}));

@@ -15,6 +15,7 @@ import { uniqueTripTitle } from "./tripTitleDedup";
 import TripOptimizedEditor from "./TripOptimizedEditor";
 import TripDateEditModal from "./TripDateEditModal";
 import TripInlineEditor from "./TripInlineEditor";
+import TripMapModal from "./TripMapModal";
 import "./TripDetailPage.css";
 
 function Icon({ name }) {
@@ -162,6 +163,7 @@ export default function TripDetailPage() {
   const [view, setView] = useState(() => readTripDisplayPreferences(id, account).view);
   const [activeIndex, setActiveIndex] = useState(0);
   const [hiddenTimeDays, setHiddenTimeDays] = useState({});
+  const [mapOpen, setMapOpen] = useState(false);
   const [version, setVersion] = useState(() => readTripDisplayPreferences(id, account).version);
   const [optimizedRevision, setOptimizedRevision] = useState(0);
   const optimizedVersions = useMemo(() =>
@@ -259,6 +261,7 @@ export default function TripDetailPage() {
     mounted.current = true;
     setNotice("");
     setEditWarning(null);
+    setMapOpen(false);
     setDateOpen(false);setDateBusy(false);setDateError("");dateLock.current=false;
     setTitleEditing(false);
     setTitleDraft("");
@@ -377,7 +380,7 @@ export default function TripDetailPage() {
   const goNextStage = (kind, day, add = false, first = false) => {
     if (bulkBusy) return;
     if (kind === "map") {
-      setNotice("지도 전용 화면은 다음 단계에서 연결할 예정이에요.");
+      setMapOpen(true);
       return;
     }
     const chosen = day || (view === "tabs" ? activeIndex + 1 : 1);
@@ -655,6 +658,11 @@ export default function TripDetailPage() {
         }}>일정 다시 조회</button>}
       </div>}
     </section>
+    {mapOpen && <TripMapModal trip={result.trip}
+      days={editMode && !optimizedEdit ? days : displayDays}
+      initialDay={view === "tabs" ? (days[activeIndex]?.day || 1) :
+        (displayDays.find(day => day.places.length)?.day || 1)}
+      owner={account + ":" + id + ":" + activeVersion} onClose={() => setMapOpen(false)}/>}
     {dateOpen && <TripDateEditModal startDate={result.trip.startDate}
       endDate={result.trip.endDate} busy={dateBusy} error={dateError}
       onClose={() => {if (!dateLock.current) {setDateOpen(false);setDateError("");}}}

@@ -1,8 +1,9 @@
 /* eslint-disable testing-library/no-node-access -- Inspect SDK-owned children retained by the provider after React updates. */
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { GoogleMapBox, KakaoMapBox } from "./RouteResult";
 import { importLibrary } from "@googlemaps/js-api-loader";
 import { loadKakaoMapsScript } from "../utils/kakaoMapLoader";
+import TripMapModal from "./TripMapModal";
 
 jest.mock("@googlemaps/js-api-loader", () => ({ setOptions: jest.fn(), importLibrary: jest.fn() }));
 jest.mock("../utils/kakaoMapLoader", () => ({ loadKakaoMapsScript: jest.fn() }));
@@ -86,4 +87,39 @@ test("unmounted Kakao consumer ignores SDK completion", async () => {
   view.unmount();
   await act(async () => finish({ maps: sdk }));
   expect(sdk.Map).not.toHaveBeenCalled();
+});
+
+test.each([
+  ["서울", 37.57, 126.98, "카카오맵", "map.kakao.com"],
+  ["오사카", 34.68, 135.52, "구글맵", "www.google.com"],
+])("trip map uses the existing SDK for %s and keeps empty days empty", async (destination, lat, lng, label, host) => {
+  const { sdk, overlays } = makeSdk();
+  window.google = { maps: sdk }; window.kakao = { maps: sdk };
+  importLibrary.mockImplementation(async library => ({
+    maps: { Map: sdk.Map }, marker: { Marker: sdk.Marker }, geocoding: { Geocoder: sdk.Geocoder },
+  }[library]));
+  loadKakaoMapsScript.mockResolvedValue(window.kakao);
+  const trip = { title: "테스트 여행", destination };
+  const days = [
+    { day: 1, label: "1일차", dateLabel: "10.26", places: [
+      { tripPlaceId: 10, placeName: "첫 장소", latitude: lat, longitude: lng },
+      { tripPlaceId: 11, placeName: "두 번째", latitude: lat + .01, longitude: lng + .01 },
+    ] },
+    { day: 2, label: "2일차", dateLabel: "10.27", places: [] },
+  ];
+  const close = jest.fn();
+  render(<TripMapModal trip={trip} days={days} initialDay={1} owner="account:A:trip1" onClose={close}/>);
+  await waitFor(() => expect(sdk.Map).toHaveBeenCalledTimes(1));
+  expect(screen.getByRole("region", { name: label + " 일정 지도" })).toBeInTheDocument();
+  expect(new URL(screen.getByRole("link", { name: label + "에서 경로 열기 ↗" }).href).hostname).toBe(host);
+  expect(loadKakaoMapsScript).toHaveBeenCalledTimes(destination === "서울" ? 1 : 0);
+  expect(importLibrary.mock.calls.map(([library]) => library))
+    .toEqual(destination === "서울" ? [] : ["maps", "marker", "geocoding"]);
+  fireEvent.click(screen.getByRole("button", { name: "2일차 10.27" }));
+  expect(screen.getByText("이 일차에는 등록된 장소가 없어요.")).toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: /에서 경로 열기/ })).not.toBeInTheDocument();
+  expect(sdk.Map).toHaveBeenCalledTimes(1);
+  overlays.forEach(overlay => expect(overlay.setMap).toHaveBeenCalledWith(null));
+  fireEvent.keyDown(document, { key: "Escape" });
+  expect(close).toHaveBeenCalledTimes(1);
 });
