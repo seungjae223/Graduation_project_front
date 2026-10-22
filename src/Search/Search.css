@@ -418,10 +418,6 @@
 
 .search-page .clear-btn { min-height: var(--touch-target); }
 
-@media (min-width: 768px) {
-  .search-page .region-card { flex-basis: calc((100% - 50px) / 6); }
-}
-
 /* Server-backed destination results are visually distinct from individual places. */
 .search-destinations-caption { margin: 4px 0 12px; color: var(--color-text-muted); font-size: 13px; }
 .search-destination-list { display: flex; flex-direction: column; gap: 12px; }

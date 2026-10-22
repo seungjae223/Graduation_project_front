@@ -7,8 +7,8 @@ html :is(
   .fix-point-modal, .route-result-memo-modal, .location-permission-modal,
   .privacy-modal
 ) {
-  width: min(92vw, var(--dialog-width, var(--modal-width)));
-  max-width: min(92vw, var(--dialog-width, var(--modal-width)));
+  width: min(92vw, var(--page-max-width), var(--dialog-width, var(--modal-width)));
+  max-width: min(92vw, var(--page-max-width), var(--dialog-width, var(--modal-width)));
   max-height: calc(var(--modal-viewport-height, 100dvh) - 32px);
   min-width: 0;
   box-sizing: border-box;

@@ -1,33 +1,17 @@
 /*
  * Responsive application shell
  *
- * The app uses the viewport. Each route has a content limit, shared with its
- * header and fixed controls, while cards/forms retain their own proportions.
+ * Every route uses the home column, shared with its header and fixed controls.
+ * Smaller viewports shrink the column; cards/forms retain their own proportions.
  */
 :root {
-  --compact-content-width: 390px;
-  --content-max-width: 640px;
+  --content-max-width: 390px;
   --page-max-width: min(100vw, var(--content-max-width));
   /* Compatibility for detail/auth styles that still use the old token. */
   --app-width: var(--page-max-width);
   --page-gutter: clamp(16px, 4vw, 24px);
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-/* Route metadata is present during lazy loading, so navigation stays aligned. */
-:root:has(.app:is([data-page="/home"], [data-page="/login"])) {
-  --content-max-width: var(--compact-content-width);
-}
-
-:root:has(.app:is(
-  [data-page="/search"],
-  [data-page="/recommend"],
-  [data-page="/popular-all"],
-  [data-page="/total"],
-  [data-page^="/destinations/"]
-)) {
-  --content-max-width: 960px;
 }
 
 html {
@@ -255,17 +239,6 @@ button {
     max-height: 360px;
   }
 
-  /* Wider discovery pages add columns instead of stretching each card. */
-  .app .recommend-destination-page .recommend-destination-grid,
-  .app .search-page .destination-place-grid,
-  .app .destination-explore-page .destination-place-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .search-page .search-input-wrap {
-    max-width: 640px;
-  }
 }
 
 @media (max-height: 620px) and (max-width: 767px) {
