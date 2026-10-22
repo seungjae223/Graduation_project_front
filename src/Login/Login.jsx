@@ -4,7 +4,7 @@ import { beginOAuth } from "../utils/oauthSecurity";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getApiErrorMessage } from "../api/api";
 import { getSocialAuthorizationApi, loginApi } from "../api/authApi";
-import { saveSocialLoginReturnPath } from "../utils/authRedirect";
+import { LOGIN_SUCCESS_PATH, getSocialLoginReturnPath, saveSocialLoginReturnPath } from "../utils/authRedirect";
 import { buildAuthPath, getAuthReturnPath } from "./authPaths";
 import useAuthRequest, { isCanceledAuthRequest } from "./useAuthRequest";
 import "./Login.css";
@@ -60,7 +60,7 @@ const Login = () => {
     if (!request) return;
     try {
       await loginApi({ email, password, keepLogin: loginForm.keepLogin }, request.options);
-      if (request.isCurrent()) navigate(returnPath, { replace: true });
+      if (request.isCurrent()) navigate(LOGIN_SUCCESS_PATH, { replace: true });
     } catch (error) {
       if (!request.isCurrent() || isCanceledAuthRequest(error)) return;
       logSafeApiError(error, "login");
@@ -83,12 +83,12 @@ const Login = () => {
       const result = await getSocialAuthorizationApi(provider, request.options);
       if (!request.isCurrent()) return;
       if (result.authenticated) {
-        sessionStorage.removeItem("socialLoginReturnTo");
-        navigate(returnPath, { replace: true });
+        getSocialLoginReturnPath({ consume: true });
+        navigate(LOGIN_SUCCESS_PATH, { replace: true });
         return;
       }
       const { authorizationUrl, state } = result;
-      saveSocialLoginReturnPath(returnPath);
+      saveSocialLoginReturnPath(LOGIN_SUCCESS_PATH);
       window.location.assign(beginOAuth(provider, authorizationUrl, state));
     } catch (error) {
       if (!request.isCurrent() || isCanceledAuthRequest(error)) return;

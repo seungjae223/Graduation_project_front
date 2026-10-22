@@ -1,4 +1,4 @@
-const DEFAULT_AFTER_LOGIN_PATH = "/home";
+export const LOGIN_SUCCESS_PATH = "/home";
 
 export const isSafeInternalPath = (value) => {
   if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
@@ -15,7 +15,7 @@ export const isSafeInternalPath = (value) => {
 
 export const getCurrentReturnPath = () => {
   const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-  return isSafeInternalPath(currentPath) ? currentPath : DEFAULT_AFTER_LOGIN_PATH;
+  return isSafeInternalPath(currentPath) ? currentPath : LOGIN_SUCCESS_PATH;
 };
 
 export const buildLoginPath = (returnPath = getCurrentReturnPath()) => {
@@ -28,13 +28,13 @@ export const buildLoginPath = (returnPath = getCurrentReturnPath()) => {
 
 export const getReturnPathFromSearch = (search) => {
   const returnPath = new URLSearchParams(search).get("returnTo");
-  return isSafeInternalPath(returnPath) ? returnPath : DEFAULT_AFTER_LOGIN_PATH;
+  return isSafeInternalPath(returnPath) ? returnPath : LOGIN_SUCCESS_PATH;
 };
 
 export const saveSocialLoginReturnPath = (returnPath) => {
   const safePath = isSafeInternalPath(returnPath)
     ? returnPath
-    : DEFAULT_AFTER_LOGIN_PATH;
+    : LOGIN_SUCCESS_PATH;
 
   try {
     sessionStorage.setItem("socialLoginReturnTo", safePath);
@@ -51,8 +51,8 @@ export const getSocialLoginReturnPath = ({ consume = false } = {}) => {
       sessionStorage.removeItem("socialLoginReturnTo");
     }
 
-    return isSafeInternalPath(savedPath) ? savedPath : DEFAULT_AFTER_LOGIN_PATH;
+    return isSafeInternalPath(savedPath) ? savedPath : LOGIN_SUCCESS_PATH;
   } catch {
-    return DEFAULT_AFTER_LOGIN_PATH;
+    return LOGIN_SUCCESS_PATH;
   }
 };

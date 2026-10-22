@@ -22,10 +22,12 @@ beforeEach(() => {
 });
 test.each(["google", "kakao"])("%s: StrictMode에서도 일치한 state로 한 번만 완료", async (provider) => {
   mockProvider = provider;
+  sessionStorage.setItem("socialLoginReturnTo", "/route-create");
   sessionStorage.setItem(`oauth_state_${provider}`, JSON.stringify({ state: "expected", expiresAt: Date.now() + 60000 }));
   const view = render(<StrictMode><OAuthCallback /></StrictMode>);
   await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
   expect(mockNavigate).toHaveBeenCalledWith("/home", { replace: true });
+  expect(sessionStorage.getItem("socialLoginReturnTo")).toBeNull();
   expect(completeSocialLoginApi).toHaveBeenCalledTimes(1);
   expect(completeSocialLoginApi).toHaveBeenCalledWith(
     { provider, code: "test-code", state: "expected" },

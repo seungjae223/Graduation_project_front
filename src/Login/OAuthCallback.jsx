@@ -6,6 +6,7 @@ import { getApiErrorMessage } from "../api/api";
 import { completeSocialLoginApi } from "../api/authApi";
 import EarthLoader from "../Loading/EarthLoader";
 import {
+  LOGIN_SUCCESS_PATH,
   buildLoginPath,
   getSocialLoginReturnPath,
 } from "../utils/authRedirect";
@@ -47,7 +48,10 @@ function OAuthCallback() {
       attempt.started = true;
       try {
         await completeSocialLoginApi(attempt.payload, request.options);
-        if (request.isCurrent()) navigate(getSocialLoginReturnPath({ consume: true }), { replace: true });
+        if (request.isCurrent()) {
+          getSocialLoginReturnPath({ consume: true });
+          navigate(LOGIN_SUCCESS_PATH, { replace: true });
+        }
       } catch (error) {
         if (!request.isCurrent() || isCanceledAuthRequest(error)) return;
         logSafeApiError(error, "oauth-complete");

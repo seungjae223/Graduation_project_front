@@ -50,6 +50,36 @@ beforeEach(() => {
 });
 afterEach(() => alert.mockRestore());
 
+test.each(["/mypage", "/route-create", "/route-result?id=28#day-1"])("email login goes home regardless of returnTo %s", async (destination) => {
+  loginApi.mockResolvedValue({});
+  setup(`/login?returnTo=${encodeURIComponent(destination)}`);
+  fireEvent.change(screen.getByLabelText("이메일"), { target: { value: "test@example.com" } });
+  fireEvent.change(screen.getByLabelText("비밀번호"), { target: { value: "test-only" } });
+  fireEvent.submit(screen.getByRole("form", { name: "로그인" }));
+  await waitFor(() => expect(screen.getByTestId("location")).toHaveTextContent(/^\/home$/));
+  expect(loginApi).toHaveBeenCalledTimes(1);
+});
+
+test.each([["kakao", "카카오 로그인"], ["google", "구글 로그인"]])("%s immediate login goes home and clears the old social destination", async (provider, label) => {
+  getSocialAuthorizationApi.mockResolvedValue({ authenticated: true });
+  saveSocialLoginReturnPath("/route-create");
+  setup("/login?returnTo=%2Fmypage");
+  fireEvent.click(screen.getByRole("button", { name: label }));
+  await waitFor(() => expect(screen.getByTestId("location")).toHaveTextContent(/^\/home$/));
+  expect(getSocialAuthorizationApi).toHaveBeenCalledWith(provider, expect.any(Object));
+  expect(sessionStorage.getItem("socialLoginReturnTo")).toBeNull();
+});
+
+test("failed email login stays on the login page", async () => {
+  loginApi.mockRejectedValue(new Error("로그인 실패"));
+  setup("/login?returnTo=%2Fmypage");
+  fireEvent.change(screen.getByLabelText("이메일"), { target: { value: "test@example.com" } });
+  fireEvent.change(screen.getByLabelText("비밀번호"), { target: { value: "test-only" } });
+  fireEvent.submit(screen.getByRole("form", { name: "로그인" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("이메일 또는 비밀번호를 확인해주세요.");
+  expect(screen.getByTestId("location")).toHaveTextContent(/^\/login\?returnTo=%2Fmypage$/);
+});
+
 test("a departed login aborts its request and cannot navigate on late success", async () => {
   const result = deferred(); loginApi.mockReturnValue(result.promise);
   setup("/login?returnTo=%2Fmypage", true);
@@ -363,10 +393,12 @@ test("StrictMode OAuth uses single-use state once, sends once and aborts departe
   expect(screen.getByTestId("location")).toHaveTextContent("/away");
 });
 
-test("current StrictMode OAuth completion honors safe original destination", async () => {
-  beginOAuth("kakao", "https://kauth.kakao.com/authorize?state=test-state", "test-state");
+test.each(["kakao", "google"])("current StrictMode %s OAuth completion always goes home", async (provider) => {
+  const host = provider === "kakao" ? "kauth.kakao.com" : "accounts.google.com";
+  beginOAuth(provider, `https://${host}/authorize?state=test-state`, "test-state");
   saveSocialLoginReturnPath("/mypage"); completeSocialLoginApi.mockResolvedValue({});
-  setup("/oauth/kakao/callback?code=test-code&state=test-state", true);
-  await waitFor(() => expect(screen.getByTestId("location")).toHaveTextContent("/mypage"));
+  setup(`/oauth/${provider}/callback?code=test-code&state=test-state`, true);
+  await waitFor(() => expect(screen.getByTestId("location")).toHaveTextContent(/^\/home$/));
   expect(completeSocialLoginApi).toHaveBeenCalledTimes(1);
+  expect(sessionStorage.getItem("socialLoginReturnTo")).toBeNull();
 });
