@@ -533,7 +533,7 @@
       transparent 0 7.7px, #cadce7 7.9px 8.8px, transparent 9px) no-repeat,
     radial-gradient(circle at var(--home-notch-x) 100%,
       transparent 0 7.7px, #cadce7 7.9px 8.8px, transparent 9px) no-repeat,
-    url("./ticket-torn-outline.svg") right top / 12px var(--home-tear-height) repeat-y;
+    url("./ticket-torn-outline.svg") right top / 20px var(--home-tear-height) repeat-y;
 }
 
 /* Symmetric gutters plus center snapping make the current pass visually centered. */
