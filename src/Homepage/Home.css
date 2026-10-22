@@ -457,8 +457,15 @@
 .home-ticket-main h2 { font-size:19px; margin:5px 0; }
 .home-ticket-main p { margin:0; line-height:1.5; font-size:12px; }
 .home-ticket-route { display:flex; align-items:center; justify-content:space-between; gap:12px; color:#42657a; font-size:12px; font-weight:700; padding-top:14px; }
-.home-ticket-flight-line { flex:1; text-align:center; color:#2b739b; font-size:17px; border-top:1px dashed #9fbcca; height:1px; line-height:0; }
-.home-ticket-flight-line::first-letter { background:#f1f8fc; }
+.home-ticket-flight-line{position:relative;flex:1;min-width:24px;height:24px;color:#2b739b}
+.home-ticket-flight-line::before{content:"";position:absolute;top:50%;left:0;right:0;border-top:1px dashed #9fbcca;pointer-events:none}
+.home-ticket-plane{position:absolute;top:50%;left:0;display:block;width:20px;height:20px;transform:translateY(-50%);background:transparent;pointer-events:none;animation:home-ticket-flight 4s linear infinite}
+@keyframes home-ticket-flight{
+  0%{left:0;opacity:0}
+  8%,85%{opacity:1}
+  100%{left:calc(100% - 20px);opacity:0}
+}
+@media(prefers-reduced-motion:reduce){.home-ticket-plane{animation:none;left:calc(50% - 10px);opacity:1}}
 .home-ticket-perforation { position:relative; z-index:2; border-top:1.5px dashed #adc6d3; margin:0 12px; height:0; }
 .home-ticket-perforation::before,.home-ticket-perforation::after { content:""; position:absolute; z-index:3; top:-12px; width:24px; height:24px; border-radius:50%; background:var(--color-page); border:0; box-shadow:none; pointer-events:none; }
 .home-ticket-perforation::before { left:-24px; }

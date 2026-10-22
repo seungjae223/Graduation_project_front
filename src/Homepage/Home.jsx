@@ -84,7 +84,13 @@ function TripSection({ trips, status, retry, isSignedIn }) {
         <div className="home-ticket-topline"><span className="home-trip-kicker">MY NEXT TRIP</span><span className="home-ticket-symbol" aria-hidden="true">✈</span></div>
         <h2 id="home-trip-title">첫 여행 계획을 시작해 볼까요?</h2>
         <p>가고 싶은 도시와 날짜를 정하고 나만의 여행 일정을 만들어 보세요.</p>
-        <div className="home-ticket-route" aria-hidden="true"><span>나의 출발</span><span className="home-ticket-flight-line">✈</span><span>새로운 여행</span></div>
+        <div className="home-ticket-route" aria-hidden="true"><span>나의 출발</span>
+          <span className="home-ticket-flight-line">
+            <svg className="home-ticket-plane" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" focusable="false">
+              <path d="m22 12-8-3-4-7H7l3 7-6 1-2-3H0l2 5-2 5h2l2-3 6 1-3 7h3l4-7 8-3Z" />
+            </svg>
+          </span><span>새로운 여행</span>
+        </div>
       </div>
       <div className="home-ticket-perforation" aria-hidden="true" />
       <div className="home-ticket-bottom"><span className="home-ticket-bottom-label">YOUR NEXT JOURNEY</span>
