@@ -27,7 +27,7 @@ export default function PastTrips() {
   const query = useReadQuery(account + ":past-trips",
     signal => getTripsApi({ signal }), account !== "anonymous",
     () => getAuthSnapshot().accountKey === account);
-  const { deleteTrips, pendingId, busy, notice } = useTripDeletion(account, id => {
+  const { deleteTrips, pendingId, busy, notice, needsVerification, retryVerification } = useTripDeletion(account, id => {
     setDeletedIds(previous => [...new Set([...previous, id])]);
     setSelectedIds(previous => previous.filter(selected => selected !== id));
     void query.retry();
@@ -86,7 +86,12 @@ export default function PastTrips() {
     {query.status === "error" && <div role="alert" className="v15-past-info">
       지난 여행을 불러오지 못했어요. <button type="button" onClick={query.retry}>다시 조회</button>
     </div>}
-    {notice && <p className="v15-past-info" role="status">{notice}</p>}
+    {notice && <div className="v15-past-info" role="status">
+      <p>{notice}</p>
+      {needsVerification && <button type="button" onClick={retryVerification} disabled={busy}>
+        {busy ? "삭제 결과 확인 중..." : "삭제 결과 다시 확인"}
+      </button>}
+    </div>}
 
     {query.data && <section aria-label="지난 여행 목록">
       <div className="v15-past-section-heading"><h2>지난 일정</h2>
@@ -114,7 +119,7 @@ export default function PastTrips() {
       role="region" aria-label="선택한 지난 여행 삭제"
       aria-hidden={!(editing && selectedIds.length > 0)}
       inert={!(editing && selectedIds.length > 0)}>
-      <button type="button" disabled={busy || !selectedIds.length} onClick={removeSelected}
+      <button type="button" disabled={busy || needsVerification || !selectedIds.length} onClick={removeSelected}
         aria-label={`선택한 지난 여행 ${selectedIds.length}개 삭제하기`}>
         삭제하기 <strong>{selectedIds.length}</strong>
       </button>

@@ -290,7 +290,7 @@ function MySchedule() {
   const [errorMessage, setErrorMessage] = useState("");
   const [editing, setEditing] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
-  const { deleteTrips, pendingId, busy, notice } = useTripDeletion(account, id => {
+  const { deleteTrips, pendingId, busy, notice, needsVerification, retryVerification } = useTripDeletion(account, id => {
     // A focus-triggered list fetch started before DELETE must not restore a removed ticket.
     requestRef.current?.abort();
     requestRef.current = null;
@@ -415,7 +415,12 @@ function MySchedule() {
       <p>{errorMessage}{scheduleList.length > 0 ? " 마지막으로 확인한 일정을 표시합니다." : ""}</p>
       <button type="button" onClick={loadSchedules} disabled={isLoading}>다시 불러오기</button>
     </div>}
-    {notice && <p className="v15-schedule-notice" role="status">{notice}</p>}
+    {notice && <div className="v15-schedule-notice" role="status">
+      <p>{notice}</p>
+      {needsVerification && <button type="button" onClick={retryVerification} disabled={busy}>
+        {busy ? "삭제 결과 확인 중..." : "삭제 결과 다시 확인"}
+      </button>}
+    </div>}
     {isLoading && <p className="v15-schedule-substatus" role="status">
       {scheduleList.length ? "일정을 갱신하는 중..." : "저장된 일정을 불러오는 중입니다."}
     </p>}
@@ -465,7 +470,7 @@ function MySchedule() {
       role="region" aria-label="선택한 여행 일정 삭제"
       aria-hidden={!(editing && selectedIds.length > 0)}
       inert={!(editing && selectedIds.length > 0)}>
-      <button type="button" disabled={busy || !selectedIds.length} onClick={removeSelected}
+      <button type="button" disabled={busy || needsVerification || !selectedIds.length} onClick={removeSelected}
         aria-label={`선택한 일정 ${selectedIds.length}개 삭제하기`}>
         삭제하기 <strong>{selectedIds.length}</strong>
       </button>

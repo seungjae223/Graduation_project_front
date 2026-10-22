@@ -1,25 +1,77 @@
 import { useEffect, useRef, useState } from "react";
-import { deleteTripApi } from "../api/tripApi";
+import { deleteTripApi, getTripsApi } from "../api/tripApi";
 import { getAuthSnapshot } from "./authState";
 import { uncertainMutation } from "./useMutationTask";
 
 // Sequential batch deletion: one confirmation, no automatic retry of an uncertain DELETE.
 export default function useTripDeletion(account, onDeleted) {
-  const lock = useRef(false);
+  const lock = useRef(null);
+  const generation = useRef(0);
+  const unresolved = useRef(null);
   const mounted = useRef(true);
   const latest = useRef({ account, onDeleted });
   latest.current = { account, onDeleted };
   const [pendingId, setPendingId] = useState(null);
   const [notice, setNotice] = useState("");
+  const [needsVerification, setNeedsVerification] = useState(false);
 
   useEffect(() => {
     mounted.current = true;
+    generation.current += 1;
+    lock.current = null;
+    unresolved.current = null;
+    setPendingId(null);
     setNotice("");
-    return () => { mounted.current = false; };
+    setNeedsVerification(false);
+    return () => { mounted.current = false; generation.current += 1; };
   }, [account]);
 
+  const isCurrent = task => mounted.current && generation.current === task.generation &&
+    latest.current.account === task.owner && getAuthSnapshot().accountKey === task.owner;
+
+  // A failed response can arrive after the server committed the deletion. Only a
+  // fresh, validated server list may remove the ticket; never resend DELETE here.
+  const verifyRemoval = async task => {
+    try {
+      const trips = await getTripsApi();
+      if (!isCurrent(task)) return "stale";
+      if (!Array.isArray(trips)) throw new Error("Invalid trip list");
+      unresolved.current = null;
+      setNeedsVerification(false);
+      if (!trips.some(trip => String(trip.id) === String(task.id))) {
+        latest.current.onDeleted(String(task.id));
+        return "deleted";
+      }
+      return "retained";
+    } catch {
+      if (!isCurrent(task)) return "stale";
+      unresolved.current = task;
+      setNeedsVerification(true);
+      return "unknown";
+    }
+  };
+
+  const verificationMessage = result => result === "unknown"
+    ? "삭제 결과를 확인하지 못했어요. 아래 버튼으로 결과를 다시 확인해 주세요. 삭제 요청은 다시 보내지 않습니다."
+    : "목록을 다시 확인했으며 일정이 아직 남아 있어요. 잠시 후 다시 삭제해 주세요.";
+
+  const retryVerification = async () => {
+    const task = unresolved.current;
+    if (lock.current || !task || !isCurrent(task)) return;
+    lock.current = task;
+    setPendingId(String(task.id));
+    try {
+      const result = await verifyRemoval(task);
+      if (!isCurrent(task)) return;
+      setNotice(result === "deleted" ? "일정 삭제를 확인했어요." : verificationMessage(result));
+    } finally {
+      if (lock.current === task) lock.current = null;
+      if (isCurrent(task)) setPendingId(null);
+    }
+  };
+
   const deleteTrips = async trips => {
-    if (lock.current || !Array.isArray(trips) || trips.length === 0) return { complete: false };
+    if (lock.current || unresolved.current || !Array.isArray(trips) || trips.length === 0) return { complete: false };
     const selected = trips.map(trip => ({ id: Number(trip.routeId || trip.id), title: trip.title || "여행 일정" }));
     if (selected.some(trip => !Number.isSafeInteger(trip.id) || trip.id <= 0) ||
         new Set(selected.map(trip => trip.id)).size !== selected.length) {
@@ -34,39 +86,45 @@ export default function useTripDeletion(account, onDeleted) {
       return { complete: false, canceled: true };
     }
 
-    lock.current = true;
+    const task = { owner: account, generation: generation.current };
+    if (!isCurrent(task)) return { complete: false };
+    lock.current = task;
     setNotice("");
-    const owner = account;
     let completed = 0;
     let errorMessage = "";
     try {
       for (const trip of selected) {
-        if (!mounted.current || latest.current.account !== owner ||
-            getAuthSnapshot().accountKey !== owner) break;
+        if (!isCurrent(task)) break;
         setPendingId(String(trip.id));
         try {
           await deleteTripApi(trip.id);
         } catch (error) {
-          errorMessage = uncertainMutation(error)
-            ? "삭제 결과가 불확실해요. 목록을 다시 조회해 주세요. 자동으로 다시 삭제하지 않습니다."
-            : "여행 일정을 삭제하지 못했어요. 다시 확인해 주세요.";
+          if (!isCurrent(task)) break;
+          if (uncertainMutation(error) || error?.response?.status === 404) {
+            const result = await verifyRemoval({ ...task, id: trip.id });
+            if (result === "stale") break;
+            if (result === "deleted") { completed += 1; continue; }
+            errorMessage = verificationMessage(result);
+          } else {
+            errorMessage = "여행 일정을 삭제하지 못했어요. 다시 확인해 주세요.";
+          }
           break;
         }
+        if (!isCurrent(task)) break;
         completed += 1;
-        if (mounted.current && latest.current.account === owner &&
-            getAuthSnapshot().accountKey === owner) latest.current.onDeleted(String(trip.id));
+        latest.current.onDeleted(String(trip.id));
       }
-      if (mounted.current && latest.current.account === owner) {
+      if (isCurrent(task)) {
         if (errorMessage) {
           setNotice((completed ? completed + "개 삭제 완료. " : "") + errorMessage);
         }
       }
     } finally {
-      lock.current = false;
-      if (mounted.current && latest.current.account === owner) setPendingId(null);
+      if (lock.current === task) lock.current = null;
+      if (isCurrent(task)) setPendingId(null);
     }
     return { complete: completed === selected.length, deleted: completed };
   };
 
-  return { deleteTrips, pendingId, busy: pendingId !== null, notice };
+  return { deleteTrips, pendingId, busy: pendingId !== null, notice, needsVerification, retryVerification };
 }

@@ -10,7 +10,7 @@ const setup = () => render(<MemoryRouter initialEntries={["/schedule"]}><Routes>
 beforeEach(() => {
   Object.keys(localStorage).filter(key => key.startsWith("nomango:v15:hidden-trip-ids:"))
     .forEach(key => localStorage.removeItem(key));
-  jest.clearAllMocks(); deleteTripApi.mockReset(); localStorage.setItem("mock_saved_route_results", JSON.stringify([{ id: "mock", title: "오래된 Mock" }])); });
+  jest.clearAllMocks(); getTripsApi.mockReset(); deleteTripApi.mockReset(); localStorage.setItem("mock_saved_route_results", JSON.stringify([{ id: "mock", title: "오래된 Mock" }])); });
 test("direct entry fetches server list despite old Mock; selection keeps server ID", async () => {
   getTripsApi.mockResolvedValue([trip]); setup();
   expect(screen.getByText("저장된 일정을 불러오는 중입니다.")).toBeInTheDocument();
@@ -118,5 +118,26 @@ test("failed batch delete leaves the selected ticket for review without an autom
     expect(await screen.findByText("여행 일정을 삭제하지 못했어요. 다시 확인해 주세요.")).toBeInTheDocument();
     expect(deleteTripApi).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("button", { name: "서버 여행 선택" })).toBeInTheDocument();
+  } finally { confirm.mockRestore(); }
+});
+
+test("uncertain deletion offers a read-only recovery button and blocks another delete", async () => {
+  getTripsApi.mockResolvedValueOnce([trip]).mockRejectedValueOnce(new Error("offline"))
+    .mockResolvedValueOnce([]);
+  deleteTripApi.mockRejectedValue({ response: { status: 500 } });
+  setup();
+  const confirm = jest.spyOn(window, "confirm").mockReturnValue(true);
+  try {
+    fireEvent.click(await screen.findByRole("button", { name: "편집" }));
+    fireEvent.click(screen.getByRole("button", { name: "서버 여행 선택" }));
+    fireEvent.click(screen.getByRole("button", { name: "선택한 일정 1개 삭제하기" }));
+    const retry = await screen.findByRole("button", { name: "삭제 결과 다시 확인" });
+    expect(screen.getByRole("button", { name: "선택한 일정 1개 삭제하기" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "서버 여행 선택" })).toBeInTheDocument();
+    fireEvent.click(retry);
+    expect(await screen.findByText("일정 삭제를 확인했어요.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "서버 여행 선택" })).not.toBeInTheDocument();
+    expect(deleteTripApi).toHaveBeenCalledTimes(1);
+    expect(getTripsApi).toHaveBeenCalledTimes(3);
   } finally { confirm.mockRestore(); }
 });
