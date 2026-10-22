@@ -26,12 +26,15 @@ test("calendar correctly inserts leading blank days",()=>{
 test("date selection requires end day and preserves range when continuing",()=>{
   jest.useFakeTimers().setSystemTime(new Date(2026, 9, 21, 12));
   mount();
-  const next=screen.getByRole("button",{name:"다음"});
+  const next=document.querySelector(".v16-date-actions button");
   expect(next).toBeDisabled();
+  expect(screen.queryByRole("button",{name:"다음"})).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:"2026-10-25"}));
   expect(next).toBeDisabled();
+  expect(screen.queryByRole("button",{name:"다음"})).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:"2026-10-27"}));
   expect(screen.getByText("2박 3일")).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"다음"})).toBeEnabled();
   fireEvent.click(next);
   expect(screen.getByText("이동한 경로: /route-create/region")).toBeInTheDocument();
   expect(readDateDraft("account:test:session:1")).toEqual({startDate:"2026-10-25",endDate:"2026-10-27"});
@@ -69,10 +72,48 @@ test("reopening the date step starts blank instead of restoring the previous sel
   saveDateDraft("account:test:session:1",{startDate:"2026-11-12",endDate:"2026-11-15"});
   mount();
   expect(screen.getAllByText("—",{selector:".v16-date-period-pair strong"})).toHaveLength(2);
-  expect(screen.getByRole("button",{name:"다음"})).toBeDisabled();
+  expect(screen.queryByRole("button",{name:"다음"})).not.toBeInTheDocument();
+  expect(document.querySelector(".v16-date-actions button")).toBeDisabled();
   expect(readDateDraft("account:test:session:1")).toBeNull();
 });
 test("the date step has no arrow decoration on Next",()=>{
   mount();
-  expect(screen.getByRole("button",{name:"다음"}).textContent).toBe("다음");
+  expect(document.querySelector(".v16-date-actions button").textContent).toBe("다음");
+});
+
+test.each(["start", "end", "clear"])("cancelling a completed range with %s hides Next and allows reselection", method=>{
+  jest.useFakeTimers().setSystemTime(new Date(2026,9,21,12));
+  mount();
+  const actions=document.querySelector(".v16-date-actions");
+  const next=actions.querySelector("button");
+  fireEvent.click(screen.getByRole("button",{name:"2026-10-25"}));
+  fireEvent.click(screen.getByRole("button",{name:"2026-10-27"}));
+  expect(actions).toHaveClass("is-visible");
+  expect(actions).not.toHaveAttribute("inert");
+  fireEvent.click(screen.getByRole("button",{name:method==="clear" ? "선택 취소" : method==="start" ? "2026-10-25" : "2026-10-27"}));
+  expect(actions).not.toHaveClass("is-visible");
+  expect(actions).toHaveAttribute("aria-hidden","true");
+  expect(actions).toHaveAttribute("inert");
+  expect(next).toBeDisabled();
+  expect(screen.queryByRole("button",{name:"다음"})).not.toBeInTheDocument();
+  expect(screen.getAllByText("—",{selector:".v16-date-period-pair strong"})).toHaveLength(2);
+  fireEvent.click(next);
+  expect(readDateDraft("account:test:session:1")).toBeNull();
+  fireEvent.click(screen.getByRole("button",{name:"2026-10-28"}));
+  fireEvent.click(screen.getByRole("button",{name:"2026-10-30"}));
+  expect(actions).toHaveClass("is-visible");
+  expect(screen.getByRole("button",{name:"다음"})).toBeEnabled();
+});
+
+test("a pending start can be cleared and same-day trips still show Next",()=>{
+  jest.useFakeTimers().setSystemTime(new Date(2026,9,21,12));
+  mount();
+  fireEvent.click(screen.getByRole("button",{name:"2026-10-25"}));
+  fireEvent.click(screen.getByRole("button",{name:"선택 취소"}));
+  expect(screen.queryByRole("button",{name:"다음"})).not.toBeInTheDocument();
+  expect(screen.queryByRole("button",{name:"선택 취소"})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"2026-10-25"}));
+  fireEvent.click(screen.getByRole("button",{name:"2026-10-25"}));
+  expect(screen.getByText("0박 1일")).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"다음"})).toBeEnabled();
 });

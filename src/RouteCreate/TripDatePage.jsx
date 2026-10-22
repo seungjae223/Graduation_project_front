@@ -34,8 +34,17 @@ export default function TripDatePage() {
   const cells = useMemo(() => makeMonthCells(month.getFullYear(), month.getMonth()), [month]);
   const days = inclusiveDays(startDate, endDate);
 
+  const clearSelection = () => {
+    setStartDate("");
+    setEndDate("");
+    setError("");
+  };
   const choose = key => {
     setError("");
+    if (endDate && (key === startDate || key === endDate)) {
+      clearSelection();
+      return;
+    }
     if (!startDate || endDate || key < startDate) {
       setStartDate(key);
       setEndDate("");
@@ -110,11 +119,15 @@ export default function TripDatePage() {
           <span className="v16-date-period-arrow" aria-hidden="true">→</span>
           <div><small>도착</small><strong>{endDate ? endDate.replace(/-/g, ".") : "—"}</strong></div>
         </div>
-        {days > 0 && <strong className="v16-date-stay">{days - 1}박 {days}일</strong>}
+        {startDate && <div className="v16-date-period-controls">
+          {days > 0 && <strong className="v16-date-stay">{days - 1}박 {days}일</strong>}
+          <button type="button" className="v16-date-clear" onClick={clearSelection}>선택 취소</button>
+        </div>}
       </div>
       {error && <p className="v16-date-error" role="alert">{error}</p>}
     </main>
-    {createPortal(<div className="v16-date-actions">
+    {createPortal(<div className={"v16-date-actions" + (days > 0 ? " is-visible" : "")}
+      aria-hidden={!days} inert={!days}>
       <button type="button" disabled={!days} onClick={next}>다음</button>
     </div>, document.body)}
   </>;
