@@ -492,18 +492,20 @@
 /* Keep the left punch-out; the right edge is the torn-off boarding-pass stub. */
 .home-boarding-pass-shape {
   --home-notch-center: calc(100% - 49px);
-  --home-tear-depth: 6px;
-  --home-tear-pitch: 12px;
+  --home-tear-height: 384px;
   border-radius:20px 0 0 20px;
   border-right:0;
   -webkit-mask-image:
     radial-gradient(circle at 0 var(--home-notch-center), transparent 0 11.45px, #000 12px),
-    conic-gradient(from 45deg at calc(100% - var(--home-tear-depth)) 50%, transparent 0 90deg, #000 0);
+    url("./ticket-torn-mask.svg");
   mask-image:
     radial-gradient(circle at 0 var(--home-notch-center), transparent 0 11.45px, #000 12px),
-    conic-gradient(from 45deg at calc(100% - var(--home-tear-depth)) 50%, transparent 0 90deg, #000 0);
-  -webkit-mask-size:100% 100%,100% var(--home-tear-pitch);
-  mask-size:100% 100%,100% var(--home-tear-pitch);
+    url("./ticket-torn-mask.svg");
+  /* Native-sized curves keep the paper grain subtle at every card width. */
+  -webkit-mask-size:100% 100%,1024px var(--home-tear-height);
+  mask-size:100% 100%,1024px var(--home-tear-height);
+  -webkit-mask-position:left top,right top;
+  mask-position:left top,right top;
   -webkit-mask-repeat:no-repeat,repeat-y;
   mask-repeat:no-repeat,repeat-y;
   -webkit-mask-composite: source-in;
@@ -512,7 +514,7 @@
 .home-boarding-pass .home-ticket-perforation::before,
 .home-boarding-pass .home-ticket-perforation::after { content:none; }
 
-/* Outline the preserved left notch and each tooth of the torn right edge. */
+/* The outline follows the same irregular curves as the paper mask. */
 .home-boarding-pass-shape {
   display:flex; flex-direction:column; justify-content:space-between;
   min-height:168px; height:100%; padding:0; position:relative; box-shadow:none; filter:none;
@@ -526,7 +528,7 @@
   background:
     radial-gradient(circle at 0 var(--home-notch-center),
       transparent 0 11.85px, #cadce7 12px 13px, transparent 13.15px) no-repeat,
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='12' viewBox='0 0 7 12'%3E%3Cpath d='M6.5 0 .5 6 6.5 12' fill='none' stroke='%23cadce7' stroke-width='1'/%3E%3C/svg%3E") right top / 7px 12px repeat-y;
+    url("./ticket-torn-outline.svg") right top / 8px var(--home-tear-height) repeat-y;
 }
 
 /* Symmetric gutters plus center snapping make the current pass visually centered. */
