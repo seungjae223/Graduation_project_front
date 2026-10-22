@@ -213,7 +213,7 @@ describe("V12 personalized home and real rankings", () => {
 
 });
 
-test("boarding passes have real centered half notches with tear line on the color boundary", () => {
+test("boarding passes keep a vertical stub seam, top and bottom notches, and centered rail gutters", () => {
   const css = fs.readFileSync(path.join(__dirname, "Home.css"), "utf8");
   expect(css).toContain("width:calc(100% + 2 * var(--home-rail-gutter))");
   expect(css).toContain("margin-inline:calc(-1 * var(--home-rail-gutter))");
@@ -221,12 +221,12 @@ test("boarding passes have real centered half notches with tear line on the colo
   expect(css).toContain("scroll-padding-inline:var(--home-rail-gutter)");
   expect(css).toContain("padding:7px 16px 12px;scroll-padding-inline:16px");
   expect(css).toContain(".home-v12 .home-trip-rail>.home-boarding-pass-shadow{flex:0 0 calc(100% - 32px)");
-  expect(css).toContain("--home-notch-center:calc(100% - 49px)");
-  expect(css).toContain("radial-gradient(circle at 0 var(--home-notch-center)");
-  expect(css).toContain("radial-gradient(circle at 100% var(--home-notch-center)");
-  expect(css).toContain("flex:0 0 0;height:0;margin:0;border:0;position:relative");
-  expect(css).toContain("top:-1px;left:14px;right:14px;height:2px");
-  expect(css).toContain("background:repeating-linear-gradient(90deg,#a8c5d8");
+  expect(css).toContain("--home-notch-x: calc(100% - var(--home-stub-width))");
+  expect(css).toContain("radial-gradient(circle at var(--home-notch-x) 0");
+  expect(css).toContain("radial-gradient(circle at var(--home-notch-x) 100%");
+  expect(css).toContain("grid-template-columns:minmax(0,1fr) var(--home-stub-width)");
+  expect(css).toContain("right:var(--home-stub-width)");
+  expect(css).toContain("background:repeating-linear-gradient(180deg,#a8c5d8");
   expect(css).toContain("scroll-snap-align:center");
 });
 
