@@ -111,12 +111,13 @@ function TripSection({ trips, status, retry, isSignedIn }) {
           <div className="home-ticket-topline"><span className="home-trip-kicker">BOARDING PASS</span><span className="home-ticket-symbol" aria-hidden="true">✈</span></div>
           <div className="home-trip-info"><span className="home-trip-destination">{trip.destination || "여행지 미정"}</span>
             <h3>{trip.title}</h3>
-            <p>{displayDate(trip.startDate)} ~ {displayDate(trip.endDate)}</p></div>
+            <div className="home-trip-footer">
+              <p>{displayDate(trip.startDate)} ~ {displayDate(trip.endDate)}</p>
+              <Link className="home-trip-continue" to={`/route-result?id=${encodeURIComponent(trip.id)}`}
+                state={{ routeId: trip.id, tripId: trip.id, scheduleId: trip.id }}>계속하기</Link>
+            </div>
+          </div>
         </div>
-        <div className="home-ticket-perforation" aria-hidden="true" />
-        <div className="home-pass-bottom"><span className="home-ticket-bottom-label">MY TRAVEL PLAN</span>
-          <Link className="home-trip-continue" to={`/route-result?id=${encodeURIComponent(trip.id)}`}
-            state={{ routeId: trip.id, tripId: trip.id, scheduleId: trip.id }}>계속하기</Link></div>
         </div>
       </article>)}
     </div><RailScrollbar carousel={slides} count={trips.length} label="내 여행 목록 가로 이동" /></div>

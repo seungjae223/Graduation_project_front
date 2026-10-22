@@ -290,7 +290,7 @@ function Search() {
               <button type="button" className="search-destination-main" aria-label={`${destination.name} 여행지 보기`}
                 onClick={() => { saveReturnPosition(); navigate(`/destinations/${encodeURIComponent(destination.code)}`, { state: { fromSearch: location.pathname + location.search } }); }}>
                 <span className="search-destination-photo">
-                  {hero ? <img src={hero.src} alt="" loading="lazy" /> : <span className="search-destination-fallback" aria-hidden="true"><CityIcon /></span>}
+                  {hero ? <img src={hero.src} alt="" loading="lazy" style={{ objectPosition: hero.position }} /> : <span className="search-destination-fallback" aria-hidden="true"><CityIcon /></span>}
                 </span>
                 <span className="search-destination-info">
                   <span className="search-destination-type">여행지 · {destination.countryName}</span>
@@ -298,10 +298,6 @@ function Search() {
                   <span className="search-destination-link">여행지 둘러보기 <span aria-hidden="true">→</span></span>
                 </span>
               </button>
-              {hero && <a className="search-destination-credit" href={hero.source} target="_blank" rel="noreferrer noopener"
-                aria-label={`${destination.name} 대표 사진 출처: ${hero.author}, ${hero.license}`}>
-                사진: {hero.author} · {hero.license}
-              </a>}
             </article>;
           })}
         </div>

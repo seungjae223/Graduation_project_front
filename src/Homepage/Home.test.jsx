@@ -64,7 +64,7 @@ describe("V12 personalized home and real rankings", () => {
     expect(screen.getByText("이어서 계획하기")).toBeInTheDocument();
     expect(screen.getAllByText("BOARDING PASS")).toHaveLength(2);
     const firstTicket = screen.getAllByText("BOARDING PASS")[0].closest(".home-boarding-pass");
-    expect(firstTicket.querySelector(".home-ticket-perforation")).toBeInTheDocument();
+    expect(screen.queryByText("MY TRAVEL PLAN")).not.toBeInTheDocument();
     expect(firstTicket.closest(".home-boarding-pass-shadow")).toBeInTheDocument();
     expect(rail.querySelectorAll(":scope > .home-boarding-pass-shadow")).toHaveLength(2);
     expect(screen.getByRole("slider", { name: "내 여행 목록 가로 이동" })).toBeInTheDocument();
@@ -213,7 +213,7 @@ describe("V12 personalized home and real rankings", () => {
 
 });
 
-test("boarding passes keep a vertical stub seam, top and bottom notches, and centered rail gutters", () => {
+test("boarding passes keep outer edge notches and centered rail gutters", () => {
   const css = fs.readFileSync(path.join(__dirname, "Home.css"), "utf8");
   expect(css).toContain("width:calc(100% + 2 * var(--home-rail-gutter))");
   expect(css).toContain("margin-inline:calc(-1 * var(--home-rail-gutter))");
@@ -221,12 +221,8 @@ test("boarding passes keep a vertical stub seam, top and bottom notches, and cen
   expect(css).toContain("scroll-padding-inline:var(--home-rail-gutter)");
   expect(css).toContain("padding:7px 16px 12px;scroll-padding-inline:16px");
   expect(css).toContain(".home-v12 .home-trip-rail>.home-boarding-pass-shadow{flex:0 0 calc(100% - 32px)");
-  expect(css).toContain("--home-notch-x: calc(100% - var(--home-stub-width))");
   expect(css).toContain("radial-gradient(circle at var(--home-notch-x) 0");
   expect(css).toContain("radial-gradient(circle at var(--home-notch-x) 100%");
-  expect(css).toContain("grid-template-columns:minmax(0,1fr) var(--home-stub-width)");
-  expect(css).toContain("right:var(--home-stub-width)");
-  expect(css).toContain("background:repeating-linear-gradient(180deg,#a8c5d8");
   expect(css).toContain("scroll-snap-align:center");
 });
 
