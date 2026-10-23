@@ -277,6 +277,9 @@ svg {
 .route-transition:has(> .earth-loading-screen--page) {
   display: flex;
   flex: 1;
+  animation: none;
+  opacity: 1;
+  transform: none;
 }
 
 /* Surfaces and text are themed by their component role, including body portals. */

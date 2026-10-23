@@ -87,7 +87,7 @@ function OAuthCallback() {
     );
   }
 
-  return <EarthLoader text="소셜 로그인을 완료하는 중..." />;
+  return <EarthLoader variant="page" text="소셜 로그인을 완료하는 중..." />;
 }
 
 export default OAuthCallback;
