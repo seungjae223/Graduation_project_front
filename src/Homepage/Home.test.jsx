@@ -64,7 +64,7 @@ describe("V12 personalized home and real rankings", () => {
     expect(screen.getByText("이어서 계획하기")).toBeInTheDocument();
     expect(screen.getAllByText("BOARDING PASS")).toHaveLength(2);
     const firstTicket = screen.getAllByText("BOARDING PASS")[0].closest(".home-boarding-pass");
-    expect(screen.queryByText("MY TRAVEL PLAN")).not.toBeInTheDocument();
+    expect(firstTicket.querySelector(".home-ticket-perforation")).toBeInTheDocument();
     expect(firstTicket.closest(".home-boarding-pass-shadow")).toBeInTheDocument();
     expect(rail.querySelectorAll(":scope > .home-boarding-pass-shadow")).toHaveLength(2);
     expect(screen.getByRole("slider", { name: "내 여행 목록 가로 이동" })).toBeInTheDocument();
@@ -213,7 +213,7 @@ describe("V12 personalized home and real rankings", () => {
 
 });
 
-test("boarding passes keep outer edge notches and centered rail gutters", () => {
+test("boarding passes have real centered half notches with tear line on the color boundary", () => {
   const css = fs.readFileSync(path.join(__dirname, "Home.css"), "utf8");
   expect(css).toContain("width:calc(100% + 2 * var(--home-rail-gutter))");
   expect(css).toContain("margin-inline:calc(-1 * var(--home-rail-gutter))");
@@ -221,8 +221,12 @@ test("boarding passes keep outer edge notches and centered rail gutters", () => 
   expect(css).toContain("scroll-padding-inline:var(--home-rail-gutter)");
   expect(css).toContain("padding:7px 16px 12px;scroll-padding-inline:16px");
   expect(css).toContain(".home-v12 .home-trip-rail>.home-boarding-pass-shadow{flex:0 0 calc(100% - 32px)");
-  expect(css).toContain("radial-gradient(circle at var(--home-notch-x) 0");
-  expect(css).toContain("radial-gradient(circle at var(--home-notch-x) 100%");
+  expect(css).toContain("--home-notch-center:calc(100% - 49px)");
+  expect(css).toContain("radial-gradient(circle at 0 var(--home-notch-center)");
+  expect(css).toContain("radial-gradient(circle at 100% var(--home-notch-center)");
+  expect(css).toContain("flex:0 0 0;height:0;margin:0;border:0;position:relative");
+  expect(css).toContain("top:-1px;left:14px;right:14px;height:2px");
+  expect(css).toContain("background:repeating-linear-gradient(90deg,#a8c5d8");
   expect(css).toContain("scroll-snap-align:center");
 });
 
