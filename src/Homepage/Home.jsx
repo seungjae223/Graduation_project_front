@@ -146,7 +146,9 @@ function CityTile({ city, rank }) {
     <Link to={`/destinations/${encodeURIComponent(city.code)}`} className="home-city-link"
       aria-label={`${rank}위 ${city.name} 여행지`}>
       <div className="home-city-photo">
-        {photo?.src && !photoFailed ? <img src={photo.src} alt="" loading="lazy" decoding="async" style={{ objectPosition: photo.position }}
+        {photo?.src && !photoFailed ? <img src={photo.src} srcSet={photo.srcSet} sizes="(max-width: 600px) 75vw, 350px"
+          alt="" loading={rank === 1 ? "eager" : "lazy"} fetchPriority={rank === 1 ? "high" : "auto"}
+          decoding="async" style={{ objectPosition: photo.position }}
           onError={() => setPhotoFailed(true)} /> : <span aria-hidden="true">{city.name.slice(0, 1)}</span>}
         <span className="home-rank-badge">{rank}위</span>
       </div>

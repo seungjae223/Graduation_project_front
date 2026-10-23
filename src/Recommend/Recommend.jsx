@@ -7,7 +7,7 @@ import useReadQuery from "../utils/useReadQuery";
 import { filterDestinationCatalog, getDestinationTagline } from "../data/destinationPresentation";
 import "./Recommend.css";
 
-function DestinationCard({ destination }) {
+function DestinationCard({ destination, initial = false, priority = false }) {
   const [imageFailed, setImageFailed] = useState(false);
   const hero = getDestinationHero(destination.code);
   const showPhoto = Boolean(hero?.src && !imageFailed);
@@ -17,7 +17,8 @@ function DestinationCard({ destination }) {
       aria-label={`${destination.name} 여행지 보기`}>
       <div className="recommend-destination-photo">
         {showPhoto
-          ? <img src={hero.src} alt="" loading="lazy" decoding="async" style={{ objectPosition: hero.position }}
+          ? <img src={hero.src} srcSet={hero.srcSet} sizes="(max-width: 600px) calc(100vw - 36px), 540px"
+              alt="" loading={initial ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"} decoding="async" style={{ objectPosition: hero.position }}
               onError={() => setImageFailed(true)} />
           : <span className="recommend-destination-photo-fallback" aria-hidden="true" />}
       </div>
@@ -35,7 +36,7 @@ function DestinationCard({ destination }) {
 
 export default function Recommend() {
   const catalog = useReadQuery("recommend-destinations",
-    async signal => requireSearchDestinations(await getDestinationsApi({ signal })));
+    async signal => requireSearchDestinations(await getDestinationsApi({ signal })), true, undefined, 60_000);
   const destinations = catalog.data || [];
   const [scope, setScope] = useState("OVERSEAS");
   const [group, setGroup] = useState("all");
@@ -60,7 +61,8 @@ export default function Recommend() {
     {catalog.status === "success" && visible.length === 0 &&
       <p className="recommend-destination-state">이 지역에 등록된 여행지가 아직 없어요.</p>}
     {visible.length > 0 && <ul className="recommend-destination-grid">
-      {visible.map(destination => <DestinationCard key={destination.code} destination={destination} />)}
+      {visible.map((destination, index) => <DestinationCard key={destination.code} destination={destination}
+        initial={index < 2} priority={index === 0} />)}
     </ul>}
   </div>;
 }

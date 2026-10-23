@@ -82,7 +82,7 @@ function Search() {
   const [inputError, setInputError] = useState("");
   const destinationCatalog = useReadQuery(account + ":search-destinations", async signal =>
     requireSearchDestinations(await getDestinationsApi({ signal })), true,
-    () => getAuthSnapshot().accountKey === account);
+    () => getAuthSnapshot().accountKey === account, 60_000);
   const matchedDestinations = useMemo(() =>
     findDestinationSearchMatches(destinationCatalog.data || [], keywordFromUrl),
     [destinationCatalog.data, keywordFromUrl]);
@@ -91,7 +91,7 @@ function Search() {
     (destinationCatalog.status !== "loading" && !matchedDestinations.isCountrySearch);
   const search = useServerSearch();
   const { submit: submitSearch, clear: clearSearch, status: searchStatus, revision: searchRevision } = search;
-  const recent = useReadQuery(account + ":recent-searches", signal => getRecentSearchesApi({ signal }), true, () => getAuthSnapshot().accountKey === account);
+  const recent = useReadQuery(account + ":recent-searches", signal => getRecentSearchesApi({ signal }), true, () => getAuthSnapshot().accountKey === account, 20_000);
   const recentSearches = (recent.data || []).slice(0, 10);
   const recentTask = useMutationTask(account + ":recent-searches");
   const retryRecents = recent.retry;

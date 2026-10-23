@@ -90,7 +90,21 @@ const ADDITIONAL_PHOTOS = Object.freeze({
   }
 });
 
+// Let the browser select a smaller Wikimedia thumbnail for small cards.
+// Retain the existing verified original as the high-density fallback.
+const withResponsiveSource = photo => {
+  if (!photo?.src) return photo;
+  if (photo.src.includes("/1280px-")) {
+    return { ...photo, srcSet: `${photo.src.replace("/1280px-", "/640px-")} 640w, ${photo.src} 1280w` };
+  }
+  if (photo.src.includes("Special:FilePath/") && photo.src.endsWith("?width=960")) {
+    return { ...photo, srcSet: `${photo.src.replace("?width=960", "?width=640")} 640w, ${photo.src} 960w` };
+  }
+  return photo;
+};
+
 export function getDestinationHero(code) {
-  return Object.prototype.hasOwnProperty.call(HERO_PHOTOS, code) ? HERO_PHOTOS[code]
+  const photo = Object.prototype.hasOwnProperty.call(HERO_PHOTOS, code) ? HERO_PHOTOS[code]
     : Object.prototype.hasOwnProperty.call(ADDITIONAL_PHOTOS, code) ? ADDITIONAL_PHOTOS[code] : null;
+  return withResponsiveSource(photo);
 }

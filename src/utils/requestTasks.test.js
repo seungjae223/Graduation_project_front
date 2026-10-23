@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import useReadQuery from "./useReadQuery";
+import useReadQuery, { clearReadQueryCache } from "./useReadQuery";
 import useMutationTask from "./useMutationTask";
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
 test("A → B → A ignores the first A success and finally, and cancels on unmount", async () => {
@@ -41,4 +41,35 @@ test("explicit 400 failure can be retried; different targets keep separate opera
   const { result, rerender } = renderHook(({ key }) => useMutationTask(key), { initialProps: { key: "A" } });
   await act(async () => result.current.run(write, jest.fn(), labels)); expect(result.current.status).toBe("error");
   rerender({ key: "B" }); expect(result.current.status).toBe("idle"); rerender({ key: "A" }); expect(result.current.status).toBe("error");
+});
+
+test("opt-in short-lived cache avoids a second mount request and explicit retry refreshes", async () => {
+  clearReadQueryCache();
+  const fetch = jest.fn().mockResolvedValueOnce(["cached"]).mockResolvedValueOnce(["updated"]);
+  const first = renderHook(() => useReadQuery("public-cache-test", fetch, true, () => true, 60_000));
+  await waitFor(() => expect(first.result.current.status).toBe("success"));
+  first.unmount();
+  const second = renderHook(() => useReadQuery("public-cache-test", fetch, true, () => true, 60_000));
+  expect(second.result.current.data).toEqual(["cached"]);
+  expect(second.result.current.status).toBe("success");
+  expect(fetch).toHaveBeenCalledTimes(1);
+  await act(async () => { await second.result.current.retry(); });
+  expect(second.result.current.data).toEqual(["updated"]);
+  expect(fetch).toHaveBeenCalledTimes(2);
+  second.unmount();
+  clearReadQueryCache();
+});
+
+test("cached private reads stay isolated across account-scoped keys", async () => {
+  clearReadQueryCache();
+  const fetch = jest.fn().mockResolvedValueOnce(["account-one"]).mockResolvedValueOnce(["account-two"]);
+  const one = renderHook(() => useReadQuery("account:1:recent", fetch, true, () => true, 20_000));
+  await waitFor(() => expect(one.result.current.status).toBe("success"));
+  one.unmount();
+  const two = renderHook(() => useReadQuery("account:2:recent", fetch, true, () => true, 20_000));
+  await waitFor(() => expect(two.result.current.status).toBe("success"));
+  expect(two.result.current.data).toEqual(["account-two"]);
+  expect(fetch).toHaveBeenCalledTimes(2);
+  two.unmount();
+  clearReadQueryCache();
 });

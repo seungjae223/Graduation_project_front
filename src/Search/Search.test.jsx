@@ -2,6 +2,7 @@ import userEvent from "@testing-library/user-event";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Search from "./Search";
+import { clearReadQueryCache } from "../utils/useReadQuery";
 import { getDestinationsApi } from "../api/destinationApi";
 import { getPlaceEngagementApi } from "../api/placeEngagementApi";
 jest.mock("../api/destinationApi", () => ({ getDestinationsApi: jest.fn() }));
@@ -22,7 +23,7 @@ function setup() {
   render(<MemoryRouter initialEntries={["/search"]}><Routes><Route path="/search" element={<Search />} /><Route path="/detail" element={<Destination />} /><Route path="/destinations/:code" element={<DestinationBrowse />} /></Routes></MemoryRouter>);
   return screen.getByPlaceholderText("장소, 도시 또는 테마 검색");
 }
-beforeEach(() => { window.sessionStorage.clear(); window.scrollTo = jest.fn(); window.requestAnimationFrame = callback => { callback(); return 1; }; window.cancelAnimationFrame = () => {}; jest.clearAllMocks(); getDestinationsApi.mockResolvedValue([]); getPlaceEngagementApi.mockImplementation(async ids => ids.map(id => ({ placeId: Number(id), likeCount: Number(id) === 781 ? 7 : 0, reviewCount: 0 }))); mockFavorite.mockImplementation(event => event.stopPropagation()); mockPicker.mockImplementation(event => event.stopPropagation()); getRecentSearchesApi.mockResolvedValue([]); getPlacesApi.mockResolvedValue([{ ...place, region: "부산" }]); getRecommendationsApi.mockResolvedValue([{ ...place, region: "부산" }]); });
+beforeEach(() => { clearReadQueryCache(); window.sessionStorage.clear(); window.scrollTo = jest.fn(); window.requestAnimationFrame = callback => { callback(); return 1; }; window.cancelAnimationFrame = () => {}; jest.clearAllMocks(); getDestinationsApi.mockResolvedValue([]); getPlaceEngagementApi.mockImplementation(async ids => ids.map(id => ({ placeId: Number(id), likeCount: Number(id) === 781 ? 7 : 0, reviewCount: 0 }))); mockFavorite.mockImplementation(event => event.stopPropagation()); mockPicker.mockImplementation(event => event.stopPropagation()); getRecentSearchesApi.mockResolvedValue([]); getPlacesApi.mockResolvedValue([{ ...place, region: "부산" }]); getRecommendationsApi.mockResolvedValue([{ ...place, region: "부산" }]); });
 
 test("search from a saved folder offers explicit return to that folder", async () => {
   render(<MemoryRouter initialEntries={["/search?folderId=17"]}>
