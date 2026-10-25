@@ -1,3 +1,4 @@
+import { getByAttribute } from "../testQueries";
 import { fireEvent, render, screen } from "@testing-library/react";
 import FavoriteHeart from "./FavoriteHeart";
 
@@ -8,7 +9,7 @@ test("heart reflects only system favorite state and does not open the folder pic
   const button = screen.getByRole("button", { name: "장소 좋아요 해제" });
   expect(button).toHaveAttribute("aria-pressed", "true");
   expect(button.textContent).toBe("");
-  expect(button.querySelector("svg")).not.toBeNull();
+  expect(getByAttribute("viewBox", button, "0 0 24 24")).not.toBeNull();
   fireEvent.click(button);
   expect(toggleFavorite).toHaveBeenCalledWith(expect.anything(), { id: 56, name: "장소" });
 });

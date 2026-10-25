@@ -1,5 +1,5 @@
 import React from "react";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import Search from "./Search";
 import { getDestinationsApi } from "../api/destinationApi";
@@ -121,13 +121,13 @@ test("malformed place response remains an error rather than silently showing moc
 test("late response for prior query cannot replace latest results", async () => {
   const old = deferred();
   searchPlacesApi.mockImplementation(keyword => keyword === "서울" ? old.promise : Promise.resolve(rows(1, "도쿄")));
-  const rendered = render(view("/search?keyword=서울"));
+  const { unmount: renderedUnmount } = render(view("/search?keyword=서울"));
   fireEvent.change(screen.getByLabelText("장소, 도시 또는 테마 검색"), { target: { value: "도쿄" } });
   fireEvent.click(screen.getByRole("button", { name: "검색", exact: true }));
   await screen.findByText("도쿄 장소 1");
   await act(async () => old.resolve(rows(1, "서울")));
   expect(screen.queryByText("서울 장소 1")).not.toBeInTheDocument();
-  rendered.unmount();
+  renderedUnmount();
 });
 
 test("no results stays distinct from a failed search", async () => {

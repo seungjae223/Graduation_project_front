@@ -1,9 +1,11 @@
+import { queryByClass, getArticleByText, getByAttribute } from "../testQueries";
 import userEvent from "@testing-library/user-event";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Search from "./Search";
 import { getDestinationsApi } from "../api/destinationApi";
 import { getPlaceEngagementApi } from "../api/placeEngagementApi";
+import { searchPlacesApi, getPlacesApi, getRecommendationsApi, getRecentSearchesApi, clearRecentSearchesApi, deleteRecentSearchApi } from "../api/placeApi";
 jest.mock("../api/destinationApi", () => ({ getDestinationsApi: jest.fn() }));
 jest.mock("../api/placeEngagementApi", () => ({ getPlaceEngagementApi: jest.fn() }));
 const mockFavorite = jest.fn();
@@ -12,7 +14,6 @@ jest.mock("../utils/usePlaceSaving", () => ({ __esModule: true, default: () => (
   isLiked: () => false, toggleFavorite: mockFavorite, openFolderPicker: mockPicker,
   folders: { account: "anonymous", status: "idle" }, open: false,
 }) }));
-import { searchPlacesApi, getPlacesApi, getRecommendationsApi, getRecentSearchesApi, clearRecentSearchesApi, deleteRecentSearchApi } from "../api/placeApi";
 jest.mock("../api/placeApi", () => ({ searchPlacesApi: jest.fn(), getPlacesApi: jest.fn(), getRecommendationsApi: jest.fn(), getRecentSearchesApi: jest.fn(), deleteRecentSearchApi: jest.fn(), clearRecentSearchesApi: jest.fn() }));
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
 const place = { id: 781, name: "서버 장소", address: "서버 주소", latitude: 37, longitude: 127 };
@@ -149,10 +150,10 @@ test("search result heart and folder picker do not trigger detail navigation", a
   fireEvent.click(heart);
   expect(mockFavorite).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ id: 781 }));
   const picker = screen.getByRole("button", { name: "서버 장소 폴더에 저장" });
-  const card = picker.closest("article");
+  const card = getArticleByText("서버 장소");
   expect(picker).toHaveTextContent("폴더 저장");
-  expect(card.querySelector(".place-explore-divider")).toHaveTextContent("|");
-  expect(card.querySelector(".place-explore-schedule")).toHaveTextContent("일정 추가");
+  expect(queryByClass(card, "place-explore-divider")).toHaveTextContent("|");
+  expect(queryByClass(card, "place-explore-schedule")).toHaveTextContent("일정 추가");
   fireEvent.click(picker);
   expect(mockPicker).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ id: 781 }));
   expect(screen.queryByText(/id=781/)).not.toBeInTheDocument();
@@ -271,9 +272,9 @@ test("search shares the destination card heart/count placement", async () => {
   fireEvent.change(input, { target: { value: "서버" } });
   fireEvent.click(screen.getByRole("button", { name: "검색", exact: true }));
   expect(await screen.findByRole("button", { name: "서버 장소 상세 보기" })).toBeInTheDocument();
-  const card = screen.getByRole("button", { name: "서버 장소 상세 보기" }).closest(".place-explore-card");
+  const card = getArticleByText("서버 장소");
   expect(card).not.toBeNull();
-  const stack = card.querySelector(".place-explore-favorite-stack");
+  const stack = queryByClass(card, "place-explore-favorite-stack");
   expect(stack).toContainElement(screen.getByRole("button", { name: "서버 장소 좋아요 추가" }));
   expect(stack).toContainElement(await screen.findByLabelText("서버 장소 좋아요 7개"));
 });
@@ -295,7 +296,7 @@ test("search does not push the heading down with successful like feedback", asyn
   fireEvent.change(input, { target: { value: "서버" } });
   fireEvent.click(screen.getByRole("button", { name: "검색", exact: true }));
   await screen.findByRole("button", { name: "서버 장소 상세 보기" });
-  const feedback = document.querySelector(".search-page > .place-saving-feedback");
+  const feedback = queryByClass(queryByClass(document.body, "search-page"), "place-saving-feedback");
   expect(feedback).not.toBeNull();
   expect(feedback).toHaveClass("place-saving-feedback");
   expect(screen.getByRole("heading", { name: "무엇을 검색할까요?" })).toBeInTheDocument();
@@ -315,12 +316,12 @@ test("icon-only search sort orders ALL results before pagination and retains URL
   })));
   setupUrl("/search?keyword=서울");
   await screen.findByText("A 장소");
-  const names = () => [...document.querySelectorAll(".search-results-list h3")].map(el => el.textContent);
+  const names = () => within(queryByClass(document.body, "search-results-list")).getAllByRole("heading", { level: 3 }).map(el => el.textContent);
   expect(names()).toEqual(["A 장소", "B 장소", "C 장소"]);
   const likes = screen.getByRole("button", {name:"기본순 정렬, 누르면 좋아요순"});
   expect(screen.getByText("기본순", { selector: ".search-sort-current" })).toBeInTheDocument();
-  expect(likes.querySelector("svg")).not.toBeNull();
-  expect(likes.querySelector("span")).toBeNull();
+  expect(getByAttribute("viewBox", likes, "0 0 24 24")).not.toBeNull();
+  expect(likes.innerHTML).not.toMatch(/<span\b/);
   fireEvent.click(likes);
   await waitFor(() => expect(names()).toEqual(["B 장소", "C 장소", "A 장소"]));
   expect(screen.getByLabelText("현재 검색 URL")).toHaveTextContent("sort=likes");

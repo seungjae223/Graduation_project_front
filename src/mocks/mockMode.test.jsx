@@ -48,13 +48,13 @@ test.each([true, false])("email login survives remount with isolated credentials
   expect(localStorage.getItem("accessToken")).toBe("existing-real-token");
 });
 
-test.each(["구글 로그인", "카카오 로그인"])("%s uses existing return route without OAuth navigation", async button => {
+test.each(["구글 로그인", "카카오 로그인"])("%s goes home without OAuth navigation even with returnTo", async button => {
   window.history.replaceState({}, "", "/login?returnTo=%2Fmy-schedule");
   render(<App />);
   fireEvent.click(await screen.findByRole("button", { name: button }));
-  // Return routing is independent of whether a fixed fixture trip is still upcoming.
-  expect(await screen.findByRole("heading", { name: "내 여행 일정" })).toBeInTheDocument();
-  expect(window.location.pathname).toBe("/my-schedule");
+  expect(await screen.findByRole("heading", { name: "다음 여행, 어디로 갈까요?" })).toBeInTheDocument();
+  expect(window.location.pathname).toBe("/home");
+  expect(getAccessToken()).toMatch(/^mock\./);
   expect(sessionStorage.getItem("oauth_state_google")).toBeNull();
   expect(sessionStorage.getItem("oauth_state_kakao")).toBeNull();
   expect(getMockUser().email).toBe("test@example.com");
@@ -66,6 +66,10 @@ test("email form logs in and logout returns to login", async () => {
   fireEvent.change(await screen.findByLabelText("이메일"), { target: { value: "test@example.com" } });
   fireEvent.change(screen.getByLabelText("비밀번호"), { target: { value: "password" } });
   fireEvent.click(screen.getByRole("button", { name: "로그인", exact: true }));
+  expect(await screen.findByRole("heading", { name: "다음 여행, 어디로 갈까요?" })).toBeInTheDocument();
+  expect(window.location.pathname).toBe("/home");
+  expect(getAccessToken()).toMatch(/^mock\./);
+  fireEvent.click(screen.getByRole("button", { name: "마이페이지", exact: true }));
   expect(await screen.findByRole("heading", { name: /테스트 사용자/ })).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: /로그아웃/ }));
   expect(await screen.findByLabelText("이메일")).toBeInTheDocument();

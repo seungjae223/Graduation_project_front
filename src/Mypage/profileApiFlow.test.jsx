@@ -1,5 +1,6 @@
+import { getByAttribute } from "../testQueries";
 import React from "react";
-import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within, queryByAttribute } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import MyPage from "./MyPage";
 import api from "../api/api";
@@ -42,19 +43,18 @@ test("MyPage uses consistent outline icons for every supported menu action", asy
   expected.forEach(([section, label, icon]) => {
     const scope = within(screen.getByRole("navigation", { name: section }));
     const target = scope.getByRole(label === "로그아웃" ? "button" : "link", { name: new RegExp(label) });
-    const decorativeIcon = target.querySelector(`svg[data-mypage-icon="${icon}"]`);
+    const decorativeIcon = queryByAttribute("data-mypage-icon", target, icon);
     expect(decorativeIcon).not.toBeNull();
     expect(decorativeIcon).toHaveAttribute("aria-hidden", "true");
-    expect(target.querySelector('svg[data-mypage-icon="chevron"]')).not.toBeNull();
+    expect(getByAttribute("data-mypage-icon", target, "chevron")).not.toBeNull();
   });
-  expect(document.querySelector('.mypage-v14-avatar svg[data-mypage-icon="avatar"]')).not.toBeNull();
+  expect(getByAttribute("data-mypage-icon", document.body, "avatar")).not.toBeNull();
   const shortcuts = within(screen.getByRole("navigation", { name: "여행 바로가기" }));
   [
-    ["지난 여행", "luggage"], ["저장한 장소", "bookmark"],
+    ["지난 여행", "luggage"], ["저장한 장소", "folder"],
     ["최근 본 장소", "history"], ["작성한 리뷰", "review"],
   ].forEach(([label, icon]) => {
-    expect(shortcuts.getByRole("link", { name: label })
-      .querySelector(`svg[data-mypage-icon="${icon}"]`)).not.toBeNull();
+    expect(getByAttribute("data-mypage-icon", shortcuts.getByRole("link", { name: label }), icon)).not.toBeNull();
   });
   expect(screen.queryByText("나의 여행 기록")).not.toBeInTheDocument();
 });
@@ -84,12 +84,12 @@ test("a departed account's late profile never replaces the current user's profil
   let finish;
   const oldRead = new Promise(resolve => { finish = resolve; });
   api.get.mockImplementation(() => oldRead);
-  const rendered = render(view());
+  const { rerender: renderedRerender } = render(view());
   await waitFor(() => expect(api.get).toHaveBeenCalledWith("/api/mypage/profile", expect.any(Object)));
   const oldSignal = api.get.mock.calls.find(([url]) => url.endsWith("profile"))[1].signal;
   mockAccount = "account:second";
   api.get.mockImplementation(async () => ({ data: { ...profile, nickname: "새 계정 이름" } }));
-  rendered.rerender(view());
+  renderedRerender(view());
   await screen.findByRole("heading", { name: "새 계정 이름" });
   await act(async () => finish({ data: profile }));
   expect(oldSignal.aborted).toBe(true);

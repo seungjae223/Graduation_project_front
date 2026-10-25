@@ -42,9 +42,9 @@ test.each(["/route-create", "/route-result?id=7", "/detail?id=1"])("subpage %s k
 });
 
 test("both V16 creation steps keep the same itinerary-creation header",()=>{
-  const first=setup("/route-create");
+  const { unmount: firstUnmount }=setup("/route-create");
   expect(screen.getByRole("heading",{name:"일정 만들기"})).toBeInTheDocument();
-  first.unmount();
+  firstUnmount();
   setup("/route-create/region");
   expect(screen.getByRole("heading",{name:"일정 만들기"})).toBeInTheDocument();
 });

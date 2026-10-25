@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import Recommend from "./Recommend";
@@ -10,7 +10,6 @@ const mockToggle = jest.fn();
 const mockFavorite = jest.fn();
 jest.mock("../utils/usePlaceSaving", () => ({ __esModule: true, default: () => ({ isSaved: () => false, isLiked: () => false, toggle: mockToggle, openFolderPicker: mockToggle, toggleFavorite: mockFavorite, folders: { account: "anonymous", status: "idle" }, open: false }) }));
 const place = { id: 1, name: "서버 장소", address: "서울", rating: 0 };
-const deferred = () => { let resolve, reject; const promise = new Promise((a, b) => { resolve = a; reject = b; }); return { promise, resolve, reject }; };
 function DetailTarget() { const location = useLocation(); return <p>상세 도착 {location.search}</p>; }
 function setup(entry, component = <Recommend />) {
   return render(<MemoryRouter initialEntries={[entry]}><Routes><Route path="/recommend" element={component} /><Route path="/destinations/:code" element={<p>여행지 화면</p>} /><Route path="/total" element={<Total />} /><Route path="/popular-all" element={<PopularAll />} /><Route path="/detail" element={<DetailTarget />} /></Routes></MemoryRouter>);

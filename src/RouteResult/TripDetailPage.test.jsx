@@ -1,3 +1,4 @@
+import { queryByClass, getArticleByText } from "../testQueries";
 import React from "react";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
@@ -31,14 +32,15 @@ const ItineraryRoute = () => {
     <TripDetailPage/><Locator/>
   </React.Fragment>;
 };
-const mount = (entry = "/route-result?id=12") => render(<MemoryRouter initialEntries={[entry]}><Routes>
+const itinerary = entry => <MemoryRouter initialEntries={[entry]}><Routes>
   <Route path="/route-result" element={<ItineraryRoute/>}/>
   <Route path="/route-optimize" element={<Locator/>}/>
   <Route path="/route-edit" element={<Locator/>}/>
   <Route path="/route-add-places" element={<Locator/>}/>
   <Route path="/detail" element={<Locator/>}/>
   <Route path="/detail/review" element={<Locator/>}/>
-</Routes></MemoryRouter>);
+</Routes></MemoryRouter>;
+const mount = (entry = "/route-result?id=12") => render(itinerary(entry));
 beforeEach(() => {
   jest.clearAllMocks();
   window.localStorage.clear();
@@ -115,6 +117,36 @@ test("button mode allows choosing days and displays no other day", () => {
   expect(screen.getByRole("region", { name: "2일차 일정" })).toBeInTheDocument();
   expect(screen.queryByRole("region", { name: "1일차 일정" })).not.toBeInTheDocument();
   expect(screen.getByText("아직 추가된 장소가 없어요.")).toBeInTheDocument();
+});
+
+test.each(["/route-result?id=12", "/route-result?id=12&edit=1&day=4"])(
+  "shortening dates keeps the selected day and optimization target valid: %s", entry => {
+    const view = mount(entry);
+    fireEvent.click(screen.getByRole("button", { name: "버튼형" }));
+    fireEvent.click(within(screen.getByRole("group", { name: "일차 선택" }))
+      .getByRole("button", { name: "4일차 11.15" }));
+    useTripResult.mockImplementation(() => data({ ...shortTrip, endDate: "2026-11-13" }));
+    view.rerender(itinerary(entry));
+    expect(within(screen.getByRole("group", { name: "일차 선택" }))
+      .getByRole("button", { name: "2일차 11.13" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("region", { name: "2일차 일정" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "경로 최적화" }));
+    expect(screen.getByText("/route-optimize?id=12&day=2")).toBeInTheDocument();
+  }
+);
+
+test("temporarily unloaded days do not reset the selected day during a refresh", () => {
+  const entry = "/route-result?id=12";
+  const view = mount(entry);
+  fireEvent.click(screen.getByRole("button", { name: "버튼형" }));
+  fireEvent.click(within(screen.getByRole("group", { name: "일차 선택" }))
+    .getByRole("button", { name: "3일차 11.14" }));
+  useTripResult.mockImplementation(() => ({ status: "loading", trip: null, places: [], timelines: {} }));
+  view.rerender(itinerary(entry));
+  useTripResult.mockImplementation(() => data());
+  view.rerender(itinerary(entry));
+  expect(within(screen.getByRole("group", { name: "일차 선택" }))
+    .getByRole("button", { name: "3일차 11.14" })).toHaveAttribute("aria-pressed", "true");
 });
 test("user-selected list/button view and day survive edit entry and completion", () => {
   mount();
@@ -265,24 +297,24 @@ test("reopening the same trip restores its last selected view and itinerary vers
       { type: "end", id: "2", name: "도톤보리", time: 630 }],
     warnings: [],
   })).toBe(true);
-  const first = mount();
+  const { unmount: firstUnmount } = mount();
   expect(screen.getByRole("button", { name: "목록형" })).toHaveAttribute("aria-pressed", "true");
   expect(screen.getByRole("button", { name: "직접 만든 일정" })).toHaveAttribute("aria-pressed", "true");
   fireEvent.click(screen.getByRole("button", { name: "버튼형" }));
   fireEvent.click(screen.getByRole("button", { name: "최적화한 일정" }));
-  first.unmount();
+  firstUnmount();
 
   // The itinerary screen was completely unmounted, as after leaving for /schedule.
-  const second = mount();
+  const { unmount: secondUnmount } = mount();
   expect(screen.getByRole("button", { name: "버튼형" })).toHaveAttribute("aria-pressed", "true");
   expect(screen.getByRole("button", { name: "최적화한 일정" })).toHaveAttribute("aria-pressed", "true");
   fireEvent.click(screen.getByRole("button", { name: "직접 만든 일정" }));
-  second.unmount();
+  secondUnmount();
 
-  const third = mount();
+  const { unmount: thirdUnmount } = mount();
   expect(screen.getByRole("button", { name: "버튼형" })).toHaveAttribute("aria-pressed", "true");
   expect(screen.getByRole("button", { name: "직접 만든 일정" })).toHaveAttribute("aria-pressed", "true");
-  third.unmount();
+  thirdUnmount();
 });
 
 test("different trip without prior settings opens list and manual despite earlier trip choices", () => {
@@ -302,10 +334,10 @@ test("clearing browser storage returns both defaults and does not invent an opti
     mode: "quick", order: ["1", "2"], rows: [], warnings: [],
   })).toBe(true);
   expect(saveTripDisplayPreferences(12, "account:test", { view: "tabs", version: "optimized" })).toBe(true);
-  const prior = mount();
+  const { unmount: priorUnmount } = mount();
   expect(screen.getByRole("button", { name: "버튼형" })).toHaveAttribute("aria-pressed", "true");
   expect(screen.getByRole("button", { name: "최적화한 일정" })).toHaveAttribute("aria-pressed", "true");
-  prior.unmount();
+  priorUnmount();
   window.localStorage.clear();
   mount();
   expect(screen.getByRole("button", { name: "목록형" })).toHaveAttribute("aria-pressed", "true");
@@ -365,9 +397,9 @@ test("timeline clock is left of number, and star goes directly to review writer"
     ...p, placeId: 100+i, arrivalTime: i ? "11:20" : "09:00" }))));
   mount();
   const day = screen.getByRole("region", { name: "1일차 일정" });
-  const row = within(day).getByRole("button", { name: "오사카성 장소 상세 보기" }).closest("article");
-  expect(row.querySelector(".v16-detail-time-left")).toHaveTextContent("09:00");
-  expect(row.querySelector(".v16-detail-sequence")).toHaveTextContent("1");
+  const row = getArticleByText("오사카성", day);
+  expect(queryByClass(row, "v16-detail-time-left")).toHaveTextContent("09:00");
+  expect(queryByClass(row, "v16-detail-sequence")).toHaveTextContent("1");
   fireEvent.click(within(day).getByRole("button", { name: "오사카성 리뷰 작성" }));
   expect(screen.getByText("/detail/review?id=100")).toBeInTheDocument();
 });
@@ -384,15 +416,14 @@ test("per-day clock toggle slides order column forward without changing stored v
   expect(within(first).getByRole("button",{name:"1일차 방문 시간 표시하기"}))
     .toHaveAttribute("aria-pressed","false");
   expect(within(first).getByText("09:00")).toHaveAttribute("aria-hidden","true");
-  expect(within(first).getByText("09:00").closest(".v16-detail-timeline")).toHaveClass("is-time-hidden");
+  expect(queryByClass(first, "v16-detail-timeline")).toHaveClass("is-time-hidden");
   expect(within(second).getByRole("button",{name:"2일차 방문 시간 숨기기"})).toHaveAttribute("aria-pressed","true");
   const help = within(first).getByRole("button",{name:"1일차 시간 표시 도움말"});
   expect(help).toHaveAttribute("aria-describedby","v16-time-help-1");
-  expect(first.querySelector(".v16-detail-time-help")).toHaveTextContent("실제 방문 시간은 변경되지 않아요");
+  expect(queryByClass(first, "v16-detail-time-help")).toHaveTextContent("실제 방문 시간은 변경되지 않아요");
   fireEvent.click(screen.getByRole("button",{name:"버튼형"}));
   fireEvent.click(screen.getByRole("button",{name:"목록형"}));
-  expect(screen.getByRole("region",{name:"1일차 일정"})
-    .querySelector(".v16-detail-timeline")).toHaveClass("is-time-hidden");
+  expect(queryByClass(screen.getByRole("region",{name:"1일차 일정"}), "v16-detail-timeline")).toHaveClass("is-time-hidden");
   expect(reload).not.toHaveBeenCalled();
 });
 test("review shortcut has star and a small Review caption with no bordered card", () => {
@@ -414,7 +445,7 @@ test("edit button keeps the same title, day card and toolbar while switching con
   expect(screen.getByRole("button", { name: "경로 최적화" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "지도 보기" })).toBeInTheDocument();
   expect(screen.getByText("편집 중")).toBeInTheDocument();
-  expect(document.querySelector(".v16-detail-page")).toHaveClass("is-editing");
+  expect(queryByClass(document, "v16-detail-page")).toHaveClass("is-editing");
   expect(screen.queryByText(/장소를 드래그해 순서를 바꾸거나/)).not.toBeInTheDocument();
   expect(screen.queryByLabelText(/마지막 도착 시간|출발 시간/)).not.toBeInTheDocument();
   expect(screen.getAllByRole("button", { name: /순서 이동/ })).toHaveLength(2);
@@ -577,11 +608,10 @@ test("optimized departure time displays on the first visit while manual version 
     mount();
     fireEvent.click(screen.getByRole("button",{name:"최적화한 일정"}));
     const day=screen.getByRole("region",{name:"1일차 일정"});
-    const first=within(day).getByText("오사카성").closest("article");
-    expect(first.querySelector(".v16-detail-time-left")).toHaveTextContent("09:30");
+    const first=getArticleByText("오사카성", day);
+    expect(queryByClass(first, "v16-detail-time-left")).toHaveTextContent("09:30");
     fireEvent.click(screen.getByRole("button",{name:"직접 만든 일정"}));
-    expect(within(day).getByText("오사카성").closest("article")
-      .querySelector(".v16-detail-time-left")).toHaveTextContent("—");
+    expect(queryByClass(getArticleByText("오사카성", day), "v16-detail-time-left")).toHaveTextContent("—");
   }finally{window.localStorage.clear();}
 });
 test("booking deep link opens only the targeted visit's schedule editor",()=>{
@@ -645,7 +675,7 @@ test("quick optimized itinerary asks before editing and cancellation leaves it u
     fireEvent.click(screen.getByRole("button",{name:"최적화한 일정"}));
     fireEvent.click(screen.getByRole("button",{name:"편집하기"}));
     const dialog=screen.getByRole("alertdialog",{name:"최적화한 일정 편집 경고"});
-    expect(dialog.closest(".v16-detail-edit-guard-overlay")).toHaveClass("is-quick");
+    expect(queryByClass(document.body, "v16-detail-edit-guard-overlay")).toHaveClass("is-quick");
     expect(dialog).toHaveTextContent("최적화한 동선이 달라질 수 있어요");
     fireEvent.click(within(dialog).getByRole("button",{name:"취소"}));
     expect(screen.queryByRole("alertdialog",{name:"최적화한 일정 편집 경고"})).not.toBeInTheDocument();
@@ -695,7 +725,7 @@ test("careful optimized itinerary uses a red warning but still allows user edits
     fireEvent.click(screen.getByRole("button",{name:"최적화한 일정"}));
     fireEvent.click(screen.getByRole("button",{name:"1일차 편집"}));
     const dialog=screen.getByRole("alertdialog",{name:"최적화한 일정 편집 경고"});
-    expect(dialog.closest(".v16-detail-edit-guard-overlay")).toHaveClass("is-careful");
+    expect(queryByClass(document.body, "v16-detail-edit-guard-overlay")).toHaveClass("is-careful");
     expect(dialog).toHaveTextContent("예약과 동선의 최적화 결과가 달라질 수 있어요");
     fireEvent.keyDown(dialog,{key:"Escape"});
     expect(screen.queryByRole("alertdialog",{name:"최적화한 일정 편집 경고"})).not.toBeInTheDocument();

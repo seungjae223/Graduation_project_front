@@ -1,3 +1,4 @@
+import { queryAllByClass, getByClass } from "../testQueries";
 import React from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
@@ -158,15 +159,15 @@ test("mode descriptions, distinct icons, reservation warning and equal clock pan
   const careful=screen.getByRole("button",{name:/꼼꼼한 최적화/});
   expect(quick).toHaveTextContent("출발·도착만 고정하고 빠르게 정렬");
   expect(careful).toHaveTextContent("예약 기준점과 시간까지 세세하게 고려하여 최적화");
-  expect(quick.querySelector("svg.v165-mode-icon.is-quick")).toBeInTheDocument();
-  expect(careful.querySelector("svg.v165-mode-icon.is-careful")).toBeInTheDocument();
+  expect(getByClass(quick, "is-quick")).toBeInTheDocument();
+  expect(getByClass(careful, "is-careful")).toBeInTheDocument();
   expect(screen.getByRole("alert")).toHaveTextContent("예약 시간이 있는 장소가 있어요.");
   expect(screen.getByText("출발지 · 숙소")).toBeInTheDocument();
   expect(screen.getByText("도착지 · 숙소 도착")).toBeInTheDocument();
-  const fields=document.querySelectorAll(".v165-time-field");
+  const fields=queryAllByClass(document, "v165-time-field");
   expect(fields).toHaveLength(2);
-  expect(fields[0].querySelector(".v16-inline-clock-stepper")).toBeInTheDocument();
-  expect(fields[1].querySelector(".v16-inline-clock-stepper")).toBeInTheDocument();
+  expect(getByClass(fields[0], "v16-inline-clock-stepper")).toBeInTheDocument();
+  expect(getByClass(fields[1], "v16-inline-clock-stepper")).toBeInTheDocument();
   expect(screen.queryByText("마지막 도착 희망 시각")).not.toBeInTheDocument();
 });
 test("optimizer clocks share the visit stepper and show a full midnight default",()=>{

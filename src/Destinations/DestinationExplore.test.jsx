@@ -1,3 +1,4 @@
+import { queryByClass, queryAllByClass, getArticleByText } from "../testQueries";
 import React from "react";
 import fs from "fs";
 import path from "path";
@@ -187,10 +188,10 @@ test("카테고리 숫자·불필요한 제목·주소를 없애고 각 장소�
   expect(screen.queryByText("도시의 장소들")).not.toBeInTheDocument();
   expect(screen.queryByText("일본 도쿄")).not.toBeInTheDocument();
   const picker = screen.getByRole("button", { name: "센소지 폴더에 저장" });
-  const card = picker.closest("article");
+  const card = getArticleByText("센소지");
   expect(picker).toHaveTextContent("폴더 저장");
   expect(within(card).getByRole("button", { name: "센소지 일정에 추가" })).toHaveTextContent("일정 추가");
-  expect(card.querySelector(".place-explore-divider")).toHaveTextContent("|");
+  expect(queryByClass(card, "place-explore-divider")).toHaveTextContent("|");
   fireEvent.click(picker);
   expect(mockOpenFolderPicker).toHaveBeenCalledTimes(1);
   expect(mockOpenFolderPicker.mock.calls[0][1]).toMatchObject({ id: 1, name: "센소지" });
@@ -355,10 +356,13 @@ test("like totals are grouped under the clickable heart, not at the card bottom"
   render(<View />);
   await screen.findByRole("heading", { name: "도쿄" });
   const heart = screen.getByRole("button", { name: "센소지 좋아요 추가" });
-  const stack = heart.closest(".place-explore-favorite-stack");
+  const stack = queryAllByClass(document.body, "place-explore-favorite-stack")
+    .find(item => within(item).queryByRole("button", { name: "센소지 좋아요 추가" }));
   expect(stack).not.toBeNull();
+  expect(stack).toContainElement(heart);
   expect(stack).toContainElement(await screen.findByLabelText("센소지 좋아요 10개"));
-  expect(stack.parentElement).toHaveClass("place-explore-topline");
+  expect(queryAllByClass(document.body, "place-explore-topline")
+    .find(item => within(item).queryByRole("button", { name: "센소지 좋아요 추가" }))).toContainElement(stack);
 });
 
 test("a favorite refresh preserves sorted card titles and categories until new counts arrive", async () => {
@@ -374,14 +378,14 @@ test("a favorite refresh preserves sorted card titles and categories until new c
   await screen.findByRole("heading", { name: "도쿄" });
   fireEvent.click(screen.getByRole("button", { name: /기본순 정렬, 누르면 좋아요순/ }));
   expect(await screen.findByRole("button", { name: "도쿄 장소 1 상세 보기" })).toBeInTheDocument();
-  const firstCard = screen.getByRole("button", { name: "도쿄 장소 1 상세 보기" }).closest(".place-explore-card");
-  const category = firstCard.querySelector(".destination-place-kind");
+  const firstCard = getArticleByText("도쿄 장소 1");
+  const category = queryByClass(firstCard, "destination-place-kind");
   expect(category).toHaveTextContent("명소");
 
   mockFavoriteStatus.mockReturnValue("success");
   rerender(<View />);
   await waitFor(() => expect(getPlaceEngagementApi).toHaveBeenCalledTimes(2));
-  expect(screen.getByRole("button", { name: "도쿄 장소 1 상세 보기" }).closest(".place-explore-card")).toBe(firstCard);
+  expect(getArticleByText("도쿄 장소 1")).toBe(firstCard);
   expect(category).toHaveTextContent("명소");
   expect(screen.queryByText("좋아요순 정렬 중...")).not.toBeInTheDocument();
 

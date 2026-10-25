@@ -1,5 +1,6 @@
+import { queryByClass } from "../testQueries";
 import React from "react";
-import { fireEvent,render,screen,waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter,Routes,Route,useLocation } from "react-router-dom";
 import TripRegionSelect from "./TripRegionSelect";
 import { getDestinationsApi } from "../api/destinationApi";
@@ -68,7 +69,9 @@ test("next button remains anchored in document body outside route animations",as
   saveDateDraft("account:test",{startDate:"2026-11-12",endDate:"2026-11-15"});
   mount();
   fireEvent.click(await screen.findByRole("button",{name:"오사카"}));
-  expect(document.querySelector(".v16-region-next")?.parentElement).toBe(document.body);
+  const dock = queryByClass(document.body, "v16-region-next");
+  expect(document.body).toContainElement(dock);
+  expect(screen.getByRole("main")).not.toContainElement(dock);
 });
 test("server failure is visible next to the fixed next action, without claiming navigation",async()=>{
   saveDateDraft("account:test",{startDate:"2026-11-12",endDate:"2026-11-15"});
@@ -78,7 +81,7 @@ test("server failure is visible next to the fixed next action, without claiming 
   fireEvent.click(screen.getByRole("button",{name:"다음"}));
   const alert=await screen.findByRole("alert");
   expect(alert).toHaveTextContent("저장 결과를 확인하지 못했어요 (HTTP 500)");
-  expect(alert.closest(".v16-region-next")).not.toBeNull();
+  expect(queryByClass(document.body, "v16-region-next")).toContainElement(alert);
   expect(createTripApi).toHaveBeenCalledTimes(1);
   expect(screen.queryByText("도착: /route-result?id=123")).not.toBeInTheDocument();
 });
@@ -88,7 +91,7 @@ test("successful create reads the baseline but still posts only once",async()=>{
   mount();
   fireEvent.click(await screen.findByRole("button",{name:"오사카"}));
   fireEvent.click(screen.getByRole("button",{name:"다음"}));
-  await waitFor(()=>expect(screen.getByText("도착: /route-result?id=123")).toBeInTheDocument());
+  expect(await screen.findByText("도착: /route-result?id=123")).toBeInTheDocument();
   expect(getTripsApi).toHaveBeenCalledTimes(1);
   expect(createTripApi).toHaveBeenCalledTimes(1);
 });

@@ -1,3 +1,4 @@
+import { queryByClass, getArticleByText } from "../testQueries";
 import React from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import TripInlineEditor from "./TripInlineEditor";
@@ -66,10 +67,10 @@ test("inline bottom add navigates to dedicated picker instead of opening an old 
 
 test("manual editor hides the starting marker and marks reserved stops in yellow", () => {
   mount();
-  const first = screen.getByRole("button", { name: "호텔 장소 상세 보기" }).closest("article");
-  const marker = first.querySelector(".v16-inline-position");
-  expect(marker.querySelector(".v16-detail-sequence")).toHaveTextContent("1");
-  expect(marker.querySelector(".v16-inline-start")).toBeNull();
+  const first = getArticleByText("호텔");
+  const marker = queryByClass(first, "v16-inline-position");
+  expect(queryByClass(marker, "v16-detail-sequence")).toHaveTextContent("1");
+  expect(queryByClass(marker, "v16-inline-start")).toBeNull();
   expect(marker).not.toHaveTextContent("시작");
   expect(screen.getByRole("button", { name: "호텔 방문 정보 수정" })).toHaveTextContent("수정");
 });
@@ -77,13 +78,13 @@ test("only stored clock or dwell makes the manual visit summary visible", () => 
   const custom=[{...places[0],arrivalTime:"",stayDuration:0,isStartPoint:true},
     {...places[1],arrivalTime:"",stayDuration:45,isFixed:true}];
   mount({day:{day:1,places:custom}});
-  const empty=screen.getByRole("button",{name:"호텔 장소 상세 보기"}).closest("article");
-  expect(empty.querySelector(".v16-inline-place-meta")).toBeNull();
-  const fixed=screen.getByRole("button",{name:"오사카성 장소 상세 보기"}).closest("article");
-  expect(fixed.querySelector(".v16-inline-position")).toHaveClass("is-fixed");
-  expect(fixed.querySelector(".v16-inline-pin-label")).toHaveTextContent("고정");
-  expect(fixed.querySelector(".v16-inline-place-meta")).toHaveTextContent("방문 --:--");
-  expect(fixed.querySelector(".v16-inline-place-meta")).toHaveTextContent("머무르기 45분");
+  const empty=getArticleByText("호텔");
+  expect(queryByClass(empty, "v16-inline-place-meta")).toBeNull();
+  const fixed=getArticleByText("오사카성");
+  expect(queryByClass(fixed, "v16-inline-position")).toHaveClass("is-fixed");
+  expect(queryByClass(fixed, "v16-inline-pin-label")).toHaveTextContent("고정");
+  expect(queryByClass(fixed, "v16-inline-place-meta")).toHaveTextContent("방문 --:--");
+  expect(queryByClass(fixed, "v16-inline-place-meta")).toHaveTextContent("머무르기 45분");
 });
 test("day edit opens the first place's compact form immediately", () => {
   mount({ autoOpenFirst: true });
@@ -93,7 +94,7 @@ test("day edit opens the first place's compact form immediately", () => {
 test("delete mode selects cards with right-side checks and cancels the animated dock", () => {
   mount({ deleteMode: true });
   fireEvent.click(screen.getByRole("button", { name: "오사카성 삭제 선택" }));
-  const dock = document.querySelector(".v16-inline-floating-delete");
+  const dock = queryByClass(document, "v16-inline-floating-delete");
   expect(dock).toHaveClass("is-visible");
   expect(screen.getByRole("button", { name: "선택한 장소 1개 삭제하기" })).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "오사카성 삭제 선택 해제" }));
@@ -114,7 +115,7 @@ test("selected day places delete after explicit confirmation and refresh the ori
   }));
   await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
   expect(onFinishDelete).toHaveBeenCalledTimes(1);
-  expect(document.querySelector(".v16-inline-floating-delete")).not.toHaveClass("is-visible");
+  expect(queryByClass(document, "v16-inline-floating-delete")).not.toHaveClass("is-visible");
 });
 
 test("removing a planned clock persists an explicit null and clears fixed state", async () => {

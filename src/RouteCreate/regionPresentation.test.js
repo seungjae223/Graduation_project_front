@@ -4,7 +4,7 @@ const region=fs.readFileSync(path.join(__dirname,"TripRegionSelect.css"),"utf8")
 const recommend=fs.readFileSync(path.join(__dirname,"../Recommend/Recommend.css"),"utf8");
 test("region next action slides above fixed bottom navigation",()=>{
   expect(region).toContain(".v16-region-next.is-visible");
-  expect(region).toContain("bottom:calc(70px + env(safe-area-inset-bottom,0px) + 13px)");
+  expect(region).toContain("bottom:calc(var(--footer-height) + env(safe-area-inset-bottom,0px) + 13px)");
   expect(region).not.toContain("선택 완료");
 });
 test("recommend cards span full photo with a readable bottom gradient",()=>{

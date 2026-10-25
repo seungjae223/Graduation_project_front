@@ -111,4 +111,3 @@ test("a pending start can be cleared and same-day trips still show Next",()=>{
   expect(screen.getByText("0박 1일")).toBeInTheDocument();
   expect(screen.getByRole("button",{name:"다음"})).toBeEnabled();
 });
-

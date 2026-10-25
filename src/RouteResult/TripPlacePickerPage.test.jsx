@@ -1,3 +1,4 @@
+import { queryByClass } from "../testQueries";
 import React from "react";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
@@ -62,8 +63,8 @@ test("opens all regional places by default, then favorites and region-ranked fol
   const labels=within(group).getAllByRole("button").map(x=>x.textContent);
   expect(labels).toEqual(["전체","내 숙소","좋아하는 장소","홍콩 여행","일본 여행"]);
   expect(screen.queryByRole("button",{name:"장소를 선택해 주세요"})).not.toBeInTheDocument();
-  expect(document.querySelector(".v166-cart-dock")).not.toHaveClass("is-visible");
-  expect(document.querySelector(".v166-cart-dock")).toHaveAttribute("aria-hidden","true");
+  expect(queryByClass(document, "v166-cart-dock")).not.toHaveClass("is-visible");
+  expect(queryByClass(document, "v166-cart-dock")).toHaveAttribute("aria-hidden","true");
   expect(within(group).getByRole("button",{name:"홍콩 여행"})).not.toHaveClass("is-unrelated");
   expect(within(group).getByRole("button",{name:"일본 여행"})).toHaveClass("is-unrelated");
   expect(await screen.findByText("★ 4.5(1)")).toBeInTheDocument();
@@ -82,8 +83,8 @@ test("deselecting the final place hides and disables the basket instead of showi
   fireEvent.click(within(screen.getByRole("list",{name:"장소 목록"}))
     .getByRole("button",{name:"홍콩 숙소 선택 해제"}));
   expect(screen.queryByRole("button",{name:"1곳 선택 완료"})).not.toBeInTheDocument();
-  expect(document.querySelector(".v166-cart-dock")).toHaveAttribute("aria-hidden","true");
-  expect(document.querySelector(".v166-cart-dock")).not.toHaveClass("is-visible");
+  expect(queryByClass(document, "v166-cart-dock")).toHaveAttribute("aria-hidden","true");
+  expect(queryByClass(document, "v166-cart-dock")).not.toHaveClass("is-visible");
 });
 test("all days can be cleared and submission requires selected days",async()=>{
   mount();
@@ -109,7 +110,7 @@ test("deselecting all days clears every faint already-in-day check without alter
   expect(screen.queryByText("추가할 일차를 선택해 주세요.")).not.toBeInTheDocument();
 });
 test("reentering resets target day but preserves picked places and filters from session",async()=>{
-  const first=mount();
+  const { unmount: firstUnmount }=mount();
   await screen.findByRole("button",{name:"홍콩 숙소 선택"});
   fireEvent.click(screen.getByRole("button",{name:"홍콩 숙소 선택"}));
   fireEvent.click(within(screen.getByRole("region",{name:"추가 날짜 선택"}))
@@ -117,7 +118,7 @@ test("reentering resets target day but preserves picked places and filters from 
   fireEvent.click(within(screen.getByRole("region",{name:"추가 날짜 선택"}))
     .getByRole("button",{name:/1일차/}));
   fireEvent.change(screen.getByRole("searchbox",{name:"홍콩 장소 검색"}),{target:{value:"숙소"}});
-  first.unmount();
+  firstUnmount();
   mount();
   await screen.findByRole("searchbox",{name:"홍콩 장소 검색"});
   const days=screen.getByRole("region",{name:"추가 날짜 선택"});
@@ -182,7 +183,7 @@ test("success return button dismisses on scroll without navigating automatically
   await screen.findByRole("button",{name:"✓ 일정 편집으로 돌아가기"});
   fireEvent.scroll(window);
   expect(screen.queryByRole("button",{name:"✓ 일정 편집으로 돌아가기"})).not.toBeInTheDocument();
-  expect(document.querySelector(".v166-cart-dock")).toHaveAttribute("aria-hidden","true");
+  expect(queryByClass(document, "v166-cart-dock")).toHaveAttribute("aria-hidden","true");
 });
 test("duplicate same-day place requires explicit confirmation and is permitted",async()=>{
   getTripPlacesApi.mockResolvedValue([{tripPlaceId:99,placeId:1,day:1,visitOrder:1}]);

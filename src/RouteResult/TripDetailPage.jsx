@@ -242,6 +242,11 @@ export default function TripDetailPage() {
   useEffect(() => {
     if (editMode && editDay >= 1 && editDay <= dayCount) setActiveIndex(editDay - 1);
   }, [editMode, editDay, dayCount]);
+  useEffect(() => {
+    // Keep the selected day valid after shortening dates, without resetting it
+    // while a refresh temporarily has no loaded days.
+    if (dayCount > 0) setActiveIndex(index => Math.min(index, dayCount - 1));
+  }, [dayCount]);
   // A missing optimized draft is not a valid saved display version.
   useEffect(() => {
     if (result.status === "success" && !hasOptimized && version === "optimized") {

@@ -1,4 +1,5 @@
-import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { queryByClass, getArticleByText } from "../testQueries";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Total from "./Total";
@@ -87,13 +88,13 @@ test("review sort uses all actual review scores, caches them across sorting and 
 
 test("save/detail preserve original IDs and detail/back restores page and distance state", async () => {
   render(view()); await screen.findByText("총 8개 · 1/2 페이지"); await chooseOrigin();
-  const first = screen.getByRole("heading", { name: "장소 7" }).closest("article");
+  const first = getArticleByText("장소 7");
   fireEvent.click(within(first).getByRole("button", { name: "장소 7 좋아요 추가" }));
   expect(mockFavorite).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ id: 7, originalData: places[6] }));
   fireEvent.click(within(first).getByRole("button", { name: "폴더 저장" }));
   expect(mockToggle).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ id: 7, originalData: places[6] }));
   fireEvent.click(screen.getByRole("button", { name: "2페이지" }));
-  fireEvent.click(within(screen.getByRole("heading", { name: "장소 2" }).closest("article")).getByRole("button", { name: "상세보기" }));
+  fireEvent.click(within(getArticleByText("장소 2")).getByRole("button", { name: "상세보기" }));
   await screen.findByText("상세 도착 ?id=2");
   fireEvent.click(screen.getByRole("button", { name: "돌아가기" }));
   await screen.findByText("총 8개 · 2/2 페이지");
@@ -154,7 +155,7 @@ test("changing the reference resets page one and canceling leaves the selected r
 test("a successful GPS selection stays in browser entry state, and changing accounts resets the private reference", async () => {
   const geolocation = { getCurrentPosition: jest.fn() };
   Object.defineProperty(navigator, "geolocation", { configurable: true, value: geolocation });
-  const rendered=render(view()); await screen.findByText("총 8개 · 1/2 페이지");
+  const { rerender: renderedRerender }=render(view()); await screen.findByText("총 8개 · 1/2 페이지");
   fireEvent.click(screen.getByRole("button", { name: /거리순/ }));
   fireEvent.click(screen.getByRole("button", { name: "내 현재 위치 사용" }));
   act(() => geolocation.getCurrentPosition.mock.calls[0][0]({ coords: { latitude: 34.6, longitude: 135.5 } }));
@@ -167,7 +168,7 @@ test("a successful GPS selection stays in browser entry state, and changing acco
   expect(screen.getByText("현재 위치 기준 · 직선거리순")).toBeInTheDocument();
   expect(titles()[0]).toBe("장소 7");
   expect(api.get).toHaveBeenCalledWith("/api/recommendations", expect.objectContaining({ params: { theme: "ACTIVITY" } }));
-  mockAccount="account:B"; rendered.rerender(view());
+  mockAccount="account:B"; renderedRerender(view());
   await screen.findByText("총 8개 · 1/2 페이지");
   expect(screen.queryByText(/현재 위치 기준/)).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: /인기순/ })).toHaveAttribute("aria-pressed", "true");
@@ -182,7 +183,7 @@ test("reference edits are drafts: GPS success and cancel preserve the applied pl
   fireEvent.click(screen.getByRole("button", { name: "변경" }));
   expect(screen.getByLabelText("기준 장소", { exact: true })).toHaveValue("7");
   expect(screen.getByLabelText("기준 장소의 지역")).toHaveValue("오사카");
-  expect(screen.getByText("장소 7 기준 · 직선거리순").parentElement).toHaveAttribute("aria-hidden", "true");
+  expect(queryByClass(document.body, "total-distance-summary")).toHaveAttribute("aria-hidden", "true");
   fireEvent.click(screen.getByRole("button", { name: "내 현재 위치 사용" }));
   expect(screen.getByRole("button", { name: "이 위치로 정렬" })).toBeDisabled();
   act(() => geolocation.getCurrentPosition.mock.calls[0][0]({ coords: { latitude: 35.2, longitude: 135.5 } }));
@@ -210,12 +211,12 @@ test("the picker traps keyboard focus, closes with ESC/backdrop and releases bac
   const close = screen.getByRole("button", { name: "거리 기준 선택 닫기" });
   close.focus(); userEvent.tab({ shift: true });
   expect(screen.getByRole("button", { name: "취소" })).toHaveFocus();
-  fireEvent.keyDown(document.activeElement, { key: "Escape" });
+  fireEvent.keyDown(screen.getByRole("button", { name: "취소" }), { key: "Escape" });
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(distance).toHaveFocus();
   expect(scroller.style.overflowY).not.toBe("hidden");
   fireEvent.click(distance);
-  fireEvent.click(screen.getByRole("dialog").parentElement);
+  fireEvent.click(queryByClass(document.body, "total-origin-layer"));
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(distance).toHaveAttribute("aria-pressed", "false");
 });

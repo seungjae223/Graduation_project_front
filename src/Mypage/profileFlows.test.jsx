@@ -1,6 +1,6 @@
+import { queryByClass, getByClass, getAllByClass, getByAttribute } from "../testQueries";
 import React from "react";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { SavedPlacesProvider } from "../Context/SavedPlacesContext";
 import Inquiry from "./Inquiry";
@@ -145,7 +145,7 @@ test("folder entry animates forward without a redundant in-page back button", as
   const folderButton = screen.getByRole("button",{name:"도쿄 모음 폴더로 이동"});
   expect(folderButton).toHaveClass("v14-saved-folder-forward");
   fireEvent.click(folderButton);
-  expect(document.querySelector(".v14-saved-view")).toHaveClass("v14-saved-view--forward");
+  expect(queryByClass(document, "v14-saved-view")).toHaveClass("v14-saved-view--forward");
   expect(screen.queryByRole("button",{name:/^폴더 목록$/})).not.toBeInTheDocument();
   // Header owns backward navigation; SavedPlaces no longer renders a second Back control.
 });
@@ -166,10 +166,11 @@ test("favorite folder stays first and protected in bulk delete mode", async () =
   });
   setup(<SavedPlaces />, "/saved-places");
   await screen.findByText("좋아하는 장소");
-  const list = document.querySelector(".v14-saved-folders");
-  expect(list.firstElementChild).toHaveClass("is-favorites");
-  expect(list.firstElementChild).toHaveTextContent("좋아하는 장소");
-  expect(list.firstElementChild.querySelector(".v14-saved-folder-icon svg")).not.toBeNull();
+  const list = queryByClass(document.body, "v14-saved-folders");
+  const firstFolder = within(list).getAllByRole("listitem")[0];
+  expect(firstFolder).toHaveClass("is-favorites");
+  expect(firstFolder).toHaveTextContent("좋아하는 장소");
+  expect(getByAttribute("viewBox", getByClass(firstFolder, "v14-saved-folder-icon"), "0 0 24 24")).not.toBeNull();
   expect(screen.queryByRole("button", {name:"좋아하는 장소 폴더 삭제"})).not.toBeInTheDocument();
   expect(screen.queryByRole("button", {name:/선택한 폴더 \d+개 삭제하기/})).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:"폴더 삭제 선택"}));
@@ -178,7 +179,7 @@ test("favorite folder stays first and protected in bulk delete mode", async () =
   fireEvent.click(screen.getByRole("checkbox",{name:"일반 폴더 A 폴더 선택"}));
   fireEvent.click(screen.getByRole("checkbox",{name:"일반 폴더 B 폴더 선택"}));
   const deleteButton = screen.getByRole("button",{name:"선택한 폴더 2개 삭제하기"});
-  expect(deleteButton.closest(".v14-saved-floating-delete")).not.toBeNull();
+  expect(queryByClass(document.body, "v14-saved-floating-delete")).toContainElement(deleteButton);
   fireEvent.click(deleteButton);
   await waitFor(() => expect(api.delete).toHaveBeenCalledTimes(2));
   expect(api.delete.mock.calls.map(([url])=>url))
@@ -192,7 +193,7 @@ test("folder delete pill remains mounted and slides down when all folders are un
     : []}));
   setup(<SavedPlaces />, "/saved-places");
   await screen.findByText("체크할 폴더");
-  const pill = document.querySelector(".v14-saved-floating-delete");
+  const pill = queryByClass(document, "v14-saved-floating-delete");
   expect(pill).toBeInTheDocument();
   expect(pill).not.toHaveClass("is-visible");
   expect(pill).toHaveAttribute("aria-hidden","true");
@@ -213,7 +214,7 @@ test("place delete pill stays mounted while the last selection is cleared", asyn
     [{id:71,name:"체험 장소",region:"오사카",placeCategory:"EXPERIENCE",placeCategoryLabel:"체험"}]}));
   setup(<SavedPlaces />, "/saved-places?folderId=1");
   await screen.findByRole("button",{name:"기본순 정렬, 누르면 좋아요순"});
-  const pill = document.querySelector(".v14-saved-floating-delete");
+  const pill = queryByClass(document, "v14-saved-floating-delete");
   expect(pill).not.toHaveClass("is-visible");
   fireEvent.click(screen.getByRole("button",{name:"장소 삭제 선택"}));
   fireEvent.click(screen.getByRole("checkbox",{name:"체험 장소 선택"}));
@@ -286,11 +287,11 @@ test("folder details cycle the same default, likes and reviews sort controls as 
   expect(screen.getByRole("button",{name:"체험"})).toBeInTheDocument();
   fireEvent.click(first);
   expect(screen.getByRole("button",{name:"좋아요순 정렬, 누르면 리뷰순"})).toBeInTheDocument();
-  await waitFor(() => expect([...document.querySelectorAll(".v14-saved-items > li h3")]
+  await waitFor(() => expect(within(queryByClass(document.body, "v14-saved-items")).getAllByRole("heading", { level: 3 })
     .map(node => node.textContent)).toEqual(["오사카 B", "오사카 A"]));
   fireEvent.click(screen.getByRole("button",{name:"좋아요순 정렬, 누르면 리뷰순"}));
   expect(screen.getByRole("button",{name:"리뷰순 정렬, 누르면 기본순"})).toBeInTheDocument();
-  await waitFor(() => expect([...document.querySelectorAll(".v14-saved-items > li h3")]
+  await waitFor(() => expect(within(queryByClass(document.body, "v14-saved-items")).getAllByRole("heading", { level: 3 })
     .map(node => node.textContent)).toEqual(["오사카 A", "오사카 B"]));
   fireEvent.click(screen.getByRole("button",{name:"리뷰순 정렬, 누르면 기본순"}));
   expect(screen.getByRole("button",{name:"기본순 정렬, 누르면 좋아요순"})).toBeInTheDocument();
@@ -307,10 +308,10 @@ test("selection delete removes only checked places within the folder", async () 
   expect(screen.queryByRole('button',{name:/선택한 장소 \d+개 삭제하기/})).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button',{name:'장소 삭제 선택'}));
   expect(screen.getByRole('button',{name:'장소 선택 완료'})).toBeInTheDocument();
-  expect(document.querySelector('.v14-saved-card-shell.is-selecting')).not.toBeNull();
+  expect(getAllByClass(document.body, "v14-saved-card-shell").find(item => item.classList.contains("is-selecting"))).not.toBeNull();
   fireEvent.click(screen.getByRole('checkbox',{name:'서울 장소 선택'}));
   const deleteButton = screen.getByRole('button',{name:'선택한 장소 1개 삭제하기'});
-  expect(deleteButton.closest('.v14-saved-floating-delete')).not.toBeNull();
+  expect(queryByClass(document.body, "v14-saved-floating-delete")).toContainElement(deleteButton);
   fireEvent.click(deleteButton);
   await waitFor(()=>expect(api.delete).toHaveBeenCalledWith('/api/folders/1/places/71'));
   expect(screen.getByTestId('location')).toHaveTextContent('/saved-places?folderId=1');
@@ -369,10 +370,22 @@ test("undated server record remains accessible without a date-unknown tab or fak
   expect(screen.queryByRole('button',{name:'날짜 미정'})).not.toBeInTheDocument();
   expect(screen.queryByText('D-Day')).not.toBeInTheDocument();
 });
-test("schedule refresh failure retains the same account's confirmed list", async () => {
-  api.get.mockResolvedValue({data:[{id:1,title:'확인된 일정',selectedDates:['2099-01-01']}]}); setup(<MySchedule />,'/my-schedule');
-  expect(await screen.findByRole('heading',{name:'확인된 일정'})).toBeInTheDocument();
-  api.get.mockRejectedValue(new Error('failed')); fireEvent.focus(window);
-  expect(await screen.findByRole('alert')).toHaveTextContent('마지막으로 확인한 일정을 표시합니다.');
-  expect(screen.getByRole('heading',{name:'확인된 일정'})).toBeInTheDocument();
+test("schedule focus refresh waits 30 seconds and retains the confirmed list on failure", async () => {
+  const loadedAt = Date.now();
+  const clock = jest.spyOn(Date, "now").mockReturnValue(loadedAt);
+  try {
+    api.get.mockResolvedValue({data:[{id:1,title:'확인된 일정',selectedDates:['2099-01-01']}]});
+    setup(<MySchedule />,'/my-schedule');
+    expect(await screen.findByRole('heading',{name:'확인된 일정'})).toBeInTheDocument();
+    const reads = api.get.mock.calls.length;
+    clock.mockReturnValue(loadedAt + 30000);
+    fireEvent.focus(window);
+    expect(api.get).toHaveBeenCalledTimes(reads);
+    api.get.mockRejectedValue(new Error('failed'));
+    clock.mockReturnValue(loadedAt + 30001);
+    fireEvent.focus(window);
+    expect(await screen.findByRole('alert')).toHaveTextContent('마지막으로 확인한 일정을 표시합니다.');
+    expect(api.get).toHaveBeenCalledTimes(reads + 1);
+    expect(screen.getByRole('heading',{name:'확인된 일정'})).toBeInTheDocument();
+  } finally { clock.mockRestore(); }
 });

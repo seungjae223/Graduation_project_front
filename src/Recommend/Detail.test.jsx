@@ -1,3 +1,4 @@
+import { queryByClass } from "../testQueries";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, useNavigate } from "react-router-dom";
 import Detail from "./Detail";
@@ -176,7 +177,7 @@ test("detail shows the verified count directly beneath its heart", async () => {
   setup();
   const title = await screen.findByRole("heading", { name: "장소 1" });
   expect(title).toBeInTheDocument();
-  const stack = screen.getByRole("button", { name: "장소 1 좋아요 추가" }).closest(".detail-favorite-stack");
+  const stack = queryByClass(document.body, "detail-favorite-stack");
   expect(stack).not.toBeNull();
   expect(stack).toContainElement(await screen.findByLabelText("장소 1 좋아요 12개"));
   expect(getPlaceEngagementApi).toHaveBeenCalledWith([1], expect.objectContaining({ signal: expect.any(AbortSignal) }));

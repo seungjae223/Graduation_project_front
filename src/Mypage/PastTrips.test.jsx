@@ -1,4 +1,11 @@
+import { queryByClass, getArticleByText } from "../testQueries";
 import { getPastTrips } from "./PastTrips";
+
+import React from "react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
+import PastTrips from "./PastTrips";
+import { getTripsApi, deleteTripApi } from "../api/tripApi";
 
 test("past trips are based on completed dates, sorted newest first", () => {
   const trips = [
@@ -8,12 +15,6 @@ test("past trips are based on completed dates, sorted newest first", () => {
   ];
   expect(getPastTrips(trips, new Date(2026,9,20)).map(x=>x.id)).toEqual([6,1,4]);
 });
-
-import React from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
-import PastTrips from "./PastTrips";
-import { getTripsApi, deleteTripApi } from "../api/tripApi";
 jest.mock("../api/tripApi", () => ({ getTripsApi: jest.fn(), deleteTripApi: jest.fn() }));
 jest.mock("../utils/useSessionKey", () => ({ __esModule: true, default: () => "account:test" }));
 jest.mock("../utils/authState", () => ({ getAuthSnapshot: () => ({ accountKey: "account:test" }) }));
@@ -47,8 +48,8 @@ test("past used ticket has no flight stub and edit is on the list heading", asyn
     startDate: "2025-03-01", endDate: "2025-03-03" }]);
   setupPage();
   const ticket = await screen.findByRole("button", { name: "부산 지난 여행 일정 보기" });
-  expect(ticket.closest(".v15-trip-card")).toHaveClass("is-past");
-  expect(ticket.querySelector(".v15-ticket-flight-zone")).toBeNull();
+  expect(getArticleByText("부산 지난 여행")).toHaveClass("is-past");
+  expect(queryByClass(ticket, "v15-ticket-flight-zone")).toBeNull();
   expect(screen.queryByRole("button", { name: "부산 지난 여행 영구 삭제" })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "편집" }));
   fireEvent.click(screen.getByRole("button", { name: "부산 지난 여행 선택" }));

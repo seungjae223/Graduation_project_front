@@ -1,3 +1,4 @@
+import { queryByClass, queryAllByClass, getByClass } from "../testQueries";
 import fs from "fs";
 import path from "path";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
@@ -63,10 +64,11 @@ describe("V12 personalized home and real rankings", () => {
     expect(screen.queryByRole("button", { name: /여행 계획 시작하기/ })).not.toBeInTheDocument();
     expect(screen.getByText("이어서 계획하기")).toBeInTheDocument();
     expect(screen.getAllByText("BOARDING PASS")).toHaveLength(2);
-    const firstTicket = screen.getAllByText("BOARDING PASS")[0].closest(".home-boarding-pass");
-    expect(firstTicket.querySelector(".home-ticket-perforation")).toBeInTheDocument();
-    expect(firstTicket.closest(".home-boarding-pass-shadow")).toBeInTheDocument();
-    expect(rail.querySelectorAll(":scope > .home-boarding-pass-shadow")).toHaveLength(2);
+    const tickets = within(rail).getAllByRole("article");
+    const firstTicket = queryByClass(tickets[0], "home-boarding-pass");
+    expect(getByClass(firstTicket, "home-ticket-perforation")).toBeInTheDocument();
+    expect(tickets[0]).toHaveClass("home-boarding-pass-shadow");
+    expect(within(rail).getAllByRole("article")).toHaveLength(2);
     expect(screen.getByRole("slider", { name: "내 여행 목록 가로 이동" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "전체 일정" })).toHaveAttribute("href", "/schedule");
   });
@@ -81,7 +83,7 @@ describe("V12 personalized home and real rankings", () => {
     mount();
     expect(await screen.findByText("예정된 여행")).toBeInTheDocument();
     expect(screen.queryByText("종료된 여행")).not.toBeInTheDocument();
-    expect(screen.getByLabelText("내 여행 일정 목록").querySelectorAll(".home-boarding-pass-shadow")).toHaveLength(1);
+    expect(queryAllByClass(screen.getByLabelText("내 여행 일정 목록"), "home-boarding-pass-shadow")).toHaveLength(1);
   });
 
   it("allows mouse dragging of ticket cards without accidentally opening a trip", async () => {
@@ -122,8 +124,8 @@ describe("V12 personalized home and real rankings", () => {
     expect(screen.getAllByText(/^\d+위$/)).toHaveLength(10);
     expect(screen.queryByText("샘플")).not.toBeInTheDocument();
     expect(screen.queryByText("샘플 포함")).not.toBeInTheDocument();
-    expect(screen.getByLabelText("인기 도시 순위 가로 스크롤").children).toHaveLength(10);
-    expect(screen.getByLabelText("최근 인기 장소 자동 순환 가로 스크롤").querySelectorAll(".home-hot-card")).toHaveLength(21);
+    expect(within(screen.getByLabelText("인기 도시 순위 가로 스크롤")).getAllByRole("article")).toHaveLength(10);
+    expect(queryAllByClass(screen.getByLabelText("최근 인기 장소 자동 순환 가로 스크롤"), "home-hot-card")).toHaveLength(21);
     expect(screen.getByRole("button", { name: "1위 오사카성 검색 결과 보기" })).toBeInTheDocument();
     expect(screen.getByRole("slider", { name: "인기 도시 가로 이동" })).toBeInTheDocument();
     expect(screen.getByText("1위")).toBeInTheDocument();
@@ -136,19 +138,19 @@ describe("V12 personalized home and real rankings", () => {
     const rail = await screen.findByLabelText("최근 인기 장소 자동 순환 가로 스크롤");
     expect(within(rail).getAllByRole("button", { name: "1위 오사카성 상세 보기" })).toHaveLength(1);
     expect(within(rail).getAllByRole("button", { name: "2위 도톤보리 상세 보기" })).toHaveLength(1);
-    expect(rail.querySelectorAll(".home-hot-card")).toHaveLength(21);
-    expect(rail.querySelectorAll(".home-hot-demo-card")).toHaveLength(15);
+    expect(queryAllByClass(rail, "home-hot-card")).toHaveLength(21);
+    expect(queryAllByClass(rail, "home-hot-demo-card")).toHaveLength(15);
     expect(within(rail).queryByText("샘플 · 실제 순위 아님")).not.toBeInTheDocument();
-    expect(rail.querySelector(".home-hot-rank")).toBeNull();
+    expect(queryByClass(rail, "home-hot-rank")).toBeNull();
     expect(rail).toHaveAttribute("aria-label", "최근 인기 장소 자동 순환 가로 스크롤");
   });
 
   it("preserves real ranked destinations while filling spare city slots with editorial suggestions", async () => {
     mount();
     const cityRail = await screen.findByLabelText("인기 도시 순위 가로 스크롤");
-    expect(cityRail.children).toHaveLength(10);
+    expect(within(cityRail).getAllByRole("article")).toHaveLength(10);
     expect(within(cityRail).getByRole("link", { name: "1위 오사카 여행지" })).toBeInTheDocument();
-    expect(cityRail.querySelectorAll(".home-city-demo-tile")).toHaveLength(8);
+    expect(queryAllByClass(cityRail, "home-city-demo-tile")).toHaveLength(8);
     expect(screen.queryByText("샘플 포함")).not.toBeInTheDocument();
   });
 
@@ -164,13 +166,14 @@ describe("V12 personalized home and real rankings", () => {
     mount();
     const rail = await screen.findByLabelText("최근 인기 장소 자동 순환 가로 스크롤");
     const slider = screen.getByRole("slider", { name: "지금 뜨는 장소 가로 이동" });
-    Array.from(rail.children).forEach((card, index) => {
+    const cards = within(rail).getAllByRole("article", { hidden: true });
+    cards.forEach((card, index) => {
       Object.defineProperties(card, {
         offsetLeft: { configurable: true, value: index * 100 },
         offsetWidth: { configurable: true, value: 89 },
       });
     });
-    const groupSpan = rail.children[rail.children.length / 3].offsetLeft - rail.children[0].offsetLeft;
+    const groupSpan = cards[cards.length / 3].offsetLeft - cards[0].offsetLeft;
     Object.defineProperty(rail, "scrollWidth", { configurable: true, value: groupSpan * 3 });
     Object.defineProperty(rail, "clientWidth", { configurable: true, value: 100 });
     rail.scrollLeft = groupSpan;

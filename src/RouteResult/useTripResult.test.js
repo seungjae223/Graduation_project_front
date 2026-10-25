@@ -98,3 +98,40 @@ test("in-place refresh does not replace the mounted itinerary with a loading scr
   expect(result.current.status).toBe("success");
   expect(result.current.places[0].memo).toBe("새 메모");
 });
+
+test.each(["success", "error"])("post-save refresh supersedes an older read even on late %s", async outcome => {
+  const { result } = renderHook(() => useTripResult("1"));
+  await waitFor(() => expect(result.current.status).toBe("success"));
+  let finishOld, failOld;
+  getTripPlacesApi.mockImplementationOnce(() => new Promise((resolve, reject) => {
+    finishOld = resolve; failOld = reject;
+  }));
+  let oldRefresh;
+  act(() => { oldRefresh = result.current.refreshInPlace(); });
+  const oldSignal = getTripPlacesApi.mock.calls[1][1].signal;
+  const savedPlaces = [{ ...places[0], memo: "저장한 새 메모" }];
+  getTripPlacesApi.mockResolvedValueOnce(savedPlaces);
+  await act(async () => { await result.current.refreshInPlace(); });
+  expect(oldSignal.aborted).toBe(true);
+  expect(getTripPlacesApi).toHaveBeenCalledTimes(3);
+  expect(result.current.places).toEqual(savedPlaces);
+  await act(async () => {
+    if (outcome === "success") finishOld(places);
+    else failOld(new Error("old request failed"));
+    await oldRefresh;
+  });
+  expect(result.current.status).toBe("success");
+  expect(result.current.places).toEqual(savedPlaces);
+});
+
+test("ordinary retry clicks deduplicate while detail is pending", async () => {
+  let finish;
+  getTripPlacesApi.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+  const { result } = renderHook(() => useTripResult("1"));
+  const signal = getTripPlacesApi.mock.calls[0][1].signal;
+  await act(async () => { await result.current.retry(); await result.current.retry(); });
+  expect(getTripPlacesApi).toHaveBeenCalledTimes(1);
+  expect(signal.aborted).toBe(false);
+  await act(async () => finish(places));
+  expect(result.current.status).toBe("success");
+});

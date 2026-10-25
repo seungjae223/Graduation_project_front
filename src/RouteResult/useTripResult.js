@@ -45,7 +45,9 @@ export default function useTripResult(id, demo = false) {
   }, []);
 
   const load = useCallback(async ({ preserveScreen = false } = {}) => {
-    if (busy.current.has("detail")) return;
+    // A post-save refresh must supersede reads started before that save.
+    // Ordinary retry clicks still share the pending detail request.
+    if (busy.current.has("detail") && !preserveScreen) return;
     controller.current?.abort();
     const request = new AbortController();
     controller.current = request;

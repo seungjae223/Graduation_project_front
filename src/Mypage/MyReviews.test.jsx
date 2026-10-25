@@ -90,7 +90,7 @@ test("review card without an image renders a safe placeholder instead of an empt
   view();
   expect(await screen.findByText("본문 유지")).toBeInTheDocument();
   expect(screen.getByRole("img",{name:"사진 없는 장소 사진 정보 없음"})).toBeInTheDocument();
-  expect(document.querySelector('img[src=""]')).toBeNull();
+  expect(screen.queryAllByRole("img", { hidden: true }).filter(image => image.getAttribute("src") === "")).toHaveLength(0);
 });
 
 test("a denied review-photo URL is reported rather than showing a broken image", async () => {
