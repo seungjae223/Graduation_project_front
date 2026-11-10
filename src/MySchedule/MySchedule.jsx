@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import "./MySchedule.css";
 import { getTripsApi } from "../api/tripApi";
 import { useRoutePending } from "../Loading/routePending";
+import { SkeletonCards, SkeletonProgress, SkeletonStatus } from "../Loading/LoadingSkeleton";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
 import useTripDeletion from "../utils/useTripDeletion";
@@ -423,9 +424,9 @@ function MySchedule() {
         {busy ? "삭제 결과 확인 중..." : "삭제 결과 다시 확인"}
       </button>}
     </div>}
-    {isLoading && <p className="v15-schedule-substatus" role="status">
-      {scheduleList.length ? "일정을 갱신하는 중..." : "저장된 일정을 불러오는 중입니다."}
-    </p>}
+    {isLoading && (featured || undatedTrips.length > 0
+      ? <SkeletonProgress label="일정 갱신 중" />
+      : <SkeletonStatus label="저장된 일정 로딩"><SkeletonCards kind="ticket" /></SkeletonStatus>)}
 
     {featured && <section className="v15-schedule-featured" aria-label="가장 가까운 여행">
       <div className="v15-schedule-section-title">

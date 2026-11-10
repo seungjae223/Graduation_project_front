@@ -4,11 +4,15 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import PageTransition from "../animations/PageTransition";
 import useReadQuery from "../utils/useReadQuery";
 import EarthLoader from "./EarthLoader";
+import PageSkeleton from "./LoadingSkeleton";
 import RouteLoading from "./RouteLoading";
 
 afterEach(() => jest.restoreAllMocks());
 
-test("one spinner covers the page chunk, first read and visible photo", async () => {
+test.each([
+  ["globe", undefined, "earth-loading-screen--page"],
+  ["search skeleton", <PageSkeleton page="search" />, "page-skeleton--search"],
+])("the %s covers the page chunk, first read and visible photo", async (_name, fallback, className) => {
   let completeChunk;
   let completeRead;
   let completePhoto = false;
@@ -33,21 +37,23 @@ test("one spinner covers the page chunk, first read and visible photo", async ()
   }
   const Page = lazy(() => new Promise(resolve => { completeChunk = resolve; }));
   render(<StrictMode><header>헤더</header>
-    <main><PageTransition className="route-transition"><RouteLoading><Page /></RouteLoading></PageTransition></main>
+    <main><PageTransition className="route-transition">
+      <RouteLoading fallback={fallback}><Page /></RouteLoading>
+    </PageTransition></main>
     <footer>하단 메뉴</footer></StrictMode>);
-  const spinner = screen.getByRole("status");
-  expect(spinner).toHaveClass("earth-loading-screen--page");
+  const placeholder = screen.getByRole("status");
+  expect(placeholder).toHaveClass(className);
   expect(screen.getByRole("banner")).toBeVisible();
   expect(screen.getByRole("contentinfo")).toBeVisible();
   await act(async () => completeChunk({ default: Content }));
-  expect(screen.getByRole("status")).toBe(spinner);
+  expect(screen.getByRole("status")).toBe(placeholder);
 
   await act(async () => completeRead("내 여행"));
   expect(screen.queryByRole("heading")).not.toBeInTheDocument();
-  expect(screen.getByRole("status")).toBe(spinner);
+  expect(screen.getByRole("status")).toBe(placeholder);
   completePhoto = true;
   fireEvent.load(screen.getByAltText("여행 사진"));
-  expect(screen.getByRole("status")).toBe(spinner);
+  expect(screen.getByRole("status")).toBe(placeholder);
 
   await act(async () => finishDecode());
   expect(await screen.findByRole("heading", { name: "내 여행" })).toBeVisible();

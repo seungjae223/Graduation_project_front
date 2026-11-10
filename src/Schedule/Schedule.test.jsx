@@ -13,7 +13,7 @@ beforeEach(() => {
   jest.clearAllMocks(); getTripsApi.mockReset(); deleteTripApi.mockReset(); localStorage.setItem("mock_saved_route_results", JSON.stringify([{ id: "mock", title: "오래된 Mock" }])); });
 test("direct entry fetches server list despite old Mock; selection keeps server ID", async () => {
   getTripsApi.mockResolvedValue([trip]); setup();
-  expect(screen.getByText("저장된 일정을 불러오는 중입니다.")).toBeInTheDocument();
+  expect(screen.getByRole("status", { name: "저장된 일정 로딩" })).toBeInTheDocument();
   const card = await screen.findByRole("button", { name: "서버 여행 일정 보기" }); fireEvent.click(card);
   expect(screen.getByText("결과 주소 ?id=51")).toBeInTheDocument();
   expect(screen.queryByText("오래된 Mock")).not.toBeInTheDocument();

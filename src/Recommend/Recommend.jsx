@@ -4,6 +4,7 @@ import { getDestinationsApi } from "../api/destinationApi";
 import { requireSearchDestinations } from "../Search/destinationSearch";
 import { getDestinationHero } from "../Destinations/destinationHeroPhotos";
 import useReadQuery from "../utils/useReadQuery";
+import { SkeletonCards, SkeletonStatus } from "../Loading/LoadingSkeleton";
 import { filterDestinationCatalog, getDestinationTagline } from "../data/destinationPresentation";
 import "./Recommend.css";
 
@@ -52,7 +53,8 @@ export default function Recommend() {
       {groups.map(item => <button type="button" key={item.key}
         aria-pressed={group === item.key} onClick={() => setGroup(item.key)}>{item.label}</button>)}
     </div>
-    {catalog.status === "loading" && <p role="status" className="recommend-destination-state">여행지를 불러오는 중...</p>}
+    {catalog.status === "loading" && !catalog.data &&
+      <SkeletonStatus label="추천 여행지 로딩"><SkeletonCards kind="cover" /></SkeletonStatus>}
     {catalog.status === "error" && <div role="alert" className="recommend-destination-state">
       여행지를 불러오지 못했어요.
       <button type="button" onClick={catalog.retry}>다시 조회</button>

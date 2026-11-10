@@ -244,7 +244,7 @@ test("switching from a typed query to a recent keyword keeps the old cards mount
   expect(screen.getByRole("button", { name: "서버 장소 상세 보기" })).toBe(oldCard);
   expect(screen.getByRole("button", { name: "부산", exact: true })).toBe(recentButton);
   expect(screen.getByText('"서울" 검색 결과')).toBeInTheDocument();
-  expect(screen.getByText("장소를 검색하는 중이에요...")).toBeInTheDocument();
+  expect(screen.getByRole("status", { name: "장소 검색 결과 로딩" })).toBeInTheDocument();
   await act(async () => pending.resolve([nextPlace]));
   expect(await screen.findByRole("button", { name: "부산 새 결과 상세 보기" })).toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "서버 장소 상세 보기" })).not.toBeInTheDocument();
@@ -261,7 +261,7 @@ test("refreshing recent keywords does not show a new loading placeholder over ex
   const recentButton = await screen.findByRole("button", { name: "부산", exact: true });
   await waitFor(() => expect(getRecentSearchesApi.mock.calls.length).toBeGreaterThan(1));
   expect(screen.getByRole("button", { name: "부산", exact: true })).toBe(recentButton);
-  expect(screen.queryByText("최근 검색어를 불러오는 중...")).not.toBeInTheDocument();
+  expect(screen.queryByRole("status", { name: "최근 검색어 로딩" })).not.toBeInTheDocument();
   await act(async () => pendingRefresh.resolve([{ id: 8, keyword: "서울" }]));
   expect(await screen.findByRole("button", { name: "서울", exact: true })).toBeInTheDocument();
 });
