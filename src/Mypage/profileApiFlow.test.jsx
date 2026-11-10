@@ -1,6 +1,6 @@
 import { getByAttribute } from "../testQueries";
 import React from "react";
-import { act, fireEvent, render, screen, waitFor, within, queryByAttribute } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import MyPage from "./MyPage";
 import api from "../api/api";
@@ -31,30 +31,29 @@ test("MyPage reads only profile and replaces cached names with server values", a
 });
 
 
-test("MyPage uses consistent outline icons for every supported menu action", async () => {
+test("MyPage exposes the same accessible menu actions with decorative icons", async () => {
   render(view());
   await screen.findByRole("heading", { name: profile.nickname });
   const expected = [
-    ["계정", "내 정보 수정", "user-edit"],
+    ["계정", "내 정보 수정"],
     ["계정", "비밀번호 변경", "lock"],
-    ["계정", "로그아웃", "logout"],
+    ["계정", "로그아웃"],
     ["고객지원", "1:1 문의", "message"],
   ];
   expected.forEach(([section, label, icon]) => {
     const scope = within(screen.getByRole("navigation", { name: section }));
     const target = scope.getByRole(label === "로그아웃" ? "button" : "link", { name: new RegExp(label) });
-    const decorativeIcon = queryByAttribute("data-mypage-icon", target, icon);
-    expect(decorativeIcon).not.toBeNull();
+    const decorativeIcon = icon
+      ? getByAttribute("data-mypage-icon", target, icon)
+      : getByAttribute("data-useanimations", target, "");
     expect(decorativeIcon).toHaveAttribute("aria-hidden", "true");
     expect(getByAttribute("data-mypage-icon", target, "chevron")).not.toBeNull();
   });
   expect(getByAttribute("data-mypage-icon", document.body, "avatar")).not.toBeNull();
   const shortcuts = within(screen.getByRole("navigation", { name: "여행 바로가기" }));
-  [
-    ["지난 여행", "luggage"], ["저장한 장소", "folder"],
-    ["최근 본 장소", "history"], ["작성한 리뷰", "review"],
-  ].forEach(([label, icon]) => {
-    expect(getByAttribute("data-mypage-icon", shortcuts.getByRole("link", { name: label }), icon)).not.toBeNull();
+  ["지난 여행", "저장한 장소", "최근 본 장소", "작성한 리뷰"].forEach(label => {
+    const icon = getByAttribute("data-useanimations", shortcuts.getByRole("link", { name: label }), "");
+    expect(icon).toHaveAttribute("aria-hidden", "true");
   });
   expect(screen.queryByText("나의 여행 기록")).not.toBeInTheDocument();
 });

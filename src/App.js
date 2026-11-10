@@ -18,6 +18,7 @@ import Footer from "./Footer/Footer";
 import { DetailFooterProvider } from "./components/DetailFooterContext";
 import SearchPop from "./SearchPopup/SearchPop";
 import RecommendationPageSkeleton from "./Loading/LoadingSkeleton";
+import MainTabPreview from "./Loading/MainTabPreview";
 import RouteLoading from "./Loading/RouteLoading";
 import RouteErrorBoundary from "./Loading/RouteErrorBoundary";
 import useSessionKey from "./utils/useSessionKey";
@@ -215,6 +216,7 @@ function Layout() {
         <PageTransition
           key={transitionKey}
           startWithSlide={Boolean(mainTabTransition || detailTransition || subpageTransition)}
+          preview={mainTabTransition && <MainTabPreview path={pathname} />}
           className={`route-transition ${detailTransition} ${mainTabTransition} ${subpageTransition} ${
             pathname === "/" || pathname.startsWith("/onboarding")
               ? `onboarding-route onboarding-route--${onboardingDirection}`

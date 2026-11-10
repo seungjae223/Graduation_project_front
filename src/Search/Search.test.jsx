@@ -6,6 +6,9 @@ import Search from "./Search";
 import { getDestinationsApi } from "../api/destinationApi";
 import { getPlaceEngagementApi } from "../api/placeEngagementApi";
 import { searchPlacesApi, getPlacesApi, getRecommendationsApi, getRecentSearchesApi, clearRecentSearchesApi, deleteRecentSearchApi } from "../api/placeApi";
+let mockAccount = "account:test";
+jest.mock("../utils/useSessionKey", () => ({ __esModule: true, default: () => mockAccount }));
+jest.mock("../utils/authState", () => ({ getAuthSnapshot: () => ({ accountKey: mockAccount, credentialVersion: 1 }) }));
 jest.mock("../api/destinationApi", () => ({ getDestinationsApi: jest.fn() }));
 jest.mock("../api/placeEngagementApi", () => ({ getPlaceEngagementApi: jest.fn() }));
 const mockFavorite = jest.fn();
@@ -24,6 +27,18 @@ function setup() {
   return screen.getByPlaceholderText("장소, 도시 또는 테마 검색");
 }
 beforeEach(() => { window.sessionStorage.clear(); window.scrollTo = jest.fn(); jest.clearAllMocks(); getDestinationsApi.mockResolvedValue([]); getPlaceEngagementApi.mockImplementation(async ids => ids.map(id => ({ placeId: Number(id), likeCount: Number(id) === 781 ? 7 : 0, reviewCount: 0 }))); mockFavorite.mockImplementation(event => event.stopPropagation()); mockPicker.mockImplementation(event => event.stopPropagation()); getRecentSearchesApi.mockResolvedValue([]); getPlacesApi.mockResolvedValue([{ ...place, region: "부산" }]); getRecommendationsApi.mockResolvedValue([{ ...place, region: "부산" }]); });
+afterEach(() => { mockAccount = "account:test"; });
+
+test("비로그인 검색은 공개 장소만 조회하고 개인 검색 기록은 요청하지 않는다", async () => {
+  mockAccount = "anonymous";
+  const input = setup();
+  fireEvent.change(input, { target: { value: "부산" } });
+  fireEvent.click(screen.getByRole("button", { name: "검색", exact: true }));
+  expect(await screen.findByText("서버 장소")).toBeVisible();
+  expect(getPlacesApi).toHaveBeenCalledTimes(1);
+  expect(searchPlacesApi).not.toHaveBeenCalled();
+  expect(getRecentSearchesApi).not.toHaveBeenCalled();
+});
 
 test("search from a saved folder offers explicit return to that folder", async () => {
   render(<MemoryRouter initialEntries={["/search?folderId=17"]}>

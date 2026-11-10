@@ -51,6 +51,7 @@ function Search() {
   const returnFolderId = searchParams.get("folderId");
   const canReturnToFolder = /^[1-9]\d*$/.test(returnFolderId || "");
   const account = useSessionKey();
+  const signedIn = account !== "anonymous";
   const saving = usePlaceSaving();
   const [quickAddPlace, setQuickAddPlace] = useState(null);
   const keywordFromUrl = (searchParams.get("keyword") || "").trim().replace(/\s+/g, " ");
@@ -73,7 +74,7 @@ function Search() {
   const search = useServerSearch();
   const { submit: submitSearch, clear: clearSearch, status: searchStatus, revision: searchRevision } = search;
   const recent = useReadQuery(account + ":recent-searches",
-    signal => getRecentSearchesApi({ signal, timeout: SEARCH_READ_TIMEOUT_MS }), true,
+    signal => getRecentSearchesApi({ signal, timeout: SEARCH_READ_TIMEOUT_MS }), signedIn,
     () => getAuthSnapshot().accountKey === account);
   const recentPending = recent.status === "loading" && recent.data === null;
   const recentSearches = (recent.data || []).slice(0, 10);
@@ -94,8 +95,8 @@ function Search() {
     else clearSearch();
   }, [keywordFromUrl, submitSearch, clearSearch]);
   useEffect(() => {
-    if (searchStatus === "success") void retryRecents();
-  }, [searchStatus, searchRevision, retryRecents]);
+    if (signedIn && searchStatus === "success") void retryRecents();
+  }, [signedIn, searchStatus, searchRevision, retryRecents]);
 
   const resultsHeading = useRef(null);
   const scrollRequested = useRef(false);
@@ -246,7 +247,7 @@ function Search() {
       </form>
       {inputError && <p id="search-input-error" className="empty-text" role="alert">{inputError}</p>}
     </section>
-    <section className="search-section">
+    {signedIn && <section className="search-section">
       <div className="section-top"><h2>최근 검색어</h2><button type="button" className="clear-btn recent-clear-btn" onClick={() => void mutateRecent(null)} disabled={recentTask.blocked}>전체 삭제</button></div>
       {recentPending && <SkeletonStatus label="최근 검색어 로딩"><SkeletonChips /></SkeletonStatus>}
       {recent.status === "error" && <div role="alert"><p>최근 검색어를 불러오지 못했어요.</p><button type="button" className="clear-btn" onClick={recent.retry}>최근 검색어 다시 조회</button></div>}
@@ -259,7 +260,7 @@ function Search() {
         </div>)}
         {recent.status !== "error" && recent.data !== null && !recentSearches.length && <p className="empty-text">최근 검색어가 없어요.</p>}
       </div>
-    </section>
+    </section>}
     {keywordFromUrl && (hasDestinationMatches || destinationCatalog.status === "loading" || destinationCatalog.status === "error") && <section className="search-section search-destinations-section" aria-labelledby="search-destinations-title">
       <h2 id="search-destinations-title">여행지 검색 결과</h2>
       {destinationCatalog.status === "loading" && <p className="empty-text" role="status">여행지를 검색하는 중이에요.</p>}

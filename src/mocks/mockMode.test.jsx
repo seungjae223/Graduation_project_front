@@ -218,6 +218,7 @@ test("Mock forces its adapter, strips credentials and never falls back for unkno
 });
 
 test("search stays editable while only the recent keyword section shows a skeleton", async () => {
+  await loginApi({ email: "test@example.com", password: "any-password" });
   let release;
   const delay = new Promise(resolve => { release = resolve; });
   const interceptor = api.interceptors.request.use(async config => {

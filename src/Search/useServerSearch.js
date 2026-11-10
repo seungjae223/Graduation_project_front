@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { searchPlacesApi } from "../api/placeApi";
+import { getPlacesApi, searchPlacesApi } from "../api/placeApi";
 import { getApiErrorMessage } from "../api/api";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
@@ -9,6 +9,7 @@ export default function useServerSearch() {
   const account = useSessionKey();
   const [state, setState] = useState({ account, status: "idle", keyword: "", displayedKeyword: "", items: [], error: "" });
   const request = useRef(null);
+  const publicPlaces = useRef(null);
   const version = useRef(0);
   const cancelRequest = useCallback(() => { ++version.current; request.current?.controller.abort(); request.current = null; }, []);
   const clear = useCallback(() => {
@@ -39,9 +40,17 @@ export default function useServerSearch() {
       items: previous.account === account ? previous.items : [], error: "",
     }));
     try {
-      const items = requireSearchPlaces(await searchPlacesApi(keyword, {
-        signal: controller.signal, timeout: SEARCH_READ_TIMEOUT_MS,
-      }));
+      const options = { signal: controller.signal, timeout: SEARCH_READ_TIMEOUT_MS };
+      let items;
+      if (account === "anonymous") {
+        publicPlaces.current ??= requireSearchPlaces(await getPlacesApi(options));
+        const term = keyword.toLocaleLowerCase();
+        items = publicPlaces.current.filter(place =>
+          [place.name, place.region, place.address, place.placeCategoryLabel, place.placeCategory].some(
+            field => field?.toLocaleLowerCase().includes(term)));
+      } else {
+        items = requireSearchPlaces(await searchPlacesApi(keyword, options));
+      }
       if (ticket === version.current && !controller.signal.aborted && getAuthSnapshot().accountKey === account) {
         setState({ account, status: "success", keyword, displayedKeyword: keyword, items, error: "", revision: ticket });
       }

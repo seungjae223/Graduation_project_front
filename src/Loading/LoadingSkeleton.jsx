@@ -34,14 +34,16 @@ export function DestinationCardSkeletons() {
 
 export default function RecommendationPageSkeleton() {
   return (
-    <SkeletonStatus label="추천 화면 로딩" className="page-skeleton page-skeleton--recommend">
-      <span className="skeleton-fill page-skeleton-title" />
-      <div className="page-skeleton-tabs">
-        <span className="skeleton-fill" />
-        <span className="skeleton-fill" />
-      </div>
-      <SkeletonChips />
-      <DestinationCardSkeletons />
-    </SkeletonStatus>
+    <div className="page-skeleton">
+      <h1 aria-hidden="true">어디로 떠나볼까요?</h1>
+      <SkeletonStatus label="추천 화면 로딩" className="page-skeleton--recommend">
+        <div className="page-skeleton-tabs">
+          <span className="skeleton-fill" />
+          <span className="skeleton-fill" />
+        </div>
+        <SkeletonChips />
+        <DestinationCardSkeletons />
+      </SkeletonStatus>
+    </div>
   );
 }

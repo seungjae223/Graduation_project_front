@@ -51,9 +51,8 @@
 .destination-card-skeleton-title { width: min(72%, 150px); height: 27px; }
 .destination-card-skeleton-caption { width: min(52%, 110px); height: 12px; }
 
-.page-skeleton { padding: 24px 16px; margin: 0 auto; }
-.page-skeleton--recommend { max-width: 640px; }
-.page-skeleton-title { width: min(58%, 218px); height: 28px; }
+.page-skeleton { padding: 24px 16px; max-width: 640px; margin: 0 auto; }
+.page-skeleton h1 { margin: 0; font-size: var(--font-page-title); line-height: 1.35; color: var(--color-text-strong); }
 .page-skeleton-tabs {
   display: flex;
   justify-content: space-around;

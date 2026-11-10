@@ -21,7 +21,7 @@ const finishSlide = entry => {
 
 // One DOM entry per existing route key. Suspense may resolve more than once,
 // but it never resets an entry that is already ready or settled.
-export default function PageTransition({ className, startWithSlide = false, children }) {
+export default function PageTransition({ className, startWithSlide = false, preview, children }) {
   const [initial] = useState(() => ({ className, slide: startWithSlide && !prefersReducedMotion() }));
   const entry = useRef(null);
   useLayoutEffect(() => {
@@ -49,6 +49,7 @@ export default function PageTransition({ className, startWithSlide = false, chil
       if (entry.current.dataset.pageEntry === "ready") entry.current.dataset.pageEntry = "settled";
       else finishSlide(entry);
     }}>
+    {preview}
     <EntryContext.Provider value={entry}>{children}</EntryContext.Provider>
   </div>;
 }

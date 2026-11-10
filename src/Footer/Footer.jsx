@@ -10,10 +10,14 @@ import "./Footer.css";
 import searchIcon from "../animations/searchIcon";
 import AnimatedIconButton from "../components/AnimatedIconButton";
 import { useDetailFooter } from "../components/DetailFooterContext";
+import { getAccessToken } from "../api/api";
+import { buildLoginPath } from "../utils/authRedirect";
+import useTapFeedback from "../utils/useTapFeedback";
 
 const Footer = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const tapFeedback = useTapFeedback();
   const isDetail = location.pathname === "/detail";
   const detailFooter = useDetailFooter();
   const actions = detailFooter?.actions;
@@ -76,12 +80,14 @@ const Footer = () => {
       label: "일정",
       path: "/schedule",
       icon: calendarIcon,
+      requiresLogin: true,
     },
     {
       key: "mypage",
       label: "마이페이지",
       path: "/mypage",
       icon: profileIcon,
+      requiresLogin: true,
     },
   ];
 
@@ -94,7 +100,11 @@ const Footer = () => {
             return (
               <AnimatedIconButton key={tab.key} animation={tab.icon} iconSize={22} iconWrapClassName="tab-icon-wrap"
                 className={`tab ${isActive ? "active" : ""} ${tab.key}-tab`}
-                onClick={() => navigate(tab.path)} aria-pressed={isActive}
+                onClick={event => {
+                  const needsLogin = () => tab.requiresLogin && !getAccessToken();
+                  const open = () => navigate(needsLogin() ? buildLoginPath(tab.path) : tab.path);
+                  if (!tapFeedback(event, needsLogin() ? open : null)) open();
+                }} aria-pressed={isActive}
                 disabled={isDetail} tabIndex={isDetail ? -1 : 0}>
                 <span className="tab-label">{tab.label}</span>
               </AnimatedIconButton>

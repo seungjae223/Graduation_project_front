@@ -1,10 +1,11 @@
 /* eslint-disable testing-library/no-node-access -- Verify that navigation retains the same SVG nodes. */
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import Footer from "./Footer";
 import { DetailFooterProvider, useDetailFooter } from "../components/DetailFooterContext";
 function Path() { return <output data-testid="path">{useLocation().pathname}</output>; }
+function ReturnPath() { return <output data-testid="return-path">{useLocation().search}</output>; }
 const tabs = [["홈", "/home"], ["검색", "/search"], ["추천", "/recommend"], ["일정", "/schedule"], ["마이페이지", "/mypage"]];
 test.each(tabs)("직접 URL/새 마운트에서 %s active", (label, path) => {
   render(<MemoryRouter initialEntries={[path]}><Footer /></MemoryRouter>);
@@ -12,6 +13,7 @@ test.each(tabs)("직접 URL/새 마운트에서 %s active", (label, path) => {
   expect(screen.getAllByRole("button")).toHaveLength(5);
 });
 test("모든 GNB 클릭 시 경로 변경, 동일 SVG DOM 유지", () => {
+  sessionStorage.setItem("accessToken", "footer-test-session");
   render(<MemoryRouter initialEntries={["/home"]}><Footer /><Path /></MemoryRouter>);
   const icons = screen.getAllByRole("button").map(button => button.querySelector("svg"));
   expect(icons.every(Boolean)).toBe(true);
@@ -20,6 +22,22 @@ test("모든 GNB 클릭 시 경로 변경, 동일 SVG DOM 유지", () => {
     expect(screen.getByTestId("path")).toHaveTextContent(path);
     expect(screen.getAllByRole("button").filter(button => button.getAttribute("aria-pressed") === "true")).toHaveLength(1);
     screen.getAllByRole("button").forEach((button, index) => expect(button.querySelector("svg")).toBe(icons[index]));
+  }
+  sessionStorage.removeItem("accessToken");
+});
+test.each([["일정", "%2Fschedule"], ["마이페이지", "%2Fmypage"]])("비로그인 %s 터치는 짧게 재생한 뒤 로그인으로 이동한다", (label, returnTo) => {
+  jest.useFakeTimers();
+  try {
+    render(<MemoryRouter initialEntries={["/home"]}><Footer /><Path /><ReturnPath /></MemoryRouter>);
+    const tap = new MouseEvent("click", { bubbles: true, cancelable: true });
+    Object.defineProperty(tap, "pointerType", { value: "touch" });
+    fireEvent(screen.getByRole("button", { name: label }), tap);
+    expect(screen.getByTestId("path")).toHaveTextContent("/home");
+    act(() => jest.advanceTimersByTime(150));
+    expect(screen.getByTestId("path")).toHaveTextContent("/login");
+    expect(screen.getByTestId("return-path")).toHaveTextContent(`?returnTo=${returnTo}`);
+  } finally {
+    jest.useRealTimers();
   }
 });
 test("검색이나 직접 진입한 Destination Explore는 검색 탭을 유지한다", () => {
