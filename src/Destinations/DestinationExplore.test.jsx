@@ -3,10 +3,12 @@ import React from "react";
 import fs from "fs";
 import path from "path";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation, useNavigate, useNavigationType } from "react-router-dom";
 import DestinationExplore from "./DestinationExplore";
 import RouteErrorBoundary from "../Loading/RouteErrorBoundary";
+import RouteLoading from "../Loading/RouteLoading";
 import getRouteBoundaryKey from "../utils/routeBoundaryKey";
+import useRouteScrollRestoration from "../utils/useRouteScrollRestoration";
 import { getDestinationApi, getDestinationPlacesApi } from "../api/destinationApi";
 import { getPlaceEngagementApi } from "../api/placeEngagementApi";
 const mockOpenFolderPicker = jest.fn();
@@ -45,6 +47,14 @@ function TestRoutes() {
 }
 function View({ initial = "/destinations/tokyo" }) {
   return <MemoryRouter initialEntries={[initial]}><CurrentPath /><TestRoutes /></MemoryRouter>;
+}
+function ScrollRestorationRoutes() {
+  const location = useLocation();
+  const mainRef = React.useRef(null);
+  useRouteScrollRestoration(mainRef, location.key, location.pathname, useNavigationType(), "account:A");
+  return <main ref={mainRef}><div className="route-transition">
+    <RouteLoading key={location.pathname}><TestRoutes /></RouteLoading>
+  </div></main>;
 }
 beforeEach(() => {
   jest.resetAllMocks();
@@ -207,53 +217,44 @@ test("도시 탐색 카드에서 장소별 빠른 일정 추가 창을 열고 �
 });
 
 
-test("detail back restores the exact city position even with StrictMode effect cleanup", async () => {
-  window.sessionStorage.clear();
+test("detail back restores the city scroll only after fresh data and the route loader finish", async () => {
   const beforeScroll = window.scrollTo;
-  const beforeFrame = window.requestAnimationFrame;
-  const beforeCancel = window.cancelAnimationFrame;
   const beforeY = Object.getOwnPropertyDescriptor(window, "scrollY");
-  const scheduled = new Map();
-  let nextFrame = 0;
+  const root = document.documentElement;
+  const beforeHeight = Object.getOwnPropertyDescriptor(root, "scrollHeight");
+  Object.defineProperty(root, "scrollHeight", { configurable: true, get: () =>
+    window.innerHeight + (document.querySelector('.route-content:not([data-loading]) .destination-place-grid') ? 1200 : 0) });
   let currentY = 720;
-  window.scrollTo = jest.fn((x, y) => { currentY = y; });
+  window.scrollTo = jest.fn((x, y) => { currentY = Math.min(y, root.scrollHeight - window.innerHeight); });
   Object.defineProperty(window, "scrollY", { configurable: true, get: () => currentY });
-  window.requestAnimationFrame = callback => {
-    const id = ++nextFrame;
-    scheduled.set(id, callback);
-    return id;
-  };
-  window.cancelAnimationFrame = id => scheduled.delete(id);
-  const flushFrame = () => {
-    const callbacks = Array.from(scheduled.values());
-    scheduled.clear();
-    callbacks.forEach(callback => callback());
-  };
   try {
-    render(<React.StrictMode><View /></React.StrictMode>);
+    render(<React.StrictMode><MemoryRouter initialEntries={["/destinations/tokyo"]}>
+      <CurrentPath /><ScrollRestorationRoutes />
+    </MemoryRouter></React.StrictMode>);
     await screen.findByRole("heading", { name: "도쿄" });
     fireEvent.change(screen.getByRole("searchbox", { name: "이 여행지 안에서 장소 찾기" }), { target: { value: "장소" } });
     fireEvent.click(screen.getByRole("button", { name: "장소 더 보기 (12/13)" }));
     expect(screen.getByTestId("current-path")).toHaveTextContent("shown=24");
     fireEvent.click(screen.getByRole("button", { name: "도쿄 장소 13 상세 보기" }));
-    expect(screen.getByText("장소 상세")).toBeInTheDocument();
-    currentY = 0; // The shorter detail screen may have reset the document scroll.
-    fireEvent.click(screen.getByRole("button", { name: "상세에서 돌아가기" }));
+    const back = await screen.findByRole("button", { name: "상세에서 돌아가기" });
+    expect(currentY).toBe(0);
+    let release;
+    const latest = new Promise(resolve => { release = resolve; });
+    getDestinationPlacesApi.mockReturnValue(latest);
+    fireEvent.click(back);
+    expect(screen.getByText("화면을 불러오는 중...")).toBeInTheDocument();
+    expect(window.scrollTo).not.toHaveBeenCalledWith(0, 720);
+    await act(async () => release(places.map(place => place.id === 14 ? { ...place, name: "도쿄 장소 13 최신" } : place)));
     await screen.findByRole("heading", { name: "도쿄" });
     expect(screen.getByRole("searchbox", { name: "이 여행지 안에서 장소 찾기" })).toHaveValue("장소");
-    expect(screen.getByRole("button", { name: "도쿄 장소 13 상세 보기" })).toBeInTheDocument();
-    expect(window.scrollTo).not.toHaveBeenCalled();
-    act(flushFrame);
-    act(flushFrame);
-    expect(window.scrollTo).toHaveBeenLastCalledWith(0, 720);
-    expect(window.sessionStorage.length).toBe(0);
+    expect(screen.getByRole("button", { name: "도쿄 장소 13 최신 상세 보기" })).toBeInTheDocument();
+    await waitFor(() => expect(window.scrollTo).toHaveBeenLastCalledWith(0, 720));
   } finally {
     window.scrollTo = beforeScroll;
-    window.requestAnimationFrame = beforeFrame;
-    window.cancelAnimationFrame = beforeCancel;
     if (beforeY) Object.defineProperty(window, "scrollY", beforeY);
     else delete window.scrollY;
-    window.sessionStorage.clear();
+    if (beforeHeight) Object.defineProperty(root, "scrollHeight", beforeHeight);
+    else delete root.scrollHeight;
   }
 });
 

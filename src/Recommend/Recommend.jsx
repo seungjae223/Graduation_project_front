@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { getDestinationsApi } from "../api/destinationApi";
 import { requireSearchDestinations } from "../Search/destinationSearch";
 import { getDestinationHero } from "../Destinations/destinationHeroPhotos";
 import useReadQuery from "../utils/useReadQuery";
 import { DestinationCardSkeletons, SkeletonStatus } from "../Loading/LoadingSkeleton";
-import { filterDestinationCatalog, getDestinationTagline } from "../data/destinationPresentation";
+import { DESTINATION_GROUPS, filterDestinationCatalog, getDestinationTagline } from "../data/destinationPresentation";
 import "./Recommend.css";
 
 function DestinationCard({ destination }) {
@@ -35,13 +35,28 @@ function DestinationCard({ destination }) {
 }
 
 export default function Recommend() {
+  const [params, setParams] = useSearchParams();
   const catalog = useReadQuery("recommend-destinations",
     async signal => requireSearchDestinations(await getDestinationsApi({ signal })));
   const destinations = catalog.data || [];
-  const [scope, setScope] = useState("OVERSEAS");
-  const [group, setGroup] = useState("all");
+  const scope = params.get("scope") === "DOMESTIC" ? "DOMESTIC" : "OVERSEAS";
+  const requestedGroup = params.get("region");
+  const group = scope === "OVERSEAS" && DESTINATION_GROUPS.some(item => item.key === requestedGroup)
+    ? requestedGroup : "all";
   const { visible, groups } = filterDestinationCatalog(destinations, scope, group);
-  const chooseScope = value => { setScope(value); setGroup("all"); };
+  const chooseScope = value => setParams(current => {
+    const next = new URLSearchParams(current);
+    if (value === "DOMESTIC") next.set("scope", value);
+    else next.delete("scope");
+    next.delete("region");
+    return next;
+  }, { replace: true });
+  const chooseGroup = value => setParams(current => {
+    const next = new URLSearchParams(current);
+    if (value === "all") next.delete("region");
+    else next.set("region", value);
+    return next;
+  }, { replace: true });
 
   return <div className="recommend-page recommend-destination-page">
     <header className="recommend-destination-heading"><h1>어디로 떠나볼까요?</h1></header>
@@ -51,7 +66,7 @@ export default function Recommend() {
     </div>
     <div className="recommend-region-chips" role="group" aria-label="여행 지역">
       {groups.map(item => <button type="button" key={item.key}
-        aria-pressed={group === item.key} onClick={() => setGroup(item.key)}>{item.label}</button>)}
+        aria-pressed={group === item.key} onClick={() => chooseGroup(item.key)}>{item.label}</button>)}
     </div>
     {catalog.status === "loading" && !catalog.data &&
       <SkeletonStatus label="추천 여행지 로딩"><DestinationCardSkeletons /></SkeletonStatus>}

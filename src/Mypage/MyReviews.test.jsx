@@ -1,6 +1,6 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useNavigate } from "react-router-dom";
 import MyReviews from "./MyReviews";
 import { getMyReviewsApi, editMyReviewApi, deleteMyReviewApi } from "../api/myReviewsApi";
 
@@ -31,16 +31,26 @@ test("empty, failure and retry are not disguised as a successful empty list", as
   expect(await screen.findByText("아직 작성한 리뷰가 없어요.")).toBeInTheDocument();
 });
 
-test("paging changes the actual authenticated review query", async () => {
+test("detail back fetches the same review page again", async () => {
   getMyReviewsApi.mockImplementation(async page => ({
     page, totalPages: 2, totalElements: 11,
     content: [{ id: page + 1, placeId: 10 + page, placeName: "방문 장소", comment: "후기 " + page, rating: 4, photos: [] }],
   }));
-  view();
+  function Detail() {
+    const navigate = useNavigate();
+    return <button type="button" onClick={() => navigate(-1)}>뒤로</button>;
+  }
+  render(<MemoryRouter initialEntries={["/mypage/reviews"]}><Routes>
+    <Route path="/mypage/reviews" element={<MyReviews />} />
+    <Route path="/detail" element={<Detail />} />
+  </Routes></MemoryRouter>);
   await screen.findByText("후기 0");
   fireEvent.click(screen.getByRole("button", { name: "다음" }));
   expect(await screen.findByText("후기 1")).toBeInTheDocument();
-  await waitFor(() => expect(getMyReviewsApi).toHaveBeenCalledWith(1, expect.any(Object)));
+  fireEvent.click(screen.getByRole("link", { name: "방문 장소" }));
+  fireEvent.click(screen.getByRole("button", { name: "뒤로" }));
+  expect(await screen.findByText("후기 1")).toBeInTheDocument();
+  expect(getMyReviewsApi.mock.calls.map(([page]) => page)).toEqual([0, 1, 1]);
 });
 
 

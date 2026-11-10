@@ -30,6 +30,7 @@ import OnBoarding2 from "./OnBoarding/OnBoarding2";
 import OnBoarding3 from "./OnBoarding/OnBoarding3";
 import AdminAccessGuard from "./Admin/AdminAccessGuard";
 import useKeyboardRouteFocus from "./utils/useKeyboardRouteFocus";
+import useRouteScrollRestoration from "./utils/useRouteScrollRestoration";
 import getRouteBoundaryKey from "./utils/routeBoundaryKey";
 import getMainTabTransition from "./utils/mainTabTransition";
 import getSubpageTransition from "./utils/subpageTransition";
@@ -118,8 +119,9 @@ function NotFound() {
 }
 
 function Layout() {
-  useSessionKey();
+  const account = useSessionKey();
   const location = useLocation();
+  const mainRef = useRef(null);
   const [isSearchPopOpen, setIsSearchPopOpen] = useState(false);
   const navigationType = useNavigationType();
   useKeyboardRouteFocus(location.pathname, navigationType);
@@ -195,6 +197,7 @@ function Layout() {
   const transitionKey = pathname === "/saved-places"
     ? `${pathname}:${new URLSearchParams(location.search).get("folderId") || "list"}`
     : pathname;
+  useRouteScrollRestoration(mainRef, location.key, transitionKey, navigationType, account);
   const shouldShowAdminFooter = isAdminPage && hasAccessToken;
 
   // 로그인, 관리자 화면에서만 Header 숨김
@@ -208,7 +211,7 @@ function Layout() {
         <Header onSearchClick={() => setIsSearchPopOpen(true)} />
       )}
 
-      <main
+      <main ref={mainRef}
         className={`app-content ${
           shouldShowDefaultFooter || shouldShowAdminFooter ? "with-footer" : ""
         }`}

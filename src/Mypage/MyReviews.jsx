@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useLayoutEffect, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import useReadQuery from "../utils/useReadQuery";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
@@ -28,12 +28,25 @@ function ReviewPhotoStrip({ urls }) {
 
 export default function MyReviews() {
   const account = useSessionKey();
-  const [page, setPage] = useState(0);
+  const [params, setParams] = useSearchParams();
+  const requestedPage = Number(params.get("page"));
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 1 ? requestedPage - 1 : 0;
+  const setPage = index => setParams(current => {
+    const next = new URLSearchParams(current);
+    if (index === 0) next.delete("page");
+    else next.set("page", String(index + 1));
+    return next;
+  }, { replace: true });
   const query = useReadQuery(`${account}:my-reviews:${page}`,
     signal => getMyReviewsApi(page, { signal }), account !== "anonymous",
     () => getAuthSnapshot().accountKey === account);
   const data = query.data;
   const lock = useRef(false);
+  const mounted = useRef(false);
+  useLayoutEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
   const [edit, setEdit] = useState(null);
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
@@ -82,9 +95,9 @@ export default function MyReviews() {
       () => deleteMyReviewApi(review.id),
       updated => updated && updated.totalElements === oldTotal - 1 &&
         !updated.content.some(row => row.id === review.id));
-    if (applied) {
+    if (applied && mounted.current) {
       setEdit(null); setNotice("리뷰를 삭제했어요.");
-      if (page > 0 && data?.content?.length === 1) setPage(value => value - 1);
+      if (page > 0 && data?.content?.length === 1) setPage(page - 1);
     }
   };
 
@@ -163,10 +176,10 @@ export default function MyReviews() {
           </li>)}
         </ul>}
       {data.totalPages > 1 && <nav className="mypage-v14-pager" aria-label="내 리뷰 페이지">
-        <button type="button" disabled={page === 0 || busy} onClick={() => {setEdit(null);setPage(p => p - 1);}}>이전</button>
+        <button type="button" disabled={page === 0 || busy} onClick={() => {setEdit(null);setPage(page - 1);}}>이전</button>
         <span>{page + 1} / {data.totalPages}</span>
         <button type="button" disabled={page >= data.totalPages - 1 || busy}
-          onClick={() => {setEdit(null);setPage(p => p + 1);}}>다음</button>
+          onClick={() => {setEdit(null);setPage(page + 1);}}>다음</button>
       </nav>}
     </>}
   </main>;

@@ -1,6 +1,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../api/api";
 import "./SavedPlaces.css";
 import useReadQuery from "../utils/useReadQuery"; import { requireList } from "../api/responseContract"; import { useSavedPlaces } from "../Context/SavedPlacesContext"; import { readSavedFolderSnapshot } from "../utils/useFolderSavedPlaces";
@@ -145,6 +145,7 @@ const normalizeFolderPlace = (record = {}, index = 0) => {
 
 function SavedPlacesContent() {
   const navigate = useNavigate();
+  const location = useLocation();
   const account = useSessionKey();
   const currentAccount = useRef(account); currentAccount.current = account;
   const [searchParams, setSearchParams] = useSearchParams();
@@ -157,9 +158,13 @@ function SavedPlacesContent() {
   }
   const folderDirection = folderMotion.current.direction;
 
-  const [activeSort, setActiveSort] = useState("기본순");
-  const [term, setTerm] = useState("");
-  const [category, setCategory] = useState("ALL");
+  const remembered = location.state?.savedPlaceFilters;
+  const { activeSort = "기본순", term = "", category = "ALL" } =
+    remembered?.account === account && remembered.folderId === folderIdFromUrl ? remembered : {};
+  const setFilters = changes => navigate({ pathname: location.pathname, search: location.search }, {
+    replace: true,
+    state: { ...location.state, savedPlaceFilters: { account, folderId: folderIdFromUrl, activeSort, term, category, ...changes } },
+  });
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
   const [folderSelectionMode, setFolderSelectionMode] = useState(false);
@@ -244,7 +249,6 @@ function SavedPlacesContent() {
       (countsById.get(String(a.placeId))?.[field] ?? -1));
   }, [openedFolderPlaces, category, term, activeSort, hasEngagement, countsById]);
   const resetFolderView = () => {
-    setActiveSort("기본순"); setTerm(""); setCategory("ALL");
     setSelectionMode(false); setSelectedIds([]);
   };
   const openFolder = folder => {
@@ -444,13 +448,13 @@ function SavedPlacesContent() {
             <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="2" />
             <path d="m15.5 15.5 5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
-          <input type="search" value={term} onChange={event=>setTerm(event.target.value)}
+          <input type="search" value={term} onChange={event=>setFilters({ term: event.target.value })}
             placeholder="이 폴더에서 장소 검색" aria-label="저장한 장소 검색" />
         </label>
         <div className="v14-saved-categories" role="group" aria-label="장소 분류">
           {["ALL",...availableCategories].map(code =>
             <button key={code} type="button" className={category===code?"is-active":""}
-              aria-pressed={category===code} onClick={()=>setCategory(code)}>
+              aria-pressed={category===code} onClick={()=>setFilters({ category: code })}>
               {code==="ALL"?"전체":getPlaceCategoryLabel(code)}
             </button>)}
         </div>
@@ -458,7 +462,7 @@ function SavedPlacesContent() {
           {(term.trim() || category !== "ALL") &&
             <p className="v14-saved-result-summary" role="status">검색 결과 {matchingPlaces.length}곳</p>}
           <button type="button" className="v14-saved-sort-button"
-            onClick={() => setActiveSort(nextSort)}
+            onClick={() => setFilters({ activeSort: nextSort })}
             aria-label={`${activeSort} 정렬, 누르면 ${nextSort}`}
             title={`다음 정렬: ${nextSort}`}>
             <SortIcon sort={activeSort} /><span>{activeSort}</span>

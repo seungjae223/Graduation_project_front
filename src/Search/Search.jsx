@@ -136,35 +136,6 @@ function Search() {
     if (saving.favoriteStatus === "success") void retryEngagement();
   }, [saving.favoriteStatus, retryEngagement]);
 
-  // An entry's search query/page live in the URL. Scroll is saved only when
-  // leaving for a detail/destination, and consumed after the results return.
-  const returnKey = "nomango:search-return:" + account + ":" + location.key;
-  const restoreScroll = useRef(null);
-  const restoreKey = useRef(null);
-  if (restoreKey.current !== returnKey) {
-    restoreKey.current = returnKey;
-    try {
-      const raw = window.sessionStorage.getItem(returnKey);
-      const value = raw ? JSON.parse(raw) : null;
-      restoreScroll.current = typeof value?.scrollY === "number" && Number.isFinite(value.scrollY) && value.scrollY >= 0 ? value.scrollY : null;
-    } catch { restoreScroll.current = null; }
-  }
-  const saveReturnPosition = () => {
-    try {
-      window.sessionStorage.setItem(returnKey, JSON.stringify({ scrollY: window.scrollY || document.documentElement.scrollTop || 0 }));
-    } catch { /* Storage can be unavailable in private browsing. */ }
-  };
-  useEffect(() => {
-    if (restoreScroll.current === null || recentPending || sortingPending || destinationCatalog.status === "loading" ||
-      (showPlaceResults && resultStatus === "loading")) return;
-    const y = restoreScroll.current;
-    const frame = window.requestAnimationFrame(() => {
-      window.scrollTo(0, y);
-      restoreScroll.current = null;
-      try { window.sessionStorage.removeItem(returnKey); } catch { /* no storage */ }
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [returnKey, recentPending, sortingPending, destinationCatalog.status, showPlaceResults, resultStatus]);
   useEffect(() => {
     if (!scrollRequested.current || resultStatus !== "success") return;
     scrollRequested.current = false;
@@ -218,7 +189,6 @@ function Search() {
     );
   };
   const handleResultClick = place => {
-    saveReturnPosition();
     navigate("/detail?id=" + encodeURIComponent(place.id) + "&source=server-search", {
     state: { place: { ...place, placeId: place.id, originalId: place.id, title: place.name, desc: place.address }, source: "server-search" },
     });
@@ -276,7 +246,7 @@ function Search() {
             const hero = getDestinationHero(destination.code);
             return <article className="search-destination-card" key={destination.code}>
               <button type="button" className="search-destination-main" aria-label={`${destination.name} 여행지 보기`}
-                onClick={() => { saveReturnPosition(); navigate(`/destinations/${encodeURIComponent(destination.code)}`, { state: { fromSearch: location.pathname + location.search } }); }}>
+                onClick={() => navigate(`/destinations/${encodeURIComponent(destination.code)}`, { state: { fromSearch: location.pathname + location.search } })}>
                 <span className="search-destination-photo">
                   {hero ? <img src={hero.src} alt="" loading="lazy" style={{ objectPosition: hero.position }} /> : <span className="search-destination-fallback" aria-hidden="true"><CityIcon /></span>}
                 </span>

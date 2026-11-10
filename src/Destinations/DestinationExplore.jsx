@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { getDestinationApi, getDestinationPlacesApi } from "../api/destinationApi";
 import { getPlaceEngagementApi } from "../api/placeEngagementApi";
 import { requireSearchPlaces } from "../Search/searchCatalog";
@@ -31,7 +31,6 @@ const VALID_CODE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function ExploreContent({ destination, places }) {
   const navigate = useNavigate();
-  const location = useLocation();
   const saving = usePlaceSaving();
   const [params, setParams] = useSearchParams();
   const category = params.get("category") || "ALL";
@@ -49,33 +48,6 @@ function ExploreContent({ destination, places }) {
   const requestedCount = Number(params.get("shown"));
   const visibleCount = Number.isSafeInteger(requestedCount) && requestedCount > PAGE_SIZE
     ? Math.ceil(Math.min(requestedCount, 10000) / PAGE_SIZE) * PAGE_SIZE : PAGE_SIZE;
-  const scrollKey = "nomango:destination-return:" + location.key;
-  useEffect(() => {
-    let y;
-    try {
-      const value = sessionStorage.getItem(scrollKey);
-      y = value === null ? null : Number(value);
-    } catch { y = null; }
-    if (y === null || !Number.isFinite(y) || y < 0 ||
-        (sort !== "default" && !Array.isArray(engagement.data))) return;
-    // StrictMode re-runs effects: a ref flag here would cancel the first frame
-    // without scheduling another. Restore after data is rendered, across two paints.
-    let frame;
-    let attempts = 0;
-    const restore = () => {
-      window.scrollTo(0, y);
-      if (++attempts < 2) frame = window.requestAnimationFrame(restore);
-      else {
-        try { sessionStorage.removeItem(scrollKey); } catch { /* Storage unavailable */ }
-      }
-    };
-    frame = window.requestAnimationFrame(restore);
-    return () => window.cancelAnimationFrame(frame);
-  }, [scrollKey, sort, engagement.data, engagement.status]);
-  const rememberScroll = () => {
-    try { sessionStorage.setItem(scrollKey, String(window.scrollY || document.documentElement.scrollTop || 0)); }
-    catch { /* Storage unavailable */ }
-  };
   const setFilters = (changes) => {
     const next = new URLSearchParams(params);
     for (const [key, value] of Object.entries(changes)) {
@@ -114,7 +86,6 @@ function ExploreContent({ destination, places }) {
   const changeKeyword = value => setFilters({ q: value, shown: null });
   const resetFilters = () => setFilters({ category: null, q: null, shown: null });
   const openDetail = place => {
-    rememberScroll();
     navigate(`/detail?id=${encodeURIComponent(place.id)}&source=destination`,
       { state: { place, source: "destination" } });
   };

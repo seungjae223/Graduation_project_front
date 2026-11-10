@@ -1,7 +1,7 @@
 
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import AnimatedHeart from "../AnimatedHeart/AnimatedHeart";
 import useReadQuery from "../utils/useReadQuery";
 import useSessionKey from "../utils/useSessionKey";
@@ -123,9 +123,10 @@ const normalizePlace = (place = {}, index = 0) => {
 function PopularAll() {
 
   const account = useSessionKey();
-  const [selection, setSelection] = useState({ account, filter: "전체", page: 1 });
-  const selectedFilter = selection.account === account ? selection.filter : "전체";
-  const selectedPage = selection.account === account ? selection.page : 1;
+  const [params, setParams] = useSearchParams();
+  const selectedFilter = params.get("country") || "전체";
+  const requestedPage = Number(params.get("page"));
+  const selectedPage = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const moreHeadingRef = useRef(null);
   const filterDragRef = useRef(null);
   const ignoreCountryClick = useRef(false);
@@ -211,19 +212,23 @@ function PopularAll() {
   const currentPage = Math.max(1, Math.min(selectedPage, totalPages));
   const pagePlaces = monthlyPlaces.slice((currentPage - 1) * MORE_PLACES_PER_PAGE, currentPage * MORE_PLACES_PER_PAGE);
   const pageItems = getPaginationItems(currentPage, totalPages);
-  useEffect(() => {
-    setSelection(previous => previous.account !== account ? { account, filter: "전체", page: 1 } :
-      previous.page !== currentPage ? { ...previous, page: currentPage } : previous);
-  }, [account, currentPage]);
+  const setSelection = (filter, page) => setParams(current => {
+    const next = new URLSearchParams(current);
+    if (filter === "전체") next.delete("country");
+    else next.set("country", filter);
+    if (page === 1) next.delete("page");
+    else next.set("page", String(page));
+    return next;
+  }, { replace: true });
 
   const selectCountry = filter => {
     scrollRequested.current = false;
-    setSelection({ account, filter, page: 1 });
+    setSelection(filter, 1);
   };
   const changePage = page => {
     if (page === currentPage || page < 1 || page > totalPages) return;
     scrollRequested.current = true;
-    setSelection({ account, filter: selectedFilter, page });
+    setSelection(selectedFilter, page);
   };
   useEffect(() => {
     if (!scrollRequested.current) return;

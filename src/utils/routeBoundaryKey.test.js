@@ -18,6 +18,11 @@ test("detail identity still resets when its query changes", () => {
   expect(getRouteBoundaryKey("/detail", "?id=1")).not.toBe(getRouteBoundaryKey("/detail", "?id=2"));
 });
 
+test.each([["/recommend", "?region=japan"], ["/popular-all", "?country=한국&page=2"]])(
+  "list controls on %s preserve its mounted route",
+  (path, filters) => expect(getRouteBoundaryKey(path, filters)).toBe(getRouteBoundaryKey(path))
+);
+
 test("itinerary detail and editor share the same boundary for one trip", () => {
   const detail = getRouteBoundaryKey("/route-result", "?id=12");
   expect(getRouteBoundaryKey("/route-result", "?id=12&edit=1&day=2")).toBe(detail);

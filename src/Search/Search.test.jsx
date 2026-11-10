@@ -221,7 +221,6 @@ test("search results and selected page survive detail navigation and back", asyn
   await screen.findByText("총 12개 · 1/3 페이지");
   fireEvent.click(screen.getByRole("button", { name: "2페이지" }));
   expect(screen.getByText("총 12개 · 2/3 페이지")).toBeInTheDocument();
-  Object.defineProperty(window, "scrollY", { configurable: true, value: 380 });
   fireEvent.click(screen.getByRole("button", { name: "서울 장소 6 상세 보기" }));
   expect(screen.getByText(/id=6/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "상세에서 뒤로" }));
@@ -229,7 +228,6 @@ test("search results and selected page survive detail navigation and back", asyn
   expect(screen.getByRole("button", { name: "2페이지" })).toHaveAttribute("aria-current", "page");
   expect(screen.getByText("서울 장소 6")).toBeInTheDocument();
   expect(input).toHaveValue("서울");
-  await waitFor(() => expect(window.scrollTo).toHaveBeenCalledWith(0, 380));
 });
 
 test("returning from a destination preserves its search keyword", async () => {
