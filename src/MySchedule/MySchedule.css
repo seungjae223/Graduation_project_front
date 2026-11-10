@@ -26,7 +26,8 @@
 .v15-hidden-list li span{overflow-wrap:anywhere;min-width:0}
 .v15-hidden-list button{border:0;border-radius:8px;background:var(--color-accent-soft);color:var(--color-accent-text);padding:9px;font:inherit;font-size:11px;font-weight:750;cursor:pointer;white-space:nowrap}
 .v15-schedule-past-nav{margin:20px 0 0}
-.v15-schedule-past-nav>button{display:flex;align-items:center;gap:12px;width:100%;min-height:78px;padding:14px 16px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);color:var(--color-text);text-align:left;font:inherit;cursor:pointer}
+.v15-schedule-past-nav>button,.v15-schedule-past-skeleton{display:flex;align-items:center;gap:12px;width:100%;min-height:78px;padding:14px 16px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);color:var(--color-text);text-align:left;font:inherit}
+.v15-schedule-past-nav>button{cursor:pointer}
 .v15-schedule-past-icon{display:grid;place-items:center;flex:0 0 37px;width:37px;height:37px;border-radius:11px;background:var(--color-accent-soft);color:var(--color-accent-text);font-size:23px}
 .v15-schedule-past-nav>button>span:nth-child(2){display:flex;flex:1;flex-direction:column;gap:5px;min-width:0}
 .v15-schedule-past-nav strong{font-size:14px;color:var(--color-text-strong)}
@@ -44,7 +45,7 @@
 .v15-schedule-section-title{margin-bottom:12px}
 .v15-schedule-cards{gap:11px}
 .v15-schedule-past-nav{margin-top:27px}
-.v15-schedule-past-nav>button{min-height:62px;border-radius:15px;background:var(--color-surface-muted)}
+.v15-schedule-past-nav>button,.v15-schedule-past-skeleton{min-height:62px;border-radius:15px;background:var(--color-surface-muted)}
 @media(max-width:360px){.my-schedule-page{padding-left:15px;padding-right:15px}}
 
 /* V15.2 keeps the header global shell, but aligns + with the page-title baseline. */
@@ -62,3 +63,12 @@
 
 .v15-schedule-section-title .v15-schedule-edit[aria-pressed=false]{color:#cc3445}
 .v15-schedule-section-title .v15-schedule-edit[aria-pressed=true]{color:#2878d4}
+
+.v15-schedule-empty-skeleton { min-height: 252px; justify-content: center; gap: 17px; }
+.v15-schedule-skeleton-icon { flex: 0 0 auto; width: 37px; height: 37px; border-radius: 11px; }
+.v15-schedule-skeleton-title { width: min(76%, 172px); height: 20px; }
+.v15-schedule-skeleton-caption { width: min(66%, 138px); height: 13px; }
+.v15-schedule-skeleton-action { width: min(72%, 144px); height: 42px; border-radius: 11px; }
+.v15-schedule-past-skeleton-copy { flex: 1; display: grid; gap: 6px; }
+.v15-schedule-past-skeleton-copy .v15-schedule-skeleton-title { width: min(60%, 92px); height: 15px; }
+.v15-schedule-past-skeleton-copy .v15-schedule-skeleton-caption { width: min(80%, 144px); height: 11px; }

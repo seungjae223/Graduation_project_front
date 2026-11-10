@@ -244,7 +244,7 @@ test("switching from a typed query to a recent keyword keeps the old cards mount
   expect(screen.getByRole("button", { name: "서버 장소 상세 보기" })).toBe(oldCard);
   expect(screen.getByRole("button", { name: "부산", exact: true })).toBe(recentButton);
   expect(screen.getByText('"서울" 검색 결과')).toBeInTheDocument();
-  expect(screen.getByRole("status", { name: "장소 검색 결과 로딩" })).toBeInTheDocument();
+  expect(screen.getByRole("progressbar", { name: "장소 검색 결과 로딩" })).toBeInTheDocument();
   await act(async () => pending.resolve([nextPlace]));
   expect(await screen.findByRole("button", { name: "부산 새 결과 상세 보기" })).toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "서버 장소 상세 보기" })).not.toBeInTheDocument();

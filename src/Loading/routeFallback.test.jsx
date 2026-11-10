@@ -4,14 +4,14 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import PageTransition from "../animations/PageTransition";
 import useReadQuery from "../utils/useReadQuery";
 import EarthLoader from "./EarthLoader";
-import PageSkeleton from "./LoadingSkeleton";
+import RecommendationPageSkeleton from "./LoadingSkeleton";
 import RouteLoading from "./RouteLoading";
 
 afterEach(() => jest.restoreAllMocks());
 
 test.each([
   ["globe", undefined, "earth-loading-screen--page"],
-  ["recommendation skeleton", <PageSkeleton page="recommend" />, "page-skeleton--recommend"],
+  ["recommendation skeleton", <RecommendationPageSkeleton />, "page-skeleton--recommend"],
 ])("the %s covers the page chunk, first read and visible photo", async (_name, fallback, className) => {
   let completeChunk;
   let completeRead;

@@ -19,49 +19,29 @@ export function SkeletonChips() {
   );
 }
 
-export function SkeletonCards({ kind }) {
+export function DestinationCardSkeletons() {
   return (
-    <div className={`skeleton-cards skeleton-cards--${kind}`}>
+    <div className="destination-card-skeletons">
       {[1, 2].map(card => (
-        <div className="skeleton-card" key={card}>
-          <div className="skeleton-card-media"><span className="skeleton-fill" /></div>
-          <div className="skeleton-card-copy">
-            <span className="skeleton-fill skeleton-card-title" />
-            <span className="skeleton-fill skeleton-card-caption" />
-          </div>
+        <div className="destination-card-skeleton" key={card}>
+          <span className="skeleton-fill destination-card-skeleton-title" />
+          <span className="skeleton-fill destination-card-skeleton-caption" />
         </div>
       ))}
     </div>
   );
 }
 
-export function SkeletonProgress({ label }) {
+export default function RecommendationPageSkeleton() {
   return (
-    <SkeletonStatus label={label} className="skeleton-progress">
-      <span className="skeleton-fill" />
-    </SkeletonStatus>
-  );
-}
-
-export default function PageSkeleton({ page }) {
-  const labels = { recommend: "추천", schedule: "일정" };
-  return (
-    <SkeletonStatus label={`${labels[page]} 화면 로딩`} className={`page-skeleton page-skeleton--${page}`}>
+    <SkeletonStatus label="추천 화면 로딩" className="page-skeleton page-skeleton--recommend">
       <span className="skeleton-fill page-skeleton-title" />
-      {page === "recommend" && <>
-        <div className="page-skeleton-tabs">
-          <span className="skeleton-fill" />
-          <span className="skeleton-fill" />
-        </div>
-        <SkeletonChips />
-        <SkeletonCards kind="cover" />
-      </>}
-      {page === "schedule" && <>
-        <span className="skeleton-fill page-skeleton-create" />
-        <span className="skeleton-fill page-skeleton-caption" />
-        <span className="skeleton-fill page-skeleton-section-title" />
-        <SkeletonCards kind="ticket" />
-      </>}
+      <div className="page-skeleton-tabs">
+        <span className="skeleton-fill" />
+        <span className="skeleton-fill" />
+      </div>
+      <SkeletonChips />
+      <DestinationCardSkeletons />
     </SkeletonStatus>
   );
 }

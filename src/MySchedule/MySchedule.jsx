@@ -4,8 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import "./MySchedule.css";
 import { getTripsApi } from "../api/tripApi";
-import { useRoutePending } from "../Loading/routePending";
-import { SkeletonCards, SkeletonProgress, SkeletonStatus } from "../Loading/LoadingSkeleton";
+import { SkeletonStatus } from "../Loading/LoadingSkeleton";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
 import useTripDeletion from "../utils/useTripDeletion";
@@ -282,14 +281,34 @@ const convertScheduleToCard = (schedule, source = "server") => {
 
 const getErrorMessage = safeApiErrorMessage;
 
+function ScheduleSkeleton() {
+  return <SkeletonStatus label="저장된 일정 로딩">
+    <div className="v15-schedule-empty v15-schedule-empty-skeleton">
+      <span className="skeleton-fill v15-schedule-skeleton-icon" />
+      <span className="skeleton-fill v15-schedule-skeleton-title" />
+      <span className="skeleton-fill v15-schedule-skeleton-caption" />
+      <span className="skeleton-fill v15-schedule-skeleton-action" />
+    </div>
+    <div className="v15-schedule-past-nav">
+      <div className="v15-schedule-past-skeleton">
+        <span className="skeleton-fill v15-schedule-skeleton-icon" />
+        <div className="v15-schedule-past-skeleton-copy">
+          <span className="skeleton-fill v15-schedule-skeleton-title" />
+          <span className="skeleton-fill v15-schedule-skeleton-caption" />
+        </div>
+      </div>
+    </div>
+  </SkeletonStatus>;
+}
+
 function MySchedule() {
   const navigate = useNavigate();
   const account = useSessionKey();
   const currentAccount = useRef(account); currentAccount.current = account;
 
-  const [scheduleList, setScheduleList] = useState([]);
+  const [scheduleList, setScheduleList] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  useRoutePending(isLoading);
+  const showScheduleSkeleton = isLoading && scheduleList === null;
   const [errorMessage, setErrorMessage] = useState("");
   const [editing, setEditing] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -299,7 +318,7 @@ function MySchedule() {
     requestRef.current = null;
     lastRefreshAt.current = Date.now();
     setIsLoading(false);
-    setScheduleList(previous => previous.filter(trip => String(trip.id) !== id));
+    setScheduleList(previous => previous && previous.filter(trip => String(trip.id) !== id));
     setSelectedIds(previous => previous.filter(selected => selected !== id));
   });
   const requestRef = useRef(null);
@@ -313,7 +332,7 @@ function MySchedule() {
     try {
       setIsLoading(true);
       setErrorMessage("");
-      const serverTrips = await getTripsApi({ signal: request.signal });
+      const serverTrips = await getTripsApi({ signal: request.signal, timeout: 15000 });
       if (!mountedRef.current || request.signal.aborted ||
           getAuthSnapshot().accountKey !== account || currentAccount.current !== account ||
           requestRef.current !== request) return;
@@ -343,8 +362,9 @@ function MySchedule() {
   }, [account]);
 
   useEffect(() => {
-    setScheduleList([]); setErrorMessage("");
+    setScheduleList(null); setErrorMessage("");
     setEditing(false); setSelectedIds([]);
+    lastRefreshAt.current = 0;
     mountedRef.current = true;
     void loadSchedules();
     return () => {
@@ -366,7 +386,7 @@ function MySchedule() {
   const { currentTrips, futureTrips, undatedTrips } = useMemo(() => {
     const today = normalizeDateOnly(new Date())?.getTime() || 0;
     const active = [], future = [], undated = [];
-    scheduleList.forEach(trip => {
+    scheduleList?.forEach(trip => {
       if (trip.endTime && trip.endTime < today) return;
       if (!trip.startTime || !trip.endTime) { undated.push(trip); return; }
       if (trip.startTime <= today) active.push(trip); else future.push(trip);
@@ -415,7 +435,7 @@ function MySchedule() {
     </header>
 
     {errorMessage && <div className="v15-schedule-notice" role="alert">
-      <p>{errorMessage}{scheduleList.length > 0 ? " 마지막으로 확인한 일정을 표시합니다." : ""}</p>
+      <p>{errorMessage}{scheduleList?.length > 0 ? " 마지막으로 확인한 일정을 표시합니다." : ""}</p>
       <button type="button" onClick={loadSchedules} disabled={isLoading}>다시 불러오기</button>
     </div>}
     {notice && <div className="v15-schedule-notice" role="status">
@@ -424,9 +444,7 @@ function MySchedule() {
         {busy ? "삭제 결과 확인 중..." : "삭제 결과 다시 확인"}
       </button>}
     </div>}
-    {isLoading && (featured || undatedTrips.length > 0
-      ? <SkeletonProgress label="일정 갱신 중" />
-      : <SkeletonStatus label="저장된 일정 로딩"><SkeletonCards kind="ticket" /></SkeletonStatus>)}
+    {showScheduleSkeleton && <ScheduleSkeleton />}
 
     {featured && <section className="v15-schedule-featured" aria-label="가장 가까운 여행">
       <div className="v15-schedule-section-title">
@@ -461,7 +479,7 @@ function MySchedule() {
       </div>
     </section>}
 
-    {!isLoading && !errorMessage && !featured && undatedTrips.length === 0 &&
+    {!showScheduleSkeleton && !errorMessage && !featured && undatedTrips.length === 0 &&
       <section className="v15-schedule-empty">
         <span aria-hidden="true">✈</span>
         <h2>준비 중인 여행이 없어요</h2>
@@ -478,13 +496,13 @@ function MySchedule() {
         삭제하기 <strong>{selectedIds.length}</strong>
       </button>
     </div>
-    <nav className="v15-schedule-past-nav" aria-label="지난 여행 바로가기">
+    {!showScheduleSkeleton && <nav className="v15-schedule-past-nav" aria-label="지난 여행 바로가기">
       <button type="button" onClick={() => navigate("/mypage/past-trips")}>
         <span className="v15-schedule-past-icon" aria-hidden="true">↺</span>
         <span><strong>지난 여행 보기</strong><small>예전에 계획했던 여행 확인하기</small></span>
         <span className="v15-schedule-past-arrow" aria-hidden="true">›</span>
       </button>
-    </nav>
+    </nav>}
   </main>;
 }
 

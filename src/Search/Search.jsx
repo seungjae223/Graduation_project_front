@@ -22,7 +22,7 @@ import { findDestinationSearchMatches, requireSearchDestinations } from "./desti
 
 import { getPageNumberGroup } from "../utils/pagination";
 import { SEARCH_PAGE_SIZE, SEARCH_READ_TIMEOUT_MS } from "./searchCatalog";
-import { SkeletonCards, SkeletonChips, SkeletonProgress, SkeletonStatus } from "../Loading/LoadingSkeleton";
+import { SkeletonChips, SkeletonStatus } from "../Loading/LoadingSkeleton";
 
 
 
@@ -278,10 +278,10 @@ function Search() {
         {recent.status !== "error" && recent.data !== null && !recentSearches.length && <p className="empty-text">최근 검색어가 없어요.</p>}
       </div>
     </section>
-    {keywordFromUrl && (hasDestinationMatches || destinationCatalog.status === "loading" || destinationCatalog.status === "error") && <section className="search-section search-destinations-section" aria-labelledby="search-destinations-title">
+    {keywordFromUrl && (hasDestinationMatches || destinationCatalog.status === "loading" || destinationCatalog.status === "error") && <section className="search-section search-destinations-section" aria-labelledby="search-destinations-title" aria-busy={destinationCatalog.status === "loading"}>
       <h2 id="search-destinations-title">여행지 검색 결과</h2>
       {destinationCatalog.status === "loading" &&
-        <SkeletonStatus label="여행지 검색 결과 로딩"><SkeletonCards kind="place" /></SkeletonStatus>}
+        <progress className="search-results-progress" aria-label="여행지 검색 결과 로딩" />}
       {destinationCatalog.status === "error" && <div role="alert" className="empty-text">
         <p>여행지 검색 결과를 불러오지 못했어요. 장소 검색 결과는 계속 확인할 수 있어요.</p>
         <button type="button" className="clear-btn" onClick={destinationCatalog.retry}>여행지 다시 조회</button>
@@ -309,11 +309,10 @@ function Search() {
         </div>
       </>}
     </section>}
-    {showPlaceResults && !(hasDestinationMatches && resultStatus === "success" && !results.length) && <section className="search-section search-results-section" aria-labelledby="search-results-title" aria-live="polite" aria-busy={resultStatus === "loading"}>
+    {showPlaceResults && !(hasDestinationMatches && resultStatus === "success" && !results.length) && <section className="search-section search-results-section" aria-labelledby="search-results-title" aria-live="polite" aria-busy={resultStatus === "loading" || sortingPending}>
       <h2 id="search-results-title" ref={resultsHeading} tabIndex={-1}>{resultTitle}</h2>
-      {resultStatus === "loading" && !showingPreviousResults &&
-        <SkeletonStatus label="장소 검색 결과 로딩"><SkeletonCards kind="place" /></SkeletonStatus>}
-      {showingPreviousResults && !sortingUnavailable && <SkeletonProgress label="장소 검색 결과 로딩" />}
+      {resultStatus === "loading" && !sortingPending &&
+        <progress className="search-results-progress" aria-label="장소 검색 결과 로딩" />}
       {resultStatus === "error" && <div className="empty-text" role="alert"><p>{resultsError}</p>
         <button type="button" className="clear-btn" onClick={retryResults}>다시 검색</button>
       </div>}
@@ -330,9 +329,7 @@ function Search() {
           </button>
         </div>
         {sortingPending &&
-          <SkeletonStatus label={`${SEARCH_SORT_NAMES[sort]} 검색 결과 정렬 중`}>
-            <SkeletonCards kind="place" />
-          </SkeletonStatus>}
+          <progress className="search-results-progress" aria-label={`${SEARCH_SORT_NAMES[sort]} 검색 결과 정렬 중`} />}
         {sortingUnavailable && engagement.status === "error" &&
           <div role="alert" className="search-sort-status">
             정렬 정보를 불러오지 못했어요.

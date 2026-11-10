@@ -244,6 +244,34 @@ test("search stays editable while only the recent keyword section shows a skelet
   }
 });
 
+test("the schedule heading and create action stay visible while its two cards load", async () => {
+  await loginApi({ email: "test@example.com", password: "any-password" });
+  let release;
+  const delay = new Promise(resolve => { release = resolve; });
+  const interceptor = api.interceptors.request.use(async config => {
+    if (config.url === "/api/trips") await delay;
+    return config;
+  });
+  window.history.replaceState({}, "", "/schedule");
+  try {
+    render(<App />);
+    const heading = await screen.findByRole("heading", { name: "내 여행 일정" });
+    expect(screen.getByRole("button", { name: "새 일정 만들기" })).toBeEnabled();
+    expect(screen.getByText("준비 중인 여행을 한눈에 확인하세요.")).toBeVisible();
+    expect(screen.getByRole("status", { name: "저장된 일정 로딩" })).toBeVisible();
+    expect(screen.queryByRole("status", { name: "일정 화면 로딩" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /지난 여행 보기/ })).not.toBeInTheDocument();
+
+    await act(async () => release());
+    expect(await screen.findByRole("button", { name: /지난 여행 보기/ })).toBeEnabled();
+    expect(screen.queryByRole("status", { name: "저장된 일정 로딩" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "내 여행 일정" })).toBe(heading);
+  } finally {
+    release();
+    api.interceptors.request.eject(interceptor);
+  }
+});
+
 test("place search and detail pages render the adapter data and review pagination", async () => {
   window.history.replaceState({}, "", "/search?keyword=경복궁");
   const view = render(<App />);

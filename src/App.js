@@ -17,7 +17,7 @@ import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
 import { DetailFooterProvider } from "./components/DetailFooterContext";
 import SearchPop from "./SearchPopup/SearchPop";
-import PageSkeleton from "./Loading/LoadingSkeleton";
+import RecommendationPageSkeleton from "./Loading/LoadingSkeleton";
 import RouteLoading from "./Loading/RouteLoading";
 import RouteErrorBoundary from "./Loading/RouteErrorBoundary";
 import useSessionKey from "./utils/useSessionKey";
@@ -87,11 +87,7 @@ const AdminInquiryWrite = lazy(() =>
   import("./Admin/AdminInquiryPage/AdminInquiryWrite")
 );
 
-const SKELETON_PAGES = {
-  "/recommend": "recommend",
-  "/schedule": "schedule",
-  "/my-schedule": "schedule",
-};
+const SECTION_LOADING_ROUTES = ["/search", "/schedule", "/my-schedule"];
 
 function RequireAuth({ children }) {
   useSessionKey();
@@ -136,8 +132,8 @@ function Layout() {
   }, [location.pathname]);
 
   const pathname = location.pathname.toLowerCase();
-  const isSearchPage = pathname.replace(/\/+$/, "") === "/search";
-  const skeletonPage = SKELETON_PAGES[pathname];
+  const usesSectionLoading = SECTION_LOADING_ROUTES.includes(pathname.replace(/\/+$/, ""));
+  const routeFallback = pathname === "/recommend" ? <RecommendationPageSkeleton /> : undefined;
   const isAdminPage = pathname.startsWith("/admin");
   const hasAccessToken = Boolean(getAccessToken());
   const isOAuthCallbackPage =
@@ -225,8 +221,8 @@ function Layout() {
           }`}
         >
           <RouteLoading key={getRouteBoundaryKey(location.pathname, location.search)}
-            waitForContent={!isSearchPage}
-            fallback={isSearchPage ? null : skeletonPage && <PageSkeleton page={skeletonPage} />}
+            waitForContent={!usesSectionLoading}
+            fallback={usesSectionLoading ? null : routeFallback}
             text={isOAuthCallbackPage ? "소셜 로그인을 완료하는 중..." : undefined}>
             <RouteErrorBoundary>
             <Routes>
