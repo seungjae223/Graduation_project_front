@@ -7,5 +7,4 @@ export function useRoutePending(pending) {
   useLayoutEffect(() => {
     if (pending && register) return register();
   }, [pending, register]);
-  return !register;
 }

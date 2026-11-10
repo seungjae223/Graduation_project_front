@@ -21,8 +21,7 @@ import { getDestinationHero } from "../Destinations/destinationHeroPhotos";
 import { findDestinationSearchMatches, requireSearchDestinations } from "./destinationSearch";
 
 import { getPageNumberGroup } from "../utils/pagination";
-import { SEARCH_PAGE_SIZE } from "./searchCatalog";
-import { useRoutePending } from "../Loading/routePending";
+import { SEARCH_PAGE_SIZE, SEARCH_READ_TIMEOUT_MS } from "./searchCatalog";
 import { SkeletonCards, SkeletonChips, SkeletonProgress, SkeletonStatus } from "../Loading/LoadingSkeleton";
 
 
@@ -83,8 +82,8 @@ function Search() {
   const [query, setQuery] = useState(keywordFromUrl);
   const [inputError, setInputError] = useState("");
   const destinationCatalog = useReadQuery(account + ":search-destinations", async signal =>
-    requireSearchDestinations(await getDestinationsApi({ signal })), true,
-    () => getAuthSnapshot().accountKey === account, Boolean(keywordFromUrl));
+    requireSearchDestinations(await getDestinationsApi({ signal, timeout: SEARCH_READ_TIMEOUT_MS })), true,
+    () => getAuthSnapshot().accountKey === account);
   const matchedDestinations = useMemo(() =>
     findDestinationSearchMatches(destinationCatalog.data || [], keywordFromUrl),
     [destinationCatalog.data, keywordFromUrl]);
@@ -93,7 +92,10 @@ function Search() {
     (destinationCatalog.status !== "loading" && !matchedDestinations.isCountrySearch);
   const search = useServerSearch();
   const { submit: submitSearch, clear: clearSearch, status: searchStatus, revision: searchRevision } = search;
-  const recent = useReadQuery(account + ":recent-searches", signal => getRecentSearchesApi({ signal }), true, () => getAuthSnapshot().accountKey === account);
+  const recent = useReadQuery(account + ":recent-searches",
+    signal => getRecentSearchesApi({ signal, timeout: SEARCH_READ_TIMEOUT_MS }), true,
+    () => getAuthSnapshot().accountKey === account);
+  const recentPending = recent.status === "loading" && recent.data === null;
   const recentSearches = (recent.data || []).slice(0, 10);
   const recentTask = useMutationTask(account + ":recent-searches");
   const retryRecents = recent.retry;
@@ -119,7 +121,6 @@ function Search() {
   const scrollRequested = useRef(false);
   const resultsReady = keywordFromUrl && search.keyword === keywordFromUrl && search.status !== "loading";
   const resultStatus = !keywordFromUrl ? "idle" : !resultsReady ? "loading" : search.status;
-  const pageReady = useRoutePending(showPlaceResults && resultStatus === "loading");
   // A query change is an in-place update, not a new page: preserve completed
   // cards until the next response arrives. This also covers the render before
   // the URL-driven fetch effect runs.
@@ -133,7 +134,7 @@ function Search() {
   // Sort the entire verified search set BEFORE pagination, not just the visible cards.
   const resultIds = results.map(place => place.id);
   const engagement = useReadQuery(`${account}:search-engagement:${resultIds.join(",")}`,
-    signal => getPlaceEngagementApi(resultIds, { signal }),
+    signal => getPlaceEngagementApi(resultIds, { signal, timeout: SEARCH_READ_TIMEOUT_MS }),
     showPlaceResults && resultIds.length > 0,
     () => getAuthSnapshot().accountKey === account);
   const hasEngagement = Array.isArray(engagement.data);
@@ -147,6 +148,7 @@ function Search() {
   const currentPage = Math.max(1, Math.min(pageFromUrl, totalPages || 1));
   const pagePlaces = sortedResults.slice((currentPage - 1) * SEARCH_PAGE_SIZE, currentPage * SEARCH_PAGE_SIZE);
   const sortingUnavailable = sort !== "default" && results.length > 0 && !hasEngagement;
+  const sortingPending = sortingUnavailable && engagement.status !== "error";
   const likeCounts = new Map((engagement.data || []).map(item => [Number(item.placeId), item.likeCount]));
   const { retry: retryEngagement } = engagement;
   useEffect(() => {
@@ -172,7 +174,7 @@ function Search() {
     } catch { /* Storage can be unavailable in private browsing. */ }
   };
   useEffect(() => {
-    if (!pageReady || restoreScroll.current === null || destinationCatalog.status === "loading" ||
+    if (restoreScroll.current === null || recentPending || sortingPending || destinationCatalog.status === "loading" ||
       (showPlaceResults && resultStatus === "loading")) return;
     const y = restoreScroll.current;
     const frame = window.requestAnimationFrame(() => {
@@ -181,7 +183,7 @@ function Search() {
       try { window.sessionStorage.removeItem(returnKey); } catch { /* no storage */ }
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [pageReady, returnKey, destinationCatalog.status, showPlaceResults, resultStatus]);
+  }, [returnKey, recentPending, sortingPending, destinationCatalog.status, showPlaceResults, resultStatus]);
   useEffect(() => {
     if (!scrollRequested.current || resultStatus !== "success") return;
     scrollRequested.current = false;
@@ -264,8 +266,7 @@ function Search() {
     </section>
     <section className="search-section">
       <div className="section-top"><h2>최근 검색어</h2><button type="button" className="clear-btn recent-clear-btn" onClick={() => void mutateRecent(null)} disabled={recentTask.blocked}>전체 삭제</button></div>
-      {recent.status === "loading" && recent.data === null &&
-        <SkeletonStatus label="최근 검색어 로딩"><SkeletonChips /></SkeletonStatus>}
+      {recentPending && <SkeletonStatus label="최근 검색어 로딩"><SkeletonChips /></SkeletonStatus>}
       {recent.status === "error" && <div role="alert"><p>최근 검색어를 불러오지 못했어요.</p><button type="button" className="clear-btn" onClick={recent.retry}>최근 검색어 다시 조회</button></div>}
       {recentTask.message && <p role="status">{recentTask.message}</p>}
       {["unknown", "refreshError"].includes(recentTask.status) && <button type="button" className="clear-btn" onClick={recentTask.retryRead}>삭제 결과 확인</button>}
@@ -328,7 +329,7 @@ function Search() {
             <SearchSortIcon sort={sort} />
           </button>
         </div>
-        {sortingUnavailable && engagement.status !== "error" &&
+        {sortingPending &&
           <SkeletonStatus label={`${SEARCH_SORT_NAMES[sort]} 검색 결과 정렬 중`}>
             <SkeletonCards kind="place" />
           </SkeletonStatus>}

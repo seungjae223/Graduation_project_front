@@ -3,7 +3,7 @@ import { searchPlacesApi } from "../api/placeApi";
 import { getApiErrorMessage } from "../api/api";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
-import { requireSearchPlaces } from "./searchCatalog";
+import { requireSearchPlaces, SEARCH_READ_TIMEOUT_MS } from "./searchCatalog";
 
 export default function useServerSearch() {
   const account = useSessionKey();
@@ -39,7 +39,9 @@ export default function useServerSearch() {
       items: previous.account === account ? previous.items : [], error: "",
     }));
     try {
-      const items = requireSearchPlaces(await searchPlacesApi(keyword, { signal: controller.signal }));
+      const items = requireSearchPlaces(await searchPlacesApi(keyword, {
+        signal: controller.signal, timeout: SEARCH_READ_TIMEOUT_MS,
+      }));
       if (ticket === version.current && !controller.signal.aborted && getAuthSnapshot().accountKey === account) {
         setState({ account, status: "success", keyword, displayedKeyword: keyword, items, error: "", revision: ticket });
       }

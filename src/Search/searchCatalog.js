@@ -1,4 +1,5 @@
 export const SEARCH_PAGE_SIZE = 5;
+export const SEARCH_READ_TIMEOUT_MS = 15000;
 
 export function requireSearchPlaces(places) {
   if (!Array.isArray(places) || places.some(place =>

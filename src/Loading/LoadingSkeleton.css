@@ -92,7 +92,6 @@
 .page-skeleton--schedule > [aria-hidden] { position: relative; padding-top: 15px; }
 .page-skeleton-title { width: min(58%, 218px); height: 28px; }
 .page-skeleton-section-title { width: 104px; height: 18px; margin: 28px 0 14px; }
-.page-skeleton-search-field { height: 56px; margin-top: 18px; border-radius: 18px; }
 .page-skeleton-tabs {
   display: flex;
   justify-content: space-around;

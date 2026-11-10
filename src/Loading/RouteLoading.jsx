@@ -13,10 +13,15 @@ function isInViewport(image) {
     top < window.innerHeight && left < window.innerWidth;
 }
 
-export default function RouteLoading({ children, fallback, text = "화면을 불러오는 중..." }) {
+export default function RouteLoading({
+  children,
+  text = "화면을 불러오는 중...",
+  fallback = <EarthLoader variant="page" text={text} />,
+  waitForContent = true,
+}) {
   const [content, setContent] = useState(null);
   const [reads, setReads] = useState(0);
-  const [phase, setPhase] = useState("pending");
+  const [phase, setPhase] = useState(waitForContent ? "pending" : "ready");
   const ready = phase === "ready";
   const hasPendingReads = reads > 0;
   const register = useCallback(() => {
@@ -90,11 +95,10 @@ export default function RouteLoading({ children, fallback, text = "화면을 불
     return <RouteContentReady><RouteLoadError timedOut /></RouteContentReady>;
   }
 
-  const loader = fallback ?? <EarthLoader variant="page" text={text} />;
   return (
     <RoutePendingContext.Provider value={ready ? null : register}>
-      {!ready && loader}
-      <Suspense fallback={ready ? loader : null}>
+      {!ready && fallback}
+      <Suspense fallback={ready ? fallback : null}>
         <div ref={setContent} className="route-content" data-loading={!ready || undefined}
           aria-hidden={!ready || undefined} inert={!ready}>
           {children}

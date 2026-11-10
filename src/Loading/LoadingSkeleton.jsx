@@ -43,20 +43,11 @@ export function SkeletonProgress({ label }) {
   );
 }
 
-export default function PageSkeleton({ page, hasKeyword = false }) {
-  const labels = { search: "검색", recommend: "추천", schedule: "일정" };
+export default function PageSkeleton({ page }) {
+  const labels = { recommend: "추천", schedule: "일정" };
   return (
     <SkeletonStatus label={`${labels[page]} 화면 로딩`} className={`page-skeleton page-skeleton--${page}`}>
       <span className="skeleton-fill page-skeleton-title" />
-      {page === "search" && <>
-        <span className="skeleton-fill page-skeleton-search-field" />
-        <span className="skeleton-fill page-skeleton-section-title" />
-        <SkeletonChips />
-        {hasKeyword && <>
-          <span className="skeleton-fill page-skeleton-section-title" />
-          <SkeletonCards kind="place" />
-        </>}
-      </>}
       {page === "recommend" && <>
         <div className="page-skeleton-tabs">
           <span className="skeleton-fill" />

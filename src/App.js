@@ -88,7 +88,6 @@ const AdminInquiryWrite = lazy(() =>
 );
 
 const SKELETON_PAGES = {
-  "/search": "search",
   "/recommend": "recommend",
   "/schedule": "schedule",
   "/my-schedule": "schedule",
@@ -137,9 +136,8 @@ function Layout() {
   }, [location.pathname]);
 
   const pathname = location.pathname.toLowerCase();
+  const isSearchPage = pathname.replace(/\/+$/, "") === "/search";
   const skeletonPage = SKELETON_PAGES[pathname];
-  const searchParams = new URLSearchParams(location.search);
-  const hasSearchKeyword = Boolean((searchParams.get("keyword") || searchParams.get("region"))?.trim());
   const isAdminPage = pathname.startsWith("/admin");
   const hasAccessToken = Boolean(getAccessToken());
   const isOAuthCallbackPage =
@@ -227,7 +225,8 @@ function Layout() {
           }`}
         >
           <RouteLoading key={getRouteBoundaryKey(location.pathname, location.search)}
-            fallback={skeletonPage && <PageSkeleton page={skeletonPage} hasKeyword={hasSearchKeyword} />}
+            waitForContent={!isSearchPage}
+            fallback={isSearchPage ? null : skeletonPage && <PageSkeleton page={skeletonPage} />}
             text={isOAuthCallbackPage ? "소셜 로그인을 완료하는 중..." : undefined}>
             <RouteErrorBoundary>
             <Routes>

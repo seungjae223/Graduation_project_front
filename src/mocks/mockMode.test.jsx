@@ -217,6 +217,33 @@ test("Mock forces its adapter, strips credentials and never falls back for unkno
   expect(realAdapter).not.toHaveBeenCalled();
 });
 
+test("search stays editable while only the recent keyword section shows a skeleton", async () => {
+  let release;
+  const delay = new Promise(resolve => { release = resolve; });
+  const interceptor = api.interceptors.request.use(async config => {
+    if (config.url === "/api/recent-searches") await delay;
+    return config;
+  });
+  window.history.replaceState({}, "", "/search");
+  try {
+    render(<App />);
+    const search = await screen.findByRole("textbox", { name: "장소, 도시 또는 테마 검색" });
+    expect(search).toBeVisible();
+    expect(screen.getByRole("status", { name: "최근 검색어 로딩" })).toBeVisible();
+    expect(screen.queryByRole("status", { name: "검색 화면 로딩" })).not.toBeInTheDocument();
+    await userEvent.type(search, "서울");
+    expect(search).toHaveValue("서울");
+
+    await act(async () => release());
+    await waitFor(() => expect(screen.queryByRole("status", { name: "최근 검색어 로딩" })).not.toBeInTheDocument());
+    expect(screen.getByRole("textbox", { name: "장소, 도시 또는 테마 검색" })).toBe(search);
+    expect(search).toHaveValue("서울");
+  } finally {
+    release();
+    api.interceptors.request.eject(interceptor);
+  }
+});
+
 test("place search and detail pages render the adapter data and review pagination", async () => {
   window.history.replaceState({}, "", "/search?keyword=경복궁");
   const view = render(<App />);

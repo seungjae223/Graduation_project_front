@@ -11,7 +11,7 @@ afterEach(() => jest.restoreAllMocks());
 
 test.each([
   ["globe", undefined, "earth-loading-screen--page"],
-  ["search skeleton", <PageSkeleton page="search" />, "page-skeleton--search"],
+  ["recommendation skeleton", <PageSkeleton page="recommend" />, "page-skeleton--recommend"],
 ])("the %s covers the page chunk, first read and visible photo", async (_name, fallback, className) => {
   let completeChunk;
   let completeRead;
