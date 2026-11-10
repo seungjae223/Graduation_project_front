@@ -3,6 +3,7 @@ import { getTripByIdApi, getTripPlacesApi, getTripTimelineApi } from "../api/tri
 import { getApiErrorMessage } from "../api/api";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
+import { useRoutePending } from "../Loading/routePending";
 
 const validId = (id) => /^\d+$/.test(String(id || "")) && Number.isSafeInteger(Number(id)) && Number(id) > 0;
 const cancelled = (error) => error?.code === "ERR_CANCELED" || error?.name === "AbortError";
@@ -133,6 +134,8 @@ export default function useTripResult(id, demo = false) {
     }
   };
   const refreshInPlace = () => load({ preserveScreen: true });
-  return { ...(String(state.id) === String(id) && state.account === account ? state : EMPTY),
+  const result = String(state.id) === String(id) && state.account === account ? state : EMPTY;
+  useRoutePending(result.status === "loading");
+  return { ...result,
     retry: load, refreshInPlace, retryTimeline, refreshDayOrder };
 }

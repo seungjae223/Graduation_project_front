@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useRoutePending } from "../Loading/routePending";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { getTripByIdApi, getTripPlacesApi, addPlaceToTripApi } from "../api/tripApi";
@@ -97,6 +98,7 @@ export default function TripPlacePickerPage() {
   const [destination, setDestination] = useState(null);
   const [sources, setSources] = useState([]);
   const [status, setStatus] = useState("loading");
+  useRoutePending(Boolean(storageKey) && status === "loading");
   const [engagement, setEngagement] = useState({});
   const [engagementError, setEngagementError] = useState(false);
   const [error, setError] = useState("");

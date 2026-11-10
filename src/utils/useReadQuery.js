@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRoutePending } from "../Loading/routePending";
 
 // Each key/request owns its success, error and loading updates, including A → B → A.
-export default function useReadQuery(key, fetcher, enabled = true, guard = () => true) {
+export default function useReadQuery(key, fetcher, enabled = true, guard = () => true, blocksRoute = true) {
   const latest = useRef({ key, fetcher, enabled, guard });
   latest.current = { key, fetcher, enabled, guard };
   const sequence = useRef(0);
@@ -32,5 +33,7 @@ export default function useReadQuery(key, fetcher, enabled = true, guard = () =>
     if (enabled) void retry();
     return () => { active.current?.controller.abort(); active.current = null; };
   }, [key, enabled, retry]);
-  return { ...(state.key === key ? state : { status: enabled ? "loading" : "idle", data: null, error: "", cause: null }), retry, read: () => retry({ returnData: true }) };
+  const current = state.key === key ? state : { status: enabled ? "loading" : "idle", data: null, error: "", cause: null };
+  useRoutePending(blocksRoute && enabled && current.status === "loading" && current.data === null);
+  return { ...current, retry, read: () => retry({ returnData: true }) };
 }

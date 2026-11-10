@@ -37,7 +37,8 @@ export default function useFolderSavedPlaces() {
   const { syncSavedPlaces } = useSavedPlaces();
   const known = useRef({ account, data: null });
   if (known.current.account !== account) known.current = { account, data: null };
-  const query = useReadQuery(`${account}:saved-folders`, signal => readSavedFolderSnapshot(signal, known.current.data), account !== "anonymous", () => getAuthSnapshot().accountKey === account);
+  // This background read enables save buttons. The page itself can already be shown.
+  const query = useReadQuery(`${account}:saved-folders`, signal => readSavedFolderSnapshot(signal, known.current.data), account !== "anonymous", () => getAuthSnapshot().accountKey === account, false);
   useEffect(() => {
     if (!query.data || getAuthSnapshot().accountKey !== account) return;
     known.current = { account, data: query.data };

@@ -1,7 +1,7 @@
 import "./App.css";
 import "./animations/onboardingButtonMotion.css";
-import { Suspense, lazy, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import PageTransition, { RouteContentReady } from "./animations/PageTransition";
+import { lazy, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import PageTransition from "./animations/PageTransition";
 import { cancelOnboardingTransition, syncOnboardingTransitionRoute } from "./OnBoarding/onboardingTransition";
 import {
   BrowserRouter,
@@ -17,7 +17,7 @@ import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
 import { DetailFooterProvider } from "./components/DetailFooterContext";
 import SearchPop from "./SearchPopup/SearchPop";
-import EarthLoader from "./Loading/EarthLoader";
+import RouteLoading from "./Loading/RouteLoading";
 import RouteErrorBoundary from "./Loading/RouteErrorBoundary";
 import useSessionKey from "./utils/useSessionKey";
 import { SavedPlacesProvider } from "./Context/SavedPlacesContext";
@@ -215,9 +215,9 @@ function Layout() {
               : ""
           }`}
         >
-          <RouteErrorBoundary key={getRouteBoundaryKey(location.pathname, location.search)}>
-          <Suspense fallback={<EarthLoader variant="page" text="화면을 불러오는 중..." />}>
-            <RouteContentReady>
+          <RouteLoading key={getRouteBoundaryKey(location.pathname, location.search)}
+            text={isOAuthCallbackPage ? "소셜 로그인을 완료하는 중..." : undefined}>
+            <RouteErrorBoundary>
             <Routes>
               <Route path="/" element={<OnBoarding />} />
               <Route path="/onboarding" element={<OnBoarding />} />
@@ -280,9 +280,8 @@ function Layout() {
 
               <Route path="*" element={<NotFound />} />
             </Routes>
-            </RouteContentReady>
-          </Suspense>
-          </RouteErrorBoundary>
+            </RouteErrorBoundary>
+          </RouteLoading>
         </PageTransition>
       </main>
 

@@ -5,6 +5,7 @@ import { USE_MOCK } from "../config/mockConfig";
 import { getMockUser } from "../mocks/authMock";
 import useSessionKey from "../utils/useSessionKey";
 import { buildLoginPath } from "../utils/authRedirect";
+import { useRoutePending } from "../Loading/routePending";
 import "./AdminMain/AdminMain.css";
 
 function rolesOf(value) {
@@ -49,8 +50,9 @@ export default function AdminAccessGuard({ children }) {
     Promise.resolve().then(() => readCurrentRole()).then(role => { if (active) setChecked({ account, attempt, role }); }).catch(() => { if (active) setChecked({ account, attempt, role: "unknown" }); });
     return () => { active = false; };
   }, [account, attempt]);
-  if (account === "anonymous") return <Navigate replace to={buildLoginPath(location.pathname + location.search)} />;
   const role = checked.account === account && checked.attempt === attempt ? checked.role : "checking";
+  useRoutePending(account !== "anonymous" && role === "checking");
+  if (account === "anonymous") return <Navigate replace to={buildLoginPath(location.pathname + location.search)} />;
   if (role === "admin") return children;
   return <main className="admin-page"><h1>{role === "checking" ? "관리자 권한 확인 중" : role === "user" ? "관리자 권한이 필요합니다" : "관리자 권한을 확인하지 못했습니다"}</h1>
     <p role={role === "checking" ? "status" : "alert"}>{role === "checking" ? "사용자 역할을 확인하고 있습니다." : role === "user" ? "관리자 계정으로 로그인해 주세요." : "현재 로그인 정보에 확인 가능한 역할이 없습니다. 다시 로그인하거나 권한 정보를 확인해 주세요."}</p>

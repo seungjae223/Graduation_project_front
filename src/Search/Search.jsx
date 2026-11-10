@@ -22,6 +22,7 @@ import { findDestinationSearchMatches, requireSearchDestinations } from "./desti
 
 import { getPageNumberGroup } from "../utils/pagination";
 import { SEARCH_PAGE_SIZE } from "./searchCatalog";
+import { useRoutePending } from "../Loading/routePending";
 
 
 
@@ -82,7 +83,7 @@ function Search() {
   const [inputError, setInputError] = useState("");
   const destinationCatalog = useReadQuery(account + ":search-destinations", async signal =>
     requireSearchDestinations(await getDestinationsApi({ signal })), true,
-    () => getAuthSnapshot().accountKey === account);
+    () => getAuthSnapshot().accountKey === account, Boolean(keywordFromUrl));
   const matchedDestinations = useMemo(() =>
     findDestinationSearchMatches(destinationCatalog.data || [], keywordFromUrl),
     [destinationCatalog.data, keywordFromUrl]);
@@ -117,6 +118,7 @@ function Search() {
   const scrollRequested = useRef(false);
   const resultsReady = keywordFromUrl && search.keyword === keywordFromUrl && search.status !== "loading";
   const resultStatus = !keywordFromUrl ? "idle" : !resultsReady ? "loading" : search.status;
+  const pageReady = useRoutePending(showPlaceResults && resultStatus === "loading");
   // A query change is an in-place update, not a new page: preserve completed
   // cards until the next response arrives. This also covers the render before
   // the URL-driven fetch effect runs.
@@ -169,7 +171,7 @@ function Search() {
     } catch { /* Storage can be unavailable in private browsing. */ }
   };
   useEffect(() => {
-    if (restoreScroll.current === null || destinationCatalog.status === "loading" ||
+    if (!pageReady || restoreScroll.current === null || destinationCatalog.status === "loading" ||
       (showPlaceResults && resultStatus === "loading")) return;
     const y = restoreScroll.current;
     const frame = window.requestAnimationFrame(() => {
@@ -178,7 +180,7 @@ function Search() {
       try { window.sessionStorage.removeItem(returnKey); } catch { /* no storage */ }
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [returnKey, destinationCatalog.status, showPlaceResults, resultStatus]);
+  }, [pageReady, returnKey, destinationCatalog.status, showPlaceResults, resultStatus]);
   useEffect(() => {
     if (!scrollRequested.current || resultStatus !== "success") return;
     scrollRequested.current = false;

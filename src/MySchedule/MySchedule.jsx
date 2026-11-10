@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import "./MySchedule.css";
 import { getTripsApi } from "../api/tripApi";
+import { useRoutePending } from "../Loading/routePending";
 import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
 import useTripDeletion from "../utils/useTripDeletion";
@@ -287,6 +288,7 @@ function MySchedule() {
 
   const [scheduleList, setScheduleList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  useRoutePending(isLoading);
   const [errorMessage, setErrorMessage] = useState("");
   const [editing, setEditing] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);

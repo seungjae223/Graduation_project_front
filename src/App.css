@@ -268,18 +268,36 @@ svg {
   }
 }
 
-/* Only the route fallback stretches. Resolved pages keep their own layout. */
-.app-content:has(> .route-transition > .earth-loading-screen--page) {
+.route-content {
+  display: contents;
+}
+
+.route-content[data-loading] {
+  display: block;
+  position: absolute;
+  inset: 0 0 auto;
+  opacity: 0;
+}
+
+/* Keep the mounted page measurable while the loader fills the route. */
+.app-content:has(> .route-transition > .earth-loading-screen--page),
+.app-content:has(> .route-transition > .route-content > .earth-loading-screen--page) {
   display: flex;
   flex-direction: column;
 }
 
-.route-transition:has(> .earth-loading-screen--page) {
+.route-transition:has(> .earth-loading-screen--page),
+.route-transition:has(> .route-content > .earth-loading-screen--page) {
   display: flex;
   flex: 1;
   animation: none;
   opacity: 1;
   transform: none;
+}
+
+.route-transition:has(> .route-content[data-loading]) {
+  position: relative;
+  overflow: clip;
 }
 
 /* Surfaces and text are themed by their component role, including body portals. */

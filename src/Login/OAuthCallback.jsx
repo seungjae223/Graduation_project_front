@@ -5,6 +5,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from "react-rout
 import { getApiErrorMessage } from "../api/api";
 import { completeSocialLoginApi } from "../api/authApi";
 import EarthLoader from "../Loading/EarthLoader";
+import { useRoutePending } from "../Loading/routePending";
 import {
   LOGIN_SUCCESS_PATH,
   buildLoginPath,
@@ -23,6 +24,7 @@ function OAuthCallback() {
   const { begin, end } = task;
   const attemptRef = useRef(null);
   const [errorMessage, setErrorMessage] = useState("");
+  useRoutePending(!errorMessage);
 
   useEffect(() => {
     if (attemptRef.current?.scope !== scope) {
