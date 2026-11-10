@@ -23,28 +23,8 @@ import { findDestinationSearchMatches, requireSearchDestinations } from "./desti
 import { getPageNumberGroup } from "../utils/pagination";
 import { SEARCH_PAGE_SIZE, SEARCH_READ_TIMEOUT_MS } from "./searchCatalog";
 import { SkeletonChips, SkeletonStatus } from "../Loading/LoadingSkeleton";
-
-
-
-const SearchIcon = () => (
-  <svg viewBox="0 0 24 24" className="svg-icon" aria-hidden="true">
-    <circle
-      cx="11"
-      cy="11"
-      r="6.5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
-    <path
-      d="M16 16L21 21"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
+import searchIcon from "../animations/searchIcon";
+import AnimatedIconButton from "../components/AnimatedIconButton";
 
 const CityIcon = () => (
   <svg viewBox="0 0 24 24" className="svg-icon" aria-hidden="true">
@@ -258,7 +238,9 @@ function Search() {
     <section className="search-hero">
       <h1 className="search-title">무엇을 검색할까요?</h1>
       <form className="search-input-wrap" onSubmit={event => { event.preventDefault(); runSearch(query); }}>
-        <button type="submit" className="search-icon-submit" aria-label="검색" disabled={search.status === "loading" && query.trim() === search.keyword}><SearchIcon /></button>
+        <AnimatedIconButton type="submit" className="search-icon-submit" aria-label="검색"
+          animation={searchIcon} iconSize={22} iconClassName="svg-icon"
+          disabled={search.status === "loading" && query.trim() === search.keyword} />
         <input type="text" value={query} maxLength={100} onChange={event => { setQuery(event.target.value); setInputError(""); }}
           aria-label="장소, 도시 또는 테마 검색" aria-invalid={Boolean(inputError)} aria-describedby={inputError ? "search-input-error" : undefined} placeholder="장소, 도시 또는 테마 검색" />
       </form>

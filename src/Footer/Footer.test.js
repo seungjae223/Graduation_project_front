@@ -14,6 +14,7 @@ test.each(tabs)("직접 URL/새 마운트에서 %s active", (label, path) => {
 test("모든 GNB 클릭 시 경로 변경, 동일 SVG DOM 유지", () => {
   render(<MemoryRouter initialEntries={["/home"]}><Footer /><Path /></MemoryRouter>);
   const icons = screen.getAllByRole("button").map(button => button.querySelector("svg"));
+  expect(icons.every(Boolean)).toBe(true);
   for (const [label, path] of tabs) {
     fireEvent.click(screen.getByRole("button", { name: label }));
     expect(screen.getByTestId("path")).toHaveTextContent(path);

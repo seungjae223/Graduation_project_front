@@ -88,7 +88,7 @@ body,
   outline-offset: -2px;
 }
 
-/* Uiverse hover motion, added behind the existing icon without changing it. */
+/* Uiverse hover motion behind the navigation icon. */
 .tab::before {
   content: "";
   position: absolute;
@@ -132,43 +132,6 @@ body,
   justify-content: center;
 }
 
-.tab-icon {
-  color: var(--color-text-muted);
-  fill: currentColor;
-  object-fit: contain;
-  display: block;
-}
-
-.tab-icon path {
-  fill: currentColor;
-}
-
-/* Figma 원본의 아이콘 프레임 크기를 유지한다. */
-.home-tab .tab-icon {
-  width: 16px;
-  height: 18px;
-}
-
-.search-tab .tab-icon {
-  width: 18px;
-  height: 18px;
-}
-
-.recommend-tab .tab-icon {
-  width: 22px;
-  height: 22px;
-}
-
-.calendar-tab .tab-icon {
-  width: 18px;
-  height: 20px;
-}
-
-.mypage-tab .tab-icon {
-  width: 16px;
-  height: 16px;
-}
-
 .tab-label {
   position: relative;
   z-index: 1;
@@ -176,10 +139,6 @@ body,
 }
 
 .tab.active {
-  color: var(--color-accent-text);
-}
-
-.tab.active .tab-icon {
   color: var(--color-accent-text);
 }
 
@@ -265,7 +224,6 @@ body,
   background: transparent; border: 0; color: #30343b;
   font-size: 12px; font-weight: 650; text-decoration: none; cursor: pointer;
 }
-.detail-nav-tab svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 /* Saving and background refreshes may temporarily disable the action. Keep its tone steady. */
 .detail-nav-tab:disabled { color: #30343b; cursor: default; }
 .detail-nav-tab:focus-visible { outline: 3px solid #666e78; outline-offset: -4px; border-radius: 8px; }

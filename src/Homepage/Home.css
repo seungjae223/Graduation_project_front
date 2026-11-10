@@ -85,14 +85,7 @@
   flex-shrink: 0;
 }
 
-.search-icon-frame img {
-  display: block;
-  width: auto;
-  height: 18px;
-  max-width: none;
-  object-fit: contain;
-  flex-shrink: 0;
-}
+.home-search-symbol { color: var(--color-accent-text); }
 
 .search-box input {
   flex: 1;
@@ -186,8 +179,7 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Crisp vector icons for the two home actions. */
-.home-quick-symbol { color:var(--color-accent-text); width:27px; height:27px; display:block; }
+.home-quick-symbol { color: var(--color-accent-text); }
 
 .icon-circle img {
   width: 24px;

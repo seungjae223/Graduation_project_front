@@ -47,7 +47,7 @@ beforeEach(() => {
   searchPlacesApi.mockImplementation(async keyword => data.filter(item =>
     [item.name, item.region, item.address].some(value => value.includes(keyword))));
   Element.prototype.scrollIntoView = jest.fn();
-  window.matchMedia = jest.fn(() => ({ matches: false }));
+  window.matchMedia = jest.fn(() => ({ matches: false, addEventListener: jest.fn(), removeEventListener: jest.fn() }));
 });
 
 test("initial screen contains search and recents, not region recommendations or a full place catalog", async () => {

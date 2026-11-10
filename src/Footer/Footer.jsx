@@ -1,14 +1,15 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import homeIcon from "react-useanimations/lib/home";
+import exploreIcon from "react-useanimations/lib/explore";
+import calendarIcon from "react-useanimations/lib/calendar";
+import profileIcon from "react-useanimations/lib/user";
+import directionsIcon from "react-useanimations/lib/navigation";
+import folderIcon from "react-useanimations/lib/folder";
 import "./Footer.css";
+import searchIcon from "../animations/searchIcon";
+import AnimatedIconButton from "../components/AnimatedIconButton";
 import { useDetailFooter } from "../components/DetailFooterContext";
-
-// Figma에서 내보낸 동일한 SVG의 색상만 active 상태에서 변경한다.
-import { ReactComponent as HomeIcon } from "../img/nav-home.svg";
-import { ReactComponent as SearchIcon } from "../img/nav-search.svg";
-import { ReactComponent as RecommendIcon } from "../img/nav-recommend.svg";
-import { ReactComponent as ScheduleIcon } from "../img/nav-schedule.svg";
-import { ReactComponent as MypageIcon } from "../img/nav-mypage.svg";
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -56,39 +57,33 @@ const Footer = () => {
       key: "home",
       label: "홈",
       path: "/home",
-      icon: HomeIcon,
+      icon: homeIcon,
     },
     {
       key: "search",
       label: "검색",
       path: "/search",
-      icon: SearchIcon,
+      icon: searchIcon,
     },
     {
       key: "recommend",
       label: "추천",
       path: "/recommend",
-      icon: RecommendIcon,
+      icon: exploreIcon,
     },
     {
       key: "calendar",
       label: "일정",
       path: "/schedule",
-      icon: ScheduleIcon,
+      icon: calendarIcon,
     },
     {
       key: "mypage",
       label: "마이페이지",
       path: "/mypage",
-      icon: MypageIcon,
+      icon: profileIcon,
     },
   ];
-
-  const actionIcons = {
-    directions: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5 11 2l8 3v15l-8-3-7 3V5Zm7-3v15M16 7l-3 3 3 3M13 10h7"/></svg>,
-    folder: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10H3V7Zm9 5v5m-2.5-2.5h5"/></svg>,
-    schedule: <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4m8-4v4M4 10h16m-4 6H8m4-4v8"/></svg>,
-  };
 
   return (
     <footer className={`footer ${isDetail ? "footer--detail" : ""}`}>
@@ -96,37 +91,36 @@ const Footer = () => {
         <div className="footer-rail footer-rail--main" aria-hidden={isDetail}>
           {tabs.map((tab) => {
             const isActive = activeTab === tab.key;
-            const Icon = tab.icon;
             return (
-              <button key={tab.key} type="button"
+              <AnimatedIconButton key={tab.key} animation={tab.icon} iconSize={22} iconWrapClassName="tab-icon-wrap"
                 className={`tab ${isActive ? "active" : ""} ${tab.key}-tab`}
                 onClick={() => navigate(tab.path)} aria-pressed={isActive}
                 disabled={isDetail} tabIndex={isDetail ? -1 : 0}>
-                <div className="tab-icon-wrap"><Icon className="tab-icon" aria-hidden="true" focusable="false" /></div>
                 <span className="tab-label">{tab.label}</span>
-              </button>
+              </AnimatedIconButton>
             );
           })}
         </div>
         <div className="footer-rail footer-rail--detail" aria-hidden={!isDetail}>
           {actions?.directions ? (
-            <a className="detail-nav-tab" href={actions.directions.url} target="_blank" rel="noopener noreferrer"
+            <AnimatedIconButton as="a" animation={directionsIcon} className="detail-nav-tab"
+              href={actions.directions.url} target="_blank" rel="noopener noreferrer"
               aria-label={`${actions.directions.provider === "kakao" ? "카카오맵" : "구글맵"} 길찾기`}
               tabIndex={isDetail ? 0 : -1}>
-              {actionIcons.directions}<span>길찾기</span>
-            </a>
-          ) : <button type="button" className="detail-nav-tab" disabled aria-label="길찾기 이용 불가">
-            {actionIcons.directions}<span>길찾기</span>
-          </button>}
-          <button type="button" className="detail-nav-tab" onClick={event => actions?.openFolder?.(event)}
+              <span>길찾기</span>
+            </AnimatedIconButton>
+          ) : <AnimatedIconButton animation={directionsIcon} className="detail-nav-tab" disabled aria-label="길찾기 이용 불가">
+            <span>길찾기</span>
+          </AnimatedIconButton>}
+          <AnimatedIconButton animation={folderIcon} className="detail-nav-tab" onClick={event => actions?.openFolder?.(event)}
             disabled={!isDetail || !actions || actions.folderDisabled}
             aria-busy={Boolean(actions?.saving)} tabIndex={isDetail ? 0 : -1}>
-            {actionIcons.folder}<span>폴더 저장</span>
-          </button>
-          <button type="button" className="detail-nav-tab" onClick={() => actions?.openTrip?.()}
+            <span>폴더 저장</span>
+          </AnimatedIconButton>
+          <AnimatedIconButton animation={calendarIcon} className="detail-nav-tab" onClick={() => actions?.openTrip?.()}
             disabled={!isDetail || !actions?.placeId} tabIndex={isDetail ? 0 : -1}>
-            {actionIcons.schedule}<span>일정 추가</span>
-          </button>
+            <span>일정 추가</span>
+          </AnimatedIconButton>
         </div>
       </nav>
     </footer>

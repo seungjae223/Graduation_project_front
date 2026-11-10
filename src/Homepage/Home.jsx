@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import exploreIcon from "react-useanimations/lib/explore";
+import calendarIcon from "react-useanimations/lib/calendar";
 import "./Home.css";
 
-import searchIcon from "../img/검색.png";
+import searchIcon from "../animations/searchIcon";
+import AnimatedIconButton from "../components/AnimatedIconButton";
 import { getTripsApi } from "../api/tripApi";
 import { getHomeRankingsApi } from "../api/homeRankingsApi";
 import { getDestinationHero } from "../Destinations/destinationHeroPhotos";
@@ -13,23 +16,6 @@ import useSessionKey from "../utils/useSessionKey";
 import { getAuthSnapshot } from "../utils/authState";
 import useHomeCarousel from "./useHomeCarousel";
 import { previewCities, previewHotPlaces } from "./homePreviewData";
-
-// Inline SVG keeps the two primary actions clear without additional assets.
-function CompassIcon() {
-  return <svg className="home-quick-symbol" width="27" height="27" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="9" />
-    <path d="m15.9 8.1-2.2 5.6-5.6 2.2 2.2-5.6 5.6-2.2Z" />
-  </svg>;
-}
-
-function CalendarPlusIcon() {
-  return <svg className="home-quick-symbol" width="27" height="27" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <rect x="3" y="5" width="18" height="16" rx="2" />
-    <path d="M7 3v4M17 3v4M3 10h18M12 13v5M9.5 15.5h5" />
-  </svg>;
-}
 
 function RailScrollbar({ carousel, label, count }) {
   if (count <= 1) return null;
@@ -238,7 +224,8 @@ export default function Home() {
     <header className="home-header"><h1>다음 여행, 어디로 갈까요?</h1>
       <p className="subtitle">당신만을 위한 여행을 계획해 보세요.</p>
       <form className="search-box" onSubmit={handleSearchSubmit}>
-        <button type="submit" className="search-icon-frame" aria-label="검색"><img src={searchIcon} alt="" /></button>
+        <AnimatedIconButton type="submit" className="search-icon-frame" aria-label="검색"
+          animation={searchIcon} iconClassName="home-search-symbol" />
         <input type="search" aria-label="목적지 또는 테마 검색" placeholder="목적지 또는 테마를 검색하세요"
           maxLength={100} value={keyword} onChange={event => setKeyword(event.target.value)} />
       </form>
@@ -247,12 +234,14 @@ export default function Home() {
     <section className="home-quick-section" aria-labelledby="home-quick-title">
       <div className="home-section-heading"><p className="home-v12-eyebrow">PLAN YOUR TRIP</p><h2 id="home-quick-title">여행 계획하기</h2></div>
       <div className="quick-menu">
-        <button type="button" className="menu-card" onClick={() => navigate("/recommend")}>
-          <div className="icon-circle"><CompassIcon /></div><h3>테마 추천</h3><p>취향에 맞는 여행 아이디어</p>
-        </button>
-        <button type="button" className="menu-card" onClick={() => navigate("/route-create")}>
-          <div className="icon-circle"><CalendarPlusIcon /></div><h3>일정 만들기</h3><p>날짜와 장소로 여행 일정 시작</p>
-        </button>
+        <AnimatedIconButton className="menu-card" onClick={() => navigate("/recommend")} animation={exploreIcon}
+          iconSize={29} iconClassName="home-quick-symbol" iconWrapClassName="icon-circle">
+          <h3>테마 추천</h3><p>취향에 맞는 여행 아이디어</p>
+        </AnimatedIconButton>
+        <AnimatedIconButton className="menu-card" onClick={() => navigate("/route-create")} animation={calendarIcon}
+          iconSize={29} iconClassName="home-quick-symbol" iconWrapClassName="icon-circle">
+          <h3>일정 만들기</h3><p>날짜와 장소로 여행 일정 시작</p>
+        </AnimatedIconButton>
       </div>
     </section>
     <CityRanking cities={rankData.cities} status={rankingStatus} retry={rankingsQuery.retry} forceDemo={rankingsDemo} />
