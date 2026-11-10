@@ -214,6 +214,7 @@ function Layout() {
       >
         <PageTransition
           key={transitionKey}
+          startWithSlide={Boolean(mainTabTransition || detailTransition || subpageTransition)}
           className={`route-transition ${detailTransition} ${mainTabTransition} ${subpageTransition} ${
             pathname === "/" || pathname.startsWith("/onboarding")
               ? `onboarding-route onboarding-route--${onboardingDirection}`

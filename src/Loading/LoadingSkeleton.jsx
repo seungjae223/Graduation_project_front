@@ -2,7 +2,7 @@ import "./LoadingSkeleton.css";
 
 export function SkeletonStatus({ label, children, className }) {
   return (
-    <div className={className} role="status" aria-label={label}>
+    <div className={className} data-route-loader="" role="status" aria-label={label}>
       <span className="skeleton-status-label">{label}</span>
       <div aria-hidden="true">{children}</div>
     </div>

@@ -239,6 +239,15 @@ svg {
   transform: none;
 }
 
+.app-content:has(> .route-transition[data-page-entry="sliding"]) {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+}
+
+.route-transition[data-page-entry="sliding"] { flex: 1; }
+.route-transition[data-page-entry="sliding"] [data-route-loader] { visibility: hidden; }
+
 .route-transition::-webkit-scrollbar {
   width: 0;
   height: 0;
@@ -365,10 +374,10 @@ svg {
 
 
 /* V7 detail route transition. Header/footer stay fixed; only route body slides. */
-.route-transition--detail-forward[data-page-entry="ready"] {
+.route-transition--detail-forward:is([data-page-entry="ready"], [data-page-entry="sliding"]) {
   animation: nomango-detail-enter 240ms cubic-bezier(.22,1,.36,1) both;
 }
-.route-transition--detail-backward[data-page-entry="ready"] {
+.route-transition--detail-backward:is([data-page-entry="ready"], [data-page-entry="sliding"]) {
   animation: nomango-detail-return 240ms cubic-bezier(.22,1,.36,1) both;
 }
 @keyframes nomango-detail-enter {
@@ -380,15 +389,15 @@ svg {
   to { transform: translateX(0); opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .route-transition--detail-forward[data-page-entry="ready"],
-  .route-transition--detail-backward[data-page-entry="ready"] { animation: none; }
+  .route-transition--detail-forward:is([data-page-entry="ready"], [data-page-entry="sliding"]),
+  .route-transition--detail-backward:is([data-page-entry="ready"], [data-page-entry="sliding"]) { animation: none; }
 }
 
 /* V10: fast horizontal entry only when moving between primary tabs. */
-.route-transition--tab-from-right[data-page-entry="ready"] {
+.route-transition--tab-from-right:is([data-page-entry="ready"], [data-page-entry="sliding"]) {
   animation: nomango-tab-enter-right 275ms cubic-bezier(.22, 1, .36, 1) both;
 }
-.route-transition--tab-from-left[data-page-entry="ready"] {
+.route-transition--tab-from-left:is([data-page-entry="ready"], [data-page-entry="sliding"]) {
   animation: nomango-tab-enter-left 275ms cubic-bezier(.22, 1, .36, 1) both;
 }
 @keyframes nomango-tab-enter-right {
@@ -400,22 +409,22 @@ svg {
   to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .route-transition--tab-from-right[data-page-entry="ready"],
-  .route-transition--tab-from-left[data-page-entry="ready"] { animation: none; }
+  .route-transition--tab-from-right:is([data-page-entry="ready"], [data-page-entry="sliding"]),
+  .route-transition--tab-from-left:is([data-page-entry="ready"], [data-page-entry="sliding"]) { animation: none; }
 }
 
 
 /* MyPage -> subpage and subpage -> MyPage use the same slide as the bottom tabs. */
-.route-transition--subpage-from-right[data-page-entry="ready"]{
+.route-transition--subpage-from-right:is([data-page-entry="ready"], [data-page-entry="sliding"]){
   animation:nomango-tab-enter-right 275ms cubic-bezier(.22,1,.36,1) both;
 }
-.route-transition--subpage-from-left[data-page-entry="ready"]{
+.route-transition--subpage-from-left:is([data-page-entry="ready"], [data-page-entry="sliding"]){
   animation:nomango-tab-enter-left 275ms cubic-bezier(.22,1,.36,1) both;
 }
 /* SavedPlaces is keyed by folderId in the app. Avoid a second nested slide. */
 .route-transition--subpage-from-right .v14-saved-view--forward,
 .route-transition--subpage-from-left .v14-saved-view--backward{animation:none}
 @media(prefers-reduced-motion:reduce){
-  .route-transition--subpage-from-right[data-page-entry="ready"],
-  .route-transition--subpage-from-left[data-page-entry="ready"]{animation:none}
+  .route-transition--subpage-from-right:is([data-page-entry="ready"], [data-page-entry="sliding"]),
+  .route-transition--subpage-from-left:is([data-page-entry="ready"], [data-page-entry="sliding"]){animation:none}
 }

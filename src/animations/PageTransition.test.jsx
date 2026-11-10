@@ -66,3 +66,32 @@ test('main tab slide marks the route as settled after the animation finishes', (
   act(() => { entry.dispatchEvent(end); });
   expect(entry.dataset.pageEntry).toBe('settled');
 });
+
+test('horizontal entry completes while data is pending and does not replay when it arrives', async () => {
+  let resolve;
+  const pending = new Promise(done => { resolve = done; });
+  let loaded = false;
+  function Content() { if (!loaded) throw pending; return <h1>추천 여행지</h1>; }
+  const renderPage = className => (
+    <PageTransition className={className} startWithSlide>
+      <Suspense fallback={<p data-route-loader="">Loading</p>}>
+        <RouteContentReady><Content /></RouteContentReady>
+      </Suspense>
+    </PageTransition>
+  );
+  const { rerender } = render(renderPage('route-transition route-transition--tab-from-left'));
+  const entry = pageEntryFor('Loading');
+  expect(entry.dataset.pageEntry).toBe('sliding');
+  rerender(renderPage('route-transition'));
+  expect(entry).toHaveClass('route-transition--tab-from-left');
+
+  const end = new Event('animationend', { bubbles: true });
+  Object.defineProperty(end, 'animationName', { value: 'nomango-tab-enter-left' });
+  act(() => { entry.dispatchEvent(end); });
+  expect(entry.dataset.pageEntry).toBe('pending');
+
+  loaded = true;
+  await act(async () => { resolve(); await pending; });
+  expect(screen.getByRole('heading', { name: '추천 여행지' })).toBeVisible();
+  expect(entry.dataset.pageEntry).toBe('settled');
+});
