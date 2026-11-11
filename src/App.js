@@ -2,6 +2,7 @@ import "./App.css";
 import "./animations/onboardingButtonMotion.css";
 import { lazy, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import PageTransition from "./animations/PageTransition";
+import installActionButtonMotion from "./animations/actionButtonMotion";
 import { cancelOnboardingTransition, syncOnboardingTransitionRoute } from "./OnBoarding/onboardingTransition";
 import {
   BrowserRouter,
@@ -310,6 +311,7 @@ function Layout() {
 }
 
 function App() {
+  useLayoutEffect(() => installActionButtonMotion(document.body), []);
   return (
     <SavedPlacesProvider>
       <BrowserRouter>
