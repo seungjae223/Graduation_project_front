@@ -1,0 +1,29 @@
+name: Restore five approved place photos
+on:
+  push:
+    branches: [dev]
+    paths: ['.github/workflows/restore-five-place-photos.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: restore-five-place-photos
+  cancel-in-progress: false
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+      - name: Verify original photo bytes and repair only five mappings
+        run: python3 scripts/restore-five-place-photos.py
+      - name: Commit verified files to the existing deployment branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/data/placeImages.json src/utils/placeImageResolver.js public/place-images/2026-11-13/th-chom-cafe.png public/place-images/2026-11-13/th-raya-heritage.jpg public/place-images/2026-11-13/vn-moc-seafood-da-nang.jpg public/place-images/2026-11-13/vn-ocsen-beach-bar.jpg public/place-images/2026-11-13/vn-regent-phu-quoc.jpg
+          git diff --cached --quiet && exit 0
+          git commit -m 'fix: restore five missing place photos to production assets'
+          git push origin HEAD:dev
