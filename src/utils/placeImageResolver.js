@@ -26,32 +26,37 @@ export function createPlaceImageResolver(records) {
     const name = normalize(raw.name || raw.placeName || raw.title);
     const explicitId = raw.placeId ?? raw.originalId;
     const id = explicitId ?? raw.id;
-    const lat = numeric(raw.latitude ?? raw.lat), lng = numeric(raw.longitude ?? raw.lng ?? raw.lon);
-    if (!name || lat === null || lng === null || lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+    const rawLat = raw.latitude ?? raw.lat, rawLng = raw.longitude ?? raw.lng ?? raw.lon;
+    const supplied = value => value !== null && value !== undefined && value !== "";
+    const hasAnyCoordinate = supplied(rawLat) || supplied(rawLng);
+    const lat = numeric(rawLat), lng = numeric(rawLng);
+    const hasCoordinates = lat !== null && lng !== null && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+    if (!name || (hasAnyCoordinate && !hasCoordinates)) return null;
     const region = normalize(raw.region);
     const explicitCountry = raw.countryCode || raw.country || raw.nationCode;
     const country = countryCode(explicitCountry);
-    // RouteResult uses OVERSEAS as a display group, not an ISO country code.
     const overseasGroup = normalize(explicitCountry) === "overseas";
     if (explicitCountry && !country && !overseasGroup) return null;
     const address = normalize(raw.address || raw.roadAddress);
-    const matches = record =>
+    const matchesIdentity = record =>
       [record.placeName, ...(record.aliases || [])].some(alias => normalize(alias) === name) &&
       (!region || [record.region, ...(record.regionAliases || [])].some(value => region === normalize(value))) &&
       (!country || country === record.countryCode) &&
       (!overseasGroup || record.countryCode !== "KR") &&
-      (!address || address === normalize(record.address)) &&
-      distanceKm(lat, lng, record) <= 0.25;
-    // Explicit placeId/originalId remains authoritative. A plain catalog id may
-    // drift after a local reseed, so a contradictory raw id falls back to
-    // unique name + geography matching instead of hiding a valid photo.
+      (!address || address === normalize(record.address));
+    const matches = record => matchesIdentity(record) && hasCoordinates && distanceKm(lat, lng, record) <= 0.25;
+    // Compact cards require an exact stored ID, exact name and region.
+    // Supplied but invalid/partial coordinates never become a missing-coordinate fallback.
+    const matchesId = record => matchesIdentity(record) && (hasCoordinates ? matches(record) : Boolean(region));
     if (explicitId != null && byId.has(String(explicitId))) {
-      return matches(byId.get(String(explicitId))) ? byId.get(String(explicitId)) : null;
+      const record = byId.get(String(explicitId));
+      return matchesId(record) ? record : null;
     }
     if (explicitId == null && id != null && byId.has(String(id))) {
-      const idRecord = byId.get(String(id));
-      if (matches(idRecord)) return idRecord;
+      const record = byId.get(String(id));
+      if (matchesId(record)) return record;
     }
+    if (!hasCoordinates) return null;
     const candidates = [...new Set((byName.get(name) || []).filter(matches))];
     return candidates.length === 1 ? candidates[0] : null;
   };
