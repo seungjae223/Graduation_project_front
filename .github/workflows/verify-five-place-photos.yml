@@ -1,0 +1,62 @@
+name: Verify five photos on live site
+on:
+  push:
+    branches: [dev]
+    paths: ['.github/workflows/verify-five-place-photos.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify deployed original photos and compiled mappings
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, time
+          from urllib.request import Request, urlopen
+          from urllib.parse import urljoin, urlsplit
+          from pathlib import Path
+          base = 'https://noman-go.netlify.app/'
+          records = json.loads(Path('scripts/restore-five-place-photos.json').read_text())
+          marker = os.environ['GITHUB_SHA']
+          def fetch(path):
+              url = urljoin(base, path)
+              if urlsplit(url).hostname != 'noman-go.netlify.app':
+                  raise ValueError('Unexpected resource origin')
+              sep = '&' if '?' in url else '?'
+              req = Request(url + sep + 'photo_fix=' + marker, headers={'Cache-Control':'no-cache','User-Agent':'NomanGo-Photo-Deployment-Check'})
+              with urlopen(req, timeout=25) as response:
+                  return response.status, response.headers.get('Content-Type',''), response.read(25 * 1024 * 1024)
+          last = None
+          for attempt in range(24):
+              try:
+                  status, mime, body = fetch('asset-manifest.json')
+                  manifest = json.loads(body)
+                  js_path = manifest['files']['main.js']
+                  _, _, script = fetch(js_path)
+                  for row in records:
+                      if row['imageUrl'].encode() not in script:
+                          raise ValueError('Compiled mapping is not deployed: ' + row['placeName'])
+                  results = []
+                  for row in records:
+                      status, mime, body = fetch(row['imageUrl'])
+                      sha = hashlib.sha256(body).hexdigest()
+                      if status != 200 or not mime.startswith('image/') or sha != row['imageSha256']:
+                          raise ValueError('Image is not deployed or differs from approved bytes: ' + row['placeName'])
+                      results.append({'place':row['placeName'],'status':status,'mime':mime,'bytes':len(body),'sha256':sha})
+                  result = {'site':base,'deploymentCommit':marker,'mainJs':js_path,'compiledMappings':5,'verifiedPhotos':results}
+                  print('LIVE_DEPLOYMENT_PASS ' + json.dumps(result,ensure_ascii=False),flush=True)
+                  with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as out:
+                      out.write('## Live photo deployment verified\n\nAll five original images returned HTTP 200 with matching SHA-256. All five mappings are present in the served JavaScript bundle.\n\n```json\n'+json.dumps(result,ensure_ascii=False,indent=2)+'\n```\n')
+                  break
+              except Exception as error:
+                  last = str(error)
+                  print('Deployment check',attempt+1,':',last,flush=True)
+                  if attempt < 23:
+                      time.sleep(15)
+          else:
+              raise RuntimeError('Live deployment not verified: ' + str(last))
+          PY
