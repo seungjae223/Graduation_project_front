@@ -58,10 +58,76 @@ export function createPlaceImageResolver(records) {
 }
 
 export const resolvePlaceImage = createPlaceImageResolver(verifiedImages);
-export const placeImageUrl = image => image ? `${process.env.PUBLIC_URL || ""}${image.imageUrl}` : "";
+
+const approvedCommonsRedirect = src => {
+  try {
+    const url = new URL(src);
+    if (url.protocol !== "https:" || url.hostname !== "commons.wikimedia.org" ||
+        !url.pathname.startsWith("/wiki/Special:Redirect/file/")) return false;
+    const filename = decodeURIComponent(url.pathname.slice("/wiki/Special:Redirect/file/".length));
+    const width = url.searchParams.get("width");
+    return Boolean(filename) && !filename.includes("/") && !filename.includes("\\") &&
+      filename.length <= 240 && (width === "640" || width === "960");
+  } catch {
+    return false;
+  }
+};
+// The bundled manifest is reviewed source data, not an API payload. Accept its
+// exact HTTPS photo URLs so newly curated publishers do not render as empty
+// sources. This does not permit other URLs on the same publisher's host.
+const curatedExternalPhotoUrls = new Set(verifiedImages.map(image => image.imageUrl).filter(src => {
+  if (typeof src !== "string" || !src.startsWith("https://")) return false;
+  try {
+    const url = new URL(src);
+    return url.protocol === "https:" && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}));
+
+// Keep the existing constrained provider patterns for reviewed legacy callers.
+// Additional publishers are allowed only through the literal manifest set above.
+export const placeImageUrl = image => {
+  const src = image?.imageUrl;
+  if (typeof src !== "string") return "";
+  if (src.startsWith("https://")) {
+    if (curatedExternalPhotoUrls.has(src)) return src;
+    if (/^https:\/\/upload\.wikimedia\.org\/wikipedia\/commons\/thumb\//.test(src)) return src;
+    if (approvedCommonsRedirect(src)) return src;
+    if (src === "https://assets.cntraveller.in/photos/60b9f424aa65b6af02d24f16/master/w_1600,c_limit/fourseasonschiangmai.jpg") return src;
+    if (/^https:\/\/images\.unsplash\.com\/photo-\d{13}-[a-f0-9]{12}(?:\?w=(?:640|960)&q=(?:75|85))?$/.test(src)) return src;
+    if (/^https:\/\/mediahub\.seoul\.go\.kr\/uploads\/mediahub\/\d{4}\/\d{2}\/[A-Za-z0-9._-]+\.(?:jpe?g|png|webp)$/i.test(src)) return src;
+    return "";
+  }
+  return src.startsWith("/") && !src.startsWith("//")
+    ? `${process.env.PUBLIC_URL || ""}${src}` : "";
+};
+
+// If a verified Wikimedia thumb is unavailable, try its canonical file redirect
+// ONCE. This URL is derived only from the curated Commons file page, never from
+// arbitrary API data. Local and non-Commons images have no alternate.
+export function alternatePlaceImageUrl(image) {
+  const src = image?.imageUrl;
+  const source = image?.imageSource;
+  if (typeof src !== "string" ||
+      !/^https:\/\/upload\.wikimedia\.org\/wikipedia\/commons\/thumb\//.test(src) ||
+      typeof source !== "string") return "";
+  try {
+    const page = new URL(source);
+    if (page.protocol !== "https:" || page.hostname !== "commons.wikimedia.org" ||
+        !page.pathname.startsWith("/wiki/File:")) return "";
+    const filename = decodeURIComponent(page.pathname.slice("/wiki/File:".length));
+    if (!filename || filename.includes("/") || filename.includes("\\") ||
+        filename.length > 240) return "";
+    return `https://commons.wikimedia.org/wiki/Special:Redirect/file/${encodeURIComponent(filename)}?width=640`;
+  } catch {
+    return "";
+  }
+}
 
 // Display enrichment only. Does not alter IDs, region, coordinates or API payloads.
 export function withPlaceImage(place) {
   const photo = resolvePlaceImage(place);
   return photo ? { ...place, imageUrl: placeImageUrl(photo), imageCredit: photo.credit } : place;
 }
+
